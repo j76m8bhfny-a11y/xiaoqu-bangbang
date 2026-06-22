@@ -17,6 +17,8 @@ export default function RankingsPage() {
   const [pageSize, setPageSize] = useState(20);
   const [awardModalOpen, setAwardModalOpen] = useState(false);
   const [awardForm] = Form.useForm();
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createForm] = Form.useForm();
 
   const badgesQuery = useQuery({
     queryKey: ['admin', 'badges'],
@@ -41,6 +43,17 @@ export default function RankingsPage() {
   const recalculateMutation = useMutation({
     mutationFn: () => api.post('/admin/rankings/recalculate'),
     onSuccess: () => message.success('榜单已重新计算'),
+    onError: () => message.error('操作失败'),
+  });
+
+  const createBadgeMutation = useMutation({
+    mutationFn: (values: any) => api.post('/admin/badges', values),
+    onSuccess: () => {
+      message.success('奖章已创建');
+      setCreateModalOpen(false);
+      createForm.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'badges'] });
+    },
     onError: () => message.error('操作失败'),
   });
 
@@ -80,7 +93,10 @@ export default function RankingsPage() {
                 children: (
                   <>
                     <Space style={{ marginBottom: 16 }}>
-                      <Button type="primary" onClick={() => recalculateMutation.mutate()} loading={recalculateMutation.isPending}>
+                      <Button type="primary" onClick={() => setCreateModalOpen(true)}>
+                        新增奖章
+                      </Button>
+                      <Button onClick={() => recalculateMutation.mutate()} loading={recalculateMutation.isPending}>
                         重新计算榜单
                       </Button>
                     </Space>
@@ -125,6 +141,26 @@ export default function RankingsPage() {
             </Form.Item>
             <Form.Item name="reason" label="颁发原因" rules={[{ required: true }]}>
               <Input.TextArea rows={2} />
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        <Modal title="新增奖章" open={createModalOpen} onCancel={() => setCreateModalOpen(false)}
+          onOk={() => createForm.validateFields().then((v) => createBadgeMutation.mutate(v))}
+          confirmLoading={createBadgeMutation.isPending}
+        >
+          <Form form={createForm} layout="vertical">
+            <Form.Item name="code" label="代码" rules={[{ required: true }]}>
+              <Input placeholder="唯一标识，如 hero" />
+            </Form.Item>
+            <Form.Item name="name" label="名称" rules={[{ required: true }]}>
+              <Input placeholder="如 邻里英雄" />
+            </Form.Item>
+            <Form.Item name="description" label="描述" rules={[{ required: true }]}>
+              <Input.TextArea rows={2} />
+            </Form.Item>
+            <Form.Item name="iconUrl" label="图标URL" rules={[{ required: true }]}>
+              <Input placeholder="https://..." />
             </Form.Item>
           </Form>
         </Modal>

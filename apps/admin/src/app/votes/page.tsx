@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Table, Card, Tag, Space, Button, Modal, Form, Input, Select, DatePicker, InputNumber, Switch, message, Drawer,
 } from 'antd';
+import dayjs from 'dayjs';
 import type { ColumnsType } from 'antd/es/table';
 import AuthGuard from '@/components/AuthGuard';
 import AdminLayout from '@/components/Layout';
@@ -25,6 +26,9 @@ export default function VotesPage() {
   const [pageSize, setPageSize] = useState(20);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createForm] = Form.useForm();
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editForm] = Form.useForm();
+  const [editingId, setEditingId] = useState('');
   const [resultsDrawerOpen, setResultsDrawerOpen] = useState(false);
   const [resultsVoteId, setResultsVoteId] = useState('');
   const [options, setOptions] = useState<string[]>(['']);
@@ -61,6 +65,36 @@ export default function VotesPage() {
     onError: () => message.error('操作失败'),
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, body }: { id: string; body: any }) => api.patch(`/admin/votes/${id}`, body),
+    onSuccess: () => {
+      message.success('已更新');
+      setEditModalOpen(false);
+      editForm.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'votes'] });
+    },
+    onError: () => message.error('操作失败'),
+  });
+
+  const openEditModal = (record: any) => {
+    setEditingId(record.id);
+    editForm.setFieldsValue({
+      title: record.title,
+      description: record.description,
+      endAt: record.endAt ? dayjs(record.endAt) : null,
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleEdit = () => {
+    editForm.validateFields().then((values) => {
+      updateMutation.mutate({
+        id: editingId,
+        body: { ...values, endAt: values.endAt?.toISOString() },
+      });
+    });
+  };
+
   const addOption = () => setOptions([...options, '']);
   const removeOption = (index: number) => setOptions(options.filter((_, i) => i !== index));
   const updateOption = (index: number, value: string) => {
@@ -93,10 +127,13 @@ export default function VotesPage() {
     { title: '开始时间', dataIndex: 'startAt', width: 180 },
     { title: '结束时间', dataIndex: 'endAt', width: 180 },
     {
-      title: '操作', width: 220, render: (_, record) => (
+      title: '操作', width: 280, render: (_, record) => (
         <Space size="small" wrap>
           {record.status === 'draft' && (
-            <Button size="small" type="link" onClick={() => publishMutation.mutate(record.id)}>发布</Button>
+            <>
+              <Button size="small" type="link" onClick={() => publishMutation.mutate(record.id)}>发布</Button>
+              <Button size="small" type="link" onClick={() => openEditModal(record)}>编辑</Button>
+            </>
           )}
           {record.status === 'published' && (
             <Button size="small" type="link" danger onClick={() => closeMutation.mutate(record.id)}>关闭</Button>
@@ -170,6 +207,22 @@ export default function VotesPage() {
               ))}
               <Button type="dashed" onClick={addOption} block>添加选项</Button>
             </div>
+          </Form>
+        </Modal>
+
+        <Modal title="编辑投票" open={editModalOpen} onCancel={() => setEditModalOpen(false)}
+          onOk={handleEdit} confirmLoading={updateMutation.isPending} width={520}
+        >
+          <Form form={editForm} layout="vertical">
+            <Form.Item name="title" label="标题" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="description" label="描述">
+              <Input.TextArea rows={3} />
+            </Form.Item>
+            <Form.Item name="endAt" label="结束时间">
+              <DatePicker showTime style={{ width: '100%' }} />
+            </Form.Item>
           </Form>
         </Modal>
 
