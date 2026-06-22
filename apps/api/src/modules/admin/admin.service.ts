@@ -916,6 +916,33 @@ export class AdminService {
     return this.prisma.marketItem.count({ where });
   }
 
+  async hideMarketItem(adminId: string, id: string, communityId: string) {
+    const item = await this.prisma.marketItem.findUnique({ where: { id }, select: { communityId: true } });
+    if (!item || item.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    await this.prisma.marketItem.update({ where: { id }, data: { status: 'hidden' } });
+    await this.logAudit(adminId, 'hide_market_item', 'market_item', id);
+    return { id, status: 'hidden' };
+  }
+
+  async restoreMarketItem(adminId: string, id: string, communityId: string) {
+    const item = await this.prisma.marketItem.findUnique({ where: { id }, select: { communityId: true } });
+    if (!item || item.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    await this.prisma.marketItem.update({ where: { id }, data: { status: 'on_sale' } });
+    await this.logAudit(adminId, 'restore_market_item', 'market_item', id);
+    return { id, status: 'on_sale' };
+  }
+
+  async rejectMarketItem(adminId: string, id: string, communityId: string, reason?: string) {
+    const item = await this.prisma.marketItem.findUnique({ where: { id }, select: { communityId: true } });
+    if (!item || item.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    await this.prisma.marketItem.update({
+      where: { id },
+      data: { status: 'rejected', aiReviewStatus: 'reject' },
+    });
+    await this.logAudit(adminId, 'reject_market_item', 'market_item', id, reason ? { reason } : undefined);
+    return { id, status: 'rejected' };
+  }
+
   // === System Settings ===
   async getSettings() {
     const settings = await this.prisma.systemSetting.findMany();

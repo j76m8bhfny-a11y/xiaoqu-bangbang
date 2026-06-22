@@ -633,6 +633,24 @@ export class AdminController {
     return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
   }
 
+  @Post('market/:id/hide')
+  async hideMarketItem(@Param('id') id: string, @CurrentUser('userId') userId: string, @CurrentCommunityId() communityId: string) {
+    const data = await this.adminService.hideMarketItem(userId, id, communityId);
+    return { code: 0, message: 'ok', data };
+  }
+
+  @Post('market/:id/restore')
+  async restoreMarketItem(@Param('id') id: string, @CurrentUser('userId') userId: string, @CurrentCommunityId() communityId: string) {
+    const data = await this.adminService.restoreMarketItem(userId, id, communityId);
+    return { code: 0, message: 'ok', data };
+  }
+
+  @Post('market/:id/reject')
+  async rejectMarketItem(@Param('id') id: string, @CurrentUser('userId') userId: string, @CurrentCommunityId() communityId: string, @Body('reason') reason?: string) {
+    const data = await this.adminService.rejectMarketItem(userId, id, communityId, reason);
+    return { code: 0, message: 'ok', data };
+  }
+
   // === System Settings ===
   @Get('settings')
   async getSettings() {

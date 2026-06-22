@@ -101,6 +101,7 @@ describe('Feature: 管理后台（全量）', () => {
       await prisma.serviceProvider.deleteMany({ where: { communityId } });
       await prisma.committeeMemberClaim.deleteMany({ where: { communityId } });
       await prisma.committeeMember.deleteMany({ where: { communityId } });
+      await prisma.marketItem.deleteMany({ where: { communityId } });
       await prisma.auditLog.deleteMany({ where: { operatorId: { in: [adminUserId, userId] } } });
       await prisma.communityMember.deleteMany({ where: { communityId } });
       await prisma.adminUser.deleteMany({ where: { userId: { in: [adminUserId, userId] } } });
@@ -463,6 +464,66 @@ describe('Feature: 管理后台（全量）', () => {
         .expect(200);
 
       expect(res.body.code).toBe(0);
+    });
+  });
+
+  // ===== 闲置管理 =====
+  describe('【管理】闲置管理动作', () => {
+    let marketItemId: string;
+
+    it('准备一条闲置数据', async () => {
+      const item = await prisma.marketItem.create({
+        data: {
+          communityId,
+          sellerId: userId,
+          category: 'other',
+          title: '管理测试闲置',
+          description: '用于管理动作测试',
+          tradeType: 'sell',
+          conditionLevel: 'good',
+          status: 'on_sale',
+        },
+      });
+      marketItemId = item.id;
+      expect(marketItemId).toBeDefined();
+    });
+
+    it('POST /admin/market/:id/hide - 应将状态置为 hidden', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/market/${marketItemId}/hide`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(201);
+
+      expect(res.body.code).toBe(0);
+      expect(res.body.data.status).toBe('hidden');
+    });
+
+    it('POST /admin/market/:id/restore - 应恢复为 on_sale', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/market/${marketItemId}/restore`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(201);
+
+      expect(res.body.code).toBe(0);
+      expect(res.body.data.status).toBe('on_sale');
+    });
+
+    it('POST /admin/market/:id/reject - 应拒绝并置为 rejected', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/market/${marketItemId}/reject`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ reason: '违规内容' })
+        .expect(201);
+
+      expect(res.body.code).toBe(0);
+      expect(res.body.data.status).toBe('rejected');
+    });
+
+    it('POST /admin/market/:id/hide - 普通用户应403', async () => {
+      await request(app.getHttpServer())
+        .post(`/api/v1/admin/market/${marketItemId}/hide`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(403);
     });
   });
 
