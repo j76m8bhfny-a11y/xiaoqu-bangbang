@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import * as bcrypt from 'bcryptjs';
 
 // Load env vars from .env file
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -10,66 +11,66 @@ const prisma = new PrismaClient();
 // Fixed deterministic UUIDs for idempotency — all must be valid UUID v4 format
 // Communities
 const COMMUNITY_YANGGUANG_ID = 'a0000000-0000-0000-0000-000000000001';
-const COMMUNITY_BISHUIWAN_ID  = 'a0000000-0000-0000-0000-000000000002';
+const COMMUNITY_BISHUIWAN_ID = 'a0000000-0000-0000-0000-000000000002';
 
 // Users
 const USER_ZHANGSAN_ID = 'b0000000-0000-0000-0000-000000000001';
-const USER_LISI_ID     = 'b0000000-0000-0000-0000-000000000002';
-const USER_WANGWU_ID   = 'b0000000-0000-0000-0000-000000000003';
+const USER_LISI_ID = 'b0000000-0000-0000-0000-000000000002';
+const USER_WANGWU_ID = 'b0000000-0000-0000-0000-000000000003';
 
 // Events
-const EVENT_HELP_REQ_ID     = 'c0000000-0000-0000-0000-000000000001';
-const EVENT_HELP_OFFER_ID   = 'c0000000-0000-0000-0000-000000000002';
-const EVENT_WELFARE_ID      = 'c0000000-0000-0000-0000-000000000003';
-const EVENT_LOST_FOUND_ID   = 'c0000000-0000-0000-0000-000000000004';
-const EVENT_FEEDBACK_ID     = 'c0000000-0000-0000-0000-000000000005';
-const EVENT_DISCUSSION_ID   = 'c0000000-0000-0000-0000-000000000006';
+const EVENT_HELP_REQ_ID = 'c0000000-0000-0000-0000-000000000001';
+const EVENT_HELP_OFFER_ID = 'c0000000-0000-0000-0000-000000000002';
+const EVENT_WELFARE_ID = 'c0000000-0000-0000-0000-000000000003';
+const EVENT_LOST_FOUND_ID = 'c0000000-0000-0000-0000-000000000004';
+const EVENT_FEEDBACK_ID = 'c0000000-0000-0000-0000-000000000005';
+const EVENT_DISCUSSION_ID = 'c0000000-0000-0000-0000-000000000006';
 
 // Market Items
 const MARKET_FURNITURE_ID = 'd0000000-0000-0000-0000-000000000001';
-const MARKET_BABY_ID      = 'd0000000-0000-0000-0000-000000000002';
-const MARKET_DIGITAL_ID   = 'd0000000-0000-0000-0000-000000000003';
+const MARKET_BABY_ID = 'd0000000-0000-0000-0000-000000000002';
+const MARKET_DIGITAL_ID = 'd0000000-0000-0000-0000-000000000003';
 
 // Votes
-const VOTE_GREEN_ID  = 'e0000000-0000-0000-0000-000000000001';
-const VOTE_FEE_ID    = 'e0000000-0000-0000-0000-000000000002';
+const VOTE_GREEN_ID = 'e0000000-0000-0000-0000-000000000001';
+const VOTE_FEE_ID = 'e0000000-0000-0000-0000-000000000002';
 
 // Vote Options
 const VOTE_GREEN_OPT_1 = 'e1000000-0000-0000-0000-000000000001';
 const VOTE_GREEN_OPT_2 = 'e1000000-0000-0000-0000-000000000002';
 const VOTE_GREEN_OPT_3 = 'e1000000-0000-0000-0000-000000000003';
-const VOTE_FEE_OPT_1   = 'e2000000-0000-0000-0000-000000000001';
-const VOTE_FEE_OPT_2   = 'e2000000-0000-0000-0000-000000000002';
-const VOTE_FEE_OPT_3   = 'e2000000-0000-0000-0000-000000000003';
-const VOTE_FEE_OPT_4   = 'e2000000-0000-0000-0000-000000000004';
+const VOTE_FEE_OPT_1 = 'e2000000-0000-0000-0000-000000000001';
+const VOTE_FEE_OPT_2 = 'e2000000-0000-0000-0000-000000000002';
+const VOTE_FEE_OPT_3 = 'e2000000-0000-0000-0000-000000000003';
+const VOTE_FEE_OPT_4 = 'e2000000-0000-0000-0000-000000000004';
 
 // Committee Members
 const COMMITTEE_DIRECTOR_ID = 'f0000000-0000-0000-0000-000000000001';
-const COMMITTEE_VICE_ID     = 'f0000000-0000-0000-0000-000000000002';
-const COMMITTEE_MEMBER_ID   = 'f0000000-0000-0000-0000-000000000003';
+const COMMITTEE_VICE_ID = 'f0000000-0000-0000-0000-000000000002';
+const COMMITTEE_MEMBER_ID = 'f0000000-0000-0000-0000-000000000003';
 
 // Announcements
 const ANNOUNCEMENT_SUMMARY_ID = 'a1000000-0000-0000-0000-000000000001';
-const ANNOUNCEMENT_DRILL_ID   = 'a1000000-0000-0000-0000-000000000002';
+const ANNOUNCEMENT_DRILL_ID = 'a1000000-0000-0000-0000-000000000002';
 
 // Banners
-const BANNER_EVENT_ID        = 'b1000000-0000-0000-0000-000000000001';
+const BANNER_EVENT_ID = 'b1000000-0000-0000-0000-000000000001';
 const BANNER_ANNOUNCEMENT_ID = 'b1000000-0000-0000-0000-000000000002';
 
 // Service Providers
-const SP_REPAIR_ID   = 'c1000000-0000-0000-0000-000000000001';
+const SP_REPAIR_ID = 'c1000000-0000-0000-0000-000000000001';
 const SP_CLEANING_ID = 'c1000000-0000-0000-0000-000000000002';
-const SP_LOCK_ID     = 'c1000000-0000-0000-0000-000000000003';
+const SP_LOCK_ID = 'c1000000-0000-0000-0000-000000000003';
 
 // Badges
 const BADGE_HELPFUL_ID = 'd1000000-0000-0000-0000-000000000001';
-const BADGE_STAR_ID    = 'd1000000-0000-0000-0000-000000000002';
-const BADGE_GUARD_ID   = 'd1000000-0000-0000-0000-000000000003';
+const BADGE_STAR_ID = 'd1000000-0000-0000-0000-000000000002';
+const BADGE_GUARD_ID = 'd1000000-0000-0000-0000-000000000003';
 
 // Community Members
 const CM_ZHANGSAN_ID = 'aa000000-0000-0000-0000-000000000001';
-const CM_LISI_ID     = 'aa000000-0000-0000-0000-000000000002';
-const CM_WANGWU_ID   = 'aa000000-0000-0000-0000-000000000003';
+const CM_LISI_ID = 'aa000000-0000-0000-0000-000000000002';
+const CM_WANGWU_ID = 'aa000000-0000-0000-0000-000000000003';
 
 // Event Comments
 const EC_1_1 = 'ab000000-0000-0000-0000-000000000001';
@@ -279,7 +280,8 @@ async function seed() {
       creatorId: USER_LISI_ID,
       type: 'help_offer',
       title: '提供：免费电脑维修服务',
-      description: '我是IT从业者，周末有空可以帮邻居修电脑、装系统、解决网络问题，不收费用，纯属帮忙。',
+      description:
+        '我是IT从业者，周末有空可以帮邻居修电脑、装系统、解决网络问题，不收费用，纯属帮忙。',
       images: [],
       videos: [],
       rewardType: 'free',
@@ -302,7 +304,8 @@ async function seed() {
       creatorId: USER_ZHANGSAN_ID,
       type: 'public_welfare',
       title: '小区义卖活动——为山区儿童筹款',
-      description: '本周六在小区广场举办义卖活动，欢迎居民捐赠闲置物品，所有收入将捐给山区儿童教育基金。',
+      description:
+        '本周六在小区广场举办义卖活动，欢迎居民捐赠闲置物品，所有收入将捐给山区儿童教育基金。',
       images: [],
       videos: [],
       rewardType: 'none',
@@ -327,7 +330,8 @@ async function seed() {
       creatorId: USER_LISI_ID,
       type: 'lost_found',
       title: '寻物：丢失一把车钥匙（大众）',
-      description: '今天下午在小区地下车库附近丢失了一把大众车钥匙，灰色遥控钥匙扣，拾到者请联系我，必有酬谢！',
+      description:
+        '今天下午在小区地下车库附近丢失了一把大众车钥匙，灰色遥控钥匙扣，拾到者请联系我，必有酬谢！',
       images: [],
       videos: [],
       rewardType: 'negotiable',
@@ -350,7 +354,8 @@ async function seed() {
       creatorId: USER_ZHANGSAN_ID,
       type: 'public_feedback',
       title: '反馈：3栋楼道灯长期不亮',
-      description: '3栋2单元5楼到6楼的楼道灯已经坏了两个多月了，多次向物业反映未解决，希望尽快处理，存在安全隐患。',
+      description:
+        '3栋2单元5楼到6楼的楼道灯已经坏了两个多月了，多次向物业反映未解决，希望尽快处理，存在安全隐患。',
       images: [],
       videos: [],
       rewardType: 'none',
@@ -373,7 +378,8 @@ async function seed() {
       creatorId: USER_LISI_ID,
       type: 'discussion',
       title: '讨论：是否应该限制外卖电动车进入小区',
-      description: '最近小区内外卖电动车速度很快，存在安全隐患。是否应该限制外卖电动车进入小区，或者规定限速和指定路线？欢迎大家讨论。',
+      description:
+        '最近小区内外卖电动车速度很快，存在安全隐患。是否应该限制外卖电动车进入小区，或者规定限速和指定路线？欢迎大家讨论。',
       images: [],
       videos: [],
       rewardType: 'none',
@@ -390,30 +396,100 @@ async function seed() {
 
   const commentData = [
     // Comments for help_request
-    { id: EC_1_1, eventId: EVENT_HELP_REQ_ID, userId: USER_LISI_ID, content: '我可以帮忙，周六上午可以吗？' },
-    { id: EC_1_2, eventId: EVENT_HELP_REQ_ID, userId: USER_WANGWU_ID, content: '6楼确实不好搬，注意安全！' },
+    {
+      id: EC_1_1,
+      eventId: EVENT_HELP_REQ_ID,
+      userId: USER_LISI_ID,
+      content: '我可以帮忙，周六上午可以吗？',
+    },
+    {
+      id: EC_1_2,
+      eventId: EVENT_HELP_REQ_ID,
+      userId: USER_WANGWU_ID,
+      content: '6楼确实不好搬，注意安全！',
+    },
 
     // Comments for help_offer
-    { id: EC_2_1, eventId: EVENT_HELP_OFFER_ID, userId: USER_ZHANGSAN_ID, content: '太好了！我电脑最近总是蓝屏，能帮我看看吗？' },
-    { id: EC_2_2, eventId: EVENT_HELP_OFFER_ID, userId: USER_WANGWU_ID, content: '李四真是个好人！' },
-    { id: EC_2_3, eventId: EVENT_HELP_OFFER_ID, userId: USER_ZHANGSAN_ID, content: '请问周末几点方便？我下午过去' },
+    {
+      id: EC_2_1,
+      eventId: EVENT_HELP_OFFER_ID,
+      userId: USER_ZHANGSAN_ID,
+      content: '太好了！我电脑最近总是蓝屏，能帮我看看吗？',
+    },
+    {
+      id: EC_2_2,
+      eventId: EVENT_HELP_OFFER_ID,
+      userId: USER_WANGWU_ID,
+      content: '李四真是个好人！',
+    },
+    {
+      id: EC_2_3,
+      eventId: EVENT_HELP_OFFER_ID,
+      userId: USER_ZHANGSAN_ID,
+      content: '请问周末几点方便？我下午过去',
+    },
 
     // Comments for public_welfare
-    { id: EC_3_1, eventId: EVENT_WELFARE_ID, userId: USER_LISI_ID, content: '支持！我捐一些孩子的旧书' },
-    { id: EC_3_2, eventId: EVENT_WELFARE_ID, userId: USER_WANGWU_ID, content: '非常有意义的活动，到时候一定参加' },
+    {
+      id: EC_3_1,
+      eventId: EVENT_WELFARE_ID,
+      userId: USER_LISI_ID,
+      content: '支持！我捐一些孩子的旧书',
+    },
+    {
+      id: EC_3_2,
+      eventId: EVENT_WELFARE_ID,
+      userId: USER_WANGWU_ID,
+      content: '非常有意义的活动，到时候一定参加',
+    },
 
     // Comments for lost_found
-    { id: EC_4_1, eventId: EVENT_LOST_FOUND_ID, userId: USER_ZHANGSAN_ID, content: '昨天在B区看到过一把钥匙，不知道是不是你的' },
-    { id: EC_4_2, eventId: EVENT_LOST_FOUND_ID, userId: USER_WANGWU_ID, content: '建议去物业看看监控' },
+    {
+      id: EC_4_1,
+      eventId: EVENT_LOST_FOUND_ID,
+      userId: USER_ZHANGSAN_ID,
+      content: '昨天在B区看到过一把钥匙，不知道是不是你的',
+    },
+    {
+      id: EC_4_2,
+      eventId: EVENT_LOST_FOUND_ID,
+      userId: USER_WANGWU_ID,
+      content: '建议去物业看看监控',
+    },
 
     // Comments for public_feedback
-    { id: EC_5_1, eventId: EVENT_FEEDBACK_ID, userId: USER_LISI_ID, content: '我们栋也有同样的问题，楼道灯坏了好几处' },
-    { id: EC_5_2, eventId: EVENT_FEEDBACK_ID, userId: USER_WANGWU_ID, content: '安全问题不能忽视，物业应该尽快处理' },
-    { id: EC_5_3, eventId: EVENT_FEEDBACK_ID, userId: USER_LISI_ID, content: '可以联名向物业提交书面投诉' },
+    {
+      id: EC_5_1,
+      eventId: EVENT_FEEDBACK_ID,
+      userId: USER_LISI_ID,
+      content: '我们栋也有同样的问题，楼道灯坏了好几处',
+    },
+    {
+      id: EC_5_2,
+      eventId: EVENT_FEEDBACK_ID,
+      userId: USER_WANGWU_ID,
+      content: '安全问题不能忽视，物业应该尽快处理',
+    },
+    {
+      id: EC_5_3,
+      eventId: EVENT_FEEDBACK_ID,
+      userId: USER_LISI_ID,
+      content: '可以联名向物业提交书面投诉',
+    },
 
     // Comments for discussion
-    { id: EC_6_1, eventId: EVENT_DISCUSSION_ID, userId: USER_ZHANGSAN_ID, content: '我觉得可以划定专用通道，而不是完全禁止' },
-    { id: EC_6_2, eventId: EVENT_DISCUSSION_ID, userId: USER_WANGWU_ID, content: '支持限速，但不能一刀切，外卖员也不容易' },
+    {
+      id: EC_6_1,
+      eventId: EVENT_DISCUSSION_ID,
+      userId: USER_ZHANGSAN_ID,
+      content: '我觉得可以划定专用通道，而不是完全禁止',
+    },
+    {
+      id: EC_6_2,
+      eventId: EVENT_DISCUSSION_ID,
+      userId: USER_WANGWU_ID,
+      content: '支持限速，但不能一刀切，外卖员也不容易',
+    },
   ];
 
   for (const c of commentData) {
@@ -446,7 +522,8 @@ async function seed() {
       sellerId: USER_ZHANGSAN_ID,
       category: 'furniture',
       title: '实木书桌（1.2米）九成新',
-      description: '搬家转实木书桌，1.2米宽，带两个抽屉，原价1800元，使用不到一年，表面无明显划痕，自提。',
+      description:
+        '搬家转实木书桌，1.2米宽，带两个抽屉，原价1800元，使用不到一年，表面无明显划痕，自提。',
       images: [],
       price: 600,
       tradeType: 'sell',
@@ -467,7 +544,8 @@ async function seed() {
       sellerId: USER_LISI_ID,
       category: 'baby',
       title: '儿童绘本30本，免费送',
-      description: '孩子长大了不看了，30本绘本免费送给有需要的邻居，适合3-6岁儿童。大多完好，少数有折痕。',
+      description:
+        '孩子长大了不看了，30本绘本免费送给有需要的邻居，适合3-6岁儿童。大多完好，少数有折痕。',
       images: [],
       tradeType: 'free',
       conditionLevel: 'used',
@@ -487,7 +565,8 @@ async function seed() {
       sellerId: USER_ZHANGSAN_ID,
       category: 'digital',
       title: 'Kindle Paperwhite 4 交换',
-      description: '闲置Kindle PW4一台，8GB，功能正常，屏幕无划痕。想交换一个蓝牙耳机或者小型音箱，有意私聊。',
+      description:
+        '闲置Kindle PW4一台，8GB，功能正常，屏幕无划痕。想交换一个蓝牙耳机或者小型音箱，有意私聊。',
       images: [],
       tradeType: 'exchange',
       conditionLevel: 'good',
@@ -510,7 +589,8 @@ async function seed() {
       id: VOTE_GREEN_ID,
       communityId: COMMUNITY_YANGGUANG_ID,
       title: '小区绿化改造方案',
-      description: '小区绿化改造即将启动，请各位业主投票选择改造方案。本次投票仅限已认证业主参与，每人限投一票。',
+      description:
+        '小区绿化改造即将启动，请各位业主投票选择改造方案。本次投票仅限已认证业主参与，每人限投一票。',
       voteType: 'single',
       onlyVerified: true,
       onlyVerifiedLocked: true,
@@ -655,7 +735,8 @@ async function seed() {
       id: ANNOUNCEMENT_SUMMARY_ID,
       communityId: COMMUNITY_YANGGUANG_ID,
       title: '2024年度工作总结',
-      content: '各位业主：2024年业委会主要完成了以下工作：1. 完成了小区监控系统的全面升级；2. 推动了地下车库防水改造工程；3. 组织了3次社区文化活动；4. 与物业协商降低了公共区域电费。感谢各位业主的支持与配合！',
+      content:
+        '各位业主：2024年业委会主要完成了以下工作：1. 完成了小区监控系统的全面升级；2. 推动了地下车库防水改造工程；3. 组织了3次社区文化活动；4. 与物业协商降低了公共区域电费。感谢各位业主的支持与配合！',
       images: [],
       publisherId: USER_ZHANGSAN_ID,
       isPinned: true,
@@ -671,7 +752,8 @@ async function seed() {
       id: ANNOUNCEMENT_DRILL_ID,
       communityId: COMMUNITY_YANGGUANG_ID,
       title: '小区消防演练通知',
-      content: '为增强居民消防安全意识，业委会联合物业将于6月15日上午9:00在中心广场举行消防演练。届时将有消防员现场演示灭火器使用和逃生技巧，欢迎各位业主积极参与。',
+      content:
+        '为增强居民消防安全意识，业委会联合物业将于6月15日上午9:00在中心广场举行消防演练。届时将有消防员现场演示灭火器使用和逃生技巧，欢迎各位业主积极参与。',
       images: [],
       publisherId: USER_LISI_ID,
       isPinned: false,
@@ -1008,7 +1090,7 @@ async function seed() {
       id: ADMIN_ZHANGSAN_ID,
       userId: USER_ZHANGSAN_ID,
       username: 'zhangsan_admin',
-      passwordHash: '',
+      passwordHash: bcrypt.hashSync('admin123', 10),
       role: 'platform_admin',
       communityId: COMMUNITY_YANGGUANG_ID,
       status: 'active',
