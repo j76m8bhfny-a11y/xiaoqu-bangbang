@@ -1,0 +1,109 @@
+{
+    "case_name": "test_login_button_has_text",
+    "run_time": "20260527 21:13:13",
+    "test_type": "TestLogin",
+    "case_doc": "\u9a8c\u8bc1\u767b\u5f55\u6309\u94ae\u6709\u6587\u672c",
+    "success": true,
+    "failures": "",
+    "errors": "",
+    "start_timestamp": 1779887593.710696,
+    "is_failure": false,
+    "is_error": false,
+    "module": ".Users.lifengju.\u6211\u7684\u5f00\u53d1.xiaoqu-bangbang.apps.miniapp.test.test_login",
+    "package": "test_login",
+    "failed_line_num": -1,
+    "device": {
+        "system_info": {
+            "brand": "devtools",
+            "model": "iPhone 12/13 (Pro)",
+            "system": "iOS 10.0.1",
+            "platform": "devtools",
+            "benchmarkLevel": -1,
+            "pixelRatio": 3,
+            "screenWidth": 390,
+            "screenHeight": 844,
+            "windowWidth": 390,
+            "windowHeight": 671,
+            "statusBarHeight": 47,
+            "safeArea": {
+                "top": 47,
+                "left": 0,
+                "right": 390,
+                "bottom": 810,
+                "width": 390,
+                "height": 763
+            },
+            "language": "zh_CN",
+            "version": "8.0.5",
+            "fontSizeSetting": 16,
+            "SDKVersion": "3.16.1",
+            "host": {
+                "env": "WeChat"
+            },
+            "enableDebug": false,
+            "mode": "default",
+            "deviceOrientation": "portrait",
+            "bluetoothEnabled": true,
+            "locationEnabled": true,
+            "wifiEnabled": true,
+            "albumAuthorized": true,
+            "cameraAuthorized": true,
+            "locationAuthorized": true,
+            "microphoneAuthorized": true,
+            "notificationAuthorized": true,
+            "notificationAlertAuthorized": true,
+            "notificationBadgeAuthorized": true,
+            "notificationSoundAuthorized": true,
+            "phoneCalendarAuthorized": true,
+            "bluetoothAuthorized": true,
+            "locationReducedAccuracy": true,
+            "devicePixelRatio": 3
+        }
+    },
+    "log_filename": "run.log",
+    "error_type": "",
+    "error_value": "",
+    "error_extra_info": "",
+    "error_stages": [],
+    "screen_info": [
+        {
+            "name": "setup",
+            "url": "/pages/login/index",
+            "path": "images/setup.png",
+            "ts": 1779887593,
+            "datetime": "2026-05-27 21:13:13",
+            "use_region": false
+        },
+        {
+            "name": "teardown",
+            "url": "/pages/login/index",
+            "path": "images/teardown.png",
+            "ts": 1779887593,
+            "datetime": "2026-05-27 21:13:13",
+            "use_region": false
+        }
+    ],
+    "step_info": [],
+    "check_list": [],
+    "assert_list": [],
+    "autofix_info": [],
+    "perf_data": "{\"startup\": 0, \"avg_cpu\": 0, \"max_cpu\": 0, \"cpu_data_list\": [], \"avg_mem\": 0, \"max_mem\": 0, \"mem_data_list\": [], \"avg_fps\": 0, \"min_fps_rt\": 0, \"fps_data_list\": [], \"fps_time_series_list\": [], \"cpu_time_series_list\": [], \"mem_time_series_list\": []}",
+    "weapp_log_path": "weapp.log",
+    "request_log_path": "request.log",
+    "stop_timestamp": 1779887593.78995,
+    "appId": "",
+    "appName": "",
+    "source": {
+        "code": [
+            "    def test_login_button_has_text(self):\n",
+            "        \"\"\"\u9a8c\u8bc1\u767b\u5f55\u6309\u94ae\u6709\u6587\u672c\"\"\"\n",
+            "        page = self.app.get_current_page()\n",
+            "        btn = page.get_element(\".login__btn\")\n",
+            "        assert btn is not None, \"\u5fae\u4fe1\u767b\u5f55\u6309\u94ae\u4e0d\u5b58\u5728\"\n",
+            "        text = btn.inner_text\n",
+            "        assert \"\u5fae\u4fe1\" in text or \"\u767b\u5f55\" in text, f\"\u6309\u94ae\u6587\u672c\u5f02\u5e38: {text}\"\n"
+        ],
+        "start": 25
+    },
+    "filename": "result.json"
+}

@@ -1,0 +1,13 @@
+{
+  "project_path": "/Users/lifengju/我的开发/xiaoqu-bangbang/apps/miniapp",
+  "appid": "wxe55306dc26646882",
+  "auto_port": 9420,
+  "test_port": 9420,
+  "platform": "ide",
+  "app": "wx",
+  "debug": true,
+  "auto_relaunch": false,
+  "check_mp_foreground": true,
+  "remote_connect_timeout": 300,
+  "request_timeout": 120
+}

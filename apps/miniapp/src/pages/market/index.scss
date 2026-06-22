@@ -1,0 +1,278 @@
+@use '../../styles/tokens.scss' as *;
+
+.market {
+  min-height: 100vh;
+  background: $color-bg;
+  position: relative;
+
+  &__header {
+    padding: $spacing-lg $spacing-md $spacing-sm;
+  }
+
+  &__header-title {
+    display: block;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+  }
+
+  &__header-sub {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-top: 4px;
+  }
+
+  &__search-wrap {
+    padding: 0 $spacing-md $spacing-sm;
+  }
+
+  &__search {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: $radius-pill;
+    padding: $spacing-xs $spacing-md;
+    gap: $spacing-xs;
+    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+  }
+
+  &__search-icon {
+    font-size: $font-size-sm;
+    flex-shrink: 0;
+  }
+
+  &__search-input {
+    flex: 1;
+    font-size: $font-size-sm;
+    color: $color-dark;
+  }
+
+  &__search-placeholder {
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+  }
+
+  &__status-bar {
+    display: flex;
+    gap: $spacing-sm;
+    padding: 0 $spacing-md $spacing-sm;
+  }
+
+  &__status-tab {
+    padding: 8px 24px;
+    border-radius: $radius-pill;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+    transition: all 0.2s;
+
+    &--active {
+      background: $color-accent;
+      box-shadow: 0 2px 12px rgba(255, 159, 67, 0.3);
+    }
+  }
+
+  &__status-text {
+    font-size: $font-size-xs;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+
+    &--active {
+      color: #fff;
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  &__category-scroll {
+    white-space: nowrap;
+    padding: 0 $spacing-md $spacing-sm;
+  }
+
+  &__category-list {
+    display: inline-flex;
+    gap: $spacing-sm;
+  }
+
+  &__category-item {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $radius-md;
+    background: #fff;
+    min-width: 80px;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+
+    &--active {
+      background: $color-bg-green;
+      box-shadow: 0 2px 8px rgba(53, 232, 154, 0.2);
+    }
+  }
+
+  &__category-icon {
+    font-size: 40px;
+  }
+
+  &__category-label {
+    font-size: 20px;
+    color: $color-text-secondary;
+
+    &--active {
+      color: $color-primary;
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  &__list {
+    height: calc(100vh - 380px);
+  }
+
+  &__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    padding: 0 $spacing-md;
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 120px;
+  }
+
+  &__empty-icon {
+    font-size: 80px;
+    margin-bottom: $spacing-md;
+  }
+
+  &__empty-text {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__bottom-spacer {
+    height: 160px;
+  }
+
+  &__fab {
+    position: fixed;
+    right: $spacing-md;
+    bottom: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 50;
+  }
+
+  &__fab-inner {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: $color-accent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(255, 159, 67, 0.4);
+  }
+
+  &__fab-plus {
+    font-size: 44px;
+    color: #fff;
+    font-weight: $font-weight-bold;
+    line-height: 1;
+  }
+
+  &__fab-label {
+    font-size: 20px;
+    color: $color-accent;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.market-card {
+  width: calc(50% - 6px);
+  background: #fff;
+  border-radius: $radius-md;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+
+  &__image {
+    height: 240px;
+    background: $color-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  &__image-emoji {
+    font-size: 80px;
+  }
+
+  &__condition {
+    position: absolute;
+    top: $spacing-xs;
+    left: $spacing-xs;
+    padding: 2px 12px;
+    border-radius: $radius-pill;
+  }
+
+  &__condition-text {
+    font-size: 18px;
+    color: #fff;
+    font-weight: $font-weight-bold;
+  }
+
+  &__body {
+    padding: $spacing-sm;
+  }
+
+  &__title {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 6px;
+  }
+
+  &__price-row {
+    display: flex;
+    align-items: baseline;
+    gap: $spacing-xs;
+    margin-bottom: 6px;
+  }
+
+  &__price {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-danger;
+  }
+
+  &__original-price {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    text-decoration: line-through;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__seller {
+    font-size: 20px;
+    color: $color-text-secondary;
+  }
+
+  &__views {
+    font-size: 20px;
+    color: $color-text-secondary;
+  }
+}

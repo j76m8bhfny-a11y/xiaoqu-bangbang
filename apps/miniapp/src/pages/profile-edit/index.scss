@@ -1,0 +1,91 @@
+@use '../../styles/tokens.scss' as *;
+
+.profile-edit {
+  min-height: 100vh;
+  background: $color-bg;
+  padding: $spacing-md;
+  padding-bottom: calc(#{$spacing-xl} + env(safe-area-inset-bottom));
+
+  &__avatar-section {
+    display: flex;
+    justify-content: center;
+    padding: $spacing-lg 0;
+  }
+
+  &__avatar {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(23, 23, 23, 0.08);
+  }
+
+  &__avatar-text {
+    font-size: 80px;
+  }
+
+  &__form {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+  }
+
+  &__field {
+    padding: $spacing-md 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__input {
+    width: 100%;
+    font-size: $font-size-md;
+    color: $color-text;
+  }
+
+  &__textarea {
+    width: 100%;
+    min-height: 120px;
+    font-size: $font-size-md;
+    color: $color-text;
+  }
+
+  &__placeholder {
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+  }
+
+  &__submit {
+    margin-top: $spacing-xl;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 88px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    box-shadow: 0 4px 16px rgba(53, 232, 154, 0.3);
+
+    &--disabled {
+      opacity: 0.6;
+    }
+  }
+
+  &__submit-text {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: #fff;
+  }
+}

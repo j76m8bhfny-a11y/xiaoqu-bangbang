@@ -1,0 +1,158 @@
+@use '../../styles/tokens.scss' as *;
+
+.service-providers {
+  min-height: 100vh;
+  background: $color-bg;
+
+  &__header {
+    padding: $spacing-lg $spacing-md $spacing-sm;
+  }
+
+  &__header-title {
+    display: block;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+  }
+
+  &__header-sub {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-top: 4px;
+  }
+
+  &__category-scroll {
+    white-space: nowrap;
+    padding: 0 $spacing-md $spacing-sm;
+  }
+
+  &__category-list {
+    display: inline-flex;
+    gap: $spacing-xs;
+  }
+
+  &__category-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 24px;
+    border-radius: $radius-pill;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+    transition: all 0.2s;
+
+    &--active {
+      background: $color-primary;
+      box-shadow: 0 2px 12px rgba(53, 232, 154, 0.3);
+    }
+  }
+
+  &__category-label {
+    font-size: $font-size-xs;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+
+    &--active {
+      color: #fff;
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  &__list {
+    height: calc(100vh - 260px);
+    padding: 0 $spacing-md;
+  }
+
+  &__card {
+    display: flex;
+    gap: $spacing-sm;
+    padding: $spacing-md;
+    background: #fff;
+    border-radius: $radius-md;
+    margin-bottom: $spacing-sm;
+    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__card-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: $radius-md;
+    background: $color-bg-green;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__card-icon-text {
+    font-size: 40px;
+  }
+
+  &__card-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__card-top {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-bottom: 6px;
+  }
+
+  &__card-name {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__card-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 12px;
+    border-radius: $radius-pill;
+    background: $color-bg-green;
+    flex-shrink: 0;
+  }
+
+  &__card-tag-text {
+    font-size: 20px;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__card-desc {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 6px;
+  }
+
+  &__card-source {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 12px;
+    border-radius: $radius-pill;
+    background: $color-bg-orange;
+  }
+
+  &__card-source-text {
+    font-size: 20px;
+    color: $color-accent;
+    font-weight: $font-weight-medium;
+  }
+
+  &__bottom-spacer {
+    height: 40px;
+  }
+}

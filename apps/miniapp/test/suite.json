@@ -1,0 +1,8 @@
+{
+  "pkg_list": [
+    {
+      "pkg": "test_login",
+      "case_list": ["test_login_page_loads", "test_login_page_has_title", "test_login_button_exists", "test_login_button_has_text"]
+    }
+  ]
+}

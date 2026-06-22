@@ -1,0 +1,76 @@
+@use '../../styles/tokens.scss' as *;
+
+.settings {
+  min-height: 100vh;
+  background: $color-bg;
+
+  &__scroll {
+    height: 100vh;
+  }
+
+  &__section {
+    margin-bottom: $spacing-md;
+  }
+
+  &__section-title {
+    display: block;
+    padding: $spacing-sm $spacing-md 8px;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md $spacing-md;
+    background: #fff;
+    border-bottom: 1px solid $color-border;
+
+    &:first-of-type {
+      border-radius: $radius-md $radius-md 0 0;
+    }
+
+    &:last-of-type {
+      border-bottom: none;
+      border-radius: 0 0 $radius-md $radius-md;
+    }
+
+    &:only-of-type {
+      border-radius: $radius-md;
+    }
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__menu-left {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__menu-icon {
+    font-size: $font-size-md;
+  }
+
+  &__menu-label {
+    font-size: $font-size-md;
+    color: $color-dark;
+  }
+
+  &__menu-arrow {
+    font-size: $font-size-lg;
+    color: $color-text-secondary;
+  }
+
+  &__menu-value {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__bottom-spacer {
+    height: 40px;
+  }
+}

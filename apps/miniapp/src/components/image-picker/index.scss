@@ -1,0 +1,63 @@
+@use '../../styles/tokens.scss' as *;
+
+.image-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+
+  &__item {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: $radius-md;
+    overflow: hidden;
+  }
+
+  &__image {
+    width: 200px;
+    height: 200px;
+    border-radius: $radius-md;
+  }
+
+  &__remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__remove-text {
+    font-size: $font-size-md;
+    color: #fff;
+    line-height: 1;
+  }
+
+  &__add {
+    width: 200px;
+    height: 200px;
+    border-radius: $radius-md;
+    border: 2px dashed #ddd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  &__add-icon {
+    font-size: 56px;
+    color: #ccc;
+    line-height: 1;
+  }
+
+  &__add-label {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+}

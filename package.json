@@ -1,0 +1,54 @@
+{
+  "name": "xiaoqu-bangbang",
+  "version": "0.1.0",
+  "private": true,
+  "description": "小区帮榜棒 - 让小区里的好事，被看见",
+  "scripts": {
+    "dev:miniapp": "pnpm --filter @xiaoqu-bangbang/miniapp dev:weapp",
+    "dev:api": "pnpm --filter @xiaoqu-bangbang/api dev",
+    "dev:admin": "pnpm --filter @xiaoqu-bangbang/admin dev",
+    "build:miniapp": "pnpm --filter @xiaoqu-bangbang/miniapp build:weapp",
+    "build:api": "pnpm --filter @xiaoqu-bangbang/api build",
+    "build:admin": "pnpm --filter @xiaoqu-bangbang/admin build",
+    "lint": "pnpm -r run lint",
+    "lint:fix": "pnpm -r run lint:fix",
+    "format": "prettier --write \"apps/**/*.{ts,tsx}\" \"packages/**/*.{ts,tsx}\"",
+    "db:migrate": "pnpm --filter @xiaoqu-bangbang/api db:migrate",
+    "db:generate": "pnpm --filter @xiaoqu-bangbang/api db:generate",
+    "db:push": "pnpm --filter @xiaoqu-bangbang/api db:push",
+    "db:studio": "pnpm --filter @xiaoqu-bangbang/api db:studio",
+    "test": "pnpm -r run test",
+    "test:e2e": "pnpm --filter @xiaoqu-bangbang/api test:e2e",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
+    "prettier": "^3.4.2",
+    "typescript-eslint": "^8.61.1"
+  },
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "@tarojs/binding",
+      "@tarojs/cli",
+      "esbuild",
+      "prisma",
+      "@swc/core",
+      "@parcel/watcher",
+      "unrs-resolver"
+    ]
+  }
+}

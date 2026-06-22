@@ -1,0 +1,183 @@
+@use '../../styles/tokens.scss' as *;
+
+.committee-member {
+  min-height: 100vh;
+  background: $color-bg;
+
+  &__scroll {
+    height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  // Avatar Section
+  &__avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-xl $spacing-md $spacing-lg;
+  }
+
+  &__avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: $color-bg-green;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__avatar-text {
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+  }
+
+  &__avatar-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+  }
+
+  &__name {
+    display: block;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: 4px;
+  }
+
+  &__position {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 20px;
+    border-radius: $radius-pill;
+  }
+
+  &__status-text {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+  }
+
+  // Info Card
+  &__info-card {
+    margin: 0 $spacing-md $spacing-md;
+    background: #fff;
+    border-radius: $radius-md;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+  }
+
+  &__info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-sm $spacing-md;
+
+    & + & {
+      border-top: 1px solid $color-border;
+    }
+  }
+
+  &__info-label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    flex-shrink: 0;
+  }
+
+  &__info-value {
+    font-size: $font-size-sm;
+    color: $color-dark;
+    font-weight: $font-weight-medium;
+    text-align: right;
+  }
+
+  // Claim Button
+  &__claim-section {
+    padding: 0 $spacing-md $spacing-md;
+  }
+
+  &__claim-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 88px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__claim-btn-text {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: #fff;
+  }
+
+  // Claims List
+  &__claims {
+    padding: 0 $spacing-md;
+  }
+
+  &__claims-header {
+    display: block;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__claim-item {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-sm $spacing-md;
+    margin-bottom: $spacing-xs;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+  }
+
+  &__claim-item-top {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-xs;
+    margin-bottom: 8px;
+  }
+
+  &__claim-item-statement {
+    flex: 1;
+    font-size: $font-size-sm;
+    color: $color-text;
+    line-height: 1.6;
+  }
+
+  &__claim-item-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 12px;
+    border-radius: $radius-pill;
+    flex-shrink: 0;
+  }
+
+  &__claim-item-tag-text {
+    font-size: 20px;
+    font-weight: $font-weight-medium;
+  }
+
+  &__claim-item-date {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__bottom-spacer {
+    height: 40px;
+  }
+}

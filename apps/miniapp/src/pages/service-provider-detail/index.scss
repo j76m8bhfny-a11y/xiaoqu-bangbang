@@ -1,0 +1,145 @@
+@use '../../styles/tokens.scss' as *;
+
+.sp-detail {
+  min-height: 100vh;
+  background: $color-bg;
+
+  &__scroll {
+    height: 100vh;
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-xl $spacing-md;
+    background: #fff;
+    border-radius: 0 0 $radius-lg $radius-lg;
+    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+  }
+
+  &__logo {
+    width: 120px;
+    height: 120px;
+    border-radius: $radius-lg;
+    background: $color-bg-green;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__logo-icon {
+    font-size: 60px;
+  }
+
+  &__name {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__tags {
+    display: flex;
+    gap: $spacing-xs;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 16px;
+    border-radius: $radius-pill;
+
+    &--category {
+      background: $color-bg-green;
+    }
+
+    &--source {
+      background: $color-bg-orange;
+    }
+  }
+
+  &__tag-text {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+  }
+
+  &__tag--category &__tag-text {
+    color: $color-primary;
+  }
+
+  &__tag--source &__tag-text {
+    color: $color-accent;
+  }
+
+  &__section {
+    padding: $spacing-md;
+    margin-top: $spacing-sm;
+  }
+
+  &__section-title {
+    display: block;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__description {
+    display: block;
+    font-size: $font-size-md;
+    color: $color-text;
+    line-height: 1.6;
+  }
+
+  &__contact-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: #fff;
+    border-radius: $radius-md;
+    margin-bottom: $spacing-xs;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__contact-icon {
+    font-size: $font-size-md;
+  }
+
+  &__contact-value {
+    font-size: $font-size-md;
+    color: $color-dark;
+  }
+
+  &__no-contact {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    text-align: center;
+    padding: $spacing-md;
+  }
+
+  &__disclaimer {
+    margin: $spacing-lg $spacing-md;
+    padding: $spacing-md;
+    background: $color-bg-orange;
+    border-radius: $radius-md;
+    text-align: center;
+  }
+
+  &__disclaimer-text {
+    font-size: $font-size-sm;
+    color: $color-accent;
+    font-weight: $font-weight-medium;
+  }
+
+  &__bottom-spacer {
+    height: 40px;
+  }
+}

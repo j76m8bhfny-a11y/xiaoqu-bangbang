@@ -1,0 +1,73 @@
+@use '../../styles/tokens.scss' as *;
+
+.service-card {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  background: #fff;
+  border-radius: $radius-md;
+  padding: $spacing-sm;
+  min-width: 400px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+
+  &__icon-wrap {
+    width: 80px;
+    height: 80px;
+    border-radius: $radius-sm;
+    background: $color-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__icon {
+    font-size: 40px;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-bottom: 4px;
+  }
+
+  &__name {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+  }
+
+  &__tag {
+    padding: 2px 10px;
+    border-radius: $radius-pill;
+    background: $color-bg-green;
+  }
+
+  &__tag-text {
+    font-size: 20px;
+    color: $color-primary;
+  }
+
+  &__desc {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__source {
+    font-size: 20px;
+    color: $color-accent;
+  }
+}

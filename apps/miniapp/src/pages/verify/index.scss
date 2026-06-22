@@ -1,0 +1,197 @@
+@use '../../styles/tokens.scss' as *;
+
+.verify {
+  min-height: 100vh;
+  background: $color-bg;
+  display: flex;
+  flex-direction: column;
+
+  &__body {
+    flex: 1;
+    padding: $spacing-md;
+    padding-bottom: calc(#{$spacing-xl} + env(safe-area-inset-bottom));
+  }
+
+  &__card {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-lg $spacing-md;
+    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+    margin-bottom: $spacing-lg;
+  }
+
+  &__section-title {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text;
+    margin-bottom: $spacing-sm;
+    margin-top: $spacing-md;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  // ===== Material type pills =====
+  &__type-group {
+    display: flex;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+  }
+
+  &__type-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 72px;
+    border-radius: $radius-pill;
+    background: $color-bg;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+
+    &--active {
+      background: $color-bg-green;
+      border-color: $color-primary;
+    }
+  }
+
+  &__type-text {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+
+    &--active {
+      color: $color-primary;
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  // ===== Consent row =====
+  &__consent-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md 0;
+    margin-top: $spacing-md;
+    border-top: 1px solid $color-border;
+  }
+
+  &__consent-text {
+    flex: 1;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    line-height: 1.5;
+    margin-right: $spacing-sm;
+  }
+
+  // ===== Submit button =====
+  &__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 88px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    box-shadow: 0 4px 16px rgba(53, 232, 154, 0.3);
+    margin-top: $spacing-lg;
+
+    &--disabled {
+      opacity: 0.6;
+    }
+  }
+
+  &__submit-text {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: #fff;
+  }
+
+  // ===== Records section =====
+  &__records {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-lg $spacing-md;
+    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+  }
+
+  &__record-list {
+    margin-top: $spacing-sm;
+  }
+
+  &__record-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__record-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__record-type {
+    font-size: $font-size-sm;
+    color: $color-dark;
+    font-weight: $font-weight-medium;
+  }
+
+  &__record-date {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  // ===== Status tags =====
+  &__status-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 16px;
+    border-radius: $radius-pill;
+    font-size: $font-size-xs;
+
+    &--orange {
+      background: $color-bg-orange;
+    }
+
+    &--green {
+      background: $color-bg-green;
+    }
+
+    &--red {
+      background: rgba(255, 107, 107, 0.1);
+    }
+
+    &--blue {
+      background: rgba(66, 133, 244, 0.1);
+    }
+  }
+
+  &__status-tag-text {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+
+    .verify__status-tag--orange & {
+      color: $color-accent;
+    }
+
+    .verify__status-tag--green & {
+      color: $color-success;
+    }
+
+    .verify__status-tag--red & {
+      color: $color-danger;
+    }
+
+    .verify__status-tag--blue & {
+      color: #4285f4;
+    }
+  }
+}

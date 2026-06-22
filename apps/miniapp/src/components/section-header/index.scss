@@ -1,0 +1,42 @@
+@use '../../styles/tokens.scss' as *;
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md $spacing-md $spacing-sm;
+
+  &__left {
+    display: flex;
+    align-items: baseline;
+    gap: $spacing-xs;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+  }
+
+  &__subtitle {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__action {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__action-text {
+    font-size: $font-size-xs;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__action-arrow {
+    font-size: $font-size-xs;
+    color: $color-primary;
+  }
+}

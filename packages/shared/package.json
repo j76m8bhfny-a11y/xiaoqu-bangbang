@@ -1,0 +1,24 @@
+{
+  "name": "@xiaoqu-bangbang/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "小区帮榜棒 - 共享类型、枚举与 API DTO",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

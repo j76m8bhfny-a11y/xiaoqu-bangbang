@@ -1,0 +1,85 @@
+@use '../../styles/tokens.scss' as *;
+
+.badges {
+  min-height: 100vh;
+  background: $color-bg;
+
+  &__stats {
+    text-align: center;
+    padding: $spacing-md $spacing-md $spacing-sm;
+  }
+
+  &__stats-text {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__content {
+    height: calc(100vh - 80px);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+  }
+
+  &__card {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-md $spacing-sm;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+
+    &--earned {
+      border-left: 4px solid #35e89a;
+      opacity: 1;
+    }
+
+    &--locked {
+      filter: grayscale(0.7);
+      opacity: 0.5;
+    }
+  }
+
+  &__card-icon {
+    font-size: 48px;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__card-name {
+    font-size: $font-size-md;
+    color: $color-dark;
+    font-weight: $font-weight-bold;
+    margin-bottom: 4px;
+  }
+
+  &__card-desc {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__card-badge {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+
+    &--earned {
+      color: #35e89a;
+    }
+
+    &--locked {
+      color: $color-text-secondary;
+      font-size: 32px;
+    }
+  }
+
+  &__bottom-spacer {
+    height: 120px;
+  }
+}

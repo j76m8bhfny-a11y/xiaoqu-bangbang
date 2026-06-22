@@ -1,0 +1,66 @@
+@use '../../styles/tokens.scss' as *;
+
+.login {
+  min-height: 100vh;
+  background: linear-gradient(180deg, $color-primary 0%, rgba(53, 232, 154, 0.08) 55%, $color-bg 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-xl;
+    width: 100%;
+  }
+
+  &__logo {
+    font-size: 120px;
+    margin-bottom: $spacing-md;
+  }
+
+  &__title {
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xl;
+  }
+
+  &__btn {
+    width: 560px;
+    height: 96px;
+    border-radius: $radius-pill;
+    background: $color-accent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $spacing-sm;
+
+    &:active {
+      opacity: 0.8;
+    }
+
+    &--wechat {
+      background: #07c160;
+    }
+  }
+
+  &__btn-text {
+    color: #fff;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+  }
+
+  &__hint {
+    font-size: 22px;
+    color: $color-text-secondary;
+    margin-top: $spacing-md;
+  }
+}

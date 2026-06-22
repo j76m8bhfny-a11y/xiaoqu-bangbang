@@ -1,0 +1,176 @@
+@use '../../styles/tokens.scss' as *;
+
+.committee {
+  min-height: 100vh;
+  background: $color-bg;
+
+  &__scroll {
+    height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  // Stats Header
+  &__stats {
+    display: flex;
+    gap: $spacing-sm;
+    padding: $spacing-md;
+  }
+
+  &__stat-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-md 0;
+    background: #fff;
+    border-radius: $radius-md;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+  }
+
+  &__stat-value {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: 4px;
+  }
+
+  &__stat-label {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  // Section
+  &__section {
+    padding: 0 $spacing-md;
+    margin-bottom: $spacing-md;
+  }
+
+  &__section-header {
+    display: block;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: $spacing-sm;
+  }
+
+  // Member Card
+  &__member-card {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: #fff;
+    border-radius: $radius-md;
+    margin-bottom: $spacing-xs;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__member-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: $color-bg-green;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__member-avatar-emoji {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+  }
+
+  &__member-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__member-name {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-medium;
+    color: $color-dark;
+    margin-bottom: 4px;
+  }
+
+  &__member-position {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__member-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 16px;
+    border-radius: $radius-pill;
+    flex-shrink: 0;
+  }
+
+  &__member-tag-text {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+  }
+
+  // Announcement Card
+  &__announcement-card {
+    padding: $spacing-sm $spacing-md;
+    background: #fff;
+    border-radius: $radius-md;
+    margin-bottom: $spacing-xs;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__announcement-top {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-bottom: 8px;
+  }
+
+  &__announcement-title {
+    flex: 1;
+    font-size: $font-size-md;
+    font-weight: $font-weight-medium;
+    color: $color-dark;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__announcement-pin {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 12px;
+    border-radius: $radius-pill;
+    background: $color-bg-orange;
+    flex-shrink: 0;
+  }
+
+  &__announcement-pin-text {
+    font-size: 20px;
+    color: $color-accent;
+    font-weight: $font-weight-medium;
+  }
+
+  &__announcement-date {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__bottom-spacer {
+    height: 40px;
+  }
+}

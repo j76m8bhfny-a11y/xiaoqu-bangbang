@@ -1,0 +1,312 @@
+@use '../../styles/tokens.scss' as *;
+
+.vote-detail {
+  position: relative;
+  min-height: 100vh;
+  background: $color-bg;
+
+  &__scroll {
+    height: 100vh;
+    padding-bottom: 160px;
+  }
+
+  &__tags {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-md $spacing-md 0;
+    flex-wrap: wrap;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 20px;
+    border-radius: $radius-pill;
+
+    &--type {
+      background: $color-bg-orange;
+    }
+
+    &--active {
+      background: $color-bg-green;
+    }
+
+    &--ended {
+      background: #f0f0f0;
+    }
+
+    &--verified {
+      background: #e8f0fe;
+    }
+
+    &--voted {
+      background: $color-primary;
+    }
+  }
+
+  &__tag-text {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+  }
+
+  &__tag--type &__tag-text {
+    color: $color-accent;
+  }
+
+  &__tag--active &__tag-text {
+    color: $color-success;
+  }
+
+  &__tag--ended &__tag-text {
+    color: $color-text-secondary;
+  }
+
+  &__tag--verified &__tag-text {
+    color: #1a73e8;
+  }
+
+  &__tag--voted &__tag-text {
+    color: #fff;
+  }
+
+  &__title {
+    display: block;
+    padding: $spacing-sm $spacing-md 0;
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    line-height: 1.4;
+  }
+
+  &__description {
+    display: block;
+    padding: $spacing-xs $spacing-md 0;
+    font-size: $font-size-md;
+    color: $color-text;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  &__time {
+    padding: $spacing-xs $spacing-md $spacing-md;
+  }
+
+  &__time-text {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__options {
+    padding: 0 $spacing-md $spacing-md;
+  }
+
+  &__options-header {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    margin-bottom: $spacing-xs;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+    border: 2px solid transparent;
+    transition: all 0.2s;
+
+    &--selected {
+      border-color: $color-primary;
+      background: $color-bg-green;
+    }
+
+    &--disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  }
+
+  &__indicator {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid $color-border;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+
+    &--checkbox {
+      border-radius: $spacing-xs;
+    }
+
+    &--checked {
+      background: $color-primary;
+      border-color: $color-primary;
+    }
+  }
+
+  &__indicator-icon {
+    font-size: $font-size-sm;
+    color: #fff;
+    font-weight: $font-weight-bold;
+  }
+
+  &__option-text {
+    flex: 1;
+    font-size: $font-size-md;
+    color: $color-dark;
+    line-height: 1.5;
+  }
+
+  &__results {
+    padding: 0 $spacing-md $spacing-md;
+  }
+
+  &__results-header {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__result-item {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-sm $spacing-md;
+    margin-bottom: $spacing-xs;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+  }
+
+  &__result-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  &__result-content {
+    font-size: $font-size-sm;
+    color: $color-dark;
+    font-weight: $font-weight-medium;
+  }
+
+  &__result-percent {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    font-weight: $font-weight-bold;
+  }
+
+  &__result-bar-bg {
+    height: 16px;
+    background: #f0f0f0;
+    border-radius: $radius-pill;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+
+  &__result-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, $color-primary, #7cf5c2);
+    border-radius: $radius-pill;
+    transition: width 0.6s ease;
+    min-width: 4px;
+  }
+
+  &__result-count {
+    font-size: 20px;
+    color: $color-text-secondary;
+  }
+
+  &__bottom-spacer {
+    height: 40px;
+  }
+
+  &__action-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    padding-bottom: calc(#{$spacing-sm} + env(safe-area-inset-bottom));
+    background: #fff;
+    box-shadow: 0 -2px 12px rgba(23, 23, 23, 0.08);
+    z-index: 100;
+  }
+
+  &__submit-btn {
+    flex: 1;
+    height: 80px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+
+    &:active {
+      opacity: 0.7;
+    }
+
+    &--disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+
+  &__submit-btn-text {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: #fff;
+  }
+
+  &__results-btn {
+    flex: 1;
+    height: 80px;
+    border-radius: $radius-pill;
+    background: $color-accent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__results-btn-text {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: #fff;
+  }
+
+  &__voted-badge {
+    flex: 1;
+    height: 80px;
+    border-radius: $radius-pill;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__voted-badge-text {
+    font-size: $font-size-md;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+  }
+}

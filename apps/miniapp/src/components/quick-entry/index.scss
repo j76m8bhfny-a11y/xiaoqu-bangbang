@@ -1,0 +1,43 @@
+@use '../../styles/tokens.scss' as *;
+
+.quick-entry {
+  padding: 0 $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-sm;
+    background: #fff;
+    border-radius: $radius-lg;
+    padding: $spacing-md $spacing-sm;
+    box-shadow: 0 2px 12px rgba(23, 23, 23, 0.04);
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: $spacing-xs 0;
+  }
+
+  &__icon {
+    width: 88px;
+    height: 88px;
+    border-radius: $radius-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__emoji {
+    font-size: 44px;
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+  }
+}

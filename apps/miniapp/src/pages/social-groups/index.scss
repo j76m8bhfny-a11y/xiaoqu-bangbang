@@ -1,0 +1,142 @@
+@use '../../styles/tokens.scss' as *;
+
+.social-groups {
+  min-height: 100vh;
+  background: $color-bg;
+
+  &__scroll {
+    height: 100vh;
+  }
+
+  &__header {
+    padding: $spacing-lg $spacing-md $spacing-sm;
+  }
+
+  &__header-title {
+    display: block;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+  }
+
+  &__header-sub {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-top: 4px;
+  }
+
+  &__list {
+    padding: 0 $spacing-md;
+  }
+
+  &__card {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    margin-bottom: $spacing-sm;
+    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+  }
+
+  &__card-header {
+    display: flex;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__card-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: $radius-md;
+    background: $color-bg-green;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__card-icon-text {
+    font-size: 40px;
+  }
+
+  &__card-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__card-name {
+    display: block;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: 4px;
+  }
+
+  &__card-desc {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__card-owner {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__card-members {
+    font-size: $font-size-xs;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__card-qr {
+    display: flex;
+    justify-content: center;
+    padding: $spacing-sm;
+    background: $color-bg;
+    border-radius: $radius-sm;
+  }
+
+  &__qr-image {
+    width: 200px;
+    height: 200px;
+  }
+
+  &__qr-placeholder {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    padding: $spacing-lg;
+  }
+
+  &__card-verify {
+    display: flex;
+    justify-content: center;
+    padding: $spacing-md;
+    background: $color-bg-orange;
+    border-radius: $radius-sm;
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__card-verify-text {
+    font-size: $font-size-md;
+    color: $color-accent;
+    font-weight: $font-weight-medium;
+  }
+
+  &__bottom-spacer {
+    height: 40px;
+  }
+}

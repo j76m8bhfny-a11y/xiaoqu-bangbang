@@ -1,0 +1,57 @@
+{
+  "name": "@xiaoqu-bangbang/miniapp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "小区帮榜棒 - Taro 微信小程序",
+  "templateInfo": {
+    "name": "default",
+    "typescript": true,
+    "css": "scss"
+  },
+  "scripts": {
+    "dev:weapp": "taro dev --type weapp",
+    "build:weapp": "taro build --type weapp",
+    "dev:swan": "taro dev --type swan",
+    "build:swan": "taro build --type swan",
+    "dev:h5": "taro dev --type h5",
+    "build:h5": "taro build --type h5",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "browserslist": [
+    "last 3 versions",
+    "Android >= 4.1",
+    "ios >= 8"
+  ],
+  "dependencies": {
+    "@tarojs/components": "^4.0.9",
+    "@tarojs/helper": "^4.0.9",
+    "@tarojs/plugin-framework-react": "^4.0.9",
+    "@tarojs/plugin-platform-weapp": "^4.0.9",
+    "@tarojs/react": "^4.0.9",
+    "@tarojs/runtime": "^4.0.9",
+    "@tarojs/shared": "^4.0.9",
+    "@tarojs/taro": "^4.0.9",
+    "@xiaoqu-bangbang/shared": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.29.5",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@babel/runtime": "^7.26.0",
+    "@tarojs/cli": "^4.0.9",
+    "@tarojs/webpack5-runner": "^4.0.9",
+    "@types/react": "^18.3.18",
+    "babel-preset-taro": "^4.2.0",
+    "sass": "^1.83.4",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8",
+    "webpack": "5.91.0"
+  }
+}

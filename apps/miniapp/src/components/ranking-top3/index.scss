@@ -1,0 +1,104 @@
+@use '../../styles/tokens.scss' as *;
+
+.ranking-top3 {
+  background: #fff;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  margin-bottom: $spacing-sm;
+  box-shadow: 0 2px 12px rgba(23, 23, 23, 0.04);
+
+  &__podium {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm 0 $spacing-md;
+  }
+
+  &__person {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+
+    &--1 {
+      .ranking-top3__avatar {
+        box-shadow: 0 4px 20px rgba(255, 217, 61, 0.3);
+      }
+    }
+  }
+
+  &__crown {
+    font-size: 36px;
+    line-height: 1;
+  }
+
+  &__avatar {
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  &__avatar-text {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+  }
+
+  &__avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+
+  &__name {
+    font-size: $font-size-xs;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__stats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__flower {
+    font-size: 22px;
+    color: $color-accent;
+    font-weight: $font-weight-medium;
+  }
+
+  &__help {
+    font-size: 20px;
+    color: $color-text-secondary;
+  }
+
+  &__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: $spacing-sm;
+    border-top: 1px solid $color-border;
+    margin-top: $spacing-xs;
+  }
+
+  &__action-text {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__action-arrow {
+    font-size: $font-size-sm;
+    color: $color-primary;
+  }
+}

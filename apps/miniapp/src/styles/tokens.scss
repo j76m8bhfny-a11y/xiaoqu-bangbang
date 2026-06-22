@@ -1,0 +1,44 @@
+// 小区帮榜棒 Design Tokens
+// 参考 ui/06_UI_STYLE_GUIDE.md
+
+// 主色
+$color-bg: #fff8ec;          // 米白底
+$color-cream: #ffe9a8;       // 奶油黄
+$color-primary: #35e89a;     // 活力青绿
+$color-accent: #ff9f43;      // 暖橙
+$color-dark: #171717;        // 深墨黑
+
+// 辅助色
+$color-text: #2f2f2f;        // 正文深灰
+$color-text-secondary: #7a7a7a; // 次级文字
+$color-border: #efe7d8;      // 浅边框
+$color-success: #4caf82;     // 成功绿
+$color-danger: #ff6b6b;      // 温和红
+$color-bg-green: #e9fff4;    // 浅绿底
+$color-bg-orange: #fff1dd;   // 浅橙底
+
+// 圆角
+$radius-sm: 12px;
+$radius-md: 18px;
+$radius-lg: 24px;
+$radius-pill: 999px;
+
+// 间距
+$spacing-xs: 8px;
+$spacing-sm: 12px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// 字号
+$font-size-xs: 24px;
+$font-size-sm: 26px;
+$font-size-md: 28px;
+$font-size-lg: 32px;
+$font-size-xl: 36px;
+$font-size-xxl: 44px;
+
+// 字重
+$font-weight-normal: 400;
+$font-weight-medium: 600;
+$font-weight-bold: 700;

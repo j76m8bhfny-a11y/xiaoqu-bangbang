@@ -1,0 +1,127 @@
+@use '../../styles/tokens.scss' as *;
+
+.home {
+  min-height: 100vh;
+  background: $color-bg;
+  position: relative;
+
+  &__scroll {
+    height: calc(100vh - 100px);
+  }
+
+  &__section {
+    margin-bottom: $spacing-xs;
+  }
+
+  &__ranking-wrap {
+    padding: 0 $spacing-md;
+  }
+
+  &__service-scroll {
+    width: 100%;
+    white-space: nowrap;
+  }
+
+  &__service-list {
+    display: inline-flex;
+    gap: $spacing-sm;
+    padding: 0 $spacing-md $spacing-md;
+  }
+
+  &__events {
+    padding: 0 $spacing-md;
+  }
+
+  &__announcements {
+    padding: 0 $spacing-md;
+  }
+
+  &__announcement-card {
+    padding: $spacing-sm $spacing-md;
+    background: #fff;
+    border-radius: $radius-md;
+    margin-bottom: $spacing-xs;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__announcement-top {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-bottom: 8px;
+  }
+
+  &__announcement-title {
+    flex: 1;
+    font-size: $font-size-md;
+    font-weight: $font-weight-medium;
+    color: $color-dark;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__announcement-pin {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 12px;
+    border-radius: $radius-pill;
+    background: $color-bg-orange;
+    flex-shrink: 0;
+  }
+
+  &__announcement-pin-text {
+    font-size: 20px;
+    color: $color-accent;
+    font-weight: $font-weight-medium;
+  }
+
+  &__announcement-date {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__bottom-spacer {
+    height: 120px;
+  }
+
+  &__fab {
+    position: fixed;
+    right: $spacing-md;
+    bottom: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 50;
+  }
+
+  &__fab-inner {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: $color-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(53, 232, 154, 0.4);
+  }
+
+  &__fab-plus {
+    font-size: 52px;
+    color: #fff;
+    font-weight: $font-weight-bold;
+    line-height: 1;
+  }
+
+  &__fab-label {
+    font-size: 20px;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+}

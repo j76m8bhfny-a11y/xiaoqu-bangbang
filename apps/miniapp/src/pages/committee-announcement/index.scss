@@ -1,0 +1,96 @@
+@use '../../styles/tokens.scss' as *;
+
+.committee-announcement {
+  min-height: 100vh;
+  background: $color-bg;
+
+  &__scroll {
+    height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  // Title Section
+  &__title-section {
+    padding: $spacing-md $spacing-md $spacing-xs;
+  }
+
+  &__title {
+    display: block;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    line-height: 1.4;
+  }
+
+  &__pin-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 12px;
+    border-radius: $radius-pill;
+    background: $color-bg-orange;
+    margin-top: $spacing-xs;
+  }
+
+  &__pin-tag-text {
+    font-size: $font-size-xs;
+    color: $color-accent;
+    font-weight: $font-weight-medium;
+  }
+
+  // Meta Row
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-xs $spacing-md $spacing-md;
+  }
+
+  &__publisher {
+    font-size: $font-size-sm;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+  }
+
+  &__dot {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__date {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  // Content
+  &__content {
+    display: block;
+    padding: $spacing-xs $spacing-md $spacing-md;
+    font-size: $font-size-md;
+    color: $color-text;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  // Images
+  &__images {
+    padding: 0 $spacing-md $spacing-md;
+  }
+
+  &__swiper {
+    width: 100%;
+    height: 480px;
+    border-radius: $radius-md;
+    overflow: hidden;
+  }
+
+  &__image {
+    width: 100%;
+    height: 480px;
+    border-radius: $radius-md;
+  }
+
+  &__bottom-spacer {
+    height: 40px;
+  }
+}
