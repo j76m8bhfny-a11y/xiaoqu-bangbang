@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Image } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useShareAppMessage } from '@tarojs/taro';
 import { useAuthStore, useCommunityStore } from '@/store';
 import { rankingService } from '@/services';
 import { useRequest } from '@/hooks';
@@ -37,15 +37,11 @@ const MENU_ITEMS: MenuItem[][] = [
   ],
 ];
 
-const UNIMPLEMENTED_FEATURES = new Set([
-  'my_services',
-  'invite',
-]);
-
 const MENU_ROUTES: Record<string, string> = {
   verify: '/pages/verify/index',
   my_badges: '/pages/badges/index',
   my_rank: '/pages/ranking/index',
+  my_services: '/pages/service-providers/index',
   notifications: '/pages/notifications/index',
   feedback_history: '/pages/events/index?tab=my_feedback',
   settings: '/pages/settings/index',
@@ -55,11 +51,16 @@ export default function Mine() {
   const user = useAuthStore((s) => s.user);
   const communityName = useCommunityStore((s) => s.currentCommunityName);
 
-  const { data: myRanking } = useRequest(
-    () => rankingService.getMyRanking(),
-    [],
-    { enabled: !!user }
-  );
+  const { data: myRanking } = useRequest(() => rankingService.getMyRanking(), [], {
+    enabled: !!user,
+  });
+
+  useShareAppMessage(() => ({
+    title: communityName
+      ? `${communityName}的邻居都在用「小区帮榜棒」`
+      : '邻里互助，从小区帮榜棒开始',
+    path: '/pages/home/index',
+  }));
 
   const nickname = user?.nickname ?? '邻居';
   const isVerified = user?.verifyStatus === 'verified';
@@ -73,8 +74,13 @@ export default function Mine() {
   ];
 
   const handleMenuClick = (item: MenuItem) => {
-    if (UNIMPLEMENTED_FEATURES.has(item.id)) {
-      Taro.showToast({ title: '功能开发中', icon: 'none' });
+    if (item.id === 'invite') {
+      Taro.showModal({
+        title: '邀请邻居',
+        content: '点击右上角"···"，选择"转发"，把小区帮榜棒分享给邻居吧～',
+        showCancel: false,
+        confirmText: '知道了',
+      });
       return;
     }
     if (item.id === 'about') {
@@ -95,32 +101,35 @@ export default function Mine() {
     }
   };
 
-  const handleActivityClick = (act: typeof MY_ACTIVITIES[number]) => {
+  const handleActivityClick = (act: (typeof MY_ACTIVITIES)[number]) => {
     Taro.navigateTo({ url: act.page });
   };
 
   return (
-    <View className='mine'>
+    <View className="mine">
       {/* 用户信息卡片 */}
-      <View className='mine__user-card' onClick={() => Taro.navigateTo({ url: '/pages/profile-edit/index' })}>
-        <View className='mine__user-bg' />
-        <View className='mine__user-info'>
-          <View className='mine__avatar'>
+      <View
+        className="mine__user-card"
+        onClick={() => Taro.navigateTo({ url: '/pages/profile-edit/index' })}
+      >
+        <View className="mine__user-bg" />
+        <View className="mine__user-info">
+          <View className="mine__avatar">
             {user?.avatarUrl ? (
-              <Image className='mine__avatar-img' src={user.avatarUrl} mode='aspectFill' />
+              <Image className="mine__avatar-img" src={user.avatarUrl} mode="aspectFill" />
             ) : (
-              <Text className='mine__avatar-text'>{nickname.slice(0, 1)}</Text>
+              <Text className="mine__avatar-text">{nickname.slice(0, 1)}</Text>
             )}
           </View>
-          <View className='mine__user-detail'>
-            <Text className='mine__user-name'>{nickname}</Text>
-            <View className='mine__user-tags'>
+          <View className="mine__user-detail">
+            <Text className="mine__user-name">{nickname}</Text>
+            <View className="mine__user-tags">
               <View className={`mine__user-tag ${verifyClass}`}>
-                <Text className='mine__user-tag-text'>{verifyLabel}</Text>
+                <Text className="mine__user-tag-text">{verifyLabel}</Text>
               </View>
               {communityName && (
-                <View className='mine__user-tag mine__user-tag--community'>
-                  <Text className='mine__user-tag-text'>🏠 {communityName}</Text>
+                <View className="mine__user-tag mine__user-tag--community">
+                  <Text className="mine__user-tag-text">🏠 {communityName}</Text>
                 </View>
               )}
             </View>
@@ -129,29 +138,33 @@ export default function Mine() {
       </View>
 
       {/* 数据统计 */}
-      <View className='mine__stats'>
+      <View className="mine__stats">
         {stats.map((stat) => (
-          <View key={stat.label} className='mine__stat'>
-            <Text className='mine__stat-icon'>{stat.icon}</Text>
-            <Text className='mine__stat-value'>{stat.value}</Text>
-            <Text className='mine__stat-label'>{stat.label}</Text>
+          <View key={stat.label} className="mine__stat">
+            <Text className="mine__stat-icon">{stat.icon}</Text>
+            <Text className="mine__stat-value">{stat.value}</Text>
+            <Text className="mine__stat-label">{stat.label}</Text>
           </View>
         ))}
       </View>
 
-      <ScrollView scrollY className='mine__content'>
+      <ScrollView scrollY className="mine__content">
         {/* 我的动态入口 */}
-        <View className='mine__activities'>
-          <View className='mine__section-title'>
-            <Text className='mine__section-title-text'>我的动态</Text>
+        <View className="mine__activities">
+          <View className="mine__section-title">
+            <Text className="mine__section-title-text">我的动态</Text>
           </View>
-          <View className='mine__activity-grid'>
+          <View className="mine__activity-grid">
             {MY_ACTIVITIES.map((act) => (
-              <View key={act.id} className='mine__activity-item' onClick={() => handleActivityClick(act)}>
-                <View className='mine__activity-icon-wrap'>
-                  <Text className='mine__activity-icon'>{act.icon}</Text>
+              <View
+                key={act.id}
+                className="mine__activity-item"
+                onClick={() => handleActivityClick(act)}
+              >
+                <View className="mine__activity-icon-wrap">
+                  <Text className="mine__activity-icon">{act.icon}</Text>
                 </View>
-                <Text className='mine__activity-label'>{act.title}</Text>
+                <Text className="mine__activity-label">{act.title}</Text>
               </View>
             ))}
           </View>
@@ -159,27 +172,27 @@ export default function Mine() {
 
         {/* 菜单列表 */}
         {MENU_ITEMS.map((group, gi) => (
-          <View key={gi} className='mine__menu-group'>
+          <View key={gi} className="mine__menu-group">
             {group.map((item) => (
-              <View key={item.id} className='mine__menu-item' onClick={() => handleMenuClick(item)}>
-                <View className='mine__menu-left'>
-                  <Text className='mine__menu-icon'>{item.icon}</Text>
-                  <Text className='mine__menu-label'>{item.label}</Text>
+              <View key={item.id} className="mine__menu-item" onClick={() => handleMenuClick(item)}>
+                <View className="mine__menu-left">
+                  <Text className="mine__menu-icon">{item.icon}</Text>
+                  <Text className="mine__menu-label">{item.label}</Text>
                 </View>
-                <View className='mine__menu-right'>
+                <View className="mine__menu-right">
                   {item.count !== undefined && item.count > 0 && (
-                    <View className='mine__menu-badge'>
-                      <Text className='mine__menu-badge-text'>{item.count}</Text>
+                    <View className="mine__menu-badge">
+                      <Text className="mine__menu-badge-text">{item.count}</Text>
                     </View>
                   )}
-                  <Text className='mine__menu-arrow'>›</Text>
+                  <Text className="mine__menu-arrow">›</Text>
                 </View>
               </View>
             ))}
           </View>
         ))}
 
-        <View className='mine__bottom-spacer' />
+        <View className="mine__bottom-spacer" />
       </ScrollView>
     </View>
   );
