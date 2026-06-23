@@ -167,6 +167,7 @@ export interface CreateEventRequest {
   capacity?: number | null;
   isAnonymous?: boolean;
   visibility?: Visibility;
+  topicId?: string;
 }
 
 export interface EventDto {
