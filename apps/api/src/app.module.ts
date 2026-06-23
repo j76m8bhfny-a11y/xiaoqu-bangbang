@@ -20,6 +20,7 @@ import { ServiceProvidersModule } from './modules/serviceProviders/service-provi
 import { ShareModule } from './modules/share/share.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { TopicsModule } from './modules/topics/topics.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 @Module({
@@ -46,6 +47,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     ShareModule,
     AdminModule,
     UploadModule,
+    TopicsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

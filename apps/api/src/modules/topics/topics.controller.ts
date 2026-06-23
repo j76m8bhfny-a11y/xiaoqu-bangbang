@@ -1,0 +1,170 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Inject,
+} from '@nestjs/common';
+import { TopicsService } from './topics.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
+import { CurrentCommunityId } from '../../common/decorators/current-community.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { getPaginationParams } from '../../common/helpers/pagination';
+
+@Controller('topics')
+@UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+export class TopicsController {
+  constructor(@Inject(TopicsService) private topicsService: TopicsService) {}
+
+  @Get()
+  async list(
+    @CurrentCommunityId() communityId: string,
+    @Query('status') status?: string,
+    @Query('keyword') keyword?: string,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ) {
+    const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
+    const { items, total } = await this.topicsService.list(communityId, { status, keyword }, { skip, take });
+    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+  }
+
+  @Post('comments/:commentId/like')
+  async likeComment(
+    @CurrentUser('userId') userId: string,
+    @Param('commentId') commentId: string,
+  ) {
+    const c = await this.topicsService.likeComment(commentId, userId, 'like');
+    return { code: 0, message: 'ok', data: c };
+  }
+
+  @Post('comments/:commentId/dislike')
+  async dislikeComment(
+    @CurrentUser('userId') userId: string,
+    @Param('commentId') commentId: string,
+  ) {
+    const c = await this.topicsService.likeComment(commentId, userId, 'dislike');
+    return { code: 0, message: 'ok', data: c };
+  }
+
+  @Delete('comments/:commentId/like')
+  async unlikeComment(
+    @CurrentUser('userId') userId: string,
+    @Param('commentId') commentId: string,
+  ) {
+    const c = await this.topicsService.unlikeComment(commentId, userId);
+    return { code: 0, message: 'ok', data: c };
+  }
+
+  @Post()
+  async create(
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+    @Body() body: { title: string; description?: string },
+  ) {
+    const topic = await this.topicsService.create(userId, communityId, body);
+    return { code: 0, message: 'ok', data: topic };
+  }
+
+  @Get(':id')
+  async findOne(
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const topic = await this.topicsService.findById(id, communityId);
+    return { code: 0, message: 'ok', data: topic };
+  }
+
+  @Post(':id/like')
+  async like(
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+    @Param('id') id: string,
+    @Body() body: { scope?: 'open' | 'closed' },
+  ) {
+    const scope = body?.scope ?? 'open';
+    const topic = await this.topicsService.like(id, userId, communityId, 'like', scope);
+    return { code: 0, message: 'ok', data: topic };
+  }
+
+  @Post(':id/dislike')
+  async dislike(
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+    @Param('id') id: string,
+    @Body() body: { scope?: 'open' | 'closed' },
+  ) {
+    const scope = body?.scope ?? 'open';
+    const topic = await this.topicsService.like(id, userId, communityId, 'dislike', scope);
+    return { code: 0, message: 'ok', data: topic };
+  }
+
+  @Delete(':id/like')
+  async unlike(
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+    @Param('id') id: string,
+    @Query('scope') scope?: 'open' | 'closed',
+  ) {
+    const topic = await this.topicsService.unlike(id, userId, communityId, scope ?? 'open');
+    return { code: 0, message: 'ok', data: topic };
+  }
+
+  @Post(':id/rating')
+  async rate(
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+    @Param('id') id: string,
+    @Body() body: { rating: number },
+  ) {
+    const topic = await this.topicsService.rate(id, userId, communityId, body.rating);
+    return { code: 0, message: 'ok', data: topic };
+  }
+
+  @Get(':id/timeline')
+  async timeline(
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ) {
+    const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
+    const items = await this.topicsService.getTimeline(id, communityId, { skip, take });
+    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps } };
+  }
+
+  @Get(':id/comments')
+  async listComments(
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+    @Query('eventId') eventId?: string,
+    @Query('sort') sort?: 'hot' | 'new',
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ) {
+    const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
+    const { items, total } = await this.topicsService.listComments(id, communityId, {
+      eventId,
+      sort,
+      skip,
+      take,
+    });
+    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+  }
+
+  @Post(':id/comments')
+  async createComment(
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+    @Param('id') id: string,
+    @Body() body: { eventId?: string; content: string; images?: string[]; parentId?: string },
+  ) {
+    const c = await this.topicsService.createComment(id, userId, communityId, body);
+    return { code: 0, message: 'ok', data: c };
+  }
+}
