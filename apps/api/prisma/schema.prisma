@@ -12,46 +12,53 @@ datasource db {
 // ============================
 
 model User {
-  id                 String   @id @default(uuid()) @db.Uuid
-  openid             String   @unique
+  id                 String    @id @default(uuid()) @db.Uuid
+  openid             String    @unique
   unionid            String?
   phone              String?
   nickname           String
-  avatarUrl          String   @map("avatar_url")
+  avatarUrl          String    @map("avatar_url")
   bio                String?
-  status             String   @default("active") // active/banned/deleted
+  status             String    @default("active") // active/banned/deleted
   lastLoginAt        DateTime? @map("last_login_at")
-  currentCommunityId String?  @map("current_community_id") @db.Uuid
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
+  currentCommunityId String?   @map("current_community_id") @db.Uuid
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
   deletedAt          DateTime? @map("deleted_at")
 
-  currentCommunity   Community?           @relation("UserCurrentCommunity", fields: [currentCommunityId], references: [id])
-  communityMembers   CommunityMember[]
-  verifications      Verification[]
-  events             Event[]              @relation("EventCreator")
-  selectedHelperEvents Event[]            @relation("EventSelectedHelper")
-  eventApplications  EventApplication[]
-  eventLikes         EventLike[]
-  eventThanksSent    EventThank[]        @relation("EventThankFromUser")
-  eventThanksReceived EventThank[]        @relation("EventThankToUser")
-  eventFavorites     EventFavorite[]
-  eventComments      EventComment[]
-  marketComments     MarketComment[]      @relation("MarketCommentUser")
+  currentCommunity        Community?                    @relation("UserCurrentCommunity", fields: [currentCommunityId], references: [id])
+  communityMembers        CommunityMember[]
+  verifications           Verification[]
+  events                  Event[]                       @relation("EventCreator")
+  selectedHelperEvents    Event[]                       @relation("EventSelectedHelper")
+  eventApplications       EventApplication[]
+  eventLikes              EventLike[]
+  eventThanksSent         EventThank[]                  @relation("EventThankFromUser")
+  eventThanksReceived     EventThank[]                  @relation("EventThankToUser")
+  eventFavorites          EventFavorite[]
+  eventComments           EventComment[]
+  marketComments          MarketComment[]               @relation("MarketCommentUser")
   completionConfirmations EventCompletionConfirmation[]
-  notifications      Notification[]
-  marketItems        MarketItem[]         @relation("MarketSeller")
-  marketReviews      MarketReview[]       @relation("MarketReviewReviewer")
-  marketReviewsReceived MarketReview[]    @relation("MarketReviewReviewee")
-  contributions      ContributionRecord[]
-  userBadges         UserBadge[]
-  rankingSnapshots   RankingSnapshot[]   @relation("RankingSnapshotUser")
-  committeeClaims    CommitteeMemberClaim[] @relation("CommitteeClaimUser")
-  voteRecords        VoteRecord[]        @relation("VoteRecordUser")
-  reports            Report[]             @relation("ReportReporter")
-  reportsHandled     Report[]             @relation("ReportHandler")
-  auditLogs          AuditLog[]
-  adminUser          AdminUser?
+  notifications           Notification[]
+  marketItems             MarketItem[]                  @relation("MarketSeller")
+  marketReviews           MarketReview[]                @relation("MarketReviewReviewer")
+  marketReviewsReceived   MarketReview[]                @relation("MarketReviewReviewee")
+  contributions           ContributionRecord[]
+  userBadges              UserBadge[]
+  rankingSnapshots        RankingSnapshot[]             @relation("RankingSnapshotUser")
+  committeeClaims         CommitteeMemberClaim[]        @relation("CommitteeClaimUser")
+  voteRecords             VoteRecord[]                  @relation("VoteRecordUser")
+  reports                 Report[]                      @relation("ReportReporter")
+  reportsHandled          Report[]                      @relation("ReportHandler")
+  auditLogs               AuditLog[]
+  adminUser               AdminUser?
+  topics                  Topic[]                       @relation("TopicCreator")
+  topicsClosed            Topic[]                       @relation("TopicCloser")
+  topicComments           TopicComment[]
+  topicLikes              TopicLike[]
+  topicRatings            TopicRating[]
+  topicCommentLikes       TopicCommentLike[]
+  topicMergeResolved      TopicMergeSuggestion[]        @relation("TopicMergeResolver")
 
   @@index([phone])
   @@index([currentCommunityId])
@@ -59,76 +66,78 @@ model User {
 }
 
 model Community {
-  id        String   @id @default(uuid()) @db.Uuid
+  id        String    @id @default(uuid()) @db.Uuid
   name      String
   city      String
   district  String
   address   String
-  status    String   @default("active") // active/inactive
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  status    String    @default("active") // active/inactive
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  currentCommunityUsers User[]               @relation("UserCurrentCommunity")
-  members           CommunityMember[]
-  socialGroups      CommunitySocialGroup[]
-  verifications     Verification[]
-  events            Event[]
-  marketItems       MarketItem[]
-  banners           Banner[]
-  serviceProviders  ServiceProvider[]
-  committeeMembers  CommitteeMember[]
+  currentCommunityUsers  User[]                  @relation("UserCurrentCommunity")
+  members                CommunityMember[]
+  socialGroups           CommunitySocialGroup[]
+  verifications          Verification[]
+  events                 Event[]
+  marketItems            MarketItem[]
+  banners                Banner[]
+  serviceProviders       ServiceProvider[]
+  committeeMembers       CommitteeMember[]
   committeeAnnouncements CommitteeAnnouncement[]
-  committeeClaims   CommitteeMemberClaim[] @relation("CommitteeClaimCommunity")
-  votes             Vote[]
-  voteRecords       VoteRecord[]        @relation("VoteRecordCommunity")
-  userBadges        UserBadge[]
-  contributions     ContributionRecord[]
-  rankingSnapshots  RankingSnapshot[]   @relation("RankingSnapshotCommunity")
-  notifications     Notification[]
-  shareLogs         ShareLog[]          @relation("ShareLogCommunity")
-  feedbackLogs      FeedbackProcessLog[]
-  reports           Report[]
-  adminUsers        AdminUser[]
+  committeeClaims        CommitteeMemberClaim[]  @relation("CommitteeClaimCommunity")
+  votes                  Vote[]
+  voteRecords            VoteRecord[]            @relation("VoteRecordCommunity")
+  userBadges             UserBadge[]
+  contributions          ContributionRecord[]
+  rankingSnapshots       RankingSnapshot[]       @relation("RankingSnapshotCommunity")
+  notifications          Notification[]
+  shareLogs              ShareLog[]              @relation("ShareLogCommunity")
+  feedbackLogs           FeedbackProcessLog[]
+  reports                Report[]
+  adminUsers             AdminUser[]
+  topics                 Topic[]
+  topicMergeSuggestions  TopicMergeSuggestion[]
 
   @@map("communities")
 }
 
 model CommunitySocialGroup {
-  id            String   @id @default(uuid()) @db.Uuid
-  communityId   String   @map("community_id") @db.Uuid
-  title         String
-  description   String?
-  qrImageUrl    String?  @map("qr_image_url")
-  contactText   String?  @map("contact_text")
-  visibleTo     String   @default("verified_only") @map("visible_to") // verified_only/public
-  status        String   @default("active") // active/inactive
-  sortOrder     Int      @default(0) @map("sort_order")
-  updatedBy     String?  @map("updated_by") @db.Uuid
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(uuid()) @db.Uuid
+  communityId String   @map("community_id") @db.Uuid
+  title       String
+  description String?
+  qrImageUrl  String?  @map("qr_image_url")
+  contactText String?  @map("contact_text")
+  visibleTo   String   @default("verified_only") @map("visible_to") // verified_only/public
+  status      String   @default("active") // active/inactive
+  sortOrder   Int      @default(0) @map("sort_order")
+  updatedBy   String?  @map("updated_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  community     Community @relation(fields: [communityId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
 
   @@index([communityId, status, sortOrder])
   @@map("community_social_groups")
 }
 
 model CommunityMember {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
-  communityId  String   @map("community_id") @db.Uuid
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  communityId  String    @map("community_id") @db.Uuid
   building     String?
-  roomMasked   String?  @map("room_masked")
-  role         String   @default("resident") // resident/committee_admin/platform_admin/volunteer
-  verifyStatus String   @default("unverified") @map("verify_status") // unverified/pending/verified/rejected
-  joinedAt     DateTime @default(now()) @map("joined_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  roomMasked   String?   @map("room_masked")
+  role         String    @default("resident") // resident/committee_admin/platform_admin/volunteer
+  verifyStatus String    @default("unverified") @map("verify_status") // unverified/pending/verified/rejected
+  joinedAt     DateTime  @default(now()) @map("joined_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
 
-  user         User      @relation(fields: [userId], references: [id])
-  community    Community @relation(fields: [communityId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
 
   @@unique([userId, communityId])
   @@index([communityId, role])
@@ -137,26 +146,26 @@ model CommunityMember {
 }
 
 model Verification {
-  id                   String    @id @default(uuid()) @db.Uuid
-  userId               String    @map("user_id") @db.Uuid
-  communityId          String    @map("community_id") @db.Uuid
-  materialType         String    @map("material_type") // property_cert/rent_contract/access_card/other
-  originalFileUrl      String?   @map("original_file_url")
+  id                    String    @id @default(uuid()) @db.Uuid
+  userId                String    @map("user_id") @db.Uuid
+  communityId           String    @map("community_id") @db.Uuid
+  materialType          String    @map("material_type") // property_cert/rent_contract/access_card/other
+  originalFileUrl       String?   @map("original_file_url")
   originalFileDeletedAt DateTime? @map("original_file_deleted_at")
-  maskedFileUrl        String?   @map("masked_file_url")
-  ocrResultJson        Json?     @map("ocr_result_json")
-  aiResultJson         Json?     @map("ai_result_json")
-  consentSnapshot      Json?     @map("consent_snapshot")
-  status               String    @default("pending") // pending/approved/rejected/manual_review
-  rejectReason         String?   @map("reject_reason")
-  reviewedBy           String?   @map("reviewed_by") @db.Uuid
-  reviewedAt           DateTime? @map("reviewed_at")
-  createdAt            DateTime  @default(now()) @map("created_at")
-  updatedAt            DateTime  @updatedAt @map("updated_at")
-  deletedAt            DateTime? @map("deleted_at")
+  maskedFileUrl         String?   @map("masked_file_url")
+  ocrResultJson         Json?     @map("ocr_result_json")
+  aiResultJson          Json?     @map("ai_result_json")
+  consentSnapshot       Json?     @map("consent_snapshot")
+  status                String    @default("pending") // pending/approved/rejected/manual_review
+  rejectReason          String?   @map("reject_reason")
+  reviewedBy            String?   @map("reviewed_by") @db.Uuid
+  reviewedAt            DateTime? @map("reviewed_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  deletedAt             DateTime? @map("deleted_at")
 
-  user                 User      @relation(fields: [userId], references: [id])
-  community            Community @relation(fields: [communityId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
 
   @@index([userId, communityId])
   @@index([status])
@@ -168,22 +177,22 @@ model Verification {
 // ============================
 
 model Notification {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
-  communityId  String?  @map("community_id") @db.Uuid
-  type         String   // review_result/event_response/completion/badge/feedback/vote/announcement/system
-  title        String
-  content      String
-  targetType   String?  @map("target_type") // event/market/vote etc.
-  targetId     String?  @map("target_id") @db.Uuid
-  isRead       Boolean  @default(false) @map("is_read")
-  readAt       DateTime? @map("read_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  communityId String?   @map("community_id") @db.Uuid
+  type        String // review_result/event_response/completion/badge/feedback/vote/announcement/system
+  title       String
+  content     String
+  targetType  String?   @map("target_type") // event/market/vote etc.
+  targetId    String?   @map("target_id") @db.Uuid
+  isRead      Boolean   @default(false) @map("is_read")
+  readAt      DateTime? @map("read_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
-  user         User      @relation(fields: [userId], references: [id])
-  community    Community? @relation(fields: [communityId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
+  community Community? @relation(fields: [communityId], references: [id])
 
   @@index([userId, isRead, createdAt])
   @@map("notifications")
@@ -194,66 +203,71 @@ model Notification {
 // ============================
 
 model Event {
-  id               String   @id @default(uuid()) @db.Uuid
-  communityId      String   @map("community_id") @db.Uuid
-  creatorId        String   @map("creator_id") @db.Uuid
-  type             String   // help_request/help_offer/public_welfare/lost_found/public_feedback/discussion
+  id               String    @id @default(uuid()) @db.Uuid
+  communityId      String    @map("community_id") @db.Uuid
+  creatorId        String    @map("creator_id") @db.Uuid
+  type             String // help_request/help_offer/public_welfare/lost_found/public_feedback/discussion
   title            String
   description      String
-  images           Json     @default("[]")
-  videos           Json     @default("[]")
-  rewardType       String   @default("none") @map("reward_type") // free/paid/negotiable/none
-  rewardAmount     Decimal? @map("reward_amount") @db.Decimal
-  locationText     String?  @map("location_text")
+  images           Json      @default("[]")
+  videos           Json      @default("[]")
+  rewardType       String    @default("none") @map("reward_type") // free/paid/negotiable/none
+  rewardAmount     Decimal?  @map("reward_amount") @db.Decimal
+  locationText     String?   @map("location_text")
   expectedTime     DateTime? @map("expected_time")
   eventTime        DateTime? @map("event_time")
   capacity         Int?
-  isAnonymous      Boolean  @default(false) @map("is_anonymous")
-  visibility       String   @default("public") // public/admin_only
-  status           String   @default("pending_review") // pending_review/open/in_progress/processing/completed/closed/rejected
-  aiReviewStatus   String   @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
-  aiReviewResult   Json?    @map("ai_review_result")
-  selectedHelperId String?  @map("selected_helper_id") @db.Uuid
+  isAnonymous      Boolean   @default(false) @map("is_anonymous")
+  visibility       String    @default("public") // public/admin_only
+  status           String    @default("pending_review") // pending_review/open/in_progress/processing/completed/closed/rejected
+  aiReviewStatus   String    @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
+  aiReviewResult   Json?     @map("ai_review_result")
+  selectedHelperId String?   @map("selected_helper_id") @db.Uuid
   completedAt      DateTime? @map("completed_at")
-  viewCount        Int      @default(0) @map("view_count")
-  likeCount        Int      @default(0) @map("like_count")
-  commentCount     Int      @default(0) @map("comment_count")
-  thanksCount      Int      @default(0) @map("thanks_count")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  viewCount        Int       @default(0) @map("view_count")
+  likeCount        Int       @default(0) @map("like_count")
+  commentCount     Int       @default(0) @map("comment_count")
+  thanksCount      Int       @default(0) @map("thanks_count")
+  topicId          String?   @map("topic_id") @db.Uuid
+  aiComment        String?   @map("ai_comment")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
   deletedAt        DateTime? @map("deleted_at")
 
-  community        Community       @relation(fields: [communityId], references: [id])
-  creator          User            @relation("EventCreator", fields: [creatorId], references: [id])
-  selectedHelper   User?           @relation("EventSelectedHelper", fields: [selectedHelperId], references: [id], onDelete: SetNull)
-  applications     EventApplication[]
-  comments         EventComment[]
-  likes            EventLike[]
-  thanks           EventThank[]
-  favorites        EventFavorite[]
+  community               Community                     @relation(fields: [communityId], references: [id])
+  creator                 User                          @relation("EventCreator", fields: [creatorId], references: [id])
+  selectedHelper          User?                         @relation("EventSelectedHelper", fields: [selectedHelperId], references: [id], onDelete: SetNull)
+  applications            EventApplication[]
+  comments                EventComment[]
+  likes                   EventLike[]
+  thanks                  EventThank[]
+  favorites               EventFavorite[]
   completionConfirmations EventCompletionConfirmation[]
-  feedbackLogs     FeedbackProcessLog[]
+  feedbackLogs            FeedbackProcessLog[]
+  topic                   Topic?                        @relation(fields: [topicId], references: [id])
+  topicComments           TopicComment[]
 
   @@index([communityId, type, status, createdAt])
   @@index([creatorId])
   @@index([selectedHelperId])
   @@index([aiReviewStatus])
+  @@index([topicId])
   @@map("events")
 }
 
 model EventApplication {
-  id         String   @id @default(uuid()) @db.Uuid
-  eventId    String   @map("event_id") @db.Uuid
-  userId     String   @map("user_id") @db.Uuid
-  actionType String   @map("action_type") // help/need_help/join/provide_clue/follow/participate_discussion
+  id         String    @id @default(uuid()) @db.Uuid
+  eventId    String    @map("event_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  actionType String    @map("action_type") // help/need_help/join/provide_clue/follow/participate_discussion
   message    String?
-  status     String   @default("pending") // pending/selected/cancelled/rejected/confirmed
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  status     String    @default("pending") // pending/selected/cancelled/rejected/confirmed
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
   deletedAt  DateTime? @map("deleted_at")
 
-  event      Event    @relation(fields: [eventId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 
   @@unique([eventId, userId, actionType])
   @@index([eventId, status])
@@ -264,7 +278,7 @@ model EventCompletionConfirmation {
   id            String    @id @default(uuid()) @db.Uuid
   eventId       String    @map("event_id") @db.Uuid
   userId        String    @map("user_id") @db.Uuid
-  role          String    // creator/helper/participant/admin
+  role          String // creator/helper/participant/admin
   status        String    @default("requested") // requested/confirmed
   rating        Int?
   ratingContent String?   @map("rating_content")
@@ -273,29 +287,29 @@ model EventCompletionConfirmation {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  event         Event     @relation(fields: [eventId], references: [id])
-  user          User      @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 
   @@unique([eventId, userId, role])
   @@map("event_completion_confirmations")
 }
 
 model EventComment {
-  id             String   @id @default(uuid()) @db.Uuid
-  eventId        String   @map("event_id") @db.Uuid
-  userId         String   @map("user_id") @db.Uuid
-  parentId       String?  @map("parent_id") @db.Uuid
+  id             String    @id @default(uuid()) @db.Uuid
+  eventId        String    @map("event_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  parentId       String?   @map("parent_id") @db.Uuid
   content        String
-  aiReviewStatus String   @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
-  status         String   @default("visible") // visible/hidden/deleted
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  aiReviewStatus String    @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
+  status         String    @default("visible") // visible/hidden/deleted
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
   deletedAt      DateTime? @map("deleted_at")
 
-  event          Event    @relation(fields: [eventId], references: [id])
-  user           User     @relation(fields: [userId], references: [id])
-  parent         EventComment?  @relation("CommentReplies", fields: [parentId], references: [id])
-  replies        EventComment[] @relation("CommentReplies")
+  event   Event          @relation(fields: [eventId], references: [id])
+  user    User           @relation(fields: [userId], references: [id])
+  parent  EventComment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies EventComment[] @relation("CommentReplies")
 
   @@index([eventId, createdAt])
   @@map("event_comments")
@@ -307,8 +321,8 @@ model EventLike {
   userId    String   @map("user_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
 
-  event     Event    @relation(fields: [eventId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 
   @@unique([eventId, userId])
   @@map("event_likes")
@@ -321,9 +335,9 @@ model EventThank {
   toUserId   String   @map("to_user_id") @db.Uuid
   createdAt  DateTime @default(now()) @map("created_at")
 
-  event      Event    @relation(fields: [eventId], references: [id])
-  fromUser   User     @relation("EventThankFromUser", fields: [fromUserId], references: [id])
-  toUser     User     @relation("EventThankToUser", fields: [toUserId], references: [id])
+  event    Event @relation(fields: [eventId], references: [id])
+  fromUser User  @relation("EventThankFromUser", fields: [fromUserId], references: [id])
+  toUser   User  @relation("EventThankToUser", fields: [toUserId], references: [id])
 
   @@unique([eventId, fromUserId, toUserId])
   @@map("event_thanks")
@@ -335,31 +349,31 @@ model EventFavorite {
   userId    String   @map("user_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
 
-  event     Event    @relation(fields: [eventId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 
   @@unique([eventId, userId])
   @@map("event_favorites")
 }
 
 model Report {
-  id           String   @id @default(uuid()) @db.Uuid
-  reporterId   String   @map("reporter_id") @db.Uuid
-  targetType   String   @map("target_type") // event/event_comment/market_item/market_comment/user
-  targetId     String   @map("target_id") @db.Uuid
-  communityId  String?  @map("community_id") @db.Uuid
-  reason       String   // privacy/false_info/harassment/illegal/ad_spam/other
-  description  String?
-  status       String   @default("pending") // pending/processed/rejected
-  handledBy    String?  @map("handled_by") @db.Uuid
-  handledAt    DateTime? @map("handled_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
+  id          String    @id @default(uuid()) @db.Uuid
+  reporterId  String    @map("reporter_id") @db.Uuid
+  targetType  String    @map("target_type") // event/event_comment/market_item/market_comment/user
+  targetId    String    @map("target_id") @db.Uuid
+  communityId String?   @map("community_id") @db.Uuid
+  reason      String // privacy/false_info/harassment/illegal/ad_spam/other
+  description String?
+  status      String    @default("pending") // pending/processed/rejected
+  handledBy   String?   @map("handled_by") @db.Uuid
+  handledAt   DateTime? @map("handled_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
-  reporter     User      @relation("ReportReporter", fields: [reporterId], references: [id])
-  handler      User?     @relation("ReportHandler", fields: [handledBy], references: [id])
-  community    Community? @relation(fields: [communityId], references: [id])
+  reporter  User       @relation("ReportReporter", fields: [reporterId], references: [id])
+  handler   User?      @relation("ReportHandler", fields: [handledBy], references: [id])
+  community Community? @relation(fields: [communityId], references: [id])
 
   @@map("reports")
 }
@@ -369,15 +383,15 @@ model FeedbackProcessLog {
   eventId         String   @map("event_id") @db.Uuid
   operatorId      String   @map("operator_id") @db.Uuid
   communityId     String?  @map("community_id") @db.Uuid
-  status          String   // received/processing/contacted/resolved/cannot_resolve/closed
+  status          String // received/processing/contacted/resolved/cannot_resolve/closed
   content         String
   images          Json?    @default("[]")
   visibleToPublic Boolean  @default(true) @map("visible_to_public")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  event           Event     @relation(fields: [eventId], references: [id])
-  community       Community? @relation(fields: [communityId], references: [id])
+  event     Event      @relation(fields: [eventId], references: [id])
+  community Community? @relation(fields: [communityId], references: [id])
 
   @@index([eventId, createdAt])
   @@map("feedback_process_logs")
@@ -388,29 +402,29 @@ model FeedbackProcessLog {
 // ============================
 
 model MarketItem {
-  id              String    @id @default(uuid()) @db.Uuid
-  communityId     String    @map("community_id") @db.Uuid
-  sellerId        String    @map("seller_id") @db.Uuid
-  category        String    // free/furniture/baby/books/pet/digital/other
-  title           String
-  description     String
-  images          Json      @default("[]")
-  price           Decimal?  @db.Decimal
-  tradeType       String    @map("trade_type") // sell/free/exchange
-  conditionLevel  String    @map("condition_level") // new/like_new/good/used/old
-  contactText     String?   @map("contact_text")
-  status          String    @default("pending_review") // pending_review/on_sale/sold/closed/rejected
-  aiReviewStatus  String    @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
-  aiReviewResult  Json?     @map("ai_review_result")
-  soldAt          DateTime? @map("sold_at")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  deletedAt       DateTime? @map("deleted_at")
+  id             String    @id @default(uuid()) @db.Uuid
+  communityId    String    @map("community_id") @db.Uuid
+  sellerId       String    @map("seller_id") @db.Uuid
+  category       String // free/furniture/baby/books/pet/digital/other
+  title          String
+  description    String
+  images         Json      @default("[]")
+  price          Decimal?  @db.Decimal
+  tradeType      String    @map("trade_type") // sell/free/exchange
+  conditionLevel String    @map("condition_level") // new/like_new/good/used/old
+  contactText    String?   @map("contact_text")
+  status         String    @default("pending_review") // pending_review/on_sale/sold/closed/rejected
+  aiReviewStatus String    @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
+  aiReviewResult Json?     @map("ai_review_result")
+  soldAt         DateTime? @map("sold_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
 
-  community       Community       @relation(fields: [communityId], references: [id])
-  seller          User            @relation("MarketSeller", fields: [sellerId], references: [id])
-  comments        MarketComment[]
-  reviews         MarketReview[]
+  community Community       @relation(fields: [communityId], references: [id])
+  seller    User            @relation("MarketSeller", fields: [sellerId], references: [id])
+  comments  MarketComment[]
+  reviews   MarketReview[]
 
   @@index([communityId, category, status, createdAt])
   @@index([sellerId])
@@ -418,43 +432,43 @@ model MarketItem {
 }
 
 model MarketComment {
-  id             String   @id @default(uuid()) @db.Uuid
-  itemId         String   @map("item_id") @db.Uuid
-  userId         String   @map("user_id") @db.Uuid
-  parentId       String?  @map("parent_id") @db.Uuid
+  id             String    @id @default(uuid()) @db.Uuid
+  itemId         String    @map("item_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  parentId       String?   @map("parent_id") @db.Uuid
   content        String
-  aiReviewStatus String   @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
-  status         String   @default("visible") // visible/hidden/deleted
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  aiReviewStatus String    @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
+  status         String    @default("visible") // visible/hidden/deleted
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
   deletedAt      DateTime? @map("deleted_at")
 
-  item           MarketItem     @relation(fields: [itemId], references: [id])
-  user           User           @relation("MarketCommentUser", fields: [userId], references: [id])
-  parent         MarketComment? @relation("MarketCommentReplies", fields: [parentId], references: [id])
-  replies        MarketComment[] @relation("MarketCommentReplies")
+  item    MarketItem      @relation(fields: [itemId], references: [id])
+  user    User            @relation("MarketCommentUser", fields: [userId], references: [id])
+  parent  MarketComment?  @relation("MarketCommentReplies", fields: [parentId], references: [id])
+  replies MarketComment[] @relation("MarketCommentReplies")
 
   @@index([itemId, createdAt])
   @@map("market_comments")
 }
 
 model MarketReview {
-  id             String   @id @default(uuid()) @db.Uuid
-  itemId         String   @map("item_id") @db.Uuid
-  reviewerId     String   @map("reviewer_id") @db.Uuid
-  revieweeId     String   @map("reviewee_id") @db.Uuid
+  id             String    @id @default(uuid()) @db.Uuid
+  itemId         String    @map("item_id") @db.Uuid
+  reviewerId     String    @map("reviewer_id") @db.Uuid
+  revieweeId     String    @map("reviewee_id") @db.Uuid
   rating         Int
   tags           Json?
   content        String?
-  status         String   @default("visible") // visible/hidden/deleted
-  aiReviewStatus String   @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  status         String    @default("visible") // visible/hidden/deleted
+  aiReviewStatus String    @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
   deletedAt      DateTime? @map("deleted_at")
 
-  item           MarketItem @relation(fields: [itemId], references: [id])
-  reviewer       User       @relation("MarketReviewReviewer", fields: [reviewerId], references: [id])
-  reviewee       User       @relation("MarketReviewReviewee", fields: [revieweeId], references: [id])
+  item     MarketItem @relation(fields: [itemId], references: [id])
+  reviewer User       @relation("MarketReviewReviewer", fields: [reviewerId], references: [id])
+  reviewee User       @relation("MarketReviewReviewee", fields: [revieweeId], references: [id])
 
   @@unique([itemId, reviewerId, revieweeId])
   @@index([revieweeId, createdAt])
@@ -466,37 +480,37 @@ model MarketReview {
 // ============================
 
 model Badge {
-  id          String   @id @default(uuid()) @db.Uuid
-  code        String   @unique
+  id          String    @id @default(uuid()) @db.Uuid
+  code        String    @unique
   name        String
   description String
-  iconUrl     String?  @map("icon_url")
-  ruleJson    Json     @map("rule_json")
-  status      String   @default("active") // active/inactive
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  iconUrl     String?   @map("icon_url")
+  ruleJson    Json      @map("rule_json")
+  status      String    @default("active") // active/inactive
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  userBadges  UserBadge[]
+  userBadges UserBadge[]
 
   @@map("badges")
 }
 
 model UserBadge {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
-  communityId  String   @map("community_id") @db.Uuid
-  badgeId      String   @map("badge_id") @db.Uuid
-  sourceType   String   @map("source_type") // event/market/manual
-  sourceId     String?  @map("source_id") @db.Uuid
-  awardedBy    String?  @map("awarded_by") @db.Uuid
-  awardedAt    DateTime @default(now()) @map("awarded_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  communityId String   @map("community_id") @db.Uuid
+  badgeId     String   @map("badge_id") @db.Uuid
+  sourceType  String   @map("source_type") // event/market/manual
+  sourceId    String?  @map("source_id") @db.Uuid
+  awardedBy   String?  @map("awarded_by") @db.Uuid
+  awardedAt   DateTime @default(now()) @map("awarded_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user         User      @relation(fields: [userId], references: [id])
-  community    Community @relation(fields: [communityId], references: [id])
-  badge        Badge     @relation(fields: [badgeId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
+  badge     Badge     @relation(fields: [badgeId], references: [id])
 
   @@index([userId, communityId])
   @@index([communityId, awardedAt])
@@ -504,23 +518,23 @@ model UserBadge {
 }
 
 model ContributionRecord {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
-  communityId  String   @map("community_id") @db.Uuid
-  sourceType   String   @map("source_type") // event/market/feedback/manual
-  sourceId     String   @map("source_id") @db.Uuid
-  action       String   // help_free/help_paid/public_welfare/lost_found/feedback/market/good_review/manual
-  score        Int
-  flowerCount  Int      @map("flower_count")
-  reason       String
-  occurredAt   DateTime @map("occurred_at")
-  status       String   @default("valid") // valid/pending_review/invalid
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  communityId String    @map("community_id") @db.Uuid
+  sourceType  String    @map("source_type") // event/market/feedback/manual
+  sourceId    String    @map("source_id") @db.Uuid
+  action      String // help_free/help_paid/public_welfare/lost_found/feedback/market/good_review/manual
+  score       Int
+  flowerCount Int       @map("flower_count")
+  reason      String
+  occurredAt  DateTime  @map("occurred_at")
+  status      String    @default("valid") // valid/pending_review/invalid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
-  user         User      @relation(fields: [userId], references: [id])
-  community    Community @relation(fields: [communityId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
 
   @@unique([userId, sourceType, sourceId, action])
   @@index([communityId, userId, occurredAt])
@@ -528,21 +542,21 @@ model ContributionRecord {
 }
 
 model RankingSnapshot {
-  id           String   @id @default(uuid()) @db.Uuid
-  communityId  String   @map("community_id") @db.Uuid
-  periodType   String   @map("period_type") // total/month
-  periodKey    String   @map("period_key") // total 或 YYYY-MM
-  userId       String   @map("user_id") @db.Uuid
-  rankNo       Int      @map("rank_no")
-  score        Int
-  flowerCount  Int      @map("flower_count")
-  helpCount    Int      @map("help_count")
-  badgeCount   Int      @map("badge_count")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(uuid()) @db.Uuid
+  communityId String   @map("community_id") @db.Uuid
+  periodType  String   @map("period_type") // total/month
+  periodKey   String   @map("period_key") // total 或 YYYY-MM
+  userId      String   @map("user_id") @db.Uuid
+  rankNo      Int      @map("rank_no")
+  score       Int
+  flowerCount Int      @map("flower_count")
+  helpCount   Int      @map("help_count")
+  badgeCount  Int      @map("badge_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  community    Community @relation("RankingSnapshotCommunity", fields: [communityId], references: [id])
-  user         User      @relation("RankingSnapshotUser", fields: [userId], references: [id])
+  community Community @relation("RankingSnapshotCommunity", fields: [communityId], references: [id])
+  user      User      @relation("RankingSnapshotUser", fields: [userId], references: [id])
 
   @@index([communityId, periodType, periodKey])
 }
@@ -552,47 +566,47 @@ model RankingSnapshot {
 // ============================
 
 model CommitteeMember {
-  id              String   @id @default(uuid()) @db.Uuid
-  communityId     String   @map("community_id") @db.Uuid
-  name            String
-  position        String
-  avatarUrl       String?  @map("avatar_url")
-  responsibility  String?
-  termStart       DateTime? @map("term_start") @db.Date
-  termEnd         DateTime? @map("term_end") @db.Date
-  claimedUserId   String?  @map("claimed_user_id") @db.Uuid
-  claimStatus     String   @default("unclaimed") @map("claim_status") // unclaimed/pending/claimed/rejected
-  status          String   @default("active") // active/inactive
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-  deletedAt       DateTime? @map("deleted_at")
+  id             String    @id @default(uuid()) @db.Uuid
+  communityId    String    @map("community_id") @db.Uuid
+  name           String
+  position       String
+  avatarUrl      String?   @map("avatar_url")
+  responsibility String?
+  termStart      DateTime? @map("term_start") @db.Date
+  termEnd        DateTime? @map("term_end") @db.Date
+  claimedUserId  String?   @map("claimed_user_id") @db.Uuid
+  claimStatus    String    @default("unclaimed") @map("claim_status") // unclaimed/pending/claimed/rejected
+  status         String    @default("active") // active/inactive
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
 
-  community       Community              @relation(fields: [communityId], references: [id])
-  claims          CommitteeMemberClaim[]
+  community Community              @relation(fields: [communityId], references: [id])
+  claims    CommitteeMemberClaim[]
 
   @@index([communityId])
   @@map("committee_members")
 }
 
 model CommitteeMemberClaim {
-  id                 String   @id @default(uuid()) @db.Uuid
-  committeeMemberId  String   @map("committee_member_id") @db.Uuid
-  userId             String   @map("user_id") @db.Uuid
-  communityId        String   @map("community_id") @db.Uuid
-  statement          String
-  materialUrls       Json     @map("material_urls")
-  aiReviewResult     Json?    @map("ai_review_result")
-  status             String   @default("pending") // pending/approved/rejected/manual_review
-  rejectReason       String?  @map("reject_reason")
-  reviewedBy         String?  @map("reviewed_by") @db.Uuid
-  reviewedAt         DateTime? @map("reviewed_at")
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
-  deletedAt          DateTime? @map("deleted_at")
+  id                String    @id @default(uuid()) @db.Uuid
+  committeeMemberId String    @map("committee_member_id") @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  communityId       String    @map("community_id") @db.Uuid
+  statement         String
+  materialUrls      Json      @map("material_urls")
+  aiReviewResult    Json?     @map("ai_review_result")
+  status            String    @default("pending") // pending/approved/rejected/manual_review
+  rejectReason      String?   @map("reject_reason")
+  reviewedBy        String?   @map("reviewed_by") @db.Uuid
+  reviewedAt        DateTime? @map("reviewed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
 
-  committeeMember    CommitteeMember @relation(fields: [committeeMemberId], references: [id])
-  user               User            @relation("CommitteeClaimUser", fields: [userId], references: [id])
-  community          Community       @relation("CommitteeClaimCommunity", fields: [communityId], references: [id])
+  committeeMember CommitteeMember @relation(fields: [committeeMemberId], references: [id])
+  user            User            @relation("CommitteeClaimUser", fields: [userId], references: [id])
+  community       Community       @relation("CommitteeClaimCommunity", fields: [communityId], references: [id])
 
   @@unique([committeeMemberId, userId])
   @@index([communityId])
@@ -600,60 +614,60 @@ model CommitteeMemberClaim {
 }
 
 model CommitteeAnnouncement {
-  id           String    @id @default(uuid()) @db.Uuid
-  communityId  String    @map("community_id") @db.Uuid
-  title        String
-  content      String
-  images       Json      @default("[]")
-  publisherId  String    @map("publisher_id") @db.Uuid
-  isPinned     Boolean   @default(false) @map("is_pinned")
-  status       String    @default("draft") // draft/published/hidden
-  publishedAt  DateTime? @map("published_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
+  id          String    @id @default(uuid()) @db.Uuid
+  communityId String    @map("community_id") @db.Uuid
+  title       String
+  content     String
+  images      Json      @default("[]")
+  publisherId String    @map("publisher_id") @db.Uuid
+  isPinned    Boolean   @default(false) @map("is_pinned")
+  status      String    @default("draft") // draft/published/hidden
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
-  community    Community @relation(fields: [communityId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
 
   @@index([communityId])
   @@map("committee_announcements")
 }
 
 model Vote {
-  id                   String   @id @default(uuid()) @db.Uuid
-  communityId          String   @map("community_id") @db.Uuid
-  title                String
-  description          String
-  voteType             String   @map("vote_type") // single/multiple
-  maxChoices           Int?     @map("max_choices")
-  onlyVerified         Boolean  @default(true) @map("only_verified")
-  onlyVerifiedLocked   Boolean  @default(true) @map("only_verified_locked")
-  resultVisibility     String   @map("result_visibility") @default("always") // always/after_vote/after_end/admin_only
-  isAnonymous          Boolean  @default(false) @map("is_anonymous")
-  startAt              DateTime @map("start_at")
-  endAt                DateTime @map("end_at")
-  status               String   @default("draft") // draft/published/closed
-  createdBy            String   @map("created_by") @db.Uuid
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
-  deletedAt            DateTime? @map("deleted_at")
+  id                 String    @id @default(uuid()) @db.Uuid
+  communityId        String    @map("community_id") @db.Uuid
+  title              String
+  description        String
+  voteType           String    @map("vote_type") // single/multiple
+  maxChoices         Int?      @map("max_choices")
+  onlyVerified       Boolean   @default(true) @map("only_verified")
+  onlyVerifiedLocked Boolean   @default(true) @map("only_verified_locked")
+  resultVisibility   String    @default("always") @map("result_visibility") // always/after_vote/after_end/admin_only
+  isAnonymous        Boolean   @default(false) @map("is_anonymous")
+  startAt            DateTime  @map("start_at")
+  endAt              DateTime  @map("end_at")
+  status             String    @default("draft") // draft/published/closed
+  createdBy          String    @map("created_by") @db.Uuid
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
 
-  community            Community    @relation(fields: [communityId], references: [id])
-  options              VoteOption[]
-  records              VoteRecord[]
+  community Community    @relation(fields: [communityId], references: [id])
+  options   VoteOption[]
+  records   VoteRecord[]
 
   @@index([communityId])
   @@map("votes")
 }
 
 model VoteOption {
-  id         String   @id @default(uuid()) @db.Uuid
-  voteId     String   @map("vote_id") @db.Uuid
-  content    String
-  sortOrder  Int      @default(0) @map("sort_order")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id        String   @id @default(uuid()) @db.Uuid
+  voteId    String   @map("vote_id") @db.Uuid
+  content   String
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  vote       Vote     @relation(fields: [voteId], references: [id], onDelete: Cascade)
+  vote Vote @relation(fields: [voteId], references: [id], onDelete: Cascade)
 
   @@map("vote_options")
 }
@@ -669,9 +683,9 @@ model VoteRecord {
   votedAt           DateTime @default(now()) @map("voted_at")
   createdAt         DateTime @default(now()) @map("created_at")
 
-  vote              Vote     @relation(fields: [voteId], references: [id])
-  user              User     @relation("VoteRecordUser", fields: [userId], references: [id])
-  community         Community @relation("VoteRecordCommunity", fields: [communityId], references: [id])
+  vote      Vote      @relation(fields: [voteId], references: [id])
+  user      User      @relation("VoteRecordUser", fields: [userId], references: [id])
+  community Community @relation("VoteRecordCommunity", fields: [communityId], references: [id])
 
   @@unique([voteId, userId])
   @@index([voteId])
@@ -684,52 +698,52 @@ model VoteRecord {
 // ============================
 
 model Banner {
-  id           String    @id @default(uuid()) @db.Uuid
-  communityId  String?   @map("community_id") @db.Uuid
-  title        String
-  subtitle     String?
-  imageUrl     String    @map("image_url")
-  linkType     String    @map("link_type") @default("none") // event/market/announcement/service_provider/url/none
-  linkId       String?   @map("link_id") @db.Uuid
-  linkUrl      String?   @map("link_url")
-  position     String    @default("home_top") // home_top/event_list/market_list
-  sortOrder    Int       @default(0) @map("sort_order")
-  status       String    @default("draft") // draft/published/offline
-  startAt      DateTime? @map("start_at")
-  endAt        DateTime? @map("end_at")
-  reviewedBy   String?   @map("reviewed_by") @db.Uuid
-  reviewedAt   DateTime? @map("reviewed_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
+  id          String    @id @default(uuid()) @db.Uuid
+  communityId String?   @map("community_id") @db.Uuid
+  title       String
+  subtitle    String?
+  imageUrl    String    @map("image_url")
+  linkType    String    @default("none") @map("link_type") // event/market/announcement/service_provider/url/none
+  linkId      String?   @map("link_id") @db.Uuid
+  linkUrl     String?   @map("link_url")
+  position    String    @default("home_top") // home_top/event_list/market_list
+  sortOrder   Int       @default(0) @map("sort_order")
+  status      String    @default("draft") // draft/published/offline
+  startAt     DateTime? @map("start_at")
+  endAt       DateTime? @map("end_at")
+  reviewedBy  String?   @map("reviewed_by") @db.Uuid
+  reviewedAt  DateTime? @map("reviewed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
-  community    Community? @relation(fields: [communityId], references: [id])
+  community Community? @relation(fields: [communityId], references: [id])
 
   @@index([communityId])
   @@map("banners")
 }
 
 model ServiceProvider {
-  id                   String   @id @default(uuid()) @db.Uuid
-  communityId          String   @map("community_id") @db.Uuid
+  id                   String    @id @default(uuid()) @db.Uuid
+  communityId          String    @map("community_id") @db.Uuid
   name                 String
-  category             String   // repair/cleaning/lock/home_appliance/moving/pet/other
-  logoUrl              String?  @map("logo_url")
-  coverUrl             String?  @map("cover_url")
+  category             String // repair/cleaning/lock/home_appliance/moving/pet/other
+  logoUrl              String?   @map("logo_url")
+  coverUrl             String?   @map("cover_url")
   description          String
-  contactText          String   @map("contact_text")
-  serviceArea          String?  @map("service_area")
-  recommendationSource String   @map("recommendation_source") @default("platform") // platform/committee/community
-  verifyStatus         String   @map("verify_status") @default("unverified") // unverified/verified/rejected
-  status               String   @default("pending_review") // pending_review/published/offline/rejected
-  sortOrder            Int      @default(0) @map("sort_order")
-  reviewedBy           String?  @map("reviewed_by") @db.Uuid
+  contactText          String    @map("contact_text")
+  serviceArea          String?   @map("service_area")
+  recommendationSource String    @default("platform") @map("recommendation_source") // platform/committee/community
+  verifyStatus         String    @default("unverified") @map("verify_status") // unverified/verified/rejected
+  status               String    @default("pending_review") // pending_review/published/offline/rejected
+  sortOrder            Int       @default(0) @map("sort_order")
+  reviewedBy           String?   @map("reviewed_by") @db.Uuid
   reviewedAt           DateTime? @map("reviewed_at")
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
   deletedAt            DateTime? @map("deleted_at")
 
-  community            Community @relation(fields: [communityId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
 
   @@index([communityId, category, status, sortOrder])
   @@map("service_providers")
@@ -740,34 +754,34 @@ model ServiceProvider {
 // ============================
 
 model AiReviewLog {
-  id            String   @id @default(uuid()) @db.Uuid
-  targetType    String   @map("target_type") // event/comment/market_item/verification/committee_claim/banner/service_provider
-  targetId      String   @map("target_id") @db.Uuid
-  inputSummary  Json     @map("input_summary")
-  result        String   // pass/reject/manual_review
-  labels        Json?
-  score         Decimal? @db.Decimal
-  rawResult     Json?    @map("raw_result")
-  createdAt     DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid()) @db.Uuid
+  targetType   String   @map("target_type") // event/comment/market_item/verification/committee_claim/banner/service_provider
+  targetId     String   @map("target_id") @db.Uuid
+  inputSummary Json     @map("input_summary")
+  result       String // pass/reject/manual_review
+  labels       Json?
+  score        Decimal? @db.Decimal
+  rawResult    Json?    @map("raw_result")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   @@index([targetType, targetId])
   @@map("ai_review_logs")
 }
 
 model AdminUser {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String?  @unique @map("user_id") @db.Uuid
-  username     String   @unique
-  passwordHash String?  @map("password_hash")
-  role         String   // platform_admin/committee_admin
-  communityId  String?  @map("community_id") @db.Uuid
-  status       String   @default("active") // active/disabled
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String?   @unique @map("user_id") @db.Uuid
+  username     String    @unique
+  passwordHash String?   @map("password_hash")
+  role         String // platform_admin/committee_admin
+  communityId  String?   @map("community_id") @db.Uuid
+  status       String    @default("active") // active/disabled
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
 
-  user         User?      @relation(fields: [userId], references: [id])
-  community    Community? @relation(fields: [communityId], references: [id])
+  user      User?      @relation(fields: [userId], references: [id])
+  community Community? @relation(fields: [communityId], references: [id])
 
   @@map("admin_users")
 }
@@ -783,7 +797,7 @@ model AuditLog {
   ipHash       String?  @map("ip_hash")
   createdAt    DateTime @default(now()) @map("created_at")
 
-  operator     User     @relation(fields: [operatorId], references: [id])
+  operator User @relation(fields: [operatorId], references: [id])
 
   @@index([operatorId, createdAt])
   @@index([targetType, targetId])
@@ -795,20 +809,20 @@ model AuditLog {
 // ============================
 
 model ShareLog {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String?  @map("user_id") @db.Uuid
-  communityId  String?  @map("community_id") @db.Uuid
-  targetType   String   @map("target_type") // home/event/market/ranking/badge/announcement/vote/service_provider
-  targetId     String?  @map("target_id") @db.Uuid
-  channel      String   // friend/timeline/poster/copy_link/open_from_share
-  shareTitle   String?  @map("share_title")
-  sharePath    String?  @map("share_path")
-  imageUrl     String?  @map("image_url")
-  shareToken   String?  @unique @map("share_token")
-  scene        String?
-  createdAt    DateTime @default(now()) @map("created_at")
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  communityId String?  @map("community_id") @db.Uuid
+  targetType  String   @map("target_type") // home/event/market/ranking/badge/announcement/vote/service_provider
+  targetId    String?  @map("target_id") @db.Uuid
+  channel     String // friend/timeline/poster/copy_link/open_from_share
+  shareTitle  String?  @map("share_title")
+  sharePath   String?  @map("share_path")
+  imageUrl    String?  @map("image_url")
+  shareToken  String?  @unique @map("share_token")
+  scene       String?
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  community    Community? @relation("ShareLogCommunity", fields: [communityId], references: [id])
+  community Community? @relation("ShareLogCommunity", fields: [communityId], references: [id])
 
   @@index([communityId, targetType, targetId, createdAt])
   @@index([userId, createdAt])
@@ -816,13 +830,13 @@ model ShareLog {
 }
 
 model ShareTemplate {
-  id             String   @id @default(uuid()) @db.Uuid
-  targetType     String   @map("target_type") @unique // home/event/market/ranking/badge/announcement/vote/service_provider
-  titleTemplate  String   @map("title_template")
-  defaultImageUrl String? @map("default_image_url")
-  status         String   @default("active") // active/inactive
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id              String   @id @default(uuid()) @db.Uuid
+  targetType      String   @unique @map("target_type") // home/event/market/ranking/badge/announcement/vote/service_provider
+  titleTemplate   String   @map("title_template")
+  defaultImageUrl String?  @map("default_image_url")
+  status          String   @default("active") // active/inactive
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("share_templates")
 }
@@ -838,4 +852,135 @@ model SystemSetting {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("system_settings")
+}
+
+// ============================
+// 议事榜
+// ============================
+
+model Topic {
+  id                 String    @id @default(uuid()) @db.Uuid
+  communityId        String    @map("community_id") @db.Uuid
+  title              String
+  description        String?
+  status             String    @default("open") // open / closed
+  likeCount          Int       @default(0) @map("like_count")
+  dislikeCount       Int       @default(0) @map("dislike_count")
+  closedLikeCount    Int       @default(0) @map("closed_like_count")
+  closedDislikeCount Int       @default(0) @map("closed_dislike_count")
+  ratingSum          Int       @default(0) @map("rating_sum")
+  ratingCount        Int       @default(0) @map("rating_count")
+  eventCount         Int       @default(0) @map("event_count")
+  commentCount       Int       @default(0) @map("comment_count")
+  closedSummary      String?   @map("closed_summary")
+  closedAt           DateTime? @map("closed_at")
+  closedBy           String?   @map("closed_by") @db.Uuid
+  createdBy          String    @map("created_by") @db.Uuid
+  aiReviewStatus     String    @default("pending") @map("ai_review_status")
+  aiReviewResult     Json?     @map("ai_review_result")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  community                Community              @relation(fields: [communityId], references: [id])
+  creator                  User                   @relation("TopicCreator", fields: [createdBy], references: [id])
+  closer                   User?                  @relation("TopicCloser", fields: [closedBy], references: [id])
+  events                   Event[]
+  comments                 TopicComment[]
+  likes                    TopicLike[]
+  ratings                  TopicRating[]
+  mergeSuggestionsAsTarget TopicMergeSuggestion[] @relation("MergeTarget")
+  mergeSuggestionsAsSource TopicMergeSuggestion[] @relation("MergeSource")
+
+  @@index([communityId, status, likeCount])
+  @@map("topics")
+}
+
+model TopicComment {
+  id             String   @id @default(uuid()) @db.Uuid
+  topicId        String   @map("topic_id") @db.Uuid
+  eventId        String?  @map("event_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  parentId       String?  @map("parent_id") @db.Uuid
+  content        String
+  images         Json     @default("[]")
+  likeCount      Int      @default(0) @map("like_count")
+  dislikeCount   Int      @default(0) @map("dislike_count")
+  replyCount     Int      @default(0) @map("reply_count")
+  aiReviewStatus String   @default("pending") @map("ai_review_status")
+  status         String   @default("visible")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  topic   Topic              @relation(fields: [topicId], references: [id])
+  event   Event?             @relation(fields: [eventId], references: [id])
+  user    User               @relation(fields: [userId], references: [id])
+  parent  TopicComment?      @relation("TopicCommentReplies", fields: [parentId], references: [id])
+  replies TopicComment[]     @relation("TopicCommentReplies")
+  likes   TopicCommentLike[]
+
+  @@index([topicId, eventId, likeCount])
+  @@map("topic_comments")
+}
+
+model TopicLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  topicId   String   @map("topic_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  type      String // like / dislike
+  scope     String   @default("open") // open / closed
+  createdAt DateTime @default(now()) @map("created_at")
+
+  topic Topic @relation(fields: [topicId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([topicId, userId, scope])
+  @@map("topic_likes")
+}
+
+model TopicRating {
+  id        String   @id @default(uuid()) @db.Uuid
+  topicId   String   @map("topic_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  rating    Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  topic Topic @relation(fields: [topicId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([topicId, userId])
+  @@map("topic_ratings")
+}
+
+model TopicCommentLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  commentId String   @map("comment_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  type      String // like / dislike
+  createdAt DateTime @default(now()) @map("created_at")
+
+  comment TopicComment @relation(fields: [commentId], references: [id])
+  user    User         @relation(fields: [userId], references: [id])
+
+  @@unique([commentId, userId])
+  @@map("topic_comment_likes")
+}
+
+model TopicMergeSuggestion {
+  id            String    @id @default(uuid()) @db.Uuid
+  communityId   String    @map("community_id") @db.Uuid
+  sourceTopicId String    @map("source_topic_id") @db.Uuid
+  targetTopicId String    @map("target_topic_id") @db.Uuid
+  similarity    Float
+  status        String    @default("pending") // pending / approved / rejected
+  createdAt     DateTime  @default(now()) @map("created_at")
+  resolvedAt    DateTime? @map("resolved_at")
+  resolvedBy    String?   @map("resolved_by") @db.Uuid
+
+  community   Community @relation(fields: [communityId], references: [id])
+  sourceTopic Topic     @relation("MergeSource", fields: [sourceTopicId], references: [id])
+  targetTopic Topic     @relation("MergeTarget", fields: [targetTopicId], references: [id])
+  resolver    User?     @relation("TopicMergeResolver", fields: [resolvedBy], references: [id])
+
+  @@index([communityId, status])
+  @@map("topic_merge_suggestions")
 }
