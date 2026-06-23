@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Form, Input, InputNumber, Button, message, Spin, Space } from 'antd';
+import { Card, Form, Input, InputNumber, Switch, Button, message, Spin, Space } from 'antd';
 import AuthGuard from '@/components/AuthGuard';
 import AdminLayout from '@/components/Layout';
 import api from '@/lib/api';
@@ -16,13 +16,30 @@ export default function SettingsPage() {
     queryFn: () => api.get<null, ApiResponse<Record<string, string>>>('/admin/settings'),
   });
 
+  const { data: aiData, isLoading: aiLoading } = useQuery({
+    queryKey: ['admin', 'settings', 'ai'],
+    queryFn: () => api.get<null, ApiResponse<any>>('/admin/settings/ai'),
+  });
+
   const updateMutation = useMutation({
     mutationFn: (values: any) => api.patch('/admin/settings', values),
-    onSuccess: () => { message.success('设置已保存'); queryClient.invalidateQueries({ queryKey: ['admin', 'settings'] }); },
+    onSuccess: () => {
+      message.success('设置已保存');
+      queryClient.invalidateQueries({ queryKey: ['admin', 'settings'] });
+    },
     onError: () => message.error('保存失败'),
   });
 
-  // Populate form when data loads
+  const updateAiMutation = useMutation({
+    mutationFn: (values: any) => api.patch('/admin/settings/ai', values),
+    onSuccess: () => {
+      message.success('AI 设置已保存');
+      queryClient.invalidateQueries({ queryKey: ['admin', 'settings', 'ai'] });
+    },
+    onError: () => message.error('保存失败'),
+  });
+
+  const aiSettings = aiData?.data;
   const settings = data?.data;
   if (settings && !form.isFieldsTouched()) {
     form.setFieldsValue({
@@ -41,9 +58,16 @@ export default function SettingsPage() {
       <AdminLayout>
         <Card title="系统设置">
           {isLoading ? (
-            <div style={{ textAlign: 'center', padding: 48 }}><Spin size="large" /></div>
+            <div style={{ textAlign: 'center', padding: 48 }}>
+              <Spin size="large" />
+            </div>
           ) : (
-            <Form form={form} layout="vertical" onFinish={(values) => updateMutation.mutate(values)} style={{ maxWidth: 600 }}>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={(values) => updateMutation.mutate(values)}
+              style={{ maxWidth: 600 }}
+            >
               <Form.Item name="appName" label="应用名称">
                 <Input placeholder="小区帮榜棒" />
               </Form.Item>
@@ -71,6 +95,45 @@ export default function SettingsPage() {
                 </Button>
               </Form.Item>
             </Form>
+          )}
+        </Card>
+
+        <Card title="AI 功能开关" style={{ marginTop: 16 }}>
+          {aiLoading || !aiSettings ? (
+            <div style={{ textAlign: 'center', padding: 48 }}>
+              <Spin />
+            </div>
+          ) : (
+            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+              <Space>
+                <Switch
+                  checked={!!aiSettings.aiTopicSuggest}
+                  onChange={(v) => updateAiMutation.mutate({ aiTopicSuggest: v })}
+                />
+                <span>议题推荐（创建事件时根据标题推荐相关议题）</span>
+              </Space>
+              <Space>
+                <Switch
+                  checked={!!aiSettings.aiTopicMerge}
+                  onChange={(v) => updateAiMutation.mutate({ aiTopicMerge: v })}
+                />
+                <span>议题合并建议（自动扫描相似议题）</span>
+              </Space>
+              <Space>
+                <Switch
+                  checked={!!aiSettings.aiEventComment}
+                  onChange={(v) => updateAiMutation.mutate({ aiEventComment: v })}
+                />
+                <span>AI 事件点评（事件下展示 AI 评论）</span>
+              </Space>
+              <Space>
+                <Switch
+                  checked={!!aiSettings.aiContentReview}
+                  onChange={(v) => updateAiMutation.mutate({ aiContentReview: v })}
+                />
+                <span>AI 内容审核（自动审核违规内容）</span>
+              </Space>
+            </Space>
           )}
         </Card>
       </AdminLayout>
