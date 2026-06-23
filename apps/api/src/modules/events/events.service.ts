@@ -21,7 +21,7 @@ export class EventsService {
 
   async list(
     communityId: string,
-    query?: { type?: string; status?: string; keyword?: string },
+    query?: { type?: string; status?: string; keyword?: string; excludeTypes?: string[] },
     pagination?: { skip: number; take: number },
   ) {
     const where: any = {
@@ -31,6 +31,8 @@ export class EventsService {
 
     if (query?.type) {
       where.type = query.type;
+    } else if (query?.excludeTypes && query.excludeTypes.length > 0) {
+      where.type = { notIn: query.excludeTypes };
     }
     if (query?.status) {
       where.status = query.status;
@@ -67,13 +69,18 @@ export class EventsService {
     return items;
   }
 
-  async count(communityId: string, query?: { type?: string; status?: string; keyword?: string }) {
+  async count(
+    communityId: string,
+    query?: { type?: string; status?: string; keyword?: string; excludeTypes?: string[] },
+  ) {
     const where: any = {
       communityId,
       deletedAt: null,
     };
 
     if (query?.type) where.type = query.type;
+    else if (query?.excludeTypes && query.excludeTypes.length > 0)
+      where.type = { notIn: query.excludeTypes };
     if (query?.status) where.status = query.status;
     if (query?.keyword) {
       where.OR = [

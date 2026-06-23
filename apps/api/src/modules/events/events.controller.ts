@@ -32,13 +32,15 @@ export class EventsController {
     @Query('type') type?: string,
     @Query('status') status?: string,
     @Query('keyword') keyword?: string,
+    @Query('excludeTypes') excludeTypesRaw?: string,
     @Query('page') page?: number,
     @Query('pageSize') pageSize?: number,
   ) {
     const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
+    const excludeTypes = excludeTypesRaw ? excludeTypesRaw.split(',').filter(Boolean) : undefined;
     const [items, total] = await Promise.all([
-      this.eventsService.list(communityId, { type, status, keyword }, { skip, take }),
-      this.eventsService.count(communityId, { type, status, keyword }),
+      this.eventsService.list(communityId, { type, status, keyword, excludeTypes }, { skip, take }),
+      this.eventsService.count(communityId, { type, status, keyword, excludeTypes }),
     ]);
     return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
   }

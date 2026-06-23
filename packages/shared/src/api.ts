@@ -209,6 +209,7 @@ export interface EventListQuery {
   type?: EventType;
   status?: EventStatus;
   keyword?: string;
+  excludeTypes?: string; // 逗号分隔的 EventType 列表
   page?: number;
   pageSize?: number;
 }
