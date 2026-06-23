@@ -11,3 +11,4 @@ export { voteService } from './vote';
 export { committeeService } from './committee';
 export { verificationService } from './verification';
 export { reportService } from './report';
+export { topicService } from './topic';

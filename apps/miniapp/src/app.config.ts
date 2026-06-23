@@ -1,8 +1,11 @@
 export default defineAppConfig({
   pages: [
     'pages/home/index',
+    'pages/plaza/index',
     'pages/events/index',
     'pages/market/index',
+    'pages/topics/index',
+    'pages/topic-detail/index',
     'pages/ranking/index',
     'pages/mine/index',
     'pages/login/index',
@@ -40,16 +43,16 @@ export default defineAppConfig({
         selectedIconPath: 'assets/tab-home-active.png',
       },
       {
-        pagePath: 'pages/events/index',
-        text: '事件',
-        iconPath: 'assets/tab-events.png',
-        selectedIconPath: 'assets/tab-events-active.png',
+        pagePath: 'pages/plaza/index',
+        text: '小区广场',
+        iconPath: 'assets/tab-plaza.png',
+        selectedIconPath: 'assets/tab-plaza-active.png',
       },
       {
-        pagePath: 'pages/market/index',
-        text: '闲置',
-        iconPath: 'assets/tab-market.png',
-        selectedIconPath: 'assets/tab-market-active.png',
+        pagePath: 'pages/topics/index',
+        text: '议事榜',
+        iconPath: 'assets/tab-topics.png',
+        selectedIconPath: 'assets/tab-topics-active.png',
       },
       {
         pagePath: 'pages/ranking/index',
