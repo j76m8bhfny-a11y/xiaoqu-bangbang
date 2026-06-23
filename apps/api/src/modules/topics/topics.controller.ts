@@ -30,15 +30,16 @@ export class TopicsController {
     @Query('pageSize') pageSize?: number,
   ) {
     const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
-    const { items, total } = await this.topicsService.list(communityId, { status, keyword }, { skip, take });
+    const { items, total } = await this.topicsService.list(
+      communityId,
+      { status, keyword },
+      { skip, take },
+    );
     return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
   }
 
   @Post('comments/:commentId/like')
-  async likeComment(
-    @CurrentUser('userId') userId: string,
-    @Param('commentId') commentId: string,
-  ) {
+  async likeComment(@CurrentUser('userId') userId: string, @Param('commentId') commentId: string) {
     const c = await this.topicsService.likeComment(commentId, userId, 'like');
     return { code: 0, message: 'ok', data: c };
   }
@@ -72,10 +73,7 @@ export class TopicsController {
   }
 
   @Get(':id')
-  async findOne(
-    @Param('id') id: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
+  async findOne(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
     const topic = await this.topicsService.findById(id, communityId);
     return { code: 0, message: 'ok', data: topic };
   }

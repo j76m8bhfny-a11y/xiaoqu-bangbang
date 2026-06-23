@@ -1447,6 +1447,10 @@ export class AdminService {
           commentCount: { increment: sourceComments },
         },
       }),
+      // 删除引用源议题的合并建议，避免 FK 阻塞 topic.delete
+      this.prisma.topicMergeSuggestion.deleteMany({
+        where: { OR: [{ sourceTopicId }, { targetTopicId: sourceTopicId }] },
+      }),
       this.prisma.topic.delete({ where: { id: sourceTopicId } }),
     ]);
     await this.logAudit(adminId, 'merge_topics', 'topic', sourceTopicId, { targetTopicId });
@@ -1492,6 +1496,58 @@ export class AdminService {
     }
     await this.logAudit(adminId, 'update_ai_settings', 'system_setting', null, { dto });
     return this.getAiSettings();
+  }
+
+  // === Topic Merge Suggestions ===
+  async listMergeSuggestions(communityId: string, status: string = 'pending') {
+    return this.prisma.topicMergeSuggestion.findMany({
+      where: { communityId, status },
+      include: {
+        sourceTopic: { select: { id: true, title: true, eventCount: true } },
+        targetTopic: { select: { id: true, title: true, eventCount: true } },
+      },
+      orderBy: { similarity: 'desc' },
+    });
+  }
+
+  async approveMergeSuggestion(adminId: string, id: string, communityId: string) {
+    const suggestion = await this.prisma.topicMergeSuggestion.findUnique({ where: { id } });
+    if (!suggestion || suggestion.communityId !== communityId) {
+      throw new NotFoundException('合并建议不存在');
+    }
+    if (suggestion.status !== 'pending') {
+      throw new ForbiddenException('该建议已处理');
+    }
+    // 记录返回值（合并后建议本身会被 mergeTopics 清理）
+    const snapshot = {
+      id: suggestion.id,
+      sourceTopicId: suggestion.sourceTopicId,
+      targetTopicId: suggestion.targetTopicId,
+      similarity: suggestion.similarity,
+      status: 'approved' as const,
+    };
+    // 复用 mergeTopics 业务（source → target），同时删除关联建议
+    await this.mergeTopics(
+      adminId,
+      suggestion.sourceTopicId,
+      suggestion.targetTopicId,
+      communityId,
+    );
+    await this.logAudit(adminId, 'approve_merge_suggestion', 'topic_merge_suggestion', id);
+    return snapshot;
+  }
+
+  async rejectMergeSuggestion(adminId: string, id: string, communityId: string) {
+    const suggestion = await this.prisma.topicMergeSuggestion.findUnique({ where: { id } });
+    if (!suggestion || suggestion.communityId !== communityId) {
+      throw new NotFoundException('合并建议不存在');
+    }
+    const updated = await this.prisma.topicMergeSuggestion.update({
+      where: { id },
+      data: { status: 'rejected', resolvedAt: new Date(), resolvedBy: adminId },
+    });
+    await this.logAudit(adminId, 'reject_merge_suggestion', 'topic_merge_suggestion', id);
+    return updated;
   }
 
   // === Helpers ===

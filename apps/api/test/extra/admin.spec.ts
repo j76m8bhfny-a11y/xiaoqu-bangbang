@@ -721,4 +721,76 @@ describe('Feature: 管理后台（全量）', () => {
       expect(res.body.data.aiComment).toBeNull();
     });
   });
+
+  // ===== 议题合并建议 =====
+  describe('【管理】议题合并建议', () => {
+    let suggA: string;
+    let suggB: string;
+
+    beforeAll(async () => {
+      // 创建两个高度相似的议题（共享同一组高频字符），让 Jaccard 命中 0.8~0.95
+      const t1 = await prisma.topic.create({
+        data: {
+          communityId,
+          title: '小区门口违章停车治理',
+          description: '希望物业加强对门口违章停车的管理',
+          createdBy: userId,
+          status: 'open',
+        },
+      });
+      const t2 = await prisma.topic.create({
+        data: {
+          communityId,
+          title: '小区门口违章停车整顿',
+          description: '希望物业加强对门口违章停车的管理力度',
+          createdBy: userId,
+          status: 'open',
+        },
+      });
+      suggA = t1.id;
+      suggB = t2.id;
+    });
+
+    it('POST /admin/topics/merge-suggestions/scan 应扫描并创建建议', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/admin/topics/merge-suggestions/scan')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(201);
+      expect(Array.isArray(res.body.data.created)).toBe(true);
+    });
+
+    it('GET /admin/topics/merge-suggestions 应列出 pending 建议', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/admin/topics/merge-suggestions?status=pending')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.data.items)).toBe(true);
+    });
+
+    it('POST /admin/topics/merge-suggestions/:id/reject 应标记为 rejected', async () => {
+      // 手动创建一条建议确保可控
+      const s = await prisma.topicMergeSuggestion.create({
+        data: { communityId, sourceTopicId: suggA, targetTopicId: suggB, similarity: 0.85 },
+      });
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/topics/merge-suggestions/${s.id}/reject`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(201);
+      expect(res.body.data.status).toBe('rejected');
+    });
+
+    it('POST /admin/topics/merge-suggestions/:id/approve 应合并并标记为 approved', async () => {
+      const s = await prisma.topicMergeSuggestion.create({
+        data: { communityId, sourceTopicId: suggA, targetTopicId: suggB, similarity: 0.9 },
+      });
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/topics/merge-suggestions/${s.id}/approve`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(201);
+      expect(res.body.data.status).toBe('approved');
+      // 源议题应被删除
+      const src = await prisma.topic.findUnique({ where: { id: suggA } });
+      expect(src).toBeNull();
+    });
+  });
 });

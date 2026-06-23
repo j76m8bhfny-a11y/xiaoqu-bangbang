@@ -11,6 +11,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
+import { TopicsService } from '../topics/topics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
 import { AdminGuard } from './guards/admin.guard';
@@ -28,6 +29,7 @@ export class AdminController {
   constructor(
     @Inject(AdminService) private adminService: AdminService,
     @Inject(JwtService) private jwtService: JwtService,
+    @Inject(TopicsService) private topicsService: TopicsService,
   ) {}
 
   @Post('auth/login')
@@ -811,7 +813,42 @@ export class AdminController {
   }
 
   // === Topics 议事管理 ===
-  // 注意：merge 必须在 :id 之前，避免被参数路由捕获
+  // 注意：merge / merge-suggestions 必须在 :id 之前，避免被参数路由捕获
+  @Get('topics/merge-suggestions')
+  async listTopicMergeSuggestions(
+    @CurrentCommunityId() communityId: string,
+    @Query('status') status?: string,
+  ) {
+    const data = await this.adminService.listMergeSuggestions(communityId, status);
+    return { code: 0, message: 'ok', data: { items: data } };
+  }
+
+  @Post('topics/merge-suggestions/scan')
+  async scanTopicMergeSuggestions(@CurrentCommunityId() communityId: string) {
+    const created = await this.topicsService.scanMergeSuggestions(communityId);
+    return { code: 0, message: 'ok', data: { created } };
+  }
+
+  @Post('topics/merge-suggestions/:id/approve')
+  async approveTopicMergeSuggestion(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.approveMergeSuggestion(userId, id, communityId);
+    return { code: 0, message: 'ok', data };
+  }
+
+  @Post('topics/merge-suggestions/:id/reject')
+  async rejectTopicMergeSuggestion(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.rejectMergeSuggestion(userId, id, communityId);
+    return { code: 0, message: 'ok', data };
+  }
+
   @Post('topics/merge')
   async mergeTopics(
     @CurrentUser('userId') userId: string,

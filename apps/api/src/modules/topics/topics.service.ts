@@ -111,7 +111,13 @@ export class TopicsService {
 
   // ===== 点赞/点踩/评分 =====
 
-  async like(topicId: string, userId: string, communityId: string, type: 'like' | 'dislike', scope: 'open' | 'closed') {
+  async like(
+    topicId: string,
+    userId: string,
+    communityId: string,
+    type: 'like' | 'dislike',
+    scope: 'open' | 'closed',
+  ) {
     const topic = await this.prisma.topic.findUnique({ where: { id: topicId } });
     if (!topic || topic.communityId !== communityId) throw new NotFoundException('议题不存在');
 
@@ -197,9 +203,10 @@ export class TopicsService {
     const where: any = { topicId, parentId: null, status: 'visible' };
     if (options.eventId !== undefined) where.eventId = options.eventId;
 
-    const orderBy = options.sort === 'new'
-      ? [{ createdAt: 'desc' as const }]
-      : [{ likeCount: 'desc' as const }, { createdAt: 'desc' as const }];
+    const orderBy =
+      options.sort === 'new'
+        ? [{ createdAt: 'desc' as const }]
+        : [{ likeCount: 'desc' as const }, { createdAt: 'desc' as const }];
 
     const [items, total] = await Promise.all([
       this.prisma.topicComment.findMany({
@@ -412,7 +419,10 @@ export class TopicsService {
       for (let j = i + 1; j < topics.length; j++) {
         const a = topics[i];
         const b = topics[j];
-        const sim = jaccard(tokenize(`${a.title} ${a.description ?? ''}`), tokenize(`${b.title} ${b.description ?? ''}`));
+        const sim = jaccard(
+          tokenize(`${a.title} ${a.description ?? ''}`),
+          tokenize(`${b.title} ${b.description ?? ''}`),
+        );
         if (sim >= 0.8 && sim < 0.95) {
           const existing = await this.prisma.topicMergeSuggestion.findFirst({
             where: { communityId, sourceTopicId: a.id, targetTopicId: b.id, status: 'pending' },
@@ -436,7 +446,11 @@ export class TopicsService {
 
   // ===== 工具方法 =====
 
-  private buildLikeDelta(oldType: 'like' | 'dislike' | null, newType: 'like' | 'dislike' | null, scope: 'open' | 'closed') {
+  private buildLikeDelta(
+    oldType: 'like' | 'dislike' | null,
+    newType: 'like' | 'dislike' | null,
+    scope: 'open' | 'closed',
+  ) {
     const data: any = {};
     const likeKey = scope === 'open' ? 'likeCount' : 'closedLikeCount';
     const dislikeKey = scope === 'open' ? 'dislikeCount' : 'closedDislikeCount';
@@ -449,7 +463,10 @@ export class TopicsService {
     return data;
   }
 
-  private buildCommentLikeDelta(oldType: 'like' | 'dislike' | null, newType: 'like' | 'dislike' | null) {
+  private buildCommentLikeDelta(
+    oldType: 'like' | 'dislike' | null,
+    newType: 'like' | 'dislike' | null,
+  ) {
     const data: any = {};
     if (oldType === 'like') data.likeCount = { decrement: 1 };
     if (oldType === 'dislike') data.dislikeCount = { decrement: 1 };
@@ -508,7 +525,10 @@ export class TopicsService {
 
 function tokenize(text: string): Set<string> {
   // 简单按 2 字 N-gram 提取中文/英文 token
-  const cleaned = text.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]/g, ' ').trim();
+  const cleaned = text
+    .toLowerCase()
+    .replace(/[^\u4e00-\u9fa5a-z0-9]/g, ' ')
+    .trim();
   const set = new Set<string>();
   // 英文按空格
   for (const w of cleaned.split(/\s+/)) {
