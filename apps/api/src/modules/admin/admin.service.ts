@@ -15,7 +15,7 @@ export class AdminService {
       where: { username, status: 'active' },
     });
     if (!admin) return null;
-    const valid = admin.passwordHash && await bcrypt.compare(password, admin.passwordHash);
+    const valid = admin.passwordHash && (await bcrypt.compare(password, admin.passwordHash));
     if (!valid) return null;
     return admin;
   }
@@ -24,11 +24,23 @@ export class AdminService {
     return this.prisma.badge.findMany({ where: { status: 'active' } });
   }
 
-  async createBadge(dto: { code: string; name: string; description: string; iconUrl: string; ruleJson?: any }) {
+  async createBadge(dto: {
+    code: string;
+    name: string;
+    description: string;
+    iconUrl: string;
+    ruleJson?: any;
+  }) {
     return this.prisma.badge.create({ data: { ...dto, ruleJson: dto.ruleJson ?? {} } });
   }
 
-  async awardBadge(userId: string, badgeId: string, communityId: string, adminId: string, reason?: string) {
+  async awardBadge(
+    userId: string,
+    badgeId: string,
+    communityId: string,
+    adminId: string,
+    reason?: string,
+  ) {
     return this.prisma.userBadge.create({
       data: {
         userId,
@@ -51,12 +63,20 @@ export class AdminService {
   }
 
   // === Content Review ===
-  async getReviews(query?: { targetType?: string; status?: string }, pagination?: { skip: number; take: number }) {
+  async getReviews(
+    query?: { targetType?: string; status?: string },
+    pagination?: { skip: number; take: number },
+  ) {
     const where: any = {};
     if (query?.targetType) where.targetType = query.targetType;
     if (query?.status) where.result = query.status;
     const args: any = { where, orderBy: { createdAt: 'desc' } };
-    if (pagination) { args.skip = pagination.skip; args.take = pagination.take; } else { args.take = 50; }
+    if (pagination) {
+      args.skip = pagination.skip;
+      args.take = pagination.take;
+    } else {
+      args.take = 50;
+    }
     return this.prisma.aiReviewLog.findMany(args);
   }
 
@@ -76,7 +96,10 @@ export class AdminService {
     });
     // Update target status based on targetType
     if (review.targetType === 'event') {
-      const event = await this.prisma.event.update({ where: { id: review.targetId }, data: { aiReviewStatus: 'pass', status: 'open' } });
+      const event = await this.prisma.event.update({
+        where: { id: review.targetId },
+        data: { aiReviewStatus: 'pass', status: 'open' },
+      });
       // Notify content creator
       await this.notificationsService.create({
         userId: event.creatorId,
@@ -88,7 +111,10 @@ export class AdminService {
         targetId: event.id,
       });
     } else if (review.targetType === 'market_item') {
-      const item = await this.prisma.marketItem.update({ where: { id: review.targetId }, data: { aiReviewStatus: 'pass', status: 'on_sale' } });
+      const item = await this.prisma.marketItem.update({
+        where: { id: review.targetId },
+        data: { aiReviewStatus: 'pass', status: 'on_sale' },
+      });
       await this.notificationsService.create({
         userId: item.sellerId,
         communityId: item.communityId,
@@ -111,7 +137,10 @@ export class AdminService {
       data: { result: 'reject' },
     });
     if (review.targetType === 'event') {
-      const event = await this.prisma.event.update({ where: { id: review.targetId }, data: { aiReviewStatus: 'reject', status: 'rejected' } });
+      const event = await this.prisma.event.update({
+        where: { id: review.targetId },
+        data: { aiReviewStatus: 'reject', status: 'rejected' },
+      });
       await this.notificationsService.create({
         userId: event.creatorId,
         communityId: event.communityId,
@@ -122,7 +151,10 @@ export class AdminService {
         targetId: event.id,
       });
     } else if (review.targetType === 'market_item') {
-      const item = await this.prisma.marketItem.update({ where: { id: review.targetId }, data: { aiReviewStatus: 'reject', status: 'rejected' } });
+      const item = await this.prisma.marketItem.update({
+        where: { id: review.targetId },
+        data: { aiReviewStatus: 'reject', status: 'rejected' },
+      });
       await this.notificationsService.create({
         userId: item.sellerId,
         communityId: item.communityId,
@@ -169,15 +201,24 @@ export class AdminService {
   }
 
   // === Verification Review ===
-  async getVerifications(communityId: string, query?: { status?: string }, pagination?: { skip: number; take: number }) {
+  async getVerifications(
+    communityId: string,
+    query?: { status?: string },
+    pagination?: { skip: number; take: number },
+  ) {
     const where: any = { communityId, deletedAt: null };
     if (query?.status) where.status = query.status;
     return this.prisma.verification.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       select: {
-        id: true, userId: true, communityId: true, materialType: true,
-        status: true, createdAt: true, user: { select: { id: true, nickname: true } },
+        id: true,
+        userId: true,
+        communityId: true,
+        materialType: true,
+        status: true,
+        createdAt: true,
+        user: { select: { id: true, nickname: true } },
       },
       skip: pagination?.skip,
       take: pagination?.take,
@@ -194,10 +235,18 @@ export class AdminService {
     return this.prisma.verification.findUnique({
       where: { id },
       select: {
-        id: true, userId: true, communityId: true, materialType: true,
-        maskedFileUrl: true, ocrResultJson: true, aiResultJson: true,
-        status: true, rejectReason: true, consentSnapshot: true,
-        createdAt: true, reviewedAt: true,
+        id: true,
+        userId: true,
+        communityId: true,
+        materialType: true,
+        maskedFileUrl: true,
+        ocrResultJson: true,
+        aiResultJson: true,
+        status: true,
+        rejectReason: true,
+        consentSnapshot: true,
+        createdAt: true,
+        reviewedAt: true,
         user: { select: { id: true, nickname: true } },
       },
     });
@@ -213,7 +262,12 @@ export class AdminService {
     await this.prisma.communityMember.upsert({
       where: { userId_communityId: { userId: v.userId, communityId: v.communityId } },
       update: { verifyStatus: 'verified' },
-      create: { userId: v.userId, communityId: v.communityId, role: 'resident', verifyStatus: 'verified' },
+      create: {
+        userId: v.userId,
+        communityId: v.communityId,
+        role: 'resident',
+        verifyStatus: 'verified',
+      },
     });
     // Notify user
     await this.notificationsService.create({
@@ -251,19 +305,32 @@ export class AdminService {
   }
 
   // === Event Management ===
-  async getEvents(communityId: string, query?: { status?: string }, pagination?: { skip: number; take: number }) {
+  async getEvents(
+    communityId: string,
+    query?: { status?: string },
+    pagination?: { skip: number; take: number },
+  ) {
     const where: any = { communityId, deletedAt: null };
     if (query?.status) where.status = query.status;
     const args: any = {
       where,
       orderBy: { createdAt: 'desc' },
       select: {
-        id: true, title: true, type: true, status: true,
-        aiReviewStatus: true, createdAt: true,
+        id: true,
+        title: true,
+        type: true,
+        status: true,
+        aiReviewStatus: true,
+        createdAt: true,
         creator: { select: { id: true, nickname: true } },
       },
     };
-    if (pagination) { args.skip = pagination.skip; args.take = pagination.take; } else { args.take = 50; }
+    if (pagination) {
+      args.skip = pagination.skip;
+      args.take = pagination.take;
+    } else {
+      args.take = 50;
+    }
     return this.prisma.event.findMany(args);
   }
 
@@ -274,7 +341,10 @@ export class AdminService {
   }
 
   async hideEvent(adminId: string, id: string, communityId: string) {
-    const event = await this.prisma.event.findUnique({ where: { id }, select: { communityId: true } });
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
     if (!event || event.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.event.update({ where: { id }, data: { status: 'closed' } });
     await this.logAudit(adminId, 'hide_event', 'event', id);
@@ -282,14 +352,21 @@ export class AdminService {
   }
 
   async restoreEvent(adminId: string, id: string, communityId: string) {
-    const event = await this.prisma.event.findUnique({ where: { id }, select: { communityId: true } });
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
     if (!event || event.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.event.update({ where: { id }, data: { status: 'open' } });
     await this.logAudit(adminId, 'restore_event', 'event', id);
     return { id, status: 'open' };
   }
 
-  async addFeedbackLog(adminId: string, eventId: string, dto: { status: string; content: string; images?: string[]; visibleToPublic?: boolean }) {
+  async addFeedbackLog(
+    adminId: string,
+    eventId: string,
+    dto: { status: string; content: string; images?: string[]; visibleToPublic?: boolean },
+  ) {
     // Resolve communityId from event
     const event = await this.prisma.event.findUnique({ where: { id: eventId } });
     return this.prisma.feedbackProcessLog.create({
@@ -319,21 +396,36 @@ export class AdminService {
     return this.prisma.committeeMember.count({ where: { communityId, status: 'active' } });
   }
 
-  async createCommitteeMember(communityId: string, dto: { name: string; position: string; avatarUrl?: string; responsibility?: string }) {
+  async createCommitteeMember(
+    communityId: string,
+    dto: { name: string; position: string; avatarUrl?: string; responsibility?: string },
+  ) {
     return this.prisma.committeeMember.create({
       data: { communityId, ...dto, claimStatus: 'unclaimed' },
     });
   }
 
-  async updateCommitteeMember(id: string, dto: Partial<{ name: string; position: string; avatarUrl: string; responsibility: string }>, communityId: string) {
-    const member = await this.prisma.committeeMember.findUnique({ where: { id }, select: { communityId: true } });
-    if (!member || member.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+  async updateCommitteeMember(
+    id: string,
+    dto: Partial<{ name: string; position: string; avatarUrl: string; responsibility: string }>,
+    communityId: string,
+  ) {
+    const member = await this.prisma.committeeMember.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!member || member.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     return this.prisma.committeeMember.update({ where: { id }, data: dto });
   }
 
   async deleteCommitteeMember(adminId: string, id: string, communityId: string) {
-    const member = await this.prisma.committeeMember.findUnique({ where: { id }, select: { communityId: true } });
-    if (!member || member.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    const member = await this.prisma.committeeMember.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!member || member.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     await this.prisma.committeeMember.update({ where: { id }, data: { status: 'inactive' } });
     await this.logAudit(adminId, 'delete_committee_member', 'committee_member', id);
     return { id, status: 'inactive' };
@@ -369,7 +461,10 @@ export class AdminService {
   }
 
   async rejectClaim(adminId: string, claimId: string, reason: string, communityId: string) {
-    const claim = await this.prisma.committeeMemberClaim.findUnique({ where: { id: claimId }, select: { communityId: true } });
+    const claim = await this.prisma.committeeMemberClaim.findUnique({
+      where: { id: claimId },
+      select: { communityId: true },
+    });
     if (!claim || claim.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.committeeMemberClaim.update({
       where: { id: claimId },
@@ -393,11 +488,22 @@ export class AdminService {
     return this.prisma.vote.count({ where: { communityId } });
   }
 
-  async createVote(communityId: string, adminId: string, dto: {
-    title: string; description?: string; voteType?: string; maxChoices?: number;
-    onlyVerified?: boolean; resultVisibility?: string; isAnonymous?: boolean;
-    startAt?: string; endAt?: string; options: string[];
-  }) {
+  async createVote(
+    communityId: string,
+    adminId: string,
+    dto: {
+      title: string;
+      description?: string;
+      voteType?: string;
+      maxChoices?: number;
+      onlyVerified?: boolean;
+      resultVisibility?: string;
+      isAnonymous?: boolean;
+      startAt?: string;
+      endAt?: string;
+      options: string[];
+    },
+  ) {
     return this.prisma.vote.create({
       data: {
         communityId,
@@ -419,14 +525,24 @@ export class AdminService {
     });
   }
 
-  async updateVote(id: string, dto: Partial<{ title: string; description: string; endAt: string }>, communityId: string) {
-    const vote = await this.prisma.vote.findUnique({ where: { id }, select: { communityId: true } });
+  async updateVote(
+    id: string,
+    dto: Partial<{ title: string; description: string; endAt: string }>,
+    communityId: string,
+  ) {
+    const vote = await this.prisma.vote.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
     if (!vote || vote.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     return this.prisma.vote.update({ where: { id }, data: dto });
   }
 
   async publishVote(adminId: string, id: string, communityId: string) {
-    const vote = await this.prisma.vote.findUnique({ where: { id }, select: { communityId: true } });
+    const vote = await this.prisma.vote.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
     if (!vote || vote.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.vote.update({ where: { id }, data: { status: 'published' } });
     await this.logAudit(adminId, 'publish_vote', 'vote', id);
@@ -434,7 +550,10 @@ export class AdminService {
   }
 
   async closeVote(adminId: string, id: string, communityId: string) {
-    const vote = await this.prisma.vote.findUnique({ where: { id }, select: { communityId: true } });
+    const vote = await this.prisma.vote.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
     if (!vote || vote.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.vote.update({ where: { id }, data: { status: 'closed' } });
     await this.logAudit(adminId, 'close_vote', 'vote', id);
@@ -442,10 +561,19 @@ export class AdminService {
   }
 
   async getVoteResults(id: string, communityId: string) {
-    const vote = await this.prisma.vote.findUnique({ where: { id }, select: { communityId: true } });
+    const vote = await this.prisma.vote.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
     if (!vote || vote.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
-    const options = await this.prisma.voteOption.findMany({ where: { voteId: id }, orderBy: { sortOrder: 'asc' } });
-    const allRecords = await this.prisma.voteRecord.findMany({ where: { voteId: id }, select: { selectedOptionIds: true } });
+    const options = await this.prisma.voteOption.findMany({
+      where: { voteId: id },
+      orderBy: { sortOrder: 'asc' },
+    });
+    const allRecords = await this.prisma.voteRecord.findMany({
+      where: { voteId: id },
+      select: { selectedOptionIds: true },
+    });
     const countMap = new Map<string, number>();
     for (const r of allRecords) {
       const ids = r.selectedOptionIds as string[];
@@ -472,7 +600,19 @@ export class AdminService {
     return this.prisma.banner.count({ where });
   }
 
-  async createBanner(dto: { communityId?: string; title: string; subtitle?: string; imageUrl: string; linkType?: string; linkId?: string; linkUrl?: string; position?: string; sortOrder?: number; startAt?: string; endAt?: string }) {
+  async createBanner(dto: {
+    communityId?: string;
+    title: string;
+    subtitle?: string;
+    imageUrl: string;
+    linkType?: string;
+    linkId?: string;
+    linkUrl?: string;
+    position?: string;
+    sortOrder?: number;
+    startAt?: string;
+    endAt?: string;
+  }) {
     return this.prisma.banner.create({
       data: {
         communityId: dto.communityId,
@@ -491,23 +631,39 @@ export class AdminService {
     });
   }
 
-  async updateBanner(id: string, dto: Partial<{ title: string; subtitle: string; imageUrl: string; sortOrder: number }>, communityId: string) {
-    const banner = await this.prisma.banner.findUnique({ where: { id }, select: { communityId: true } });
-    if (!banner || banner.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+  async updateBanner(
+    id: string,
+    dto: Partial<{ title: string; subtitle: string; imageUrl: string; sortOrder: number }>,
+    communityId: string,
+  ) {
+    const banner = await this.prisma.banner.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!banner || banner.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     return this.prisma.banner.update({ where: { id }, data: dto });
   }
 
   async publishBanner(adminId: string, id: string, communityId: string) {
-    const banner = await this.prisma.banner.findUnique({ where: { id }, select: { communityId: true } });
-    if (!banner || banner.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    const banner = await this.prisma.banner.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!banner || banner.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     await this.prisma.banner.update({ where: { id }, data: { status: 'published' } });
     await this.logAudit(adminId, 'publish_banner', 'banner', id);
     return { id, status: 'published' };
   }
 
   async offlineBanner(adminId: string, id: string, communityId: string) {
-    const banner = await this.prisma.banner.findUnique({ where: { id }, select: { communityId: true } });
-    if (!banner || banner.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    const banner = await this.prisma.banner.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!banner || banner.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     await this.prisma.banner.update({ where: { id }, data: { status: 'offline' } });
     await this.logAudit(adminId, 'offline_banner', 'banner', id);
     return { id, status: 'offline' };
@@ -528,9 +684,16 @@ export class AdminService {
   }
 
   async createServiceProvider(dto: {
-    communityId: string; name: string; category: string; logoUrl?: string;
-    coverUrl?: string; description?: string; contactText?: string;
-    serviceArea?: string; recommendationSource?: string; sortOrder?: number;
+    communityId: string;
+    name: string;
+    category: string;
+    logoUrl?: string;
+    coverUrl?: string;
+    description?: string;
+    contactText?: string;
+    serviceArea?: string;
+    recommendationSource?: string;
+    sortOrder?: number;
   }) {
     return this.prisma.serviceProvider.create({
       data: {
@@ -549,32 +712,58 @@ export class AdminService {
     });
   }
 
-  async updateServiceProvider(id: string, dto: Partial<{ name: string; category: string; description: string; sortOrder: number }>, communityId: string) {
-    const provider = await this.prisma.serviceProvider.findUnique({ where: { id }, select: { communityId: true } });
-    if (!provider || provider.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+  async updateServiceProvider(
+    id: string,
+    dto: Partial<{ name: string; category: string; description: string; sortOrder: number }>,
+    communityId: string,
+  ) {
+    const provider = await this.prisma.serviceProvider.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!provider || provider.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     return this.prisma.serviceProvider.update({ where: { id }, data: dto });
   }
 
   async publishServiceProvider(adminId: string, id: string, communityId: string) {
-    const provider = await this.prisma.serviceProvider.findUnique({ where: { id }, select: { communityId: true } });
-    if (!provider || provider.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
-    await this.prisma.serviceProvider.update({ where: { id }, data: { status: 'published', reviewedBy: adminId } });
+    const provider = await this.prisma.serviceProvider.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!provider || provider.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
+    await this.prisma.serviceProvider.update({
+      where: { id },
+      data: { status: 'published', reviewedBy: adminId },
+    });
     await this.logAudit(adminId, 'publish_service_provider', 'service_provider', id);
     return { id, status: 'published' };
   }
 
   async offlineServiceProvider(adminId: string, id: string, communityId: string) {
-    const provider = await this.prisma.serviceProvider.findUnique({ where: { id }, select: { communityId: true } });
-    if (!provider || provider.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    const provider = await this.prisma.serviceProvider.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!provider || provider.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     await this.prisma.serviceProvider.update({ where: { id }, data: { status: 'offline' } });
     await this.logAudit(adminId, 'offline_service_provider', 'service_provider', id);
     return { id, status: 'offline' };
   }
 
   async rejectServiceProvider(adminId: string, id: string, reason: string, communityId: string) {
-    const provider = await this.prisma.serviceProvider.findUnique({ where: { id }, select: { communityId: true } });
-    if (!provider || provider.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
-    await this.prisma.serviceProvider.update({ where: { id }, data: { status: 'rejected', reviewedBy: adminId } });
+    const provider = await this.prisma.serviceProvider.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!provider || provider.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
+    await this.prisma.serviceProvider.update({
+      where: { id },
+      data: { status: 'rejected', reviewedBy: adminId },
+    });
     await this.logAudit(adminId, 'reject_service_provider', 'service_provider', id, { reason });
     return { id, status: 'rejected' };
   }
@@ -600,19 +789,41 @@ export class AdminService {
 
     // Delete existing snapshots and recreate
     await this.prisma.rankingSnapshot.deleteMany({ where: { communityId, periodType: 'total' } });
-    await this.prisma.rankingSnapshot.deleteMany({ where: { communityId, periodType: 'month', periodKey } });
+    await this.prisma.rankingSnapshot.deleteMany({
+      where: { communityId, periodType: 'month', periodKey },
+    });
 
     for (let i = 0; i < sorted.length; i++) {
       const [userId, data] = sorted[i];
       await this.prisma.rankingSnapshot.create({
-        data: { communityId, periodType: 'total', periodKey: 'all', userId, rankNo: i + 1, score: data.score, flowerCount: data.flowerCount, helpCount: data.helpCount, badgeCount: 0 },
+        data: {
+          communityId,
+          periodType: 'total',
+          periodKey: 'all',
+          userId,
+          rankNo: i + 1,
+          score: data.score,
+          flowerCount: data.flowerCount,
+          helpCount: data.helpCount,
+          badgeCount: 0,
+        },
       });
     }
 
     for (let i = 0; i < sorted.length; i++) {
       const [userId, data] = sorted[i];
       await this.prisma.rankingSnapshot.create({
-        data: { communityId, periodType: 'month', periodKey, userId, rankNo: i + 1, score: data.score, flowerCount: data.flowerCount, helpCount: data.helpCount, badgeCount: 0 },
+        data: {
+          communityId,
+          periodType: 'month',
+          periodKey,
+          userId,
+          rankNo: i + 1,
+          score: data.score,
+          flowerCount: data.flowerCount,
+          helpCount: data.helpCount,
+          badgeCount: 0,
+        },
       });
     }
 
@@ -633,7 +844,11 @@ export class AdminService {
     return this.prisma.committeeAnnouncement.count({ where: { communityId } });
   }
 
-  async createAnnouncement(communityId: string, adminId: string, dto: { title: string; content: string; images?: string[] }) {
+  async createAnnouncement(
+    communityId: string,
+    adminId: string,
+    dto: { title: string; content: string; images?: string[] },
+  ) {
     return this.prisma.committeeAnnouncement.create({
       data: {
         communityId,
@@ -646,14 +861,25 @@ export class AdminService {
     });
   }
 
-  async updateAnnouncement(id: string, dto: Partial<{ title: string; content: string; isPinned: boolean; status: string }>, communityId: string) {
-    const announcement = await this.prisma.committeeAnnouncement.findUnique({ where: { id }, select: { communityId: true } });
-    if (!announcement || announcement.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+  async updateAnnouncement(
+    id: string,
+    dto: Partial<{ title: string; content: string; isPinned: boolean; status: string }>,
+    communityId: string,
+  ) {
+    const announcement = await this.prisma.committeeAnnouncement.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!announcement || announcement.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     return this.prisma.committeeAnnouncement.update({ where: { id }, data: dto });
   }
 
   // === Audit Logs ===
-  async getAuditLogs(query?: { operatorId?: string; targetType?: string }, pagination?: { skip: number; take: number }) {
+  async getAuditLogs(
+    query?: { operatorId?: string; targetType?: string },
+    pagination?: { skip: number; take: number },
+  ) {
     const where: any = {};
     if (query?.operatorId) where.operatorId = query.operatorId;
     if (query?.targetType) where.targetType = query.targetType;
@@ -694,7 +920,10 @@ export class AdminService {
     return this.prisma.shareTemplate.findMany({ where: { status: 'active' } });
   }
 
-  async updateShareTemplate(id: string, dto: { titleTemplate?: string; defaultImageUrl?: string; status?: string }) {
+  async updateShareTemplate(
+    id: string,
+    dto: { titleTemplate?: string; defaultImageUrl?: string; status?: string },
+  ) {
     return this.prisma.shareTemplate.update({
       where: { id },
       data: dto,
@@ -715,7 +944,14 @@ export class AdminService {
     return this.prisma.communitySocialGroup.count({ where: { communityId } });
   }
 
-  async createSocialGroup(dto: { communityId: string; title: string; description?: string; qrImageUrl: string; visibleTo?: string; sortOrder?: number }) {
+  async createSocialGroup(dto: {
+    communityId: string;
+    title: string;
+    description?: string;
+    qrImageUrl: string;
+    visibleTo?: string;
+    sortOrder?: number;
+  }) {
     return this.prisma.communitySocialGroup.create({
       data: {
         communityId: dto.communityId,
@@ -729,7 +965,16 @@ export class AdminService {
     });
   }
 
-  async updateSocialGroup(id: string, dto: Partial<{ title: string; description: string; qrImageUrl: string; visibleTo: string; sortOrder: number }>) {
+  async updateSocialGroup(
+    id: string,
+    dto: Partial<{
+      title: string;
+      description: string;
+      qrImageUrl: string;
+      visibleTo: string;
+      sortOrder: number;
+    }>,
+  ) {
     return this.prisma.communitySocialGroup.update({ where: { id }, data: dto });
   }
 
@@ -754,7 +999,11 @@ export class AdminService {
   }
 
   // === Reports ===
-  async getReports(communityId: string, status?: string, pagination?: { skip: number; take: number }) {
+  async getReports(
+    communityId: string,
+    status?: string,
+    pagination?: { skip: number; take: number },
+  ) {
     const where: any = { communityId };
     if (status) where.status = status;
     return this.prisma.report.findMany({
@@ -787,19 +1036,35 @@ export class AdminService {
     if (!report) throw new NotFoundException('举报记录不存在');
     // Hide the target content
     if (report.targetType === 'event') {
-      await this.prisma.event.update({ where: { id: report.targetId }, data: { status: 'hidden' } });
+      await this.prisma.event.update({
+        where: { id: report.targetId },
+        data: { status: 'hidden' },
+      });
     } else if (report.targetType === 'market_item') {
-      await this.prisma.marketItem.update({ where: { id: report.targetId }, data: { status: 'hidden' } });
+      await this.prisma.marketItem.update({
+        where: { id: report.targetId },
+        data: { status: 'hidden' },
+      });
     } else if (report.targetType === 'event_comment') {
-      await this.prisma.eventComment.update({ where: { id: report.targetId }, data: { status: 'hidden' } });
+      await this.prisma.eventComment.update({
+        where: { id: report.targetId },
+        data: { status: 'hidden' },
+      });
     } else if (report.targetType === 'market_comment') {
-      await this.prisma.marketComment.update({ where: { id: report.targetId }, data: { status: 'hidden' } });
+      await this.prisma.marketComment.update({
+        where: { id: report.targetId },
+        data: { status: 'hidden' },
+      });
     }
     const updated = await this.prisma.report.update({
       where: { id: reportId },
       data: { status: 'takedown', handledBy: adminId, handledAt: new Date() },
     });
-    await this.logAudit(adminId, 'takedown_report', 'report', reportId, { reason, targetType: report.targetType, targetId: report.targetId });
+    await this.logAudit(adminId, 'takedown_report', 'report', reportId, {
+      reason,
+      targetType: report.targetType,
+      targetId: report.targetId,
+    });
     return updated;
   }
 
@@ -815,17 +1080,29 @@ export class AdminService {
     let reportedUserId: string | null = null;
     let communityId: string | null = report.communityId;
     if (report.targetType === 'event') {
-      const event = await this.prisma.event.findUnique({ where: { id: report.targetId }, select: { creatorId: true } });
+      const event = await this.prisma.event.findUnique({
+        where: { id: report.targetId },
+        select: { creatorId: true },
+      });
       reportedUserId = event?.creatorId ?? null;
     } else if (report.targetType === 'market_item') {
-      const item = await this.prisma.marketItem.findUnique({ where: { id: report.targetId }, select: { sellerId: true, communityId: true } });
+      const item = await this.prisma.marketItem.findUnique({
+        where: { id: report.targetId },
+        select: { sellerId: true, communityId: true },
+      });
       reportedUserId = item?.sellerId ?? null;
       communityId = item?.communityId ?? communityId;
     } else if (report.targetType === 'event_comment') {
-      const comment = await this.prisma.eventComment.findUnique({ where: { id: report.targetId }, select: { userId: true } });
+      const comment = await this.prisma.eventComment.findUnique({
+        where: { id: report.targetId },
+        select: { userId: true },
+      });
       reportedUserId = comment?.userId ?? null;
     } else if (report.targetType === 'market_comment') {
-      const comment = await this.prisma.marketComment.findUnique({ where: { id: report.targetId }, select: { userId: true } });
+      const comment = await this.prisma.marketComment.findUnique({
+        where: { id: report.targetId },
+        select: { userId: true },
+      });
       reportedUserId = comment?.userId ?? null;
     } else if (report.targetType === 'user') {
       reportedUserId = report.targetId;
@@ -852,18 +1129,30 @@ export class AdminService {
     let reportedUserId: string | null = null;
     let communityId: string | null = report.communityId;
     if (report.targetType === 'event') {
-      const event = await this.prisma.event.findUnique({ where: { id: report.targetId }, select: { creatorId: true, communityId: true } });
+      const event = await this.prisma.event.findUnique({
+        where: { id: report.targetId },
+        select: { creatorId: true, communityId: true },
+      });
       reportedUserId = event?.creatorId ?? null;
       communityId = event?.communityId ?? communityId;
     } else if (report.targetType === 'market_item') {
-      const item = await this.prisma.marketItem.findUnique({ where: { id: report.targetId }, select: { sellerId: true, communityId: true } });
+      const item = await this.prisma.marketItem.findUnique({
+        where: { id: report.targetId },
+        select: { sellerId: true, communityId: true },
+      });
       reportedUserId = item?.sellerId ?? null;
       communityId = item?.communityId ?? communityId;
     } else if (report.targetType === 'event_comment') {
-      const comment = await this.prisma.eventComment.findUnique({ where: { id: report.targetId }, select: { userId: true } });
+      const comment = await this.prisma.eventComment.findUnique({
+        where: { id: report.targetId },
+        select: { userId: true },
+      });
       reportedUserId = comment?.userId ?? null;
     } else if (report.targetType === 'market_comment') {
-      const comment = await this.prisma.marketComment.findUnique({ where: { id: report.targetId }, select: { userId: true } });
+      const comment = await this.prisma.marketComment.findUnique({
+        where: { id: report.targetId },
+        select: { userId: true },
+      });
       reportedUserId = comment?.userId ?? null;
     } else if (report.targetType === 'user') {
       reportedUserId = report.targetId;
@@ -894,15 +1183,25 @@ export class AdminService {
   }
 
   // === Market Items ===
-  async getMarketItems(communityId: string, status?: string, pagination?: { skip: number; take: number }) {
+  async getMarketItems(
+    communityId: string,
+    status?: string,
+    pagination?: { skip: number; take: number },
+  ) {
     const where: any = { communityId, deletedAt: null };
     if (status) where.status = status;
     return this.prisma.marketItem.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       select: {
-        id: true, title: true, category: true, tradeType: true, status: true,
-        price: true, aiReviewStatus: true, createdAt: true,
+        id: true,
+        title: true,
+        category: true,
+        tradeType: true,
+        status: true,
+        price: true,
+        aiReviewStatus: true,
+        createdAt: true,
         seller: { select: { id: true, nickname: true } },
       },
       skip: pagination?.skip,
@@ -917,7 +1216,10 @@ export class AdminService {
   }
 
   async hideMarketItem(adminId: string, id: string, communityId: string) {
-    const item = await this.prisma.marketItem.findUnique({ where: { id }, select: { communityId: true } });
+    const item = await this.prisma.marketItem.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
     if (!item || item.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.marketItem.update({ where: { id }, data: { status: 'hidden' } });
     await this.logAudit(adminId, 'hide_market_item', 'market_item', id);
@@ -925,7 +1227,10 @@ export class AdminService {
   }
 
   async restoreMarketItem(adminId: string, id: string, communityId: string) {
-    const item = await this.prisma.marketItem.findUnique({ where: { id }, select: { communityId: true } });
+    const item = await this.prisma.marketItem.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
     if (!item || item.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.marketItem.update({ where: { id }, data: { status: 'on_sale' } });
     await this.logAudit(adminId, 'restore_market_item', 'market_item', id);
@@ -933,13 +1238,22 @@ export class AdminService {
   }
 
   async rejectMarketItem(adminId: string, id: string, communityId: string, reason?: string) {
-    const item = await this.prisma.marketItem.findUnique({ where: { id }, select: { communityId: true } });
+    const item = await this.prisma.marketItem.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
     if (!item || item.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.marketItem.update({
       where: { id },
       data: { status: 'rejected', aiReviewStatus: 'reject' },
     });
-    await this.logAudit(adminId, 'reject_market_item', 'market_item', id, reason ? { reason } : undefined);
+    await this.logAudit(
+      adminId,
+      'reject_market_item',
+      'market_item',
+      id,
+      reason ? { reason } : undefined,
+    );
     return { id, status: 'rejected' };
   }
 
@@ -966,12 +1280,187 @@ export class AdminService {
       );
     }
     await Promise.all(updates);
-    await this.logAudit(userId, 'update_settings', 'system_setting', null, { keys: Object.keys(dto) });
+    await this.logAudit(userId, 'update_settings', 'system_setting', null, {
+      keys: Object.keys(dto),
+    });
     return this.getSettings();
   }
 
+  // === Topics 议事管理 ===
+  async listTopics(
+    communityId: string,
+    status: string | undefined,
+    pagination: { skip: number; take: number },
+    search?: string,
+  ) {
+    const where: any = { communityId };
+    if (status) where.status = status;
+    if (search) where.title = { contains: search, mode: 'insensitive' };
+    const [items, total] = await Promise.all([
+      this.prisma.topic.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: pagination.skip,
+        take: pagination.take,
+      }),
+      this.prisma.topic.count({ where }),
+    ]);
+    return { items, total };
+  }
+
+  async getTopicById(id: string, communityId: string) {
+    const topic = await this.prisma.topic.findUnique({
+      where: { id },
+      include: {
+        events: { orderBy: { createdAt: 'desc' }, take: 20 },
+      },
+    });
+    if (!topic || topic.communityId !== communityId) {
+      throw new NotFoundException('议题不存在');
+    }
+    return topic;
+  }
+
+  async closeTopic(adminId: string, id: string, communityId: string, summary: string) {
+    const topic = await this.prisma.topic.findUnique({ where: { id } });
+    if (!topic || topic.communityId !== communityId) throw new NotFoundException('议题不存在');
+    if (topic.status === 'closed') return topic;
+
+    const updated = await this.prisma.topic.update({
+      where: { id },
+      data: {
+        status: 'closed',
+        closedSummary: summary,
+        closedAt: new Date(),
+        closedBy: adminId,
+      },
+    });
+    await this.logAudit(adminId, 'close_topic', 'topic', id, { summary });
+
+    // 给所有事件发布者发通知
+    const events = await this.prisma.event.findMany({
+      where: { topicId: id },
+      select: { creatorId: true, title: true },
+    });
+    const creatorIds = Array.from(new Set(events.map((e) => e.creatorId)));
+    for (const creatorId of creatorIds) {
+      await this.notificationsService.create({
+        userId: creatorId,
+        communityId,
+        type: 'topic_closed',
+        title: '议题已完结',
+        content: `议题「${topic.title}」已完结，欢迎为处理结果打分`,
+        targetType: 'topic',
+        targetId: id,
+      });
+    }
+    return updated;
+  }
+
+  async reopenTopic(adminId: string, id: string, communityId: string) {
+    const topic = await this.prisma.topic.findUnique({ where: { id } });
+    if (!topic || topic.communityId !== communityId) throw new NotFoundException('议题不存在');
+    const updated = await this.prisma.topic.update({
+      where: { id },
+      data: { status: 'open', closedAt: null, closedBy: null, closedSummary: null },
+    });
+    await this.logAudit(adminId, 'reopen_topic', 'topic', id);
+    return updated;
+  }
+
+  async rejectTopic(adminId: string, id: string, communityId: string, reason?: string) {
+    const topic = await this.prisma.topic.findUnique({ where: { id } });
+    if (!topic || topic.communityId !== communityId) throw new NotFoundException('议题不存在');
+    const updated = await this.prisma.topic.update({
+      where: { id },
+      data: { aiReviewStatus: 'reject' },
+    });
+    await this.logAudit(adminId, 'reject_topic', 'topic', id, reason ? { reason } : undefined);
+    return updated;
+  }
+
+  async moveEvent(
+    adminId: string,
+    topicId: string,
+    eventId: string,
+    targetTopicId: string,
+    communityId: string,
+  ) {
+    const [source, target, event] = await Promise.all([
+      this.prisma.topic.findUnique({ where: { id: topicId } }),
+      this.prisma.topic.findUnique({ where: { id: targetTopicId } }),
+      this.prisma.event.findUnique({ where: { id: eventId } }),
+    ]);
+    if (!source || source.communityId !== communityId) throw new NotFoundException('源议题不存在');
+    if (!target || target.communityId !== communityId)
+      throw new NotFoundException('目标议题不存在');
+    if (!event || event.topicId !== topicId) throw new NotFoundException('事件不在源议题下');
+
+    await this.prisma.$transaction([
+      this.prisma.event.update({ where: { id: eventId }, data: { topicId: targetTopicId } }),
+      this.prisma.topic.update({ where: { id: topicId }, data: { eventCount: { decrement: 1 } } }),
+      this.prisma.topic.update({
+        where: { id: targetTopicId },
+        data: { eventCount: { increment: 1 } },
+      }),
+    ]);
+    await this.logAudit(adminId, 'move_event', 'event', eventId, {
+      from: topicId,
+      to: targetTopicId,
+    });
+    return { eventId, targetTopicId };
+  }
+
+  async mergeTopics(
+    adminId: string,
+    sourceTopicId: string,
+    targetTopicId: string,
+    communityId: string,
+  ) {
+    if (sourceTopicId === targetTopicId) throw new ForbiddenException('源议题与目标议题不能相同');
+    const [source, target] = await Promise.all([
+      this.prisma.topic.findUnique({ where: { id: sourceTopicId } }),
+      this.prisma.topic.findUnique({ where: { id: targetTopicId } }),
+    ]);
+    if (!source || source.communityId !== communityId) throw new NotFoundException('源议题不存在');
+    if (!target || target.communityId !== communityId)
+      throw new NotFoundException('目标议题不存在');
+
+    const sourceEvents = await this.prisma.event.count({ where: { topicId: sourceTopicId } });
+    const sourceComments = await this.prisma.topicComment.count({
+      where: { topicId: sourceTopicId },
+    });
+
+    await this.prisma.$transaction([
+      this.prisma.event.updateMany({
+        where: { topicId: sourceTopicId },
+        data: { topicId: targetTopicId },
+      }),
+      this.prisma.topicComment.updateMany({
+        where: { topicId: sourceTopicId },
+        data: { topicId: targetTopicId },
+      }),
+      this.prisma.topic.update({
+        where: { id: targetTopicId },
+        data: {
+          eventCount: { increment: sourceEvents },
+          commentCount: { increment: sourceComments },
+        },
+      }),
+      this.prisma.topic.delete({ where: { id: sourceTopicId } }),
+    ]);
+    await this.logAudit(adminId, 'merge_topics', 'topic', sourceTopicId, { targetTopicId });
+    return { sourceTopicId, targetTopicId };
+  }
+
   // === Helpers ===
-  private async logAudit(operatorId: string, action: string, targetType: string, targetId: string | null, detailJson?: any) {
+  private async logAudit(
+    operatorId: string,
+    action: string,
+    targetType: string,
+    targetId: string | null,
+    detailJson?: any,
+  ) {
     await this.prisma.auditLog.create({
       data: {
         operatorId,

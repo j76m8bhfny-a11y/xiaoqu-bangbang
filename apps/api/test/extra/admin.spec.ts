@@ -32,7 +32,9 @@ describe('Feature: 管理后台（全量）', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    );
     await app.init();
 
     prisma = app.get(PrismaService);
@@ -102,6 +104,14 @@ describe('Feature: 管理后台（全量）', () => {
       await prisma.committeeMemberClaim.deleteMany({ where: { communityId } });
       await prisma.committeeMember.deleteMany({ where: { communityId } });
       await prisma.marketItem.deleteMany({ where: { communityId } });
+      // 议事相关清理（必须在 event/topic 删之前清子表）
+      await prisma.topicCommentLike.deleteMany({ where: { comment: { topic: { communityId } } } });
+      await prisma.topicComment.deleteMany({ where: { topic: { communityId } } });
+      await prisma.topicLike.deleteMany({ where: { topic: { communityId } } });
+      await prisma.topicRating.deleteMany({ where: { topic: { communityId } } });
+      await prisma.topicMergeSuggestion.deleteMany({ where: { communityId } });
+      await prisma.event.deleteMany({ where: { communityId } });
+      await prisma.topic.deleteMany({ where: { communityId } });
       await prisma.auditLog.deleteMany({ where: { operatorId: { in: [adminUserId, userId] } } });
       await prisma.communityMember.deleteMany({ where: { communityId } });
       await prisma.adminUser.deleteMany({ where: { userId: { in: [adminUserId, userId] } } });
@@ -555,6 +565,108 @@ describe('Feature: 管理后台（全量）', () => {
         .expect(200);
 
       expect(res.body.code).toBe(0);
+    });
+  });
+
+  // ===== 议事管理 =====
+  describe('【管理】议事管理', () => {
+    let topicId: string;
+    let topicIdB: string;
+    let eventId: string;
+
+    it('准备数据：创建两个议题 + 一个事件', async () => {
+      const t1 = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ title: '电梯老化问题', description: '电梯频繁故障' });
+      expect(t1.status).toBe(201);
+      topicId = t1.body.data.id;
+
+      const t2 = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ title: '电梯维保升级', description: '建议更换维保单位' });
+      expect(t2.status).toBe(201);
+      topicIdB = t2.body.data.id;
+
+      const ev = await request(app.getHttpServer())
+        .post('/api/v1/events')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          type: 'public_feedback',
+          title: '电梯卡在 5 楼',
+          description: '今早 8 点',
+          topicId,
+        });
+      expect(ev.status).toBe(201);
+      eventId = ev.body.data.id;
+    });
+
+    it('GET /admin/topics?status=open 应包含议题', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/admin/topics?status=open')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.items.some((t: any) => t.id === topicId)).toBe(true);
+    });
+
+    it('GET /admin/topics/:id 返回议题详情', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/admin/topics/${topicId}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.id).toBe(topicId);
+    });
+
+    it('POST /admin/topics/:id/events/:eventId/move 应移动事件', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/topics/${topicId}/events/${eventId}/move`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ targetTopicId: topicIdB });
+      expect(res.status).toBe(201);
+      // 把事件移回 topicId 以便后续合并测试
+      await request(app.getHttpServer())
+        .post(`/api/v1/admin/topics/${topicIdB}/events/${eventId}/move`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ targetTopicId: topicId });
+    });
+
+    it('POST /admin/topics/:id/close 应完结议题并发通知', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/topics/${topicId}/close`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ summary: '物业已联系维修单位，本月内完成' });
+      expect(res.status).toBe(201);
+      expect(res.body.data.status).toBe('closed');
+      expect(res.body.data.closedSummary).toContain('物业');
+    });
+
+    it('POST /admin/topics/:id/reopen 应重新打开议题', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/topics/${topicId}/reopen`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(201);
+      expect(res.body.data.status).toBe('open');
+    });
+
+    it('POST /admin/topics/merge 应将源议题合并到目标', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/admin/topics/merge')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ sourceTopicId: topicId, targetTopicId: topicIdB });
+      expect(res.status).toBe(201);
+
+      // 验证源议题已删除
+      const sourceCheck = await request(app.getHttpServer())
+        .get(`/api/v1/admin/topics/${topicId}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(sourceCheck.status).toBe(404);
+
+      // 事件已挂到目标议题
+      const targetCheck = await request(app.getHttpServer())
+        .get(`/api/v1/admin/topics/${topicIdB}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(targetCheck.body.data.events.some((e: any) => e.id === eventId)).toBe(true);
     });
   });
 });
