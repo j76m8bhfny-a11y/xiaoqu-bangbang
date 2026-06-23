@@ -739,3 +739,99 @@ export interface AdminTodoItem {
   summary: string;
   createdAt: string;
 }
+
+// ===== Topic / 议事榜 DTOs =====
+
+export interface TopicDto {
+  id: string;
+  communityId: string;
+  title: string;
+  description?: string;
+  status: string;
+  likeCount: number;
+  dislikeCount: number;
+  closedLikeCount: number;
+  closedDislikeCount: number;
+  ratingSum: number;
+  ratingCount: number;
+  avgRating: number;
+  eventCount: number;
+  commentCount: number;
+  closedSummary?: string;
+  closedAt?: string;
+  createdBy: string;
+  createdAt: string;
+  latestEventPreview?: { title: string; firstImage?: string };
+}
+
+export interface TopicEventItem {
+  id: string;
+  title: string;
+  description: string;
+  images: string[];
+  aiComment?: string;
+  likeCount: number;
+  commentCount: number;
+  createdAt: string;
+  creator: { id: string; nickname: string; avatarUrl?: string };
+  isAnonymous: boolean;
+}
+
+export interface TopicDetailDto extends TopicDto {
+  events: TopicEventItem[];
+}
+
+export interface CreateTopicRequest {
+  title: string;
+  description?: string;
+}
+
+export interface TopicSuggestionDto {
+  topicId: string;
+  title: string;
+  similarity: number;
+}
+
+export interface TopicCommentDto {
+  id: string;
+  topicId: string;
+  eventId?: string;
+  userId: string;
+  userNickname: string;
+  userAvatarUrl?: string;
+  parentId?: string;
+  content: string;
+  images: string[];
+  likeCount: number;
+  dislikeCount: number;
+  replyCount: number;
+  createdAt: string;
+  replies?: TopicCommentDto[];
+}
+
+export interface TopicTimelineItem {
+  type: 'event';
+  data: TopicEventItem & { comments: TopicCommentDto[] };
+}
+
+export interface CreateTopicCommentRequest {
+  eventId?: string;
+  content: string;
+  images?: string[];
+  parentId?: string;
+}
+
+export interface TopicLikeRequest {
+  scope: 'open' | 'closed';
+}
+
+export interface TopicRatingRequest {
+  rating: number; // 1-5
+}
+
+export interface AiSettingsDto {
+  aiTopicSuggest: boolean;
+  aiTopicMerge: boolean;
+  aiEventComment: boolean;
+  aiContentReview: boolean;
+}

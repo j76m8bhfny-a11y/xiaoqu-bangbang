@@ -394,3 +394,36 @@ export enum ServiceProviderVerifyStatus {
   VERIFIED = 'verified',
   REJECTED = 'rejected',
 }
+
+/** 议题状态 */
+export enum TopicStatus {
+  OPEN = 'open',
+  CLOSED = 'closed',
+}
+
+/** 议题赞踩范围 */
+export enum TopicLikeScope {
+  OPEN = 'open',
+  CLOSED = 'closed',
+}
+
+/** 议题赞踩类型 */
+export enum TopicLikeType {
+  LIKE = 'like',
+  DISLIKE = 'dislike',
+}
+
+/** 议题合并建议状态 */
+export enum MergeSuggestionStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}
+
+/** AI 功能开关 key */
+export enum AiFeatureKey {
+  TOPIC_SUGGEST = 'ai_topic_suggest',
+  TOPIC_MERGE = 'ai_topic_merge',
+  EVENT_COMMENT = 'ai_event_comment',
+  CONTENT_REVIEW = 'ai_content_review',
+}
