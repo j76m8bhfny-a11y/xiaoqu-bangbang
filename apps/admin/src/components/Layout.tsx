@@ -20,6 +20,7 @@ import {
   ShareAltOutlined,
   SettingOutlined,
   GroupOutlined,
+  MessageOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '@/store/auth';
@@ -27,21 +28,67 @@ import { useAuthStore } from '@/store/auth';
 const { Sider, Header, Content } = Layout;
 
 const allMenuItems = [
-  { key: '/dashboard', label: '工作台', icon: <DashboardOutlined />, roles: ['platform_admin', 'committee_admin'] },
-  { key: '/reviews', label: '内容审核', icon: <AuditOutlined />, roles: ['platform_admin', 'committee_admin'] },
-  { key: '/events', label: '事件管理', icon: <FileTextOutlined />, roles: ['platform_admin', 'committee_admin'] },
+  {
+    key: '/dashboard',
+    label: '工作台',
+    icon: <DashboardOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
+  {
+    key: '/reviews',
+    label: '内容审核',
+    icon: <AuditOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
+  {
+    key: '/events',
+    label: '事件管理',
+    icon: <FileTextOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
+  {
+    key: '/topics',
+    label: '议事管理',
+    icon: <MessageOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
   { key: '/market', label: '闲置管理', icon: <ShopOutlined />, roles: ['platform_admin'] },
   { key: '/verifications', label: '用户与认证', icon: <UserOutlined />, roles: ['platform_admin'] },
-  { key: '/committee', label: '业委会管理', icon: <TeamOutlined />, roles: ['platform_admin', 'committee_admin'] },
-  { key: '/votes', label: '投票管理', icon: <LikeOutlined />, roles: ['platform_admin', 'committee_admin'] },
+  {
+    key: '/committee',
+    label: '业委会管理',
+    icon: <TeamOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
+  {
+    key: '/votes',
+    label: '投票管理',
+    icon: <LikeOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
   { key: '/banners', label: 'Banner广告', icon: <PictureOutlined />, roles: ['platform_admin'] },
-  { key: '/service-providers', label: '服务商推荐', icon: <ToolOutlined />, roles: ['platform_admin'] },
+  {
+    key: '/service-providers',
+    label: '服务商推荐',
+    icon: <ToolOutlined />,
+    roles: ['platform_admin'],
+  },
   { key: '/rankings', label: '好人榜与奖章', icon: <TrophyOutlined />, roles: ['platform_admin'] },
   { key: '/reports', label: '举报管理', icon: <WarningOutlined />, roles: ['platform_admin'] },
-  { key: '/audit-logs', label: '审计日志', icon: <FileSearchOutlined />, roles: ['platform_admin'] },
+  {
+    key: '/audit-logs',
+    label: '审计日志',
+    icon: <FileSearchOutlined />,
+    roles: ['platform_admin'],
+  },
   { key: '/share', label: '分享配置', icon: <ShareAltOutlined />, roles: ['platform_admin'] },
   { key: '/settings', label: '系统设置', icon: <SettingOutlined />, roles: ['platform_admin'] },
-  { key: '/social-groups', label: '社群入口', icon: <GroupOutlined />, roles: ['platform_admin', 'committee_admin'] },
+  {
+    key: '/social-groups',
+    label: '社群入口',
+    icon: <GroupOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -120,7 +167,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Space>
           </Dropdown>
         </Header>
-        <Content style={{ margin: 24, padding: 24, background: '#fff', borderRadius: 8, minHeight: 280 }}>
+        <Content
+          style={{ margin: 24, padding: 24, background: '#fff', borderRadius: 8, minHeight: 280 }}
+        >
           {children}
         </Content>
       </Layout>
