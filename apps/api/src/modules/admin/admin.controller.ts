@@ -788,6 +788,28 @@ export class AdminController {
     return { code: 0, message: 'ok', data };
   }
 
+  // === AI 功能开关 ===
+  @Get('settings/ai')
+  async getAiSettings() {
+    const data = await this.adminService.getAiSettings();
+    return { code: 0, message: 'ok', data };
+  }
+
+  @Patch('settings/ai')
+  async updateAiSettings(
+    @CurrentUser('userId') userId: string,
+    @Body()
+    body: Partial<{
+      aiTopicSuggest: boolean;
+      aiTopicMerge: boolean;
+      aiEventComment: boolean;
+      aiContentReview: boolean;
+    }>,
+  ) {
+    const data = await this.adminService.updateAiSettings(userId, body);
+    return { code: 0, message: 'ok', data };
+  }
+
   // === Topics 议事管理 ===
   // 注意：merge 必须在 :id 之前，避免被参数路由捕获
   @Post('topics/merge')

@@ -669,4 +669,56 @@ describe('Feature: 管理后台（全量）', () => {
       expect(targetCheck.body.data.events.some((e: any) => e.id === eventId)).toBe(true);
     });
   });
+
+  // ===== AI 功能开关 =====
+  describe('【管理】AI 功能开关', () => {
+    afterAll(async () => {
+      // 清理：恢复所有开关到默认值
+      await prisma.systemSetting.deleteMany({
+        where: {
+          key: {
+            in: ['ai_topic_suggest', 'ai_topic_merge', 'ai_event_comment', 'ai_content_review'],
+          },
+        },
+      });
+    });
+
+    it('GET /admin/settings/ai 默认全部为 true', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/admin/settings/ai')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.aiTopicSuggest).toBe(true);
+      expect(res.body.data.aiEventComment).toBe(true);
+    });
+
+    it('PATCH /admin/settings/ai 关闭 aiEventComment', async () => {
+      const res = await request(app.getHttpServer())
+        .patch('/api/v1/admin/settings/ai')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ aiEventComment: false });
+      expect(res.status).toBe(200);
+      expect(res.body.data.aiEventComment).toBe(false);
+      expect(res.body.data.aiTopicSuggest).toBe(true);
+    });
+
+    it('关闭 aiEventComment 后创建议事类事件应 aiComment=null', async () => {
+      // 先创建一个议题
+      const topic = await prisma.topic.create({
+        data: { communityId, title: '关 AI 测试议题', createdBy: userId, status: 'open' },
+      });
+
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/events')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          type: 'public_feedback',
+          title: '花坛维护',
+          description: '物业请处理',
+          topicId: topic.id,
+        });
+      expect(res.status).toBe(201);
+      expect(res.body.data.aiComment).toBeNull();
+    });
+  });
 });

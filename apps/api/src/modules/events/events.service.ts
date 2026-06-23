@@ -167,11 +167,17 @@ export class EventsService {
       aiReviewStatus = 'manual_review';
     }
 
-    // mock AI 点评（议事类事件 + 审核通过时生成）
-    const aiComment =
-      isTopicType && aiResult.result === 'pass'
-        ? generateMockAiComment(dto.title, dto.description)
-        : null;
+    // mock AI 点评（议事类事件 + 审核通过 + 开关开启时生成）
+    let aiComment: string | null = null;
+    if (isTopicType && aiResult.result === 'pass') {
+      const setting = await this.prisma.systemSetting.findUnique({
+        where: { key: 'ai_event_comment' },
+      });
+      const enabled = setting ? setting.value === 'true' : true;
+      if (enabled) {
+        aiComment = generateMockAiComment(dto.title, dto.description);
+      }
+    }
 
     const event = await this.prisma.event.create({
       data: {

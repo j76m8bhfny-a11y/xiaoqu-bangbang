@@ -1453,6 +1453,47 @@ export class AdminService {
     return { sourceTopicId, targetTopicId };
   }
 
+  // === AI 功能开关 ===
+  async getAiSettings() {
+    const keys = ['ai_topic_suggest', 'ai_topic_merge', 'ai_event_comment', 'ai_content_review'];
+    const settings = await this.prisma.systemSetting.findMany({ where: { key: { in: keys } } });
+    const map = new Map(settings.map((s) => [s.key, s.value === 'true']));
+    return {
+      aiTopicSuggest: map.get('ai_topic_suggest') ?? true,
+      aiTopicMerge: map.get('ai_topic_merge') ?? true,
+      aiEventComment: map.get('ai_event_comment') ?? true,
+      aiContentReview: map.get('ai_content_review') ?? true,
+    };
+  }
+
+  async updateAiSettings(
+    adminId: string,
+    dto: Partial<{
+      aiTopicSuggest: boolean;
+      aiTopicMerge: boolean;
+      aiEventComment: boolean;
+      aiContentReview: boolean;
+    }>,
+  ) {
+    const mapping: Record<string, string> = {
+      aiTopicSuggest: 'ai_topic_suggest',
+      aiTopicMerge: 'ai_topic_merge',
+      aiEventComment: 'ai_event_comment',
+      aiContentReview: 'ai_content_review',
+    };
+    for (const [k, dbKey] of Object.entries(mapping)) {
+      const v = (dto as any)[k];
+      if (typeof v !== 'boolean') continue;
+      await this.prisma.systemSetting.upsert({
+        where: { key: dbKey },
+        update: { value: String(v), updatedBy: adminId },
+        create: { key: dbKey, value: String(v), updatedBy: adminId },
+      });
+    }
+    await this.logAudit(adminId, 'update_ai_settings', 'system_setting', null, { dto });
+    return this.getAiSettings();
+  }
+
   // === Helpers ===
   private async logAudit(
     operatorId: string,
