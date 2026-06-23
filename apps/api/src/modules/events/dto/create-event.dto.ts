@@ -1,11 +1,4 @@
-import {
-  IsString,
-  IsOptional,
-  IsArray,
-  IsBoolean,
-  IsEnum,
-  IsNumber,
-} from 'class-validator';
+import { IsString, IsOptional, IsArray, IsBoolean, IsEnum, IsNumber } from 'class-validator';
 
 export class CreateEventDto {
   @IsEnum([
@@ -48,4 +41,8 @@ export class CreateEventDto {
   @IsOptional()
   @IsBoolean()
   isAnonymous?: boolean;
+
+  @IsOptional()
+  @IsString()
+  topicId?: string;
 }

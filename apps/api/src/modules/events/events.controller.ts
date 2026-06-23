@@ -54,12 +54,24 @@ export class EventsController {
     return { code: 0, message: 'ok', data: event };
   }
 
+  @Get('topic-suggestions')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  async topicSuggestions(
+    @CurrentCommunityId() communityId: string,
+    @Query('title') title?: string,
+    @Query('description') description?: string,
+  ) {
+    const items = await this.eventsService.suggestTopics(
+      communityId,
+      title ?? '',
+      description ?? '',
+    );
+    return { code: 0, message: 'ok', data: { items } };
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async findOne(
-    @Param('id') id: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
+  async findOne(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
     const event = await this.eventsService.findOne(id, communityId);
     return { code: 0, message: 'ok', data: event };
   }
@@ -89,10 +101,7 @@ export class EventsController {
 
   @Get(':id/applications')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async getApplications(
-    @Param('id') eventId: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
+  async getApplications(@Param('id') eventId: string, @CurrentCommunityId() communityId: string) {
     const items = await this.eventsService.getApplications(eventId, communityId);
     return { code: 0, message: 'ok', data: { items } };
   }
@@ -144,11 +153,7 @@ export class EventsController {
     @Param('id') eventId: string,
     @CurrentCommunityId() communityId: string,
   ) {
-    const result = await this.eventsService.confirmCompletion(
-      userId,
-      eventId,
-      communityId,
-    );
+    const result = await this.eventsService.confirmCompletion(userId, eventId, communityId);
     return { code: 0, message: 'ok', data: result };
   }
 
@@ -166,10 +171,7 @@ export class EventsController {
 
   @Get(':id/feedback-logs')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async getFeedbackLogs(
-    @Param('id') eventId: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
+  async getFeedbackLogs(@Param('id') eventId: string, @CurrentCommunityId() communityId: string) {
     const items = await this.eventsService.getFeedbackLogs(eventId, communityId);
     return { code: 0, message: 'ok', data: { items } };
   }
@@ -194,10 +196,7 @@ export class EventsController {
 
   @Get(':id/comments')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async getComments(
-    @Param('id') eventId: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
+  async getComments(@Param('id') eventId: string, @CurrentCommunityId() communityId: string) {
     const comments = await this.eventsService.getComments(eventId, communityId);
     return { code: 0, message: 'ok', data: { items: comments } };
   }
@@ -248,10 +247,7 @@ export class ReportsController {
   constructor(@Inject(EventsService) private eventsService: EventsService) {}
 
   @Post('reports')
-  async report(
-    @CurrentUser('userId') reporterId: string,
-    @Body() dto: ReportDto,
-  ) {
+  async report(@CurrentUser('userId') reporterId: string, @Body() dto: ReportDto) {
     const report = await this.eventsService.report(reporterId, dto);
     return { code: 0, message: 'ok', data: report };
   }

@@ -27,7 +27,9 @@ describe('Feature: 议事榜', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    );
     await app.init();
 
     prisma = app.get(PrismaService);
@@ -220,7 +222,12 @@ describe('Feature: 议事榜', () => {
     it('手动设置议题为 closed 后评分应成功', async () => {
       await prisma.topic.update({
         where: { id: topicId },
-        data: { status: 'closed', closedSummary: '已完成修复', closedAt: new Date(), closedBy: userIdA },
+        data: {
+          status: 'closed',
+          closedSummary: '已完成修复',
+          closedAt: new Date(),
+          closedBy: userIdA,
+        },
       });
 
       const res = await request(app.getHttpServer())
@@ -275,6 +282,65 @@ describe('Feature: 议事榜', () => {
       expect(res.body.data.items.length).toBeGreaterThanOrEqual(1);
       expect(res.body.data.items[0].type).toBe('event');
       expect(res.body.data.items[0].data.title).toBe('三栋花坛照片');
+    });
+  });
+
+  describe('Events 议题挂载 & 推荐', () => {
+    it('public_feedback 不传 topicId 应返回 400', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/events')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ type: 'public_feedback', title: '楼道灯坏了', description: '一楼楼道照明故障' });
+      expect(res.status).toBe(400);
+    });
+
+    it('help_request 传 topicId 应返回 400（非议事类不能挂议题）', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/events')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({
+          type: 'help_request',
+          title: '帮忙搬东西',
+          description: '周末',
+          topicId,
+        });
+      expect(res.status).toBe(400);
+    });
+
+    it('public_feedback 传合法 topicId 应成功并带 mock AI 点评', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/events')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({
+          type: 'public_feedback',
+          title: '三栋花坛又长草了',
+          description: '需要绿化部门处理',
+          topicId,
+        });
+      expect(res.status).toBe(201);
+      expect(res.body.data.topicId).toBe(topicId);
+      // 命中「花坛/绿化」模板
+      expect(res.body.data.aiComment).toContain('绿化');
+    });
+
+    it('GET /events/topic-suggestions 应返回相关议题', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/events/topic-suggestions')
+        .query({ title: '三栋花坛坏了', description: '想反馈花坛问题' })
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.data.items)).toBe(true);
+      expect(res.body.data.items.some((s: any) => s.topicId === topicId)).toBe(true);
+    });
+
+    it('GET /events/topic-suggestions 不相关内容应返回空或低相似度', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/events/topic-suggestions')
+        .query({ title: '完全不相干内容', description: 'xyzqwerty' })
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect(res.status).toBe(200);
+      const items = res.body.data.items;
+      expect(items.every((s: any) => s.similarity < 0.3)).toBe(true);
     });
   });
 });

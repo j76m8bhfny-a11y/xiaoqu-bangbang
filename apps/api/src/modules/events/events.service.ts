@@ -67,10 +67,7 @@ export class EventsService {
     return items;
   }
 
-  async count(
-    communityId: string,
-    query?: { type?: string; status?: string; keyword?: string },
-  ) {
+  async count(communityId: string, query?: { type?: string; status?: string; keyword?: string }) {
     const where: any = {
       communityId,
       deletedAt: null,
@@ -133,6 +130,20 @@ export class EventsService {
   }
 
   async create(userId: string, communityId: string, dto: any) {
+    // 议事类事件必须挂议题，非议事类不能挂议题
+    const isTopicType = dto.type === 'public_feedback' || dto.type === 'discussion';
+    if (isTopicType) {
+      if (!dto.topicId) {
+        throw new BadRequestException('议事类事件必须选择议题');
+      }
+      const topic = await this.prisma.topic.findUnique({ where: { id: dto.topicId } });
+      if (!topic || topic.communityId !== communityId) {
+        throw new BadRequestException('议题不存在或不属于当前小区');
+      }
+    } else if (dto.topicId) {
+      throw new BadRequestException('非议事类事件不能挂议题');
+    }
+
     // Run AI review on content - use a temp id for logging before creation
     const tempId = crypto.randomUUID();
     const aiResult = await this.aiReviewService.reviewText(
@@ -142,8 +153,8 @@ export class EventsService {
       { title: dto.title, description: dto.description },
     );
 
-    let status = 'pending_review';
-    let aiReviewStatus = 'pending';
+    let status: string;
+    let aiReviewStatus: string;
 
     if (aiResult.result === 'pass') {
       status = 'open';
@@ -155,6 +166,12 @@ export class EventsService {
       status = 'pending_review';
       aiReviewStatus = 'manual_review';
     }
+
+    // mock AI 点评（议事类事件 + 审核通过时生成）
+    const aiComment =
+      isTopicType && aiResult.result === 'pass'
+        ? generateMockAiComment(dto.title, dto.description)
+        : null;
 
     const event = await this.prisma.event.create({
       data: {
@@ -169,6 +186,8 @@ export class EventsService {
         locationText: dto.locationText ?? null,
         expectedTime: dto.expectedTime ? new Date(dto.expectedTime) : null,
         isAnonymous: dto.isAnonymous ?? false,
+        topicId: dto.topicId ?? null,
+        aiComment,
         status,
         aiReviewStatus,
         aiReviewResult: aiResult as any,
@@ -181,7 +200,33 @@ export class EventsService {
       data: { targetId: event.id },
     });
 
+    // 议事类事件审核通过 → 议题 eventCount +1
+    if (isTopicType && dto.topicId && status === 'open') {
+      await this.prisma.topic.update({
+        where: { id: dto.topicId },
+        data: { eventCount: { increment: 1 } },
+      });
+    }
+
     return event;
+  }
+
+  async suggestTopics(communityId: string, title: string, description: string) {
+    const topics = await this.prisma.topic.findMany({
+      where: { communityId, status: 'open' },
+      select: { id: true, title: true, description: true },
+    });
+    const queryTokens = topicTokenize(`${title} ${description}`);
+    if (queryTokens.size === 0 || topics.length === 0) return [];
+
+    const scored = topics.map((t) => {
+      const tokens = topicTokenize(`${t.title} ${t.description ?? ''}`);
+      return { topicId: t.id, title: t.title, similarity: topicJaccard(queryTokens, tokens) };
+    });
+    return scored
+      .filter((s) => s.similarity > 0)
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 3);
   }
 
   async update(userId: string, id: string, communityId: string, dto: any) {
@@ -208,13 +253,10 @@ export class EventsService {
     if (dto.description !== undefined) updateData.description = dto.description;
     if (dto.images !== undefined) updateData.images = dto.images;
     if (dto.rewardType !== undefined) updateData.rewardType = dto.rewardType;
-    if (dto.rewardAmount !== undefined)
-      updateData.rewardAmount = dto.rewardAmount;
+    if (dto.rewardAmount !== undefined) updateData.rewardAmount = dto.rewardAmount;
     if (dto.locationText !== undefined) updateData.locationText = dto.locationText;
     if (dto.expectedTime !== undefined)
-      updateData.expectedTime = dto.expectedTime
-        ? new Date(dto.expectedTime)
-        : null;
+      updateData.expectedTime = dto.expectedTime ? new Date(dto.expectedTime) : null;
     if (dto.isAnonymous !== undefined) updateData.isAnonymous = dto.isAnonymous;
 
     // Re-run AI review if content changed
@@ -419,21 +461,19 @@ export class EventsService {
     }
 
     // Determine role
-    const role =
-      event.creatorId === userId ? 'creator' : 'helper';
+    const role = event.creatorId === userId ? 'creator' : 'helper';
 
     // Upsert completion confirmation
-    const confirmation =
-      await this.prisma.eventCompletionConfirmation.upsert({
-        where: { eventId_userId_role: { eventId, userId, role } },
-        update: { status: 'requested' },
-        create: {
-          eventId,
-          userId,
-          role,
-          status: 'requested',
-        },
-      });
+    const confirmation = await this.prisma.eventCompletionConfirmation.upsert({
+      where: { eventId_userId_role: { eventId, userId, role } },
+      update: { status: 'requested' },
+      create: {
+        eventId,
+        userId,
+        role,
+        status: 'requested',
+      },
+    });
 
     return confirmation;
   }
@@ -453,8 +493,7 @@ export class EventsService {
       throw new ForbiddenException('只有创建者或帮手可以确认完成');
     }
 
-    const role =
-      event.creatorId === userId ? 'creator' : 'helper';
+    const role = event.creatorId === userId ? 'creator' : 'helper';
 
     // Create or update confirmation
     await this.prisma.eventCompletionConfirmation.upsert({
@@ -473,14 +512,12 @@ export class EventsService {
     });
 
     // Check if both parties confirmed
-    const confirmations =
-      await this.prisma.eventCompletionConfirmation.findMany({
-        where: { eventId, status: 'confirmed' },
-      });
+    const confirmations = await this.prisma.eventCompletionConfirmation.findMany({
+      where: { eventId, status: 'confirmed' },
+    });
 
     const confirmedRoles = new Set(confirmations.map((c) => c.role));
-    const allConfirmed =
-      confirmedRoles.has('creator') && confirmedRoles.has('helper');
+    const allConfirmed = confirmedRoles.has('creator') && confirmedRoles.has('helper');
 
     if (allConfirmed) {
       const completed = await this.prisma.event.update({
@@ -536,12 +573,9 @@ export class EventsService {
     }
 
     // Run AI review on comment
-    const aiResult = await this.aiReviewService.reviewText(
+    const aiResult = await this.aiReviewService.reviewText(content, 'event_comment', eventId, {
       content,
-      'event_comment',
-      eventId,
-      { content },
-    );
+    });
     const aiReviewStatus =
       aiResult.result === 'pass'
         ? 'pass'
@@ -631,12 +665,7 @@ export class EventsService {
     return { liked: true };
   }
 
-  async sendThanks(
-    fromUserId: string,
-    eventId: string,
-    toUserId: string,
-    communityId: string,
-  ) {
+  async sendThanks(fromUserId: string, eventId: string, toUserId: string, communityId: string) {
     const event = await this.prisma.event.findFirst({
       where: { id: eventId, deletedAt: null },
     });
@@ -813,4 +842,46 @@ export class EventsService {
       orderBy: { createdAt: 'desc' },
     });
   }
+}
+
+// mock AI 点评：按关键词命中模板
+function generateMockAiComment(title: string, description: string): string {
+  const text = `${title}${description ?? ''}`;
+  const templates: Array<{ keywords: string[]; comment: string }> = [
+    { keywords: ['花坛', '绿化', '草坪', '花圃'], comment: '建议联系物业绿化部门评估修复方案。' },
+    { keywords: ['电梯', '楼道', '楼梯'], comment: '建议报修物业工程部到现场查看处理。' },
+    { keywords: ['停车', '车位', '车库'], comment: '建议反馈业委会协调停车管理规范。' },
+    { keywords: ['垃圾', '卫生', '清洁'], comment: '建议联系物业保洁部门加强清理频次。' },
+    { keywords: ['噪音', '扰民', '吵闹'], comment: '建议物业协调并反馈居委会进行调解。' },
+    { keywords: ['水', '漏水', '管道'], comment: '建议立即联系物业维修组止漏并排查。' },
+    { keywords: ['门禁', '安保', '保安'], comment: '建议反馈物业加强出入口管理。' },
+  ];
+  for (const t of templates) {
+    if (t.keywords.some((k) => text.includes(k))) return t.comment;
+  }
+  return '建议联系物业核实情况并跟进处理。';
+}
+
+function topicTokenize(text: string): Set<string> {
+  const cleaned = text
+    .toLowerCase()
+    .replace(/[^\u4e00-\u9fa5a-z0-9]/g, ' ')
+    .trim();
+  const set = new Set<string>();
+  for (const w of cleaned.split(/\s+/)) {
+    if (w.length >= 2) set.add(w);
+  }
+  const chinese = cleaned.replace(/[a-z0-9]/g, '').replace(/\s+/g, '');
+  for (let i = 0; i < chinese.length - 1; i++) {
+    set.add(chinese.slice(i, i + 2));
+  }
+  return set;
+}
+
+function topicJaccard(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 || b.size === 0) return 0;
+  let inter = 0;
+  for (const x of a) if (b.has(x)) inter++;
+  const union = a.size + b.size - inter;
+  return union === 0 ? 0 : inter / union;
 }
