@@ -12,6 +12,7 @@ import {
 import { TopicsService } from './topics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
+import { VerifiedMemberGuard } from '../../common/guards/verified-member.guard';
 import { CurrentCommunityId } from '../../common/decorators/current-community.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { getPaginationParams } from '../../common/helpers/pagination';
@@ -39,12 +40,14 @@ export class TopicsController {
   }
 
   @Post('comments/:commentId/like')
+  @UseGuards(VerifiedMemberGuard)
   async likeComment(@CurrentUser('userId') userId: string, @Param('commentId') commentId: string) {
     const c = await this.topicsService.likeComment(commentId, userId, 'like');
     return { code: 0, message: 'ok', data: c };
   }
 
   @Post('comments/:commentId/dislike')
+  @UseGuards(VerifiedMemberGuard)
   async dislikeComment(
     @CurrentUser('userId') userId: string,
     @Param('commentId') commentId: string,
@@ -54,6 +57,7 @@ export class TopicsController {
   }
 
   @Delete('comments/:commentId/like')
+  @UseGuards(VerifiedMemberGuard)
   async unlikeComment(
     @CurrentUser('userId') userId: string,
     @Param('commentId') commentId: string,
@@ -63,6 +67,7 @@ export class TopicsController {
   }
 
   @Post()
+  @UseGuards(VerifiedMemberGuard)
   async create(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -79,6 +84,7 @@ export class TopicsController {
   }
 
   @Post(':id/like')
+  @UseGuards(VerifiedMemberGuard)
   async like(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -91,6 +97,7 @@ export class TopicsController {
   }
 
   @Post(':id/dislike')
+  @UseGuards(VerifiedMemberGuard)
   async dislike(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -103,6 +110,7 @@ export class TopicsController {
   }
 
   @Delete(':id/like')
+  @UseGuards(VerifiedMemberGuard)
   async unlike(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -114,6 +122,7 @@ export class TopicsController {
   }
 
   @Post(':id/rating')
+  @UseGuards(VerifiedMemberGuard)
   async rate(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -156,6 +165,7 @@ export class TopicsController {
   }
 
   @Post(':id/comments')
+  @UseGuards(VerifiedMemberGuard)
   async createComment(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,

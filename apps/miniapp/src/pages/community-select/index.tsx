@@ -36,91 +36,106 @@ export default function CommunitySelect() {
   };
 
   return (
-    <View className='cs'>
+    <View className="cs">
       {/* 顶部装饰区域 */}
-      <View className='cs__hero'>
-        <View className='cs__hero-decor'>
-          <Text className='cs__hero-emoji'>🏘️</Text>
+      <View className="cs__hero">
+        <View className="cs__hero-decor">
+          <Text className="cs__hero-emoji">🏘️</Text>
         </View>
-        <Text className='cs__hero-title'>选择您所在的小区</Text>
-        <Text className='cs__hero-subtitle'>加入社区，开启邻里互助之旅</Text>
+        <Text className="cs__hero-title">选择您所在的小区</Text>
+        <Text className="cs__hero-subtitle">加入社区，开启邻里互助之旅</Text>
       </View>
 
       {/* 搜索栏 */}
-      <View className='cs__search-wrap'>
-        <View className='cs__search'>
-          <Text className='cs__search-icon'>🔍</Text>
+      <View className="cs__search-wrap">
+        <View className="cs__search">
+          <Text className="cs__search-icon">🔍</Text>
           <Input
-            className='cs__search-input'
-            placeholder='搜索小区名称或地址...'
-            placeholderClass='cs__search-placeholder'
+            className="cs__search-input"
+            placeholder="搜索小区名称或地址..."
+            placeholderClass="cs__search-placeholder"
             value={keyword}
             onInput={(e) => setKeyword(e.detail.value)}
           />
           {keyword && (
-            <Text className='cs__search-clear' onClick={() => setKeyword('')}>✕</Text>
+            <Text className="cs__search-clear" onClick={() => setKeyword('')}>
+              ✕
+            </Text>
           )}
         </View>
       </View>
 
       {/* 小区列表 */}
-      <ScrollView scrollY className='cs__list'>
+      <ScrollView scrollY className="cs__list">
         {loading && (
-          <View className='cs__loading'>
-            <View className='cs__loading-dots'>
-              <View className='cs__loading-dot' />
-              <View className='cs__loading-dot' />
-              <View className='cs__loading-dot' />
+          <View className="cs__loading">
+            <View className="cs__loading-dots">
+              <View className="cs__loading-dot" />
+              <View className="cs__loading-dot" />
+              <View className="cs__loading-dot" />
             </View>
-            <Text className='cs__loading-text'>正在搜索小区...</Text>
+            <Text className="cs__loading-text">正在搜索小区...</Text>
           </View>
         )}
 
         {error && (
-          <View className='cs__empty'>
-            <Text className='cs__empty-emoji'>😵</Text>
-            <Text className='cs__empty-text'>加载失败，请重试</Text>
+          <View className="cs__empty">
+            <Text className="cs__empty-emoji">😵</Text>
+            <Text className="cs__empty-text">加载失败，请重试</Text>
           </View>
         )}
 
         {!loading && !error && communities.length === 0 && (
-          <View className='cs__empty'>
-            <Text className='cs__empty-emoji'>🏘️</Text>
-            <Text className='cs__empty-text'>未找到匹配的小区</Text>
-            <Text className='cs__empty-hint'>换个关键词试试？</Text>
+          <View className="cs__empty">
+            <Text className="cs__empty-emoji">🏘️</Text>
+            <Text className="cs__empty-text">未找到匹配的小区</Text>
+            <Text className="cs__empty-hint">换个关键词试试？</Text>
+            <View
+              className="cs__empty-cta"
+              onClick={() => Taro.navigateTo({ url: '/pages/community-apply/index' })}
+            >
+              <Text className="cs__empty-cta-text">+ 申请开通你家小区</Text>
+            </View>
           </View>
         )}
 
         {!loading &&
           communities.map((c) => (
-            <View key={c.id} className='cs__card' onClick={() => handleSelect(c)}>
-              <View className='cs__card-left'>
-                <View className='cs__card-icon'>
-                  <Text className='cs__card-icon-text'>🏠</Text>
+            <View key={c.id} className="cs__card" onClick={() => handleSelect(c)}>
+              <View className="cs__card-left">
+                <View className="cs__card-icon">
+                  <Text className="cs__card-icon-text">🏠</Text>
                 </View>
               </View>
-              <View className='cs__card-body'>
-                <Text className='cs__card-name'>{c.name}</Text>
-                <View className='cs__card-meta'>
-                  <Text className='cs__card-district'>{c.district}</Text>
+              <View className="cs__card-body">
+                <Text className="cs__card-name">{c.name}</Text>
+                <View className="cs__card-meta">
+                  <Text className="cs__card-district">{c.district}</Text>
                   {c.address && (
                     <>
-                      <Text className='cs__card-dot'>·</Text>
-                      <Text className='cs__card-address'>{c.address}</Text>
+                      <Text className="cs__card-dot">·</Text>
+                      <Text className="cs__card-address">{c.address}</Text>
                     </>
                   )}
                 </View>
               </View>
-              <View className='cs__card-right'>
-                <View className='cs__card-badge'>
-                  <Text className='cs__card-badge-num'>{formatMemberCount(c.memberCount)}</Text>
-                  <Text className='cs__card-badge-label'>人已入驻</Text>
+              <View className="cs__card-right">
+                <View className="cs__card-badge">
+                  <Text className="cs__card-badge-num">{formatMemberCount(c.memberCount)}</Text>
+                  <Text className="cs__card-badge-label">人已入驻</Text>
                 </View>
-                <Text className='cs__card-arrow'>›</Text>
+                <Text className="cs__card-arrow">›</Text>
               </View>
             </View>
           ))}
       </ScrollView>
+
+      <View
+        className="cs__apply-bar"
+        onClick={() => Taro.navigateTo({ url: '/pages/community-apply/index' })}
+      >
+        <Text className="cs__apply-text">+ 没找到？申请开通你家小区</Text>
+      </View>
     </View>
   );
 }

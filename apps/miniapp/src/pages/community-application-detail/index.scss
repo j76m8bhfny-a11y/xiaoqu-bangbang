@@ -1,0 +1,286 @@
+@use '../../styles/tokens.scss' as *;
+
+.cad {
+  min-height: 100vh;
+  background: $color-bg;
+  display: flex;
+  flex-direction: column;
+
+  &__body {
+    flex: 1;
+    padding: $spacing-md;
+    padding-bottom: 160px;
+  }
+
+  // ===== Hero =====
+  &__hero {
+    background: linear-gradient(135deg, #fff8ec 0%, #ffeebf 100%);
+    border-radius: $radius-md;
+    padding: $spacing-lg;
+    position: relative;
+    margin-bottom: $spacing-md;
+  }
+
+  &__status {
+    position: absolute;
+    top: $spacing-md;
+    right: $spacing-md;
+    padding: 4px 16px;
+    border-radius: $radius-pill;
+    font-size: $font-size-xs;
+
+    &--orange {
+      background: $color-bg-orange;
+    }
+    &--green {
+      background: $color-bg-green;
+    }
+    &--red {
+      background: rgba(255, 107, 107, 0.1);
+    }
+    &--gray {
+      background: rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &__status-text {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+
+    .cad__status--orange & {
+      color: $color-accent;
+    }
+    .cad__status--green & {
+      color: $color-success;
+    }
+    .cad__status--red & {
+      color: $color-danger;
+    }
+    .cad__status--gray & {
+      color: $color-text-secondary;
+    }
+  }
+
+  &__hero-name {
+    display: block;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: 8px;
+    padding-right: 120px;
+  }
+
+  &__hero-location {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: 4px;
+  }
+
+  &__hero-address {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    line-height: 1.5;
+  }
+
+  // ===== Count card =====
+  &__count-card {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-lg;
+    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+    text-align: center;
+    margin-bottom: $spacing-md;
+  }
+
+  &__count-num {
+    display: block;
+    font-size: 72px;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+    line-height: 1;
+  }
+
+  &__count-label {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text;
+    margin-top: 8px;
+  }
+
+  &__count-hint {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-top: $spacing-sm;
+  }
+
+  // ===== Cards =====
+  &__card {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-lg $spacing-md;
+    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+    margin-bottom: $spacing-md;
+
+    &--rejected {
+      background: rgba(255, 107, 107, 0.05);
+    }
+  }
+
+  &__section-title {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: $spacing-md;
+  }
+
+  // ===== Applicant =====
+  &__applicant {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__applicant-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+
+    &--placeholder {
+      background: $color-bg-green;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  &__applicant-avatar-text {
+    font-size: $font-size-md;
+    color: $color-primary;
+    font-weight: $font-weight-bold;
+  }
+
+  &__applicant-info {
+    flex: 1;
+  }
+
+  &__applicant-name {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-dark;
+    font-weight: $font-weight-medium;
+  }
+
+  &__applicant-mine {
+    color: $color-primary;
+    font-size: $font-size-xs;
+    margin-left: 4px;
+  }
+
+  &__applicant-reason {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  // ===== Supporters =====
+  &__supporters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+  }
+
+  &__supporter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 96px;
+  }
+
+  &__supporter-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+
+    &--placeholder {
+      background: $color-bg-green;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  &__supporter-avatar-text {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    font-weight: $font-weight-bold;
+  }
+
+  &__supporter-name {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // ===== Reject =====
+  &__reject-text {
+    font-size: $font-size-sm;
+    color: $color-danger;
+    line-height: 1.6;
+  }
+
+  // ===== Footer =====
+  &__footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding: $spacing-md;
+    padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  &__support-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 88px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    box-shadow: 0 4px 16px rgba(53, 232, 154, 0.3);
+
+    &--disabled {
+      background: #ccc;
+      box-shadow: none;
+    }
+  }
+
+  &__support-text {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: #fff;
+  }
+
+  &__footer-tip {
+    display: block;
+    text-align: center;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: 1.5;
+    padding: $spacing-sm 0;
+  }
+
+  &__bottom-spacer {
+    height: $spacing-lg;
+  }
+}

@@ -1,88 +1,278 @@
 @use '../../styles/tokens.scss' as *;
 
-.home {
+$radius-xl: 40px;
+
+.mine {
   min-height: 100vh;
   background: $color-bg;
-  position: relative;
 
-  &__scroll {
-    height: calc(100vh - 100px);
+  &__user-card {
+    position: relative;
+    overflow: hidden;
   }
 
-  &__section {
-    margin-bottom: $spacing-xs;
+  &__user-bg {
+    height: 280px;
+    background: linear-gradient(135deg, $color-primary 0%, #2ad488 50%, $color-cream 100%);
+    border-radius: 0 0 $radius-xl $radius-xl;
   }
 
-  &__ranking-wrap {
-    padding: 0 $spacing-md;
-  }
-
-  &__service-scroll {
-    width: 100%;
-    white-space: nowrap;
-  }
-
-  &__service-list {
-    display: inline-flex;
-    gap: $spacing-sm;
-    padding: 0 $spacing-md $spacing-md;
-  }
-
-  &__events {
-    padding: 0 $spacing-md;
-  }
-
-  &__announcements {
-    padding: 0 $spacing-md;
-  }
-
-  &__announcement-card {
-    padding: $spacing-sm $spacing-md;
-    background: #fff;
-    border-radius: $radius-md;
-    margin-bottom: $spacing-xs;
-    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
-
-    &:active {
-      opacity: 0.7;
-    }
-  }
-
-  &__announcement-top {
+  &__user-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
-    gap: $spacing-xs;
-    margin-bottom: 8px;
+    gap: $spacing-md;
+    padding: 0 $spacing-lg $spacing-lg;
   }
 
-  &__announcement-title {
-    flex: 1;
-    font-size: $font-size-md;
-    font-weight: $font-weight-medium;
-    color: $color-dark;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  &__announcement-pin {
-    display: inline-flex;
+  &__avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
     align-items: center;
-    padding: 2px 12px;
-    border-radius: $radius-pill;
-    background: $color-bg-orange;
+    justify-content: center;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 16px rgba(23, 23, 23, 0.1);
     flex-shrink: 0;
   }
 
-  &__announcement-pin-text {
+  &__avatar-text {
+    font-size: 60px;
+  }
+
+  &__avatar-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+  }
+
+  &__user-detail {
+    flex: 1;
+  }
+
+  &__user-name {
+    display: block;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: #fff;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__user-tags {
+    display: flex;
+    gap: $spacing-xs;
+  }
+
+  &__user-tag {
+    padding: 2px 12px;
+    border-radius: $radius-pill;
+
+    &--verified {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    &--community {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  &__user-tag-text {
     font-size: 20px;
-    color: $color-accent;
+    color: #fff;
     font-weight: $font-weight-medium;
   }
 
-  &__announcement-date {
-    display: block;
-    font-size: $font-size-xs;
+  &__stats {
+    display: flex;
+    justify-content: space-around;
+    padding: $spacing-md $spacing-md $spacing-sm;
+    margin: -$spacing-md $spacing-md 0;
+    background: #fff;
+    border-radius: $radius-md;
+    box-shadow: 0 4px 16px rgba(23, 23, 23, 0.06);
+    position: relative;
+    z-index: 10;
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__stat-icon {
+    font-size: 32px;
+    margin-bottom: 2px;
+  }
+
+  &__stat-value {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+  }
+
+  &__stat-label {
+    font-size: 20px;
+    color: $color-text-secondary;
+  }
+
+  &__content {
+    height: calc(100vh - 480px);
+  }
+
+  &__activities {
+    padding: $spacing-md $spacing-md 0;
+  }
+
+  &__section-title {
+    margin-bottom: $spacing-sm;
+  }
+
+  &__section-title-text {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+  }
+
+  &__activity-grid {
+    display: flex;
+    gap: $spacing-sm;
+  }
+
+  &__activity-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-sm $spacing-xs;
+    background: #fff;
+    border-radius: $radius-md;
+    position: relative;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+  }
+
+  &__activity-icon-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: $color-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+
+  &__activity-icon {
+    font-size: 36px;
+  }
+
+  &__activity-label {
+    font-size: 20px;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+  }
+
+  &__activity-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    min-width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background: $color-danger;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+  }
+
+  &__activity-badge-text {
+    font-size: 18px;
+    color: #fff;
+    font-weight: $font-weight-bold;
+  }
+
+  &__menu-group {
+    margin: $spacing-sm $spacing-md 0;
+    background: #fff;
+    border-radius: $radius-md;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+  }
+
+  &__menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    // Button openType=share 复用 menu-item 样式时去掉微信默认按钮外观
+    &--share {
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      width: 100%;
+      line-height: 1.4;
+      text-align: left;
+
+      &::after {
+        border: none;
+      }
+    }
+  }
+
+  &__menu-left {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__menu-icon {
+    font-size: $font-size-md;
+  }
+
+  &__menu-label {
+    font-size: $font-size-sm;
+    color: $color-dark;
+    font-weight: $font-weight-medium;
+  }
+
+  &__menu-right {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+
+  &__menu-badge {
+    min-width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background: $color-danger;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+  }
+
+  &__menu-badge-text {
+    font-size: 18px;
+    color: #fff;
+    font-weight: $font-weight-bold;
+  }
+
+  &__menu-arrow {
+    font-size: $font-size-lg;
     color: $color-text-secondary;
   }
 
@@ -90,38 +280,77 @@
     height: 120px;
   }
 
-  &__fab {
-    position: fixed;
-    right: $spacing-md;
-    bottom: 200px;
+  // 双发布入口（S1-5 新增）
+  &__publish-row {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    z-index: 50;
+    gap: 20rpx;
+    padding: 24rpx;
   }
 
-  &__fab-inner {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: $color-primary;
+  &__publish-btn {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 20px rgba(53, 232, 154, 0.4);
+    gap: 12rpx;
+    height: 96rpx;
+    border-radius: 20rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+
+    &--plaza {
+      background: linear-gradient(135deg, #ffd591, #ffa940);
+    }
+
+    &--events {
+      background: linear-gradient(135deg, #6ee7b7, #35e89a);
+    }
   }
 
-  &__fab-plus {
-    font-size: 52px;
-    color: #fff;
-    font-weight: $font-weight-bold;
-    line-height: 1;
+  &__publish-icon {
+    font-size: 36rpx;
   }
 
-  &__fab-label {
-    font-size: 20px;
-    color: $color-primary;
-    font-weight: $font-weight-medium;
+  &__publish-text {
+    font-size: 30rpx;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  // 活跃数据行（S1-5 新增，dashboard 概览）
+  &__active-row {
+    display: flex;
+    gap: 16rpx;
+    padding: 0 24rpx 24rpx;
+    flex-wrap: wrap;
+  }
+
+  &__active-item {
+    flex: 1;
+    min-width: 150rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 16rpx;
+    padding: 20rpx 12rpx;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  }
+
+  &__active-icon {
+    font-size: 36rpx;
+    margin-bottom: 6rpx;
+  }
+
+  &__active-value {
+    font-size: 32rpx;
+    font-weight: 700;
+    color: #35e89a;
+    line-height: 1.2;
+  }
+
+  &__active-label {
+    font-size: 22rpx;
+    color: #7a7a7a;
+    margin-top: 4rpx;
   }
 }

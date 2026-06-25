@@ -15,6 +15,7 @@ import { AddMarketCommentDto } from './dto/add-comment.dto';
 import { AddMarketReviewDto } from './dto/add-review.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
+import { VerifiedMemberGuard } from '../../common/guards/verified-member.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CurrentCommunityId } from '../../common/decorators/current-community.decorator';
 import { getPaginationParams } from '../../common/helpers/pagination';
@@ -52,10 +53,7 @@ export class MarketController {
 
   @Get('items/:id')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async findOne(
-    @Param('id') id: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
+  async findOne(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
     const item = await this.marketService.findOne(id, communityId);
     return { code: 0, message: 'ok', data: item };
   }
@@ -85,16 +83,13 @@ export class MarketController {
 
   @Get('items/:id/comments')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async getComments(
-    @Param('id') itemId: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
+  async getComments(@Param('id') itemId: string, @CurrentCommunityId() communityId: string) {
     const comments = await this.marketService.getComments(itemId, communityId);
     return { code: 0, message: 'ok', data: { items: comments } };
   }
 
   @Post('items/:id/comments')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async addComment(
     @CurrentUser('userId') userId: string,
     @Param('id') itemId: string,
@@ -113,15 +108,13 @@ export class MarketController {
 
   @Get('items/:id/reviews')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async getReviews(
-    @Param('id') itemId: string,
-  ) {
+  async getReviews(@Param('id') itemId: string) {
     const reviews = await this.marketService.getReviews(itemId);
     return { code: 0, message: 'ok', data: { items: reviews } };
   }
 
   @Post('items/:id/reviews')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async addReview(
     @CurrentUser('userId') userId: string,
     @Param('id') itemId: string,

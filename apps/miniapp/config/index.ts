@@ -13,7 +13,7 @@ export default defineConfig({
   },
   sourceRoot: 'src',
   outputRoot: 'dist',
-  plugins: ['@tarojs/plugin-framework-react'],
+  plugins: ['@tarojs/plugin-framework-react', '@tarojs/plugin-platform-weapp'],
   defineConstants: {},
   copy: { patterns: [], options: {} },
   framework: 'react',

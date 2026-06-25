@@ -1,289 +1,324 @@
-import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
-import { useCommunityStore, useNotificationStore } from '@/store';
-import { eventService, bannerService, serviceProviderService, rankingService, committeeService } from '@/services';
+import { View, Text, ScrollView, Image, Button } from '@tarojs/components';
+import Taro, { useShareAppMessage } from '@tarojs/taro';
+import { useEffect, useState } from 'react';
+import { useAuthStore, useCommunityStore } from '@/store';
+import { authService, rankingService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
-import { mapEventDtoToCardData, mapRankingItemToUser, mapBannerDtoToItem, mapServiceProviderDto } from '@/utils/mappers';
-import { PeriodType } from '@xiaoqu-bangbang/shared';
-import AppHeader from '../../components/app-header';
-import BannerCarousel from '../../components/banner-carousel';
-import QuickEntryGrid from '../../components/quick-entry';
-import EventCard from '../../components/event-card';
-import RankingTop3 from '../../components/ranking-top3';
-import ServiceProviderCard from '../../components/service-card';
-import SectionHeader from '../../components/section-header';
-import Loading from '../../components/loading';
-import ErrorState from '../../components/error-state';
-import EmptyState from '../../components/empty-state';
+import Onboarding, { shouldShowOnboarding } from '@/components/onboarding';
 import './index.scss';
 
-function formatDate(isoString: string): string {
-  const d = new Date(isoString);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+// home 即「我的」：用户卡片 + dashboard 概览 + 2 个发布入口 + 我的动态 + 设置菜单。
+// 内容沿用 pages/mine 的视觉骨架，再叠加 /me/dashboard 的活跃数据；
+// 视觉 className 复用 `mine`（home/index.scss 即 mine SCSS 的拷贝），避免重写样式。
+
+interface MenuItem {
+  id: string;
+  label: string;
+  icon: string;
+  count?: number;
 }
+
+const MY_ACTIVITIES = [
+  // ponytail: events / market 都是 tabBar，跳转用 switchTab；?tab=xxx 参数在 switchTab 下不传递，
+  //          故 events 页内默认 tab 由用户自己切换。需要参数透传待下迭代用全局 store 传值。
+  { id: 'a1', title: '我发布的求助', icon: '🆘', page: '/pages/events/index', tab: true },
+  { id: 'a2', title: '我参与的互助', icon: '🤝', page: '/pages/events/index', tab: true },
+  { id: 'a3', title: '我的闲置', icon: '📦', page: '/pages/events/index', tab: true },
+  { id: 'a4', title: '我的公益', icon: '☀️', page: '/pages/events/index', tab: true },
+];
+
+const MENU_ITEMS: MenuItem[][] = [
+  [
+    { id: 'verify', label: '业主认证', icon: '✅' },
+    { id: 'my_badges', label: '我的勋章', icon: '🏅' },
+    { id: 'my_rank', label: '我的排名', icon: '📊' },
+  ],
+  [
+    { id: 'notifications', label: '消息通知', icon: '🔔' },
+    { id: 'feedback_history', label: '反馈记录', icon: '📝' },
+    { id: 'my_services', label: '我的服务', icon: '🔧' },
+  ],
+  [
+    { id: 'community_apply', label: '申请开通小区', icon: '🏘️' },
+    { id: 'my_applications', label: '我的小区申请', icon: '📑' },
+    { id: 'invite', label: '邀请邻居', icon: '💌' },
+    { id: 'settings', label: '设置', icon: '⚙️' },
+    { id: 'about', label: '关于我们', icon: '💡' },
+  ],
+];
+
+const MENU_ROUTES: Record<string, string> = {
+  verify: '/pages/verify/index',
+  my_badges: '/pages/badges/index',
+  my_rank: '/pages/ranking/index',
+  my_services: '/pages/service-providers/index',
+  notifications: '/pages/notifications/index',
+  feedback_history: '/pages/events/index?tab=my_feedback',
+  settings: '/pages/settings/index',
+  community_apply: '/pages/community-apply/index',
+  my_applications: '/pages/my-applications/index',
+};
 
 export default function Home() {
   useAuthGuard();
 
-  const communityId = useCommunityStore((s) => s.currentCommunityId);
+  const user = useAuthStore((s) => s.user);
   const communityName = useCommunityStore((s) => s.currentCommunityName);
-  const unreadCount = useNotificationStore((s) => s.unreadCount);
 
-  const {
-    data: banners,
-    loading: bannersLoading,
-    error: bannersError,
-    refresh: refreshBanners,
-  } = useRequest(
-    () => bannerService.list(communityId ?? undefined).then((r) => r.items.map(mapBannerDtoToItem)),
-    [communityId],
-    { enabled: !!communityId },
+  // 首次登录新手引导
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    if (user && shouldShowOnboarding()) setShowOnboarding(true);
+  }, [user]);
+
+  const { data: myRanking } = useRequest(
+    () => rankingService.getMyRanking(),
+    [user?.id, communityName],
+    {
+      enabled: !!user,
+    },
   );
 
-  const {
-    data: events,
-    loading: eventsLoading,
-    error: eventsError,
-    refresh: refreshEvents,
-  } = useRequest(
-    () => eventService.list({ communityId: communityId!, pageSize: 3 }).then((r) => r.items.map(mapEventDtoToCardData)),
-    [communityId],
-    { enabled: !!communityId },
+  const { data: dashboard } = useRequest(
+    () => authService.getDashboard(),
+    [user?.id, communityName],
+    {
+      enabled: !!user,
+    },
   );
 
-  const {
-    data: helpEvents,
-    loading: helpEventsLoading,
-    error: helpEventsError,
-    refresh: refreshHelpEvents,
-  } = useRequest(
-    () => eventService.list({ communityId: communityId!, pageSize: 10 }).then((r) =>
-      r.items
-        .filter((e) => e.type === 'help_request' || e.type === 'help_offer')
-        .slice(0, 3)
-        .map(mapEventDtoToCardData)
-    ),
-    [communityId],
-    { enabled: !!communityId },
-  );
+  useShareAppMessage(() => ({
+    title: communityName
+      ? `${communityName}的邻居都在用「小区帮榜棒」`
+      : '邻里互助，从小区帮榜棒开始',
+    path: '/pages/home/index',
+  }));
 
-  const {
-    data: announcements,
-    loading: announcementsLoading,
-    error: announcementsError,
-    refresh: refreshAnnouncements,
-  } = useRequest(
-    () => committeeService.getAnnouncements().then((r) => r.items?.slice(0, 3) ?? []),
-    [communityId],
-    { enabled: !!communityId },
-  );
+  const nickname = user?.nickname ?? '邻居';
+  const isVerified = user?.verifyStatus === 'verified';
+  const verifyLabel = isVerified ? '✅ 已认证' : '⏳ 未认证';
+  const verifyClass = isVerified ? 'mine__user-tag--verified' : 'mine__user-tag--unverified';
 
-  const {
-    data: top3,
-    loading: top3Loading,
-    error: top3Error,
-    refresh: refreshTop3,
-  } = useRequest(
-    () => rankingService.list({ communityId: communityId!, periodType: PeriodType.TOTAL, pageSize: 3 }).then((r) => r.items.map(mapRankingItemToUser)),
-    [communityId],
-    { enabled: !!communityId },
-  );
+  const stats = [
+    { label: '帮助次数', value: myRanking?.helpCount ?? 0, icon: '🤲' },
+    { label: '小红花', value: myRanking?.flowerCount ?? 0, icon: '🌸' },
+    { label: '勋章', value: myRanking?.badgeCount ?? 0, icon: '🏅' },
+  ];
 
-  const {
-    data: services,
-    loading: servicesLoading,
-    error: servicesError,
-    refresh: refreshServices,
-  } = useRequest(
-    () => serviceProviderService.list().then((r) => r.items.map(mapServiceProviderDto)),
-    [],
-    { enabled: !!communityId },
-  );
+  // dashboard 上的活跃数据 —— 没数据时不渲染整行
+  const activeBlocks: {
+    key: string;
+    icon: string;
+    label: string;
+    value: number;
+    onClick: () => void;
+  }[] = [];
+  if (dashboard) {
+    if (dashboard.myActiveEventCount > 0) {
+      activeBlocks.push({
+        key: 'active_event',
+        icon: '📋',
+        label: '进行中互助',
+        value: dashboard.myActiveEventCount,
+        // events 是 tabBar 页，必须 switchTab；tab 参数无法透传，先跳到默认。
+        onClick: () => Taro.switchTab({ url: '/pages/events/index' }),
+      });
+    }
+    if (dashboard.myActiveMarketCount > 0) {
+      activeBlocks.push({
+        key: 'active_market',
+        icon: '📦',
+        label: '在售闲置',
+        value: dashboard.myActiveMarketCount,
+        onClick: () => Taro.navigateTo({ url: '/pages/market/index?tab=my' }),
+      });
+    }
+    if (dashboard.pendingVotes && dashboard.pendingVotes.length > 0) {
+      activeBlocks.push({
+        key: 'pending_votes',
+        icon: '🗳️',
+        label: '待投票',
+        value: dashboard.pendingVotes.length,
+        onClick: () => Taro.navigateTo({ url: '/pages/votes/index' }),
+      });
+    }
+    if (dashboard.unreadNotificationCount > 0) {
+      activeBlocks.push({
+        key: 'unread',
+        icon: '🔔',
+        label: '未读消息',
+        value: dashboard.unreadNotificationCount,
+        onClick: () => Taro.navigateTo({ url: '/pages/notifications/index' }),
+      });
+    }
+  }
 
-  const handleBannerClick = (bannerId: string) => {
-    const banner = banners?.find((b) => b.id === bannerId);
-    if (!banner) return;
-    const { linkType, linkId, linkUrl } = banner;
-    switch (linkType) {
-      case 'event':
-        if (linkId) Taro.navigateTo({ url: `/pages/event-detail/index?id=${linkId}` });
-        break;
-      case 'market':
-        if (linkId) Taro.navigateTo({ url: `/pages/market-detail/index?id=${linkId}` });
-        break;
-      case 'announcement':
-        if (linkId) Taro.navigateTo({ url: `/pages/committee-announcement/index?id=${linkId}` });
-        break;
-      case 'service_provider':
-        if (linkId) Taro.navigateTo({ url: `/pages/service-provider-detail/index?id=${linkId}` });
-        break;
-      case 'url':
-        if (linkUrl) {
-          Taro.setClipboardData({ data: linkUrl });
-        }
-        break;
+  const handleMenuClick = (item: MenuItem) => {
+    if (item.id === 'about') {
+      Taro.showModal({
+        title: '小区帮榜棒',
+        content: '邻里互助，共建美好社区\n版本：1.0.0',
+        showCancel: false,
+      });
+      return;
+    }
+    const route = MENU_ROUTES[item.id];
+    if (route) {
+      Taro.navigateTo({ url: route });
     }
   };
 
-  const anyLoading = bannersLoading || eventsLoading || top3Loading || servicesLoading || helpEventsLoading || announcementsLoading;
-
-  if (anyLoading && !communityId) {
-    return <Loading text='加载中...' />;
-  }
+  const handleActivityClick = (act: (typeof MY_ACTIVITIES)[number]) => {
+    if (act.tab) {
+      Taro.switchTab({ url: act.page });
+    } else {
+      Taro.navigateTo({ url: act.page });
+    }
+  };
 
   return (
-    <View className='home'>
-      <AppHeader
-        communityName={communityName ?? '选择小区'}
-        unreadCount={unreadCount}
-        onSwitchCommunity={() => Taro.navigateTo({ url: '/pages/community-select/index' })}
-        onNotificationClick={() => Taro.navigateTo({ url: '/pages/notifications/index' })}
-      />
-
-      <ScrollView scrollY className='home__scroll'>
-        {/* Banner轮播 */}
-        <View className='home__section'>
-          {bannersError ? (
-            <ErrorState message='轮播图加载失败' onRetry={refreshBanners} />
-          ) : (
-            <BannerCarousel banners={banners ?? undefined} onBannerClick={handleBannerClick} />
-          )}
-        </View>
-
-        {/* 快捷发布宫格 */}
-        <View className='home__section'>
-          <QuickEntryGrid onEntryClick={(key) => {
-            if (key === 'vote') {
-              Taro.navigateTo({ url: '/pages/votes/index' });
-            } else if (key === 'committee') {
-              Taro.navigateTo({ url: '/pages/committee/index' });
-            } else {
-              Taro.navigateTo({ url: `/pages/event-create/index?type=${key}` });
-            }
-          }} />
-        </View>
-
-        {/* 今日互助 */}
-        <View className='home__section'>
-          <SectionHeader title='🌸 今日互助' subtitle='让小区里的好事被看见' actionText='查看全部' onAction={() => Taro.navigateTo({ url: '/pages/events/index?tab=help_request' })} />
-          <View className='home__events'>
-            {helpEventsError ? (
-              <ErrorState message='互助动态加载失败' onRetry={refreshHelpEvents} />
-            ) : helpEventsLoading ? (
-              <Loading text='加载中...' />
-            ) : helpEvents && helpEvents.length > 0 ? (
-              helpEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  data={event}
-                  onCtaClick={(id) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` })}
-                />
-              ))
+    <View className="mine">
+      {/* 用户信息卡片 */}
+      <View
+        className="mine__user-card"
+        onClick={() => Taro.navigateTo({ url: '/pages/profile-edit/index' })}
+      >
+        <View className="mine__user-bg" />
+        <View className="mine__user-info">
+          <View className="mine__avatar">
+            {user?.avatarUrl ? (
+              <Image className="mine__avatar-img" src={user.avatarUrl} mode="aspectFill" />
             ) : (
-              <EmptyState icon='🌸' text='暂无互助动态' />
+              <Text className="mine__avatar-text">{nickname.slice(0, 1)}</Text>
             )}
+          </View>
+          <View className="mine__user-detail">
+            <Text className="mine__user-name">{nickname}</Text>
+            <View className="mine__user-tags">
+              <View className={`mine__user-tag ${verifyClass}`}>
+                <Text className="mine__user-tag-text">{verifyLabel}</Text>
+              </View>
+              {communityName && (
+                <View className="mine__user-tag mine__user-tag--community">
+                  <Text className="mine__user-tag-text">🏠 {communityName}</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* 数据统计 */}
+      <View className="mine__stats">
+        {stats.map((stat) => (
+          <View key={stat.label} className="mine__stat">
+            <Text className="mine__stat-icon">{stat.icon}</Text>
+            <Text className="mine__stat-value">{stat.value}</Text>
+            <Text className="mine__stat-label">{stat.label}</Text>
+          </View>
+        ))}
+      </View>
+
+      <ScrollView scrollY className="mine__content">
+        {/* 双发布入口 */}
+        <View className="mine__publish-row">
+          <View
+            className="mine__publish-btn mine__publish-btn--plaza"
+            onClick={() => Taro.switchTab({ url: '/pages/plaza/index' })}
+          >
+            <Text className="mine__publish-icon">📣</Text>
+            <Text className="mine__publish-text">发公共反馈</Text>
+          </View>
+          <View
+            className="mine__publish-btn mine__publish-btn--events"
+            onClick={() => Taro.navigateTo({ url: '/pages/event-create/index' })}
+          >
+            <Text className="mine__publish-icon">🤝</Text>
+            <Text className="mine__publish-text">发邻里互助</Text>
           </View>
         </View>
 
-        {/* 业委会公告 */}
-        <View className='home__section'>
-          <SectionHeader title='📢 业委会公告' actionText='查看全部' onAction={() => Taro.navigateTo({ url: '/pages/committee/index' })} />
-          <View className='home__announcements'>
-            {announcementsError ? (
-              <ErrorState message='公告加载失败' onRetry={refreshAnnouncements} />
-            ) : announcementsLoading ? (
-              <Loading text='加载中...' />
-            ) : announcements && announcements.length > 0 ? (
-              announcements.map((ann) => (
-                <View
-                  key={ann.id}
-                  className='home__announcement-card'
-                  onClick={() => Taro.navigateTo({ url: `/pages/committee-announcement/index?id=${ann.id}` })}
+        {/* 活跃数据（dashboard） */}
+        {activeBlocks.length > 0 && (
+          <View className="mine__active-row">
+            {activeBlocks.map((b) => (
+              <View key={b.key} className="mine__active-item" onClick={b.onClick}>
+                <Text className="mine__active-icon">{b.icon}</Text>
+                <Text className="mine__active-value">{b.value}</Text>
+                <Text className="mine__active-label">{b.label}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* 我的动态入口 */}
+        <View className="mine__activities">
+          <View className="mine__section-title">
+            <Text className="mine__section-title-text">我的动态</Text>
+          </View>
+          <View className="mine__activity-grid">
+            {MY_ACTIVITIES.map((act) => (
+              <View
+                key={act.id}
+                className="mine__activity-item"
+                onClick={() => handleActivityClick(act)}
+              >
+                <View className="mine__activity-icon-wrap">
+                  <Text className="mine__activity-icon">{act.icon}</Text>
+                </View>
+                <Text className="mine__activity-label">{act.title}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* 菜单列表 */}
+        {MENU_ITEMS.map((group, gi) => (
+          <View key={gi} className="mine__menu-group">
+            {group.map((item) =>
+              item.id === 'invite' ? (
+                // 邀请邻居：用 Button openType=share 直接触发微信分享面板
+                <Button
+                  key={item.id}
+                  className="mine__menu-item mine__menu-item--share"
+                  openType="share"
                 >
-                  <View className='home__announcement-top'>
-                    <Text className='home__announcement-title'>{ann.title}</Text>
-                    {ann.isPinned && (
-                      <View className='home__announcement-pin'>
-                        <Text className='home__announcement-pin-text'>📌 置顶</Text>
+                  <View className="mine__menu-left">
+                    <Text className="mine__menu-icon">{item.icon}</Text>
+                    <Text className="mine__menu-label">{item.label}</Text>
+                  </View>
+                  <View className="mine__menu-right">
+                    <Text className="mine__menu-arrow">›</Text>
+                  </View>
+                </Button>
+              ) : (
+                <View
+                  key={item.id}
+                  className="mine__menu-item"
+                  onClick={() => handleMenuClick(item)}
+                >
+                  <View className="mine__menu-left">
+                    <Text className="mine__menu-icon">{item.icon}</Text>
+                    <Text className="mine__menu-label">{item.label}</Text>
+                  </View>
+                  <View className="mine__menu-right">
+                    {item.count !== undefined && item.count > 0 && (
+                      <View className="mine__menu-badge">
+                        <Text className="mine__menu-badge-text">{item.count}</Text>
                       </View>
                     )}
+                    <Text className="mine__menu-arrow">›</Text>
                   </View>
-                  <Text className='home__announcement-date'>{formatDate(ann.publishedAt)}</Text>
                 </View>
-              ))
-            ) : (
-              <EmptyState icon='📢' text='暂无公告' />
+              ),
             )}
           </View>
-        </View>
+        ))}
 
-        {/* 好人榜 Top3 */}
-        <View className='home__section'>
-          <SectionHeader title='🏆 好人榜' actionText='查看全部' onAction={() => Taro.navigateTo({ url: '/pages/ranking/index' })} />
-          <View className='home__ranking-wrap'>
-            {top3Error ? (
-              <ErrorState message='排行榜加载失败' onRetry={refreshTop3} />
-            ) : top3Loading ? (
-              <Loading text='加载中...' />
-            ) : (
-              <RankingTop3 users={top3 ?? undefined} />
-            )}
-          </View>
-        </View>
-
-        {/* 便民服务 */}
-        <View className='home__section'>
-          <SectionHeader title='🏠 便民服务' subtitle='小区邻居推荐的靠谱服务' actionText='更多' onAction={() => Taro.navigateTo({ url: '/pages/service-providers/index' })} />
-          {servicesError ? (
-            <ErrorState message='服务加载失败' onRetry={refreshServices} />
-          ) : servicesLoading ? (
-            <Loading text='加载中...' />
-          ) : services && services.length > 0 ? (
-            <ScrollView scrollX className='home__service-scroll'>
-              <View className='home__service-list'>
-                {services.map((s) => (
-                  <ServiceProviderCard key={s.id} data={s} />
-                ))}
-              </View>
-            </ScrollView>
-          ) : (
-            <EmptyState icon='🏠' text='暂无便民服务' />
-          )}
-        </View>
-
-        {/* 最新事件流 */}
-        <View className='home__section'>
-          <SectionHeader title='📋 最新动态' actionText='查看全部' onAction={() => Taro.navigateTo({ url: '/pages/events/index' })} />
-          <View className='home__events'>
-            {eventsError ? (
-              <ErrorState message='动态加载失败' onRetry={refreshEvents} />
-            ) : eventsLoading ? (
-              <Loading text='加载中...' />
-            ) : events && events.length > 0 ? (
-              events.map((event) => (
-                <EventCard
-                  key={event.id}
-                  data={event}
-                  onCtaClick={(id) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` })}
-                />
-              ))
-            ) : (
-              <EmptyState icon='📋' text='暂无动态' />
-            )}
-          </View>
-        </View>
-
-        {/* 底部留白 */}
-        <View className='home__bottom-spacer' />
+        <View className="mine__bottom-spacer" />
       </ScrollView>
 
-      {/* 悬浮发布按钮 */}
-      <View className='home__fab' onClick={() => Taro.navigateTo({ url: '/pages/event-create/index' })}>
-        <View className='home__fab-inner'>
-          <Text className='home__fab-plus'>+</Text>
-        </View>
-        <Text className='home__fab-label'>发布</Text>
-      </View>
+      {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
     </View>
   );
 }

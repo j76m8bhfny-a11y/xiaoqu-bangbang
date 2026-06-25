@@ -1,6 +1,7 @@
 import { Injectable, Inject, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { maybeAwardFirstOwnerBadge } from '../verifications/verifications.service';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -63,13 +64,19 @@ export class AdminService {
   }
 
   // === Content Review ===
+  // 策略：AI 通过即放行（不进人工复审队列）。本接口默认只列出 result='manual_review' 的记录。
+  // 如需查看历史 pass/reject，前端显式传 query.status='pass'/'reject'/'all'。
   async getReviews(
     query?: { targetType?: string; status?: string },
     pagination?: { skip: number; take: number },
   ) {
     const where: any = {};
     if (query?.targetType) where.targetType = query.targetType;
-    if (query?.status) where.result = query.status;
+    if (query?.status && query.status !== 'all') {
+      where.result = query.status;
+    } else if (!query?.status) {
+      where.result = 'manual_review';
+    }
     const args: any = { where, orderBy: { createdAt: 'desc' } };
     if (pagination) {
       args.skip = pagination.skip;
@@ -83,7 +90,11 @@ export class AdminService {
   async countReviews(query?: { targetType?: string; status?: string }) {
     const where: any = {};
     if (query?.targetType) where.targetType = query.targetType;
-    if (query?.status) where.result = query.status;
+    if (query?.status && query.status !== 'all') {
+      where.result = query.status;
+    } else if (!query?.status) {
+      where.result = 'manual_review';
+    }
     return this.prisma.aiReviewLog.count({ where });
   }
 
@@ -269,6 +280,7 @@ export class AdminService {
         verifyStatus: 'verified',
       },
     });
+    await maybeAwardFirstOwnerBadge(this.prisma, v.userId, v.communityId);
     // Notify user
     await this.notificationsService.create({
       userId: v.userId,
@@ -1568,5 +1580,299 @@ export class AdminService {
         detailJson: detailJson ?? {},
       },
     });
+  }
+
+  // === 小区申请审批 ===
+  async listCommunityApplications(
+    query: { status?: string },
+    pagination: { skip: number; take: number },
+  ) {
+    const where: any = {};
+    if (query.status) where.status = query.status;
+    const [items, total] = await Promise.all([
+      this.prisma.communityApplication.findMany({
+        where,
+        orderBy: [{ supportCount: 'desc' }, { createdAt: 'desc' }],
+        skip: pagination.skip,
+        take: pagination.take,
+        include: {
+          applicant: { select: { id: true, nickname: true, avatarUrl: true } },
+        },
+      }),
+      this.prisma.communityApplication.count({ where }),
+    ]);
+    return { items: items.map((i) => this.toAdminApplicationDto(i)), total };
+  }
+
+  async getCommunityApplicationDetail(id: string) {
+    const app = await this.prisma.communityApplication.findUnique({
+      where: { id },
+      include: {
+        applicant: { select: { id: true, nickname: true, avatarUrl: true } },
+      },
+    });
+    if (!app) throw new NotFoundException('申请不存在');
+    const supporters = await this.prisma.communityApplicationSupport.findMany({
+      where: { applicationId: id },
+      orderBy: { createdAt: 'desc' },
+      include: { user: { select: { id: true, nickname: true, avatarUrl: true } } },
+    });
+    return {
+      ...this.toAdminApplicationDto(app),
+      supporters: supporters.map((s) => ({
+        userId: s.userId,
+        nickname: s.user.nickname,
+        avatarUrl: s.user.avatarUrl,
+        createdAt: s.createdAt.toISOString(),
+      })),
+    };
+  }
+
+  private toAdminApplicationDto(item: any) {
+    return {
+      id: item.id,
+      applicantId: item.applicantId,
+      applicantNickname: item.applicant?.nickname,
+      applicantAvatarUrl: item.applicant?.avatarUrl,
+      name: item.name,
+      city: item.city,
+      district: item.district,
+      address: item.address,
+      estimatedHouseholds: item.estimatedHouseholds ?? undefined,
+      reason: item.reason ?? undefined,
+      materialType: item.materialType,
+      materialUrl: item.materialUrl,
+      doorPhotoUrl: item.doorPhotoUrl ?? undefined,
+      status: item.status,
+      rejectReason: item.rejectReason ?? undefined,
+      supportCount: item.supportCount,
+      approvedCommunityId: item.approvedCommunityId ?? undefined,
+      createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt,
+    };
+  }
+
+  async approveCommunityApplication(applicationId: string, adminUserId: string) {
+    const app = await this.prisma.communityApplication.findUnique({
+      where: { id: applicationId },
+      include: { supports: { select: { userId: true } } },
+    });
+    if (!app) throw new NotFoundException('申请不存在');
+    if (app.status !== 'pending') throw new ForbiddenException('该申请已处理');
+
+    // 仅 platform_admin 可审批
+    const admin = await this.prisma.adminUser.findFirst({
+      where: { userId: adminUserId, status: 'active' },
+    });
+    if (!admin || admin.role !== 'platform_admin') {
+      throw new ForbiddenException('仅平台管理员可审批小区申请');
+    }
+
+    // 先 upsert 徽章模板（事务外，节省事务时长）
+    const founderBadge = await this.prisma.badge.upsert({
+      where: { code: 'founder' },
+      update: {},
+      create: {
+        code: 'founder',
+        name: '创始人',
+        description: '申请并成功开通该小区',
+        ruleJson: { type: 'community_founder' },
+      },
+    });
+    const seedBadge = await this.prisma.badge.upsert({
+      where: { code: 'seed_contributor' },
+      update: {},
+      create: {
+        code: 'seed_contributor',
+        name: '种子贡献者',
+        description: '助力小区开通',
+        ruleJson: { type: 'community_seed' },
+      },
+    });
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 0. 乐观锁：把状态从 pending 改为 approving，防止两个 admin 同时审批导致重复建社区。
+      //    updateMany 的 count = 0 说明已被他人处理（或状态已变）。
+      const lock = await tx.communityApplication.updateMany({
+        where: { id: applicationId, status: 'pending' },
+        data: { status: 'approving' },
+      });
+      if (lock.count === 0) {
+        throw new ForbiddenException('该申请已被处理，请刷新');
+      }
+
+      // 1. 创建 Community
+      const community = await tx.community.create({
+        data: {
+          name: app.name,
+          city: app.city,
+          district: app.district,
+          address: app.address,
+        },
+      });
+      const communityId = community.id;
+
+      // 2. 申请人为已认证成员
+      await tx.communityMember.create({
+        data: {
+          userId: app.applicantId,
+          communityId,
+          role: 'resident',
+          verifyStatus: 'verified',
+        },
+      });
+
+      // 3. 写一条 approved verification 记录
+      await tx.verification.create({
+        data: {
+          userId: app.applicantId,
+          communityId,
+          materialType: app.materialType,
+          originalFileUrl: app.materialUrl,
+          status: 'approved',
+          reviewedBy: adminUserId,
+          reviewedAt: new Date(),
+        },
+      });
+
+      // 4. 若申请人当前没有 currentCommunity，自动设置
+      const applicantUser = await tx.user.findUnique({
+        where: { id: app.applicantId },
+        select: { currentCommunityId: true },
+      });
+      if (!applicantUser?.currentCommunityId) {
+        await tx.user.update({
+          where: { id: app.applicantId },
+          data: { currentCommunityId: communityId },
+        });
+      }
+
+      // 5. 助力人作为 unverified 成员加入
+      const supporterIds = app.supports.map((s) => s.userId);
+      if (supporterIds.length > 0) {
+        await tx.communityMember.createMany({
+          data: supporterIds.map((userId) => ({
+            userId,
+            communityId,
+            role: 'resident',
+            verifyStatus: 'unverified',
+          })),
+          skipDuplicates: true,
+        });
+
+        // 6. 助力人发种子贡献者徽章 + 贡献记录
+        await tx.userBadge.createMany({
+          data: supporterIds.map((userId) => ({
+            userId,
+            communityId,
+            badgeId: seedBadge.id,
+            sourceType: 'community_application',
+            sourceId: applicationId,
+            awardedBy: adminUserId,
+          })),
+          skipDuplicates: true,
+        });
+        await tx.contributionRecord.createMany({
+          data: supporterIds.map((userId) => ({
+            userId,
+            communityId,
+            sourceType: 'community_application',
+            sourceId: applicationId,
+            action: 'community_founding',
+            score: 5,
+            flowerCount: 0,
+            reason: '助力小区开通',
+            status: 'valid',
+            occurredAt: new Date(),
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      // 7. 申请人发创始人徽章
+      await tx.userBadge.create({
+        data: {
+          userId: app.applicantId,
+          communityId,
+          badgeId: founderBadge.id,
+          sourceType: 'community_application',
+          sourceId: applicationId,
+          awardedBy: adminUserId,
+        },
+      });
+
+      // 8. 更新申请状态
+      await tx.communityApplication.update({
+        where: { id: applicationId },
+        data: {
+          status: 'approved',
+          approvedCommunityId: communityId,
+          reviewedAt: new Date(),
+          reviewedBy: adminUserId,
+        },
+      });
+
+      return { communityId, supporterCount: supporterIds.length };
+    });
+
+    // 申请人作为第 1 位认证业主，发首批业主徽章
+    await maybeAwardFirstOwnerBadge(this.prisma, app.applicantId, result.communityId);
+
+    // 事务外：通知申请人（助力人按用户要求不通知）
+    await this.notificationsService.create({
+      userId: app.applicantId,
+      communityId: result.communityId,
+      type: 'announcement',
+      title: '您申请的小区已开通',
+      content: `恭喜！「${app.name}」小区已开通，欢迎邀请邻居加入。`,
+      targetType: 'community',
+      targetId: result.communityId,
+    });
+
+    await this.logAudit(
+      adminUserId,
+      'approve_community_application',
+      'community_application',
+      applicationId,
+      {
+        communityId: result.communityId,
+      },
+    );
+
+    return { id: applicationId, status: 'approved', communityId: result.communityId };
+  }
+
+  async rejectCommunityApplication(applicationId: string, adminUserId: string, reason?: string) {
+    const app = await this.prisma.communityApplication.findUnique({ where: { id: applicationId } });
+    if (!app) throw new NotFoundException('申请不存在');
+    if (app.status !== 'pending') throw new ForbiddenException('该申请已处理');
+
+    const admin = await this.prisma.adminUser.findFirst({
+      where: { userId: adminUserId, status: 'active' },
+    });
+    if (!admin || admin.role !== 'platform_admin') {
+      throw new ForbiddenException('仅平台管理员可审批小区申请');
+    }
+
+    await this.prisma.communityApplication.update({
+      where: { id: applicationId },
+      data: {
+        status: 'rejected',
+        rejectReason: reason ?? null,
+        reviewedAt: new Date(),
+        reviewedBy: adminUserId,
+      },
+    });
+
+    await this.logAudit(
+      adminUserId,
+      'reject_community_application',
+      'community_application',
+      applicationId,
+      {
+        reason,
+      },
+    );
+
+    return { id: applicationId, status: 'rejected' };
   }
 }

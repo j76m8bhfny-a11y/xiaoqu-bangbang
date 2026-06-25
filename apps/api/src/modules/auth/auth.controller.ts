@@ -1,4 +1,14 @@
-import { Controller, Post, Get, Patch, Body, UseGuards, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  Inject,
+  NotFoundException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { WechatLoginDto } from './dto/wechat-login.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
@@ -28,11 +38,27 @@ export class MeController {
   }
 
   @Patch('me')
-  async updateMe(
-    @CurrentUser('userId') userId: string,
-    @Body() dto: UpdateUserDto,
-  ) {
+  async updateMe(@CurrentUser('userId') userId: string, @Body() dto: UpdateUserDto) {
     const user = await this.authService.updateMe(userId, dto);
     return { code: 0, message: 'ok', data: user };
+  }
+
+  @Get('me/dashboard')
+  async getMyDashboard(@CurrentUser('userId') userId: string) {
+    const data = await this.authService.getDashboard(userId);
+    return { code: 0, message: 'ok', data };
+  }
+}
+
+@Controller('users')
+@UseGuards(JwtAuthGuard)
+export class UsersController {
+  constructor(@Inject(AuthService) private authService: AuthService) {}
+
+  @Get(':id/profile')
+  async getUserProfile(@CurrentUser('userId') viewerId: string, @Param('id') targetId: string) {
+    const profile = await this.authService.getUserProfile(viewerId, targetId);
+    if (!profile) throw new NotFoundException('用户不存在');
+    return { code: 0, message: 'ok', data: profile };
   }
 }

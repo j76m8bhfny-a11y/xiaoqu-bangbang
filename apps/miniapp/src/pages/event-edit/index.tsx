@@ -22,11 +22,12 @@ export default function EventEdit() {
   const id = Taro.getCurrentInstance().router?.params?.id;
   const user = useAuthStore((s) => s.user);
 
-  const { data: event, loading, error, refresh } = useRequest<EventDto>(
-    () => eventService.getById(id!),
-    [id],
-    { enabled: !!id },
-  );
+  const {
+    data: event,
+    loading,
+    error,
+    refresh,
+  } = useRequest<EventDto>(() => eventService.getById(id!), [id], { enabled: !!id });
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -47,14 +48,15 @@ export default function EventEdit() {
       setExpectedTime(event.expectedTime ?? '');
       setRewardType(event.rewardType);
       setRewardAmount(event.rewardAmount != null ? String(event.rewardAmount) : '');
-      setCapacity(event.capacity != null ? String(event.capacity) : '');
+      // ponytail: capacity 未在 EventDto 暴露，编辑态暂不回填；下迭代恢复。
+      setCapacity('');
       setIsAnonymous(event.isAnonymous);
       setImages(event.images ?? []);
     }
   }, [event]);
 
   if (loading) {
-    return <Loading text='加载事件...' />;
+    return <Loading text="加载事件..." />;
   }
 
   if (error || !event) {
@@ -105,39 +107,40 @@ export default function EventEdit() {
   };
 
   return (
-    <View className='event-edit'>
-      <View className='event-edit__body'>
-        <View className='event-edit__card'>
-          <View className='event-edit__field'>
-            <Text className='event-edit__label'>事件类型</Text>
-            <View
-              className='event-edit__type-badge'
-              style={{ background: typeConfig.bgColor }}
-            >
-              <Text className='event-edit__type-text' style={{ color: typeConfig.color }}>
+    <View className="event-edit">
+      <View className="event-edit__body">
+        <View className="event-edit__card">
+          <View className="event-edit__field">
+            <Text className="event-edit__label">事件类型</Text>
+            <View className="event-edit__type-badge" style={{ background: typeConfig.bgColor }}>
+              <Text className="event-edit__type-text" style={{ color: typeConfig.color }}>
                 {typeConfig.label}
               </Text>
             </View>
           </View>
 
-          <View className='event-edit__field'>
-            <Text className='event-edit__label'>标题 <Text className='event-edit__required'>*</Text></Text>
+          <View className="event-edit__field">
+            <Text className="event-edit__label">
+              标题 <Text className="event-edit__required">*</Text>
+            </Text>
             <Input
-              className='event-edit__input'
-              placeholder='请输入标题'
-              placeholderClass='event-edit__placeholder'
+              className="event-edit__input"
+              placeholder="请输入标题"
+              placeholderClass="event-edit__placeholder"
               value={title}
               onInput={(e) => setTitle(e.detail.value)}
               maxlength={50}
             />
           </View>
 
-          <View className='event-edit__field'>
-            <Text className='event-edit__label'>详细描述 <Text className='event-edit__required'>*</Text></Text>
+          <View className="event-edit__field">
+            <Text className="event-edit__label">
+              详细描述 <Text className="event-edit__required">*</Text>
+            </Text>
             <Textarea
-              className='event-edit__textarea'
-              placeholder='请详细描述你的需求...'
-              placeholderClass='event-edit__placeholder'
+              className="event-edit__textarea"
+              placeholder="请详细描述你的需求..."
+              placeholderClass="event-edit__placeholder"
               value={description}
               onInput={(e) => setDescription(e.detail.value)}
               maxlength={500}
@@ -145,36 +148,36 @@ export default function EventEdit() {
             />
           </View>
 
-          <View className='event-edit__field'>
-            <Text className='event-edit__label'>图片</Text>
+          <View className="event-edit__field">
+            <Text className="event-edit__label">图片</Text>
             <ImagePicker images={images} onChange={setImages} />
           </View>
 
-          <View className='event-edit__field'>
-            <Text className='event-edit__label'>地点</Text>
+          <View className="event-edit__field">
+            <Text className="event-edit__label">地点</Text>
             <Input
-              className='event-edit__input'
-              placeholder='如：3栋楼下、小区门口'
-              placeholderClass='event-edit__placeholder'
+              className="event-edit__input"
+              placeholder="如：3栋楼下、小区门口"
+              placeholderClass="event-edit__placeholder"
               value={locationText}
               onInput={(e) => setLocationText(e.detail.value)}
             />
           </View>
 
-          <View className='event-edit__field'>
-            <Text className='event-edit__label'>期望时间</Text>
+          <View className="event-edit__field">
+            <Text className="event-edit__label">期望时间</Text>
             <Input
-              className='event-edit__input'
-              placeholder='如：本周六下午、明天上午'
-              placeholderClass='event-edit__placeholder'
+              className="event-edit__input"
+              placeholder="如：本周六下午、明天上午"
+              placeholderClass="event-edit__placeholder"
               value={expectedTime}
               onInput={(e) => setExpectedTime(e.detail.value)}
             />
           </View>
 
-          <View className='event-edit__field'>
-            <Text className='event-edit__label'>奖励方式</Text>
-            <View className='event-edit__radio-group'>
+          <View className="event-edit__field">
+            <Text className="event-edit__label">奖励方式</Text>
+            <View className="event-edit__radio-group">
               {REWARD_OPTIONS.map((opt) => (
                 <View
                   key={opt.key}
@@ -192,50 +195,48 @@ export default function EventEdit() {
           </View>
 
           {rewardType === RewardType.PAID && (
-            <View className='event-edit__field'>
-              <Text className='event-edit__label'>奖励金额</Text>
+            <View className="event-edit__field">
+              <Text className="event-edit__label">奖励金额</Text>
               <Input
-                className='event-edit__input'
-                type='digit'
-                placeholder='请输入金额'
-                placeholderClass='event-edit__placeholder'
+                className="event-edit__input"
+                type="digit"
+                placeholder="请输入金额"
+                placeholderClass="event-edit__placeholder"
                 value={rewardAmount}
                 onInput={(e) => setRewardAmount(e.detail.value)}
               />
             </View>
           )}
 
-          <View className='event-edit__field'>
-            <Text className='event-edit__label'>人数上限</Text>
+          <View className="event-edit__field">
+            <Text className="event-edit__label">人数上限</Text>
             <Input
-              className='event-edit__input'
-              type='number'
-              placeholder='不填则不限人数'
-              placeholderClass='event-edit__placeholder'
+              className="event-edit__input"
+              type="number"
+              placeholder="不填则不限人数"
+              placeholderClass="event-edit__placeholder"
               value={capacity}
               onInput={(e) => setCapacity(e.detail.value)}
             />
           </View>
 
-          <View className='event-edit__field event-edit__field--switch'>
-            <Text className='event-edit__label'>匿名发布</Text>
+          <View className="event-edit__field event-edit__field--switch">
+            <Text className="event-edit__label">匿名发布</Text>
             <Switch
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.detail.value)}
-              color='#35e89a'
+              color="#35e89a"
             />
           </View>
         </View>
       </View>
 
-      <View className='event-edit__footer'>
+      <View className="event-edit__footer">
         <View
           className={`event-edit__submit ${submitting ? 'event-edit__submit--disabled' : ''}`}
           onClick={submitting ? undefined : handleSubmit}
         >
-          <Text className='event-edit__submit-text'>
-            {submitting ? '保存中...' : '保存修改'}
-          </Text>
+          <Text className="event-edit__submit-text">{submitting ? '保存中...' : '保存修改'}</Text>
         </View>
       </View>
     </View>

@@ -55,6 +55,12 @@ const allMenuItems = [
   { key: '/market', label: '闲置管理', icon: <ShopOutlined />, roles: ['platform_admin'] },
   { key: '/verifications', label: '用户与认证', icon: <UserOutlined />, roles: ['platform_admin'] },
   {
+    key: '/community-applications',
+    label: '小区申请',
+    icon: <ShopOutlined />,
+    roles: ['platform_admin'],
+  },
+  {
     key: '/committee',
     label: '业委会管理',
     icon: <TeamOutlined />,

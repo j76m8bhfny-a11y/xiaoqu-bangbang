@@ -21,6 +21,7 @@ import { ShareModule } from './modules/share/share.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { TopicsModule } from './modules/topics/topics.module';
+import { CommunityApplicationsModule } from './modules/community-applications/community-applications.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 @Module({
@@ -48,6 +49,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     AdminModule,
     UploadModule,
     TopicsModule,
+    CommunityApplicationsModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })

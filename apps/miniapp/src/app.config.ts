@@ -4,10 +4,14 @@ export default defineAppConfig({
     'pages/plaza/index',
     'pages/events/index',
     'pages/market/index',
+    // ponytail: topics 列表入口（议事榜）在 S1-6 合并进 plaza，list 页保留
+    //           以兼容老路径/历史链接，但不再出现在 tabBar。
     'pages/topics/index',
     'pages/topic-detail/index',
     'pages/ranking/index',
-    'pages/mine/index',
+    // ponytail: home 即「我的」（S1-5 重写），mine 页源码保留过渡期，
+    //           不进 pages 列表以减小包体积。
+    // 'pages/mine/index',
     'pages/login/index',
     'pages/community-select/index',
     'pages/event-detail/index',
@@ -28,7 +32,13 @@ export default defineAppConfig({
     'pages/settings/index',
     'pages/service-providers/index',
     'pages/service-provider-detail/index',
-    'pages/social-groups/index',
+    // ponytail: social-groups 模块本期不做（已审计决议「不做」），保留源码用于后续迭代，
+    //          仅从注册页面列表移除，避免增加包体积/被入口意外触达。
+    // 'pages/social-groups/index',
+    'pages/community-apply/index',
+    'pages/community-application-detail/index',
+    'pages/my-applications/index',
+    'pages/user-profile/index',
   ],
   tabBar: {
     color: '#7A7A7A',
@@ -38,33 +48,27 @@ export default defineAppConfig({
     list: [
       {
         pagePath: 'pages/home/index',
-        text: '首页',
-        iconPath: 'assets/tab-home.png',
-        selectedIconPath: 'assets/tab-home-active.png',
+        text: '我的',
+        iconPath: 'assets/tab-mine.png',
+        selectedIconPath: 'assets/tab-mine-active.png',
       },
       {
         pagePath: 'pages/plaza/index',
-        text: '小区广场',
+        text: '公共反馈',
         iconPath: 'assets/tab-plaza.png',
         selectedIconPath: 'assets/tab-plaza-active.png',
       },
       {
-        pagePath: 'pages/topics/index',
-        text: '议事榜',
-        iconPath: 'assets/tab-topics.png',
-        selectedIconPath: 'assets/tab-topics-active.png',
+        pagePath: 'pages/events/index',
+        text: '邻里互助',
+        iconPath: 'assets/tab-home.png',
+        selectedIconPath: 'assets/tab-home-active.png',
       },
       {
         pagePath: 'pages/ranking/index',
-        text: '好人榜',
+        text: '棒帮榜',
         iconPath: 'assets/tab-ranking.png',
         selectedIconPath: 'assets/tab-ranking-active.png',
-      },
-      {
-        pagePath: 'pages/mine/index',
-        text: '我的',
-        iconPath: 'assets/tab-mine.png',
-        selectedIconPath: 'assets/tab-mine-active.png',
       },
     ],
   },

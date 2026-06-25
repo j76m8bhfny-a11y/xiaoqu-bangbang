@@ -1,0 +1,184 @@
+@use '../../styles/tokens.scss' as *;
+
+.apply {
+  min-height: 100vh;
+  background: $color-bg;
+  display: flex;
+  flex-direction: column;
+
+  &__body {
+    flex: 1;
+    padding: $spacing-md;
+    padding-bottom: calc(#{$spacing-xl} + env(safe-area-inset-bottom));
+  }
+
+  &__hero {
+    background: linear-gradient(135deg, #fff8ec 0%, #ffeebf 100%);
+    border-radius: $radius-md;
+    padding: $spacing-lg;
+    text-align: center;
+    margin-bottom: $spacing-md;
+  }
+
+  &__hero-emoji {
+    font-size: 64px;
+    line-height: 1;
+  }
+
+  &__hero-title {
+    display: block;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-top: $spacing-sm;
+  }
+
+  &__hero-subtitle {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-top: 8px;
+    line-height: 1.6;
+    padding: 0 $spacing-sm;
+  }
+
+  &__card {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-lg $spacing-md;
+    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+    margin-bottom: $spacing-md;
+  }
+
+  &__section-title {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-dark;
+    margin-bottom: $spacing-md;
+  }
+
+  &__hint {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__field {
+    margin-bottom: $spacing-md;
+
+    &--half {
+      flex: 1;
+    }
+  }
+
+  &__field-row {
+    display: flex;
+    gap: $spacing-sm;
+  }
+
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+    margin-bottom: 8px;
+  }
+
+  &__field-title {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+    margin: $spacing-md 0 $spacing-sm;
+  }
+
+  &__input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 76px;
+    padding: 0 $spacing-sm;
+    border-radius: $radius-sm;
+    background: $color-bg;
+    font-size: $font-size-sm;
+    color: $color-dark;
+  }
+
+  &__textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 120px;
+    padding: $spacing-sm;
+    border-radius: $radius-sm;
+    background: $color-bg;
+    font-size: $font-size-sm;
+    color: $color-dark;
+  }
+
+  &__type-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__type-pill {
+    flex: 1 0 calc(50% - #{$spacing-sm});
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 72px;
+    border-radius: $radius-pill;
+    background: $color-bg;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+
+    &--active {
+      background: $color-bg-green;
+      border-color: $color-primary;
+    }
+  }
+
+  &__type-text {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+
+    &--active {
+      color: $color-primary;
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  &__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 88px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    box-shadow: 0 4px 16px rgba(53, 232, 154, 0.3);
+    margin-top: $spacing-md;
+
+    &--disabled {
+      opacity: 0.6;
+    }
+  }
+
+  &__submit-text {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: #fff;
+  }
+
+  &__tip {
+    display: block;
+    text-align: center;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-top: $spacing-md;
+    line-height: 1.5;
+    padding: 0 $spacing-sm;
+  }
+}

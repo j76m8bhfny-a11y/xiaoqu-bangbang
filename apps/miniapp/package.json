@@ -9,11 +9,11 @@
     "css": "scss"
   },
   "scripts": {
-    "dev:weapp": "taro dev --type weapp",
+    "dev:weapp": "taro build --type weapp --watch",
     "build:weapp": "taro build --type weapp",
-    "dev:swan": "taro dev --type swan",
+    "dev:swan": "taro build --type swan --watch",
     "build:swan": "taro build --type swan",
-    "dev:h5": "taro dev --type h5",
+    "dev:h5": "taro build --type h5 --watch",
     "build:h5": "taro build --type h5",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",

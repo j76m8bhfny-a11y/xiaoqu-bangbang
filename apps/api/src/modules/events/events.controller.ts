@@ -17,6 +17,7 @@ import { AddEventCommentDto } from './dto/add-comment.dto';
 import { ReportDto } from './dto/report.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
+import { VerifiedMemberGuard } from '../../common/guards/verified-member.guard';
 import { CurrentCommunityId } from '../../common/decorators/current-community.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { getPaginationParams, paginate } from '../../common/helpers/pagination';
@@ -160,7 +161,7 @@ export class EventsController {
   }
 
   @Post(':id/rate')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async rateHelper(
     @CurrentUser('userId') userId: string,
     @Param('id') eventId: string,
@@ -179,7 +180,7 @@ export class EventsController {
   }
 
   @Post(':id/comments')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async addComment(
     @CurrentUser('userId') userId: string,
     @Param('id') eventId: string,
@@ -204,7 +205,7 @@ export class EventsController {
   }
 
   @Post(':id/like')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async toggleLike(
     @CurrentUser('userId') userId: string,
     @Param('id') eventId: string,
@@ -215,7 +216,7 @@ export class EventsController {
   }
 
   @Post(':id/thanks')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async sendThanks(
     @CurrentUser('userId') fromUserId: string,
     @Param('id') eventId: string,

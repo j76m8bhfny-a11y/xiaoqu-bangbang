@@ -427,3 +427,10 @@ export enum AiFeatureKey {
   EVENT_COMMENT = 'ai_event_comment',
   CONTENT_REVIEW = 'ai_content_review',
 }
+
+/** 小区申请状态 */
+export enum CommunityApplicationStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}

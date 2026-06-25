@@ -26,6 +26,10 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // set-state-in-effect 在 v5+ 默认为 error，但「fetch -> 同步到表单 state」、
+      // 「mount 后基于 localStorage 决定是否显示引导」等模式都会被误报。
+      // 降级为 warn，让真正的级联渲染问题仍可被发现。
+      'react-hooks/set-state-in-effect': 'warn',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },

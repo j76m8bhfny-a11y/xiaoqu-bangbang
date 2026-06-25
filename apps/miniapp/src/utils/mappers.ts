@@ -1,18 +1,60 @@
 import type {
-  EventDto, RankingItemDto, BannerDto, ServiceProviderDto,
+  EventDto,
+  RankingItemDto,
+  BannerDto,
+  ServiceProviderDto,
 } from '@xiaoqu-bangbang/shared';
 import type { EventCardData } from '@/components/event-card';
 import type { RankingUser } from '@/components/ranking-top3';
 import type { BannerItem } from '@/components/banner-carousel';
 import type { ServiceProviderData } from '@/components/service-card';
 
-export const EVENT_TYPE_CONFIG: Record<string, { label: string; color: string; bgColor: string; ctaText: string; ctaColor: string }> = {
-  help_request: { label: '求助', color: '#FF6B6B', bgColor: '#FFF0F0', ctaText: '我来帮', ctaColor: '#35E89A' },
-  help_offer: { label: '我能帮忙', color: '#35E89A', bgColor: '#E9FFF4', ctaText: '我需要', ctaColor: '#35E89A' },
-  public_welfare: { label: '公益', color: '#FFD93D', bgColor: '#FFFBE6', ctaText: '我要报名', ctaColor: '#FF9F43' },
-  lost_found: { label: '寻宠寻物', color: '#7C6EF6', bgColor: '#F0EDFF', ctaText: '提供线索', ctaColor: '#7C6EF6' },
-  public_feedback: { label: '公共反馈', color: '#4ECDC4', bgColor: '#E8FAF8', ctaText: '关注进展', ctaColor: '#4ECDC4' },
-  discussion: { label: '讨论', color: '#4ECDC4', bgColor: '#E8FAF8', ctaText: '参与讨论', ctaColor: '#4ECDC4' },
+export const EVENT_TYPE_CONFIG: Record<
+  string,
+  { label: string; color: string; bgColor: string; ctaText: string; ctaColor: string }
+> = {
+  help_request: {
+    label: '求助',
+    color: '#FF6B6B',
+    bgColor: '#FFF0F0',
+    ctaText: '我来帮',
+    ctaColor: '#35E89A',
+  },
+  help_offer: {
+    label: '我能帮忙',
+    color: '#35E89A',
+    bgColor: '#E9FFF4',
+    ctaText: '我需要',
+    ctaColor: '#35E89A',
+  },
+  public_welfare: {
+    label: '公益',
+    color: '#FFD93D',
+    bgColor: '#FFFBE6',
+    ctaText: '我要报名',
+    ctaColor: '#FF9F43',
+  },
+  lost_found: {
+    label: '寻宠寻物',
+    color: '#7C6EF6',
+    bgColor: '#F0EDFF',
+    ctaText: '提供线索',
+    ctaColor: '#7C6EF6',
+  },
+  public_feedback: {
+    label: '公共反馈',
+    color: '#4ECDC4',
+    bgColor: '#E8FAF8',
+    ctaText: '关注进展',
+    ctaColor: '#4ECDC4',
+  },
+  discussion: {
+    label: '讨论',
+    color: '#4ECDC4',
+    bgColor: '#E8FAF8',
+    ctaText: '参与讨论',
+    ctaColor: '#4ECDC4',
+  },
 };
 
 export const EVENT_STATUS_LABELS: Record<string, string> = {
@@ -36,8 +78,8 @@ export function mapEventDtoToCardData(dto: EventDto): EventCardData {
     statusLabel: EVENT_STATUS_LABELS[dto.status] || dto.status,
     title: dto.title,
     description: dto.description,
-    creatorName: dto.creatorNickname,
-    creatorAvatarUrl: dto.creatorAvatarUrl ?? undefined,
+    creatorName: dto.creator?.nickname ?? '邻居',
+    creatorAvatarUrl: dto.creator?.avatarUrl ?? undefined,
     createdAt: formatRelativeTime(dto.createdAt),
     locationText: dto.locationText ?? undefined,
     likeCount: dto.likeCount,
@@ -80,11 +122,18 @@ export function mapBannerDtoToItem(dto: BannerDto): BannerItem {
 
 export function mapServiceProviderDto(dto: ServiceProviderDto): ServiceProviderData {
   const categoryLabels: Record<string, string> = {
-    repair: '维修', cleaning: '保洁', lock: '开锁',
-    home_appliance: '家电', moving: '搬家', pet: '宠物', other: '其他',
+    repair: '维修',
+    cleaning: '保洁',
+    lock: '开锁',
+    home_appliance: '家电',
+    moving: '搬家',
+    pet: '宠物',
+    other: '其他',
   };
   const sourceLabels: Record<string, string> = {
-    platform: '平台', committee: '业委会', community: '邻居',
+    platform: '平台',
+    committee: '业委会',
+    community: '邻居',
   };
   return {
     id: dto.id,

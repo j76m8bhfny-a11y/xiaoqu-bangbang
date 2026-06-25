@@ -1,0 +1,34 @@
+.ufb {
+  display: flex;
+  align-items: center;
+  background: #fff8e6;
+  border: 2rpx solid #ffd591;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  margin: 0 0 24rpx;
+
+  &__icon {
+    font-size: 32rpx;
+    margin-right: 12rpx;
+  }
+
+  &__tip {
+    flex: 1;
+    font-size: 26rpx;
+    color: #a86c00;
+    line-height: 1.4;
+  }
+
+  &__cta {
+    background: #ffa940;
+    border-radius: 24rpx;
+    padding: 10rpx 24rpx;
+    margin-left: 12rpx;
+  }
+
+  &__cta-text {
+    font-size: 24rpx;
+    color: #ffffff;
+    font-weight: 600;
+  }
+}

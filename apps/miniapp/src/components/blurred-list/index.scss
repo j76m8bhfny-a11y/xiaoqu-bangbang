@@ -1,0 +1,53 @@
+.bl {
+  &__veil-wrap {
+    position: relative;
+    margin-top: 16rpx;
+  }
+
+  &__veil-items {
+    filter: blur(8rpx);
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.6;
+    max-height: 600rpx;
+    overflow: hidden;
+  }
+
+  &__veil {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0.95) 60%,
+      rgba(255, 255, 255, 1) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20rpx;
+    padding: 40rpx 0;
+  }
+
+  &__veil-tip {
+    font-size: 28rpx;
+    color: #5a5a5a;
+    font-weight: 500;
+  }
+
+  &__veil-cta {
+    background: #35e89a;
+    border-radius: 36rpx;
+    padding: 16rpx 48rpx;
+  }
+
+  &__veil-cta-text {
+    font-size: 28rpx;
+    color: #ffffff;
+    font-weight: 600;
+  }
+}

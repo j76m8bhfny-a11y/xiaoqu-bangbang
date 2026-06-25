@@ -31,6 +31,7 @@ const MENU_ITEMS: MenuItem[][] = [
     { id: 'my_services', label: '我的服务', icon: '🔧' },
   ],
   [
+    { id: 'community_apply', label: '申请开通小区', icon: '🏘️' },
     { id: 'invite', label: '邀请邻居', icon: '💌' },
     { id: 'settings', label: '设置', icon: '⚙️' },
     { id: 'about', label: '关于我们', icon: '💡' },
@@ -45,6 +46,7 @@ const MENU_ROUTES: Record<string, string> = {
   notifications: '/pages/notifications/index',
   feedback_history: '/pages/events/index?tab=my_feedback',
   settings: '/pages/settings/index',
+  community_apply: '/pages/community-apply/index',
 };
 
 export default function Mine() {

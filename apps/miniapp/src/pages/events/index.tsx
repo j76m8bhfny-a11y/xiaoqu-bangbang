@@ -1,9 +1,10 @@
-import { View, Text, ScrollView, Input } from '@tarojs/components';
+import { View, Text, ScrollView, Input, Image } from '@tarojs/components';
 import { useState, useEffect } from 'react';
 import Taro from '@tarojs/taro';
 import { useCommunityStore } from '@/store';
 import { EventType } from '@xiaoqu-bangbang/shared';
-import { eventService } from '@/services';
+import type { MarketItemDto } from '@xiaoqu-bangbang/shared';
+import { eventService, marketService } from '@/services';
 import { usePaginatedList, useAuthGuard } from '@/hooks';
 import { mapEventDtoToCardData } from '@/utils/mappers';
 import Loading from '@/components/loading';
@@ -12,20 +13,25 @@ import EmptyState from '@/components/empty-state';
 import EventCard from '../../components/event-card';
 import './index.scss';
 
-const FILTER_TABS = [
+// S1-7 events 二层 tab 重构：
+// 第一层 outer = 互助 / 闲置；
+// 第二层 = 互助下分类（求助/帮忙/公益/寻宠寻物/搭子），闲置下为 status（在售/已售）。
+// 议题类（public_feedback/discussion）下沉到 plaza，不在此处显示。
+
+type OuterTab = 'help' | 'market';
+
+const HELP_FILTERS = [
   { key: 'all', label: '全部' },
   { key: 'help_request', label: '求助' },
   { key: 'help_offer', label: '我能帮忙' },
   { key: 'public_welfare', label: '公益' },
   { key: 'lost_found', label: '寻宠寻物' },
-  { key: 'public_feedback', label: '公共反馈' },
-  { key: 'discussion', label: '讨论' },
 ];
 
-const STATUS_TABS = [
+const MARKET_FILTERS = [
   { key: 'all', label: '全部' },
-  { key: 'open', label: '进行中' },
-  { key: 'completed', label: '已完成' },
+  { key: 'on_sale', label: '在售' },
+  { key: 'sold', label: '已售' },
 ];
 
 export default function Events() {
@@ -33,70 +39,108 @@ export default function Events() {
 
   const communityId = useCommunityStore((s) => s.currentCommunityId);
   const routerParams = Taro.getCurrentInstance().router?.params;
-  const tabParam = routerParams?.tab;
-  const [activeFilter, setActiveFilter] = useState(tabParam || 'all');
-  const [activeStatus, setActiveStatus] = useState('all');
+  const initialTabParam = routerParams?.tab;
+
+  // 老入口 tab 参数兼容：market_* 自动落到「闲置」，其它在「互助」。
+  const initialOuter: OuterTab = initialTabParam === 'my' ? 'market' : 'help';
+  const [outer, setOuter] = useState<OuterTab>(initialOuter);
+  const [helpFilter, setHelpFilter] = useState<string>(
+    initialTabParam && initialTabParam !== 'my' ? initialTabParam : 'all',
+  );
+  const [marketFilter, setMarketFilter] = useState<string>('all');
   const [searchText, setSearchText] = useState('');
 
-  const { items, loading, loadingMore, hasMore, error, refresh, loadMore } = usePaginatedList(
-    (page, pageSize) => eventService.list({
-      communityId: communityId!,
-      type: activeFilter === 'all' ? undefined : activeFilter as EventType,
-      status: activeStatus === 'all' ? undefined : (activeStatus as any),
-      keyword: searchText || undefined,
-      page,
-      pageSize,
-    }),
-    [communityId, activeFilter, activeStatus, searchText],
+  // ===== 互助 (events) 列表 =====
+  // communityId 由后端 currentCommunityId guard 注入，前端不再透传。
+  const helpList = usePaginatedList(
+    (page, pageSize) =>
+      eventService.list({
+        type: helpFilter === 'all' ? undefined : (helpFilter as EventType),
+        keyword: searchText || undefined,
+        page,
+        pageSize,
+      }),
+    [communityId, helpFilter, searchText, outer],
+  );
+
+  // ===== 闲置 (market) 列表 =====
+  const marketList = usePaginatedList(
+    (page, pageSize) =>
+      marketService.list({
+        communityId: communityId!,
+        status: marketFilter === 'all' ? undefined : marketFilter,
+        keyword: searchText || undefined,
+        page,
+        pageSize,
+      }),
+    [communityId, marketFilter, searchText, outer],
   );
 
   useEffect(() => {
-    if (communityId) {
-      refresh();
-    }
-  }, [communityId, activeFilter, activeStatus, searchText, refresh]);
+    if (!communityId) return;
+    if (outer === 'help') helpList.refresh();
+    else marketList.refresh();
+  }, [communityId, outer, helpFilter, marketFilter, searchText]);
 
-  const eventCards = items.map(mapEventDtoToCardData);
+  const isHelp = outer === 'help';
+  const list = isHelp ? helpList : marketList;
+  const filters = isHelp ? HELP_FILTERS : MARKET_FILTERS;
+  const currentFilter = isHelp ? helpFilter : marketFilter;
+  const setCurrentFilter = isHelp ? setHelpFilter : setMarketFilter;
 
-  const handleEventClick = (id: string) => {
-    Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` });
-  };
-
-  const handleScrollToLower = () => {
-    if (hasMore && !loadingMore) {
-      loadMore();
-    }
-  };
+  const helpCards = helpList.items.map(mapEventDtoToCardData);
+  const marketItems = marketList.items as MarketItemDto[];
 
   return (
-    <View className='events'>
-      <View className='events__header'>
-        <Text className='events__header-title'>📋 事件广场</Text>
-        <Text className='events__header-sub'>邻里互助，温暖同行</Text>
+    <View className="events">
+      <View className="events__header">
+        <Text className="events__header-title">🤝 邻里互助</Text>
+        <Text className="events__header-sub">求助、帮忙、闲置流转</Text>
       </View>
 
-      <View className='events__search-wrap'>
-        <View className='events__search'>
-          <Text className='events__search-icon'>🔍</Text>
+      {/* 第一层：互助 / 闲置 */}
+      <View className="events__outer-tabs">
+        {(
+          [
+            { k: 'help', label: '互助' },
+            { k: 'market', label: '闲置' },
+          ] as const
+        ).map((o) => (
+          <View
+            key={o.k}
+            className={`events__outer-tab ${outer === o.k ? 'events__outer-tab--active' : ''}`}
+            onClick={() => setOuter(o.k as OuterTab)}
+          >
+            <Text className="events__outer-tab-text">{o.label}</Text>
+          </View>
+        ))}
+      </View>
+
+      <View className="events__search-wrap">
+        <View className="events__search">
+          <Text className="events__search-icon">🔍</Text>
           <Input
-            className='events__search-input'
-            placeholder='搜索事件...'
-            placeholderClass='events__search-placeholder'
+            className="events__search-input"
+            placeholder={isHelp ? '搜索互助事件...' : '搜索闲置物品...'}
+            placeholderClass="events__search-placeholder"
             value={searchText}
             onInput={(e) => setSearchText(e.detail.value)}
           />
         </View>
       </View>
 
-      <ScrollView scrollX className='events__filter-scroll'>
-        <View className='events__filter-list'>
-          {FILTER_TABS.map((tab) => (
+      {/* 第二层 filter */}
+      <ScrollView scrollX className="events__filter-scroll">
+        <View className="events__filter-list">
+          {filters.map((tab) => (
             <View
               key={tab.key}
-              className={`events__filter-tab ${activeFilter === tab.key ? 'events__filter-tab--active' : ''}`}
-              onClick={() => setActiveFilter(tab.key)}
+              className={`events__filter-tab ${currentFilter === tab.key ? 'events__filter-tab--active' : ''}`}
+              onClick={() => setCurrentFilter(tab.key)}
             >
-              <Text className={`events__filter-text ${activeFilter === tab.key ? 'events__filter-text--active' : ''}`}>
+              <Text
+                className={`events__filter-text ${currentFilter === tab.key ? 'events__filter-text--active' : ''}`}
+              >
                 {tab.label}
               </Text>
             </View>
@@ -104,46 +148,76 @@ export default function Events() {
         </View>
       </ScrollView>
 
-      <View className='events__status-bar'>
-        {STATUS_TABS.map((tab) => (
-          <View
-            key={tab.key}
-            className={`events__status-tab ${activeStatus === tab.key ? 'events__status-tab--active' : ''}`}
-            onClick={() => setActiveStatus(tab.key)}
-          >
-            <Text className={`events__status-text ${activeStatus === tab.key ? 'events__status-text--active' : ''}`}>
-              {tab.label}
-            </Text>
-          </View>
-        ))}
-      </View>
+      <ScrollView
+        scrollY
+        className="events__list"
+        onScrollToLower={() => {
+          if (list.hasMore && !list.loadingMore) list.loadMore();
+        }}
+      >
+        {list.loading && <Loading />}
+        {list.error && <ErrorState message={list.error.message} onRetry={list.refresh} />}
+        {!list.loading && !list.error && list.items.length === 0 && (
+          <EmptyState icon={isHelp ? '🤝' : '📦'} text={isHelp ? '暂无互助事件' : '暂无闲置物品'} />
+        )}
 
-      <ScrollView scrollY className='events__list' onScrollToLower={handleScrollToLower}>
-        {loading && <Loading />}
-        {error && <ErrorState message={error.message} onRetry={refresh} />}
-        {!loading && !error && eventCards.length === 0 && (
-          <EmptyState icon='📋' text='暂无相关事件' />
-        )}
-        {!loading && !error && eventCards.map((event) => (
-          <EventCard
-            key={event.id}
-            data={event}
-            onClick={handleEventClick}
-          />
-        ))}
-        {loadingMore && (
-          <View className='events__loading-more'>
-            <Loading text='加载更多...' />
+        {!list.loading &&
+          !list.error &&
+          isHelp &&
+          helpCards.map((event) => (
+            <EventCard
+              key={event.id}
+              data={event}
+              onClick={(id) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` })}
+            />
+          ))}
+
+        {!list.loading &&
+          !list.error &&
+          !isHelp &&
+          marketItems.map((it) => (
+            <View
+              key={it.id}
+              className="events__market-item"
+              onClick={() => Taro.navigateTo({ url: `/pages/market-detail/index?id=${it.id}` })}
+            >
+              {it.images?.[0] && (
+                <Image className="events__market-img" src={it.images[0]} mode="aspectFill" />
+              )}
+              <View className="events__market-body">
+                <Text className="events__market-title">{it.title}</Text>
+                <Text className="events__market-desc">{it.description}</Text>
+                <View className="events__market-meta">
+                  <Text className="events__market-price">
+                    {it.price != null ? `¥${it.price}` : '免费'}
+                  </Text>
+                  {it.status === 'sold' && <Text className="events__market-sold">已售</Text>}
+                </View>
+              </View>
+            </View>
+          ))}
+
+        {list.loadingMore && (
+          <View className="events__loading-more">
+            <Loading text="加载更多..." />
           </View>
         )}
-        <View className='events__bottom-spacer' />
+        <View className="events__bottom-spacer" />
       </ScrollView>
 
-      <View className='events__fab' onClick={() => Taro.navigateTo({ url: '/pages/event-create/index' })}>
-        <View className='events__fab-inner'>
-          <Text className='events__fab-plus'>+</Text>
+      {/* FAB：互助 → event-create；闲置 → market-create */}
+      <View
+        className="events__fab"
+        onClick={() =>
+          Taro.navigateTo({
+            url: isHelp ? '/pages/event-create/index' : '/pages/market-create/index',
+          })
+        }
+      >
+        <View className="events__fab-inner">
+          <Text className="events__fab-plus">+</Text>
         </View>
-        <Text className='events__fab-label'>发布事件</Text>
+        <Text className="events__fab-label">{isHelp ? '发互助' : '发闲置'}</Text>
       </View>
     </View>
   );

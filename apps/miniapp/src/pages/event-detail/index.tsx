@@ -8,7 +8,13 @@ import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import BottomSheet from '@/components/bottom-sheet';
 import type { EventDto, EventApplicationDto } from '@xiaoqu-bangbang/shared';
-import { EventType, ActionType, RewardType, EventStatus, ApplicationStatus } from '@xiaoqu-bangbang/shared';
+import {
+  EventType,
+  ActionType,
+  RewardType,
+  EventStatus,
+  ApplicationStatus,
+} from '@xiaoqu-bangbang/shared';
 import { EVENT_TYPE_CONFIG, EVENT_STATUS_LABELS } from '@/utils/mappers';
 import './index.scss';
 
@@ -81,11 +87,12 @@ export default function EventDetail() {
   const { id } = Taro.getCurrentInstance().router?.params ?? {};
   const user = useAuthStore((s) => s.user);
 
-  const { data: event, loading, error, refresh } = useRequest<EventDto>(
-    () => eventService.getById(id!),
-    [id],
-    { enabled: !!id },
-  );
+  const {
+    data: event,
+    loading,
+    error,
+    refresh,
+  } = useRequest<EventDto>(() => eventService.getById(id!), [id], { enabled: !!id });
 
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
@@ -182,11 +189,11 @@ export default function EventDetail() {
   const handleComment = useCallback(async () => {
     if (!id || submitting) return;
     try {
-      const res = await Taro.showModal({
+      const res = (await Taro.showModal({
         title: '发表评论',
         editable: true,
         placeholderText: '说点什么...',
-      } as any) as any;
+      } as any)) as any;
       if (res.confirm && res.content?.trim()) {
         await eventService.addComment(id, { content: res.content.trim() });
         Taro.showToast({ title: '评论成功', icon: 'success' });
@@ -212,20 +219,23 @@ export default function EventDetail() {
     }
   }, [id, submitting, refresh]);
 
-  const handleSelectHelper = useCallback(async (applicationId: string) => {
-    if (!id || submitting) return;
-    setSubmitting(true);
-    try {
-      await eventService.selectHelper(id, applicationId);
-      Taro.showToast({ title: '已选择帮手', icon: 'success' });
-      setHelperSheetVisible(false);
-      refresh();
-    } catch {
-      Taro.showToast({ title: '操作失败', icon: 'none' });
-    } finally {
-      setSubmitting(false);
-    }
-  }, [id, submitting, refresh]);
+  const handleSelectHelper = useCallback(
+    async (applicationId: string) => {
+      if (!id || submitting) return;
+      setSubmitting(true);
+      try {
+        await eventService.selectHelper(id, applicationId);
+        Taro.showToast({ title: '已选择帮手', icon: 'success' });
+        setHelperSheetVisible(false);
+        refresh();
+      } catch {
+        Taro.showToast({ title: '操作失败', icon: 'none' });
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [id, submitting, refresh],
+  );
 
   const handleRequestCompletion = useCallback(async () => {
     if (!id || submitting) return;
@@ -273,7 +283,11 @@ export default function EventDetail() {
         itemList: ['隐私泄露', '虚假信息', '骚扰辱骂', '违法违规', '其他'],
       });
       const reasons = ['privacy', 'false_info', 'harassment', 'illegal', 'other'];
-      await reportService.submit({ targetType: 'event', targetId: id, reason: reasons[res.tapIndex] });
+      await reportService.submit({
+        targetType: 'event',
+        targetId: id,
+        reason: reasons[res.tapIndex],
+      });
       Taro.showToast({ title: '举报成功', icon: 'success' });
     } catch {
       // cancelled or failed
@@ -281,7 +295,7 @@ export default function EventDetail() {
   }, [id]);
 
   if (loading) {
-    return <Loading text='加载事件详情...' />;
+    return <Loading text="加载事件详情..." />;
   }
 
   if (error || !event) {
@@ -295,79 +309,92 @@ export default function EventDetail() {
   const isPublicFeedback = event.type === EventType.PUBLIC_FEEDBACK;
 
   return (
-    <View className='event-detail'>
-      <ScrollView scrollY className='event-detail__scroll'>
-        <View className='event-detail__tags'>
+    <View className="event-detail">
+      <ScrollView scrollY className="event-detail__scroll">
+        <View className="event-detail__tags">
           <View
-            className='event-detail__type-tag'
+            className="event-detail__type-tag"
             style={{ backgroundColor: typeConfig.bgColor, color: typeConfig.color }}
           >
-            <Text className='event-detail__type-tag-text'>{typeConfig.label}</Text>
+            <Text className="event-detail__type-tag-text">{typeConfig.label}</Text>
           </View>
-          <View className='event-detail__status-tag'>
-            <Text className='event-detail__status-tag-text'>{statusLabel}</Text>
+          <View className="event-detail__status-tag">
+            <Text className="event-detail__status-tag-text">{statusLabel}</Text>
           </View>
         </View>
 
-        <Text className='event-detail__title'>{event.title}</Text>
+        <Text className="event-detail__title">{event.title}</Text>
 
-        <View className='event-detail__creator'>
+        <View className="event-detail__creator">
           {event.isAnonymous ? (
-            <View className='event-detail__avatar event-detail__avatar--anonymous'>
-              <Text className='event-detail__avatar-emoji'>😺</Text>
+            <View className="event-detail__avatar event-detail__avatar--anonymous">
+              <Text className="event-detail__avatar-emoji">😺</Text>
             </View>
           ) : (
-            <View className='event-detail__avatar'>
-              {event.creatorAvatarUrl ? (
+            <View
+              className="event-detail__avatar"
+              onClick={() =>
+                event.creator?.id &&
+                Taro.navigateTo({ url: `/pages/user-profile/index?id=${event.creator.id}` })
+              }
+            >
+              {event.creator?.avatarUrl ? (
                 <Image
-                  className='event-detail__avatar-img'
-                  src={event.creatorAvatarUrl}
-                  mode='aspectFill'
+                  className="event-detail__avatar-img"
+                  src={event.creator.avatarUrl}
+                  mode="aspectFill"
                 />
               ) : (
-                <Text className='event-detail__avatar-emoji'>👤</Text>
+                <Text className="event-detail__avatar-emoji">👤</Text>
               )}
             </View>
           )}
-          <Text className='event-detail__nickname'>
-            {event.isAnonymous ? '匿名邻居' : event.creatorNickname}
+          <Text
+            className="event-detail__nickname"
+            onClick={() =>
+              !event.isAnonymous &&
+              event.creator?.id &&
+              Taro.navigateTo({ url: `/pages/user-profile/index?id=${event.creator.id}` })
+            }
+          >
+            {event.isAnonymous ? '匿名邻居' : (event.creator?.nickname ?? '邻居')}
           </Text>
-          <Text className='event-detail__dot'>·</Text>
-          <Text className='event-detail__time'>{formatRelativeTime(event.createdAt)}</Text>
+          <Text className="event-detail__dot">·</Text>
+          <Text className="event-detail__time">{formatRelativeTime(event.createdAt)}</Text>
           {event.locationText && (
             <>
-              <Text className='event-detail__dot'>·</Text>
-              <Text className='event-detail__location'>{event.locationText}</Text>
+              <Text className="event-detail__dot">·</Text>
+              <Text className="event-detail__location">{event.locationText}</Text>
             </>
           )}
         </View>
 
-        <Text className='event-detail__description'>{event.description}</Text>
+        <Text className="event-detail__description">{event.description}</Text>
 
         {event.images.length > 0 && (
-          <View className='event-detail__images'>
+          <View className="event-detail__images">
             <Swiper
-              className='event-detail__swiper'
+              className="event-detail__swiper"
               indicatorDots
-              indicatorColor='rgba(0,0,0,0.2)'
-              indicatorActiveColor='#35e89a'
+              indicatorColor="rgba(0,0,0,0.2)"
+              indicatorActiveColor="#35e89a"
               circular
               autoplay={false}
             >
               {event.images.map((img, idx) => (
                 <SwiperItem key={idx}>
-                  <Image className='event-detail__image' src={img} mode='aspectFill' />
+                  <Image className="event-detail__image" src={img} mode="aspectFill" />
                 </SwiperItem>
               ))}
             </Swiper>
           </View>
         )}
 
-        <View className='event-detail__info-cards'>
+        <View className="event-detail__info-cards">
           {event.rewardType && event.rewardType !== RewardType.NONE && (
-            <View className='event-detail__info-card'>
-              <Text className='event-detail__info-label'>回报</Text>
-              <Text className='event-detail__info-value'>
+            <View className="event-detail__info-card">
+              <Text className="event-detail__info-label">回报</Text>
+              <Text className="event-detail__info-value">
                 {REWARD_TYPE_LABELS[event.rewardType] ?? event.rewardType}
                 {event.rewardType === RewardType.PAID && event.rewardAmount != null
                   ? ` ¥${event.rewardAmount}`
@@ -376,271 +403,318 @@ export default function EventDetail() {
             </View>
           )}
           {event.expectedTime && (
-            <View className='event-detail__info-card'>
-              <Text className='event-detail__info-label'>期望时间</Text>
-              <Text className='event-detail__info-value'>{event.expectedTime}</Text>
+            <View className="event-detail__info-card">
+              <Text className="event-detail__info-label">期望时间</Text>
+              <Text className="event-detail__info-value">{event.expectedTime}</Text>
             </View>
           )}
-          {event.eventTime && (
-            <View className='event-detail__info-card'>
-              <Text className='event-detail__info-label'>活动时间</Text>
-              <Text className='event-detail__info-value'>{event.eventTime}</Text>
-            </View>
-          )}
-          {event.capacity != null && (
-            <View className='event-detail__info-card'>
-              <Text className='event-detail__info-label'>人数上限</Text>
-              <Text className='event-detail__info-value'>{event.capacity}人</Text>
-            </View>
-          )}
+          {/* ponytail: eventTime/capacity 字段未在 EventDto 暴露，下迭代再恢复活动时间 / 容量字段。 */}
         </View>
 
-        <View className='event-detail__stats'>
-          <Text className='event-detail__stat'>👁 {event.viewCount}浏览</Text>
-          <Text className='event-detail__stat'>❤️ {event.likeCount}赞</Text>
-          <Text className='event-detail__stat'>💬 {event.commentCount}评论</Text>
-          <Text className='event-detail__stat'>🌸 {event.thanksCount}感谢</Text>
+        <View className="event-detail__stats">
+          <Text className="event-detail__stat">👁 {event.viewCount}浏览</Text>
+          <Text className="event-detail__stat">❤️ {event.likeCount}赞</Text>
+          <Text className="event-detail__stat">💬 {event.commentCount}评论</Text>
+          <Text className="event-detail__stat">🌸 {event.thanksCount}感谢</Text>
         </View>
 
         {/* Participants / Responses Section */}
         {applications && applications.length > 0 && (
-          <View className='event-detail__participants'>
-            <Text className='event-detail__participants-header'>
+          <View className="event-detail__participants">
+            <Text className="event-detail__participants-header">
               响应者 ({applications.length})
             </Text>
             {applications.map((app) => (
-              <View key={app.id} className='event-detail__participant'>
-                <View className='event-detail__participant-avatar'>
+              <View key={app.id} className="event-detail__participant">
+                <View className="event-detail__participant-avatar">
                   {app.userAvatarUrl ? (
                     <Image
-                      className='event-detail__participant-avatar-img'
+                      className="event-detail__participant-avatar-img"
                       src={app.userAvatarUrl}
-                      mode='aspectFill'
+                      mode="aspectFill"
                     />
                   ) : (
-                    <Text className='event-detail__participant-avatar-emoji'>
+                    <Text className="event-detail__participant-avatar-emoji">
                       {app.userNickname.slice(0, 1)}
                     </Text>
                   )}
                 </View>
-                <View className='event-detail__participant-body'>
-                  <View className='event-detail__participant-top'>
-                    <Text className='event-detail__participant-nickname'>{app.userNickname}</Text>
-                    <View className='event-detail__participant-action-tag'>
-                      <Text className='event-detail__participant-action-text'>
+                <View className="event-detail__participant-body">
+                  <View className="event-detail__participant-top">
+                    <Text className="event-detail__participant-nickname">{app.userNickname}</Text>
+                    <View className="event-detail__participant-action-tag">
+                      <Text className="event-detail__participant-action-text">
                         {ACTION_TYPE_LABELS[app.actionType] ?? app.actionType}
                       </Text>
                     </View>
                   </View>
                   {app.message && (
-                    <Text className='event-detail__participant-message'>{app.message}</Text>
+                    <Text className="event-detail__participant-message">{app.message}</Text>
                   )}
                 </View>
                 {isHelperType && isCreator && app.status === ApplicationStatus.PENDING && (
                   <View
-                    className='event-detail__participant-select-btn'
+                    className="event-detail__participant-select-btn"
                     onClick={() => handleSelectHelper(app.id)}
                   >
-                    <Text className='event-detail__participant-select-text'>选择</Text>
+                    <Text className="event-detail__participant-select-text">选择</Text>
                   </View>
                 )}
                 {isHelperType && app.status === ApplicationStatus.SELECTED && (
-                  <View className='event-detail__participant-selected-tag'>
-                    <Text className='event-detail__participant-selected-text'>已选择</Text>
+                  <View className="event-detail__participant-selected-tag">
+                    <Text className="event-detail__participant-selected-text">已选择</Text>
                   </View>
                 )}
               </View>
             ))}
-            {isHelperType && isCreator && (event.status === EventStatus.OPEN || event.status === EventStatus.IN_PROGRESS) && (
-              <View
-                className='event-detail__select-helper-btn'
-                onClick={() => setHelperSheetVisible(true)}
-              >
-                <Text className='event-detail__select-helper-text'>选择帮助者</Text>
-              </View>
-            )}
+            {isHelperType &&
+              isCreator &&
+              (event.status === EventStatus.OPEN || event.status === EventStatus.IN_PROGRESS) && (
+                <View
+                  className="event-detail__select-helper-btn"
+                  onClick={() => setHelperSheetVisible(true)}
+                >
+                  <Text className="event-detail__select-helper-text">选择帮助者</Text>
+                </View>
+              )}
           </View>
         )}
 
         {/* Feedback Timeline for public_feedback */}
-        {isPublicFeedback && feedbackLogs && feedbackLogs.filter((l) => l.visibleToPublic).length > 0 && (
-          <View className='event-detail__feedback'>
-            <Text className='event-detail__feedback-header'>处理进度</Text>
-            {feedbackLogs.filter((l) => l.visibleToPublic).map((log) => {
-              const statusCfg = FEEDBACK_STATUS_CONFIG[log.status] ?? { label: log.status, color: '#999', bgColor: '#F5F5F5' };
-              return (
-                <View key={log.id} className='event-detail__feedback-item'>
-                  <View className='event-detail__feedback-dot-wrap'>
-                    <View
-                      className='event-detail__feedback-dot'
-                      style={{ background: statusCfg.color }}
-                    />
-                  </View>
-                  <View className='event-detail__feedback-body'>
-                    <View className='event-detail__feedback-top'>
-                      <View
-                        className='event-detail__feedback-status'
-                        style={{ backgroundColor: statusCfg.bgColor }}
-                      >
-                        <Text className='event-detail__feedback-status-text' style={{ color: statusCfg.color }}>
-                          {statusCfg.label}
-                        </Text>
+        {isPublicFeedback &&
+          feedbackLogs &&
+          feedbackLogs.filter((l) => l.visibleToPublic).length > 0 && (
+            <View className="event-detail__feedback">
+              <Text className="event-detail__feedback-header">处理进度</Text>
+              {feedbackLogs
+                .filter((l) => l.visibleToPublic)
+                .map((log) => {
+                  const statusCfg = FEEDBACK_STATUS_CONFIG[log.status] ?? {
+                    label: log.status,
+                    color: '#999',
+                    bgColor: '#F5F5F5',
+                  };
+                  return (
+                    <View key={log.id} className="event-detail__feedback-item">
+                      <View className="event-detail__feedback-dot-wrap">
+                        <View
+                          className="event-detail__feedback-dot"
+                          style={{ background: statusCfg.color }}
+                        />
                       </View>
-                      <Text className='event-detail__feedback-time'>
-                        {formatRelativeTime(log.createdAt)}
-                      </Text>
+                      <View className="event-detail__feedback-body">
+                        <View className="event-detail__feedback-top">
+                          <View
+                            className="event-detail__feedback-status"
+                            style={{ backgroundColor: statusCfg.bgColor }}
+                          >
+                            <Text
+                              className="event-detail__feedback-status-text"
+                              style={{ color: statusCfg.color }}
+                            >
+                              {statusCfg.label}
+                            </Text>
+                          </View>
+                          <Text className="event-detail__feedback-time">
+                            {formatRelativeTime(log.createdAt)}
+                          </Text>
+                        </View>
+                        {log.content && (
+                          <Text className="event-detail__feedback-content">{log.content}</Text>
+                        )}
+                        {log.images.length > 0 && (
+                          <View className="event-detail__feedback-images">
+                            {log.images.map((img, idx) => (
+                              <Image
+                                key={idx}
+                                className="event-detail__feedback-img"
+                                src={img}
+                                mode="aspectFill"
+                              />
+                            ))}
+                          </View>
+                        )}
+                      </View>
                     </View>
-                    {log.content && (
-                      <Text className='event-detail__feedback-content'>{log.content}</Text>
-                    )}
-                    {log.images.length > 0 && (
-                      <View className='event-detail__feedback-images'>
-                        {log.images.map((img, idx) => (
-                          <Image key={idx} className='event-detail__feedback-img' src={img} mode='aspectFill' />
-                        ))}
-                      </View>
-                    )}
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        )}
+                  );
+                })}
+            </View>
+          )}
 
-        <View className='event-detail__comments'>
-          <Text className='event-detail__comments-header'>
-            💬 评论 ({event.commentCount})
-          </Text>
+        <View className="event-detail__comments">
+          <Text className="event-detail__comments-header">💬 评论 ({event.commentCount})</Text>
 
           {comments.length === 0 && !commentsLoading && (
-            <Text className='event-detail__comments-empty'>暂无评论</Text>
+            <Text className="event-detail__comments-empty">暂无评论</Text>
           )}
 
           {comments.map((c) => (
-            <View className='event-detail__comment' key={c.id}>
-              <View className='event-detail__comment-avatar'>
+            <View className="event-detail__comment" key={c.id}>
+              <View className="event-detail__comment-avatar">
                 {c.userAvatarUrl ? (
                   <Image
-                    className='event-detail__comment-avatar-img'
+                    className="event-detail__comment-avatar-img"
                     src={c.userAvatarUrl}
-                    mode='aspectFill'
+                    mode="aspectFill"
                   />
                 ) : (
-                  <Text className='event-detail__comment-avatar-emoji'>👤</Text>
+                  <Text className="event-detail__comment-avatar-emoji">👤</Text>
                 )}
               </View>
-              <View className='event-detail__comment-body'>
-                <View className='event-detail__comment-meta'>
-                  <Text className='event-detail__comment-nickname'>{c.userNickname}</Text>
-                  <Text className='event-detail__comment-time'>
+              <View className="event-detail__comment-body">
+                <View className="event-detail__comment-meta">
+                  <Text className="event-detail__comment-nickname">{c.userNickname}</Text>
+                  <Text className="event-detail__comment-time">
                     {formatRelativeTime(c.createdAt)}
                   </Text>
                 </View>
-                <Text className='event-detail__comment-content'>{c.content}</Text>
+                <Text className="event-detail__comment-content">{c.content}</Text>
               </View>
             </View>
           ))}
 
           {commentsHasMore && comments.length > 0 && (
-            <View className='event-detail__comments-more' onClick={loadMoreComments}>
-              <Text className='event-detail__comments-more-text'>加载更多</Text>
+            <View className="event-detail__comments-more" onClick={loadMoreComments}>
+              <Text className="event-detail__comments-more-text">加载更多</Text>
             </View>
           )}
         </View>
 
-        <View className='event-detail__lifecycle'>
-          {isCreator && (event.status === EventStatus.OPEN || event.status === EventStatus.IN_PROGRESS) && (
-            <View className='event-detail__lifecycle-btn event-detail__lifecycle-btn--edit' onClick={() => Taro.navigateTo({ url: `/pages/event-edit/index?id=${event.id}` })}>
-              <Text className='event-detail__lifecycle-btn-text' style={{ color: '#35E89A' }}>✏️ 编辑</Text>
-            </View>
-          )}
+        <View className="event-detail__lifecycle">
+          {isCreator &&
+            (event.status === EventStatus.OPEN || event.status === EventStatus.IN_PROGRESS) && (
+              <View
+                className="event-detail__lifecycle-btn event-detail__lifecycle-btn--edit"
+                onClick={() => Taro.navigateTo({ url: `/pages/event-edit/index?id=${event.id}` })}
+              >
+                <Text className="event-detail__lifecycle-btn-text" style={{ color: '#35E89A' }}>
+                  ✏️ 编辑
+                </Text>
+              </View>
+            )}
           {isCreator && (
             <>
               {(event.status === EventStatus.OPEN || event.status === EventStatus.IN_PROGRESS) && (
-                <View className='event-detail__lifecycle-btn event-detail__lifecycle-btn--close' onClick={handleClose}>
-                  <Text className='event-detail__lifecycle-btn-text' style={{ color: '#999' }}>关闭事件</Text>
+                <View
+                  className="event-detail__lifecycle-btn event-detail__lifecycle-btn--close"
+                  onClick={handleClose}
+                >
+                  <Text className="event-detail__lifecycle-btn-text" style={{ color: '#999' }}>
+                    关闭事件
+                  </Text>
                 </View>
               )}
               {event.status === EventStatus.IN_PROGRESS && (
-                <View className='event-detail__lifecycle-btn event-detail__lifecycle-btn--confirm' onClick={handleConfirmCompletion}>
-                  <Text className='event-detail__lifecycle-btn-text'>{submitting ? '提交中...' : '确认完成'}</Text>
+                <View
+                  className="event-detail__lifecycle-btn event-detail__lifecycle-btn--confirm"
+                  onClick={handleConfirmCompletion}
+                >
+                  <Text className="event-detail__lifecycle-btn-text">
+                    {submitting ? '提交中...' : '确认完成'}
+                  </Text>
                 </View>
               )}
             </>
           )}
-          {user && event.selectedHelperId === user.id && event.status === EventStatus.IN_PROGRESS && (
-            <View className='event-detail__lifecycle-btn event-detail__lifecycle-btn--request' onClick={handleRequestCompletion}>
-              <Text className='event-detail__lifecycle-btn-text'>{submitting ? '提交中...' : '申请完成'}</Text>
-            </View>
-          )}
+          {user &&
+            event.selectedHelperId === user.id &&
+            event.status === EventStatus.IN_PROGRESS && (
+              <View
+                className="event-detail__lifecycle-btn event-detail__lifecycle-btn--request"
+                onClick={handleRequestCompletion}
+              >
+                <Text className="event-detail__lifecycle-btn-text">
+                  {submitting ? '提交中...' : '申请完成'}
+                </Text>
+              </View>
+            )}
           {event.status === EventStatus.COMPLETED && (
-            <View className='event-detail__lifecycle-btn event-detail__lifecycle-btn--thanks' onClick={handleThanks}>
-              <Text className='event-detail__lifecycle-btn-text' style={{ color: '#FF6B6B' }}>🌸 送花感谢</Text>
+            <View
+              className="event-detail__lifecycle-btn event-detail__lifecycle-btn--thanks"
+              onClick={handleThanks}
+            >
+              <Text className="event-detail__lifecycle-btn-text" style={{ color: '#FF6B6B' }}>
+                🌸 送花感谢
+              </Text>
             </View>
           )}
-          <View className='event-detail__lifecycle-btn event-detail__lifecycle-btn--report' onClick={handleReport}>
-            <Text className='event-detail__lifecycle-btn-text' style={{ color: '#999' }}>🚫 举报</Text>
+          <View
+            className="event-detail__lifecycle-btn event-detail__lifecycle-btn--report"
+            onClick={handleReport}
+          >
+            <Text className="event-detail__lifecycle-btn-text" style={{ color: '#999' }}>
+              🚫 举报
+            </Text>
           </View>
         </View>
 
-        <View className='event-detail__bottom-spacer' />
+        <View className="event-detail__bottom-spacer" />
       </ScrollView>
 
       {/* Helper Selection BottomSheet */}
       <BottomSheet
         visible={helperSheetVisible}
         onClose={() => setHelperSheetVisible(false)}
-        title='选择帮助者'
+        title="选择帮助者"
       >
-        {applications?.filter((a) => a.status === ApplicationStatus.PENDING).map((app) => (
-          <View key={app.id} className='event-detail__helper-item'>
-            <View className='event-detail__helper-avatar'>
-              {app.userAvatarUrl ? (
-                <Image className='event-detail__helper-avatar-img' src={app.userAvatarUrl} mode='aspectFill' />
-              ) : (
-                <Text className='event-detail__helper-avatar-fallback'>{app.userNickname.slice(0, 1)}</Text>
-              )}
+        {applications
+          ?.filter((a) => a.status === ApplicationStatus.PENDING)
+          .map((app) => (
+            <View key={app.id} className="event-detail__helper-item">
+              <View className="event-detail__helper-avatar">
+                {app.userAvatarUrl ? (
+                  <Image
+                    className="event-detail__helper-avatar-img"
+                    src={app.userAvatarUrl}
+                    mode="aspectFill"
+                  />
+                ) : (
+                  <Text className="event-detail__helper-avatar-fallback">
+                    {app.userNickname.slice(0, 1)}
+                  </Text>
+                )}
+              </View>
+              <View className="event-detail__helper-info">
+                <Text className="event-detail__helper-nickname">{app.userNickname}</Text>
+                {app.message && <Text className="event-detail__helper-message">{app.message}</Text>}
+              </View>
+              <View
+                className="event-detail__helper-select-btn"
+                onClick={() => handleSelectHelper(app.id)}
+              >
+                <Text className="event-detail__helper-select-text">选择</Text>
+              </View>
             </View>
-            <View className='event-detail__helper-info'>
-              <Text className='event-detail__helper-nickname'>{app.userNickname}</Text>
-              {app.message && <Text className='event-detail__helper-message'>{app.message}</Text>}
-            </View>
-            <View
-              className='event-detail__helper-select-btn'
-              onClick={() => handleSelectHelper(app.id)}
-            >
-              <Text className='event-detail__helper-select-text'>选择</Text>
-            </View>
-          </View>
-        ))}
-        {(!applications || applications.filter((a) => a.status === ApplicationStatus.PENDING).length === 0) && (
-          <Text className='event-detail__helper-empty'>暂无待选帮手</Text>
+          ))}
+        {(!applications ||
+          applications.filter((a) => a.status === ApplicationStatus.PENDING).length === 0) && (
+          <Text className="event-detail__helper-empty">暂无待选帮手</Text>
         )}
       </BottomSheet>
 
-      <View className='event-detail__action-bar'>
+      <View className="event-detail__action-bar">
         <View
           className={`event-detail__action-btn event-detail__action-btn--like ${liked ? 'event-detail__action-btn--active' : ''}`}
           onClick={handleLike}
         >
-          <Text className='event-detail__action-btn-icon'>{liked ? '❤️' : '🤍'}</Text>
-          <Text className='event-detail__action-btn-label'>赞</Text>
+          <Text className="event-detail__action-btn-icon">{liked ? '❤️' : '🤍'}</Text>
+          <Text className="event-detail__action-btn-label">赞</Text>
         </View>
 
         <View
-          className='event-detail__action-btn event-detail__action-btn--comment'
+          className="event-detail__action-btn event-detail__action-btn--comment"
           onClick={handleComment}
         >
-          <Text className='event-detail__action-btn-icon'>💬</Text>
-          <Text className='event-detail__action-btn-label'>评论</Text>
+          <Text className="event-detail__action-btn-icon">💬</Text>
+          <Text className="event-detail__action-btn-label">评论</Text>
         </View>
 
         <View
-          className='event-detail__action-btn event-detail__action-btn--cta'
+          className="event-detail__action-btn event-detail__action-btn--cta"
           style={{ backgroundColor: typeConfig.ctaColor }}
           onClick={handleCta}
         >
-          <Text className='event-detail__action-btn-cta-text'>
+          <Text className="event-detail__action-btn-cta-text">
             {submitting ? '提交中...' : typeConfig.ctaText}
           </Text>
         </View>
@@ -649,8 +723,8 @@ export default function EventDetail() {
           className={`event-detail__action-btn event-detail__action-btn--fav ${favorited ? 'event-detail__action-btn--active' : ''}`}
           onClick={handleFavorite}
         >
-          <Text className='event-detail__action-btn-icon'>{favorited ? '⭐' : '☆'}</Text>
-          <Text className='event-detail__action-btn-label'>收藏</Text>
+          <Text className="event-detail__action-btn-icon">{favorited ? '⭐' : '☆'}</Text>
+          <Text className="event-detail__action-btn-label">收藏</Text>
         </View>
       </View>
     </View>

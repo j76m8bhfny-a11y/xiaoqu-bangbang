@@ -8,6 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../prisma/prisma.service';
 import { IS_PUBLIC_KEY } from '../constants';
+import { SKIP_CURRENT_COMMUNITY_KEY } from '../decorators/skip-current-community.decorator';
 
 @Injectable()
 export class CurrentCommunityGuard implements CanActivate {
@@ -19,6 +20,12 @@ export class CurrentCommunityGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.get(IS_PUBLIC_KEY, context.getHandler());
     if (isPublic) return true;
+
+    const skipCurrentCommunity = this.reflector.get(
+      SKIP_CURRENT_COMMUNITY_KEY,
+      context.getHandler(),
+    );
+    if (skipCurrentCommunity) return true;
 
     const request = context.switchToHttp().getRequest();
     const userId = request.user?.userId;

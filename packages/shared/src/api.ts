@@ -107,6 +107,17 @@ export interface UpdateMeRequest {
   bio?: string;
 }
 
+// home tab 看板。currentCommunityId 为 null 时其余字段均为零值/空数组。
+export interface MyDashboardDto {
+  communityId: string | null;
+  unreadNotificationCount: number;
+  contributionScore: number;
+  badgeCount: number;
+  myActiveEventCount: number;
+  myActiveMarketCount: number;
+  pendingVotes: Array<{ id: string; title: string; endAt: string }>;
+}
+
 // ===== 小区 =====
 
 export interface CommunityDto {
@@ -836,4 +847,84 @@ export interface AiSettingsDto {
   aiTopicMerge: boolean;
   aiEventComment: boolean;
   aiContentReview: boolean;
+}
+
+// ===== 小区申请 =====
+
+export interface CreateCommunityApplicationRequest {
+  name: string;
+  city: string;
+  district: string;
+  address: string;
+  estimatedHouseholds?: number;
+  reason?: string;
+  materialType: 'property_cert' | 'rent_contract' | 'access_card' | 'other';
+  materialUrl: string;
+  doorPhotoUrl?: string;
+}
+
+export interface CommunityApplicationSupporterDto {
+  userId: string;
+  nickname: string;
+  avatarUrl: string;
+  createdAt: string;
+}
+
+export interface CommunityApplicationDto {
+  id: string;
+  applicantId: string;
+  applicantNickname?: string;
+  applicantAvatarUrl?: string;
+  name: string;
+  city: string;
+  district: string;
+  address: string;
+  estimatedHouseholds?: number;
+  reason?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  rejectReason?: string;
+  supportCount: number;
+  hasSupported?: boolean;
+  recentSupporters?: CommunityApplicationSupporterDto[];
+  approvedCommunityId?: string;
+  createdAt: string;
+}
+
+export interface AdminCommunityApplicationDto extends CommunityApplicationDto {
+  materialType: string;
+  materialUrl: string;
+  doorPhotoUrl?: string;
+  supporters?: CommunityApplicationSupporterDto[];
+}
+
+export interface RejectCommunityApplicationRequest {
+  reason?: string;
+}
+
+// ============================================
+// 用户公开个人主页
+// ============================================
+
+export interface UserProfileBadgeDto {
+  id: string;
+  code: string;
+  name: string;
+  iconUrl: string | null;
+}
+
+export interface UserProfileDto {
+  id: string;
+  nickname: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  joinedAt: string;
+  /** 同 viewer 当前小区下的认证状态；viewer 无小区或 target 不在该小区时为 null */
+  verifyStatus: 'verified' | 'unverified' | null;
+  communityName: string | null;
+  helpCount: number;
+  flowerCount: number;
+  badgeCount: number;
+  contributionScore: number;
+  /** 最多 6 个最新徽章 */
+  badges: UserProfileBadgeDto[];
 }

@@ -59,6 +59,8 @@ model User {
   topicRatings            TopicRating[]
   topicCommentLikes       TopicCommentLike[]
   topicMergeResolved      TopicMergeSuggestion[]        @relation("TopicMergeResolver")
+  communityApplications   CommunityApplication[]        @relation("ApplicationApplicant")
+  communityApplicationSupports CommunityApplicationSupport[] @relation("ApplicationSupporter")
 
   @@index([phone])
   @@index([currentCommunityId])
@@ -640,6 +642,8 @@ model Vote {
   description        String
   voteType           String    @map("vote_type") // single/multiple
   maxChoices         Int?      @map("max_choices")
+  // TODO: 字段语义可读性差（双布尔配合表达 4 状态），可考虑合并为 votingPolicy 枚举字段
+  //       'all_open' / 'all_locked' / 'verified_open' / 'verified_locked'
   onlyVerified       Boolean   @default(true) @map("only_verified")
   onlyVerifiedLocked Boolean   @default(true) @map("only_verified_locked")
   resultVisibility   String    @default("always") @map("result_visibility") // always/after_vote/after_end/admin_only
@@ -983,4 +987,51 @@ model TopicMergeSuggestion {
 
   @@index([communityId, status])
   @@map("topic_merge_suggestions")
+}
+
+// ============================
+// 小区申请（用户自助开通小区）
+// ============================
+
+model CommunityApplication {
+  id                  String    @id @default(uuid()) @db.Uuid
+  applicantId         String    @map("applicant_id") @db.Uuid
+  name                String
+  city                String
+  district            String
+  address             String
+  estimatedHouseholds Int?      @map("estimated_households")
+  reason              String?
+  materialType        String    @map("material_type") // property_cert/rent_contract/access_card/other
+  materialUrl         String    @map("material_url")
+  doorPhotoUrl        String?   @map("door_photo_url")
+  status              String    @default("pending") // pending/approved/rejected
+  rejectReason        String?   @map("reject_reason")
+  approvedCommunityId String?   @map("approved_community_id") @db.Uuid
+  supportCount        Int       @default(0) @map("support_count")
+  reviewedAt          DateTime? @map("reviewed_at")
+  reviewedBy          String?   @map("reviewed_by") @db.Uuid
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  applicant User                          @relation("ApplicationApplicant", fields: [applicantId], references: [id])
+  supports  CommunityApplicationSupport[]
+
+  @@index([status, supportCount])
+  @@index([applicantId])
+  @@map("community_applications")
+}
+
+model CommunityApplicationSupport {
+  id            String   @id @default(uuid()) @db.Uuid
+  applicationId String   @map("application_id") @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  application CommunityApplication @relation(fields: [applicationId], references: [id])
+  user        User                 @relation("ApplicationSupporter", fields: [userId], references: [id])
+
+  @@unique([applicationId, userId])
+  @@index([userId])
+  @@map("community_application_supports")
 }

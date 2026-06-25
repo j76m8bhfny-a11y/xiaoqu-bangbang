@@ -124,7 +124,7 @@
   &__list {
     flex: 1;
     height: calc(100vh - 360px);
-    padding: $spacing-md $spacing-md $spacing-xl;
+    padding: $spacing-md $spacing-md 140px;
   }
 
   // ===== 卡片 =====
@@ -136,7 +136,9 @@
     border-radius: $radius-md;
     margin-bottom: $spacing-sm;
     box-shadow: 0 2px 12px rgba(23, 23, 23, 0.05);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
 
     &:active {
       transform: scale(0.98);
@@ -306,10 +308,47 @@
     color: $color-text-secondary;
     opacity: 0.6;
   }
+
+  &__empty-cta {
+    margin-top: $spacing-lg;
+    padding: 12px 32px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    box-shadow: 0 4px 12px rgba(53, 232, 154, 0.3);
+  }
+
+  &__empty-cta-text {
+    font-size: $font-size-sm;
+    color: #fff;
+    font-weight: $font-weight-bold;
+  }
+
+  &__apply-bar {
+    position: fixed;
+    left: $spacing-md;
+    right: $spacing-md;
+    bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+    height: 88px;
+    border-radius: $radius-pill;
+    background: #fff;
+    border: 2px dashed $color-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  &__apply-text {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    font-weight: $font-weight-bold;
+  }
 }
 
 @keyframes dot-pulse {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     opacity: 0.3;
     transform: scale(1);
   }

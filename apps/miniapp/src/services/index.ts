@@ -12,3 +12,5 @@ export { committeeService } from './committee';
 export { verificationService } from './verification';
 export { reportService } from './report';
 export { topicService } from './topic';
+export { communityApplicationService } from './community-application';
+export { userService } from './user';

@@ -3,7 +3,18 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Table, Card, Select, Tag, Space, Button, Drawer, Typography, Descriptions, message, Modal, Input,
+  Table,
+  Card,
+  Select,
+  Tag,
+  Space,
+  Button,
+  Drawer,
+  Typography,
+  Descriptions,
+  message,
+  Modal,
+  Input,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import AuthGuard from '@/components/AuthGuard';
@@ -25,7 +36,11 @@ interface ReviewItem {
 
 export default function ReviewsPage() {
   const queryClient = useQueryClient();
-  const [filters, setFilters] = useState<{ targetType?: string; status?: string }>({});
+  // 策略：AI 通过即放行，此处默认只显示需人工复审项（manual_review）。
+  // 历史 pass/reject 记录通过状态下拉的「全部」查看。
+  const [filters, setFilters] = useState<{ targetType?: string; status?: string }>({
+    status: 'manual_review',
+  });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -87,20 +102,33 @@ export default function ReviewsPage() {
   };
 
   const columns: ColumnsType<ReviewItem> = [
-    { title: '目标类型', dataIndex: 'targetType', width: 120, render: (v: string) => <Tag>{v}</Tag> },
+    {
+      title: '目标类型',
+      dataIndex: 'targetType',
+      width: 120,
+      render: (v: string) => <Tag>{v}</Tag>,
+    },
     { title: '目标ID', dataIndex: 'targetId', width: 120, ellipsis: true },
     {
       title: 'AI标签',
       dataIndex: 'labels',
       width: 200,
       render: (labels: string[] | undefined) =>
-        labels?.map((l, i) => <Tag key={i} color="blue">{l}</Tag>) || '-',
+        labels?.map((l, i) => (
+          <Tag key={i} color="blue">
+            {l}
+          </Tag>
+        )) || '-',
     },
     {
       title: 'AI评分',
       dataIndex: 'score',
       width: 100,
-      render: (v: number | undefined) => v !== undefined ? v.toFixed(2) : '-',
+      render: (v: number | string | undefined) => {
+        if (v === undefined || v === null) return '-';
+        const n = typeof v === 'number' ? v : Number(v);
+        return Number.isFinite(n) ? n.toFixed(2) : '-';
+      },
     },
     {
       title: '状态',
@@ -114,7 +142,14 @@ export default function ReviewsPage() {
       width: 220,
       render: (_, record) => (
         <Space size="small">
-          <Button size="small" type="link" onClick={() => { setSelected(record); setDrawerOpen(true); }}>
+          <Button
+            size="small"
+            type="link"
+            onClick={() => {
+              setSelected(record);
+              setDrawerOpen(true);
+            }}
+          >
             详情
           </Button>
           {record.result === 'manual_review' && (
@@ -122,7 +157,15 @@ export default function ReviewsPage() {
               <Button size="small" type="link" onClick={() => approveMutation.mutate(record.id)}>
                 通过
               </Button>
-              <Button size="small" type="link" danger onClick={() => { setRejectId(record.id); setRejectModalOpen(true); }}>
+              <Button
+                size="small"
+                type="link"
+                danger
+                onClick={() => {
+                  setRejectId(record.id);
+                  setRejectModalOpen(true);
+                }}
+              >
                 拒绝
               </Button>
               <Button size="small" type="link" onClick={() => adminOnlyMutation.mutate(record.id)}>
@@ -138,7 +181,14 @@ export default function ReviewsPage() {
   return (
     <AuthGuard>
       <AdminLayout>
-        <Card title="内容审核">
+        <Card
+          title="内容审核"
+          extra={
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              AI 通过即放行，此处仅展示需人工复审项；查看历史请将状态切换为「全部」
+            </Typography.Text>
+          }
+        >
           <Space style={{ marginBottom: 16 }}>
             <Select
               placeholder="目标类型"
@@ -155,15 +205,15 @@ export default function ReviewsPage() {
             />
             <Select
               placeholder="审核状态"
-              allowClear
               style={{ width: 150 }}
-              value={filters.status}
-              onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+              value={filters.status ?? 'all'}
+              onChange={(v) => setFilters((f) => ({ ...f, status: v === 'all' ? 'all' : v }))}
               options={[
-                { value: 'pending', label: '待审核' },
                 { value: 'manual_review', label: '人工审核' },
                 { value: 'pass', label: '通过' },
                 { value: 'reject', label: '拒绝' },
+                { value: 'pending', label: '待审核' },
+                { value: 'all', label: '全部' },
               ]}
             />
           </Space>
@@ -177,17 +227,15 @@ export default function ReviewsPage() {
               pageSize,
               total: data?.data?.total ?? 0,
               showSizeChanger: true,
-              onChange: (p, ps) => { setPage(p); setPageSize(ps); },
+              onChange: (p, ps) => {
+                setPage(p);
+                setPageSize(ps);
+              },
             }}
           />
         </Card>
 
-        <Drawer
-          title="审核详情"
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          width={500}
-        >
+        <Drawer title="审核详情" open={drawerOpen} onClose={() => setDrawerOpen(false)} width={500}>
           {selected && (
             <Descriptions column={1} bordered size="small">
               <Descriptions.Item label="ID">{selected.id}</Descriptions.Item>

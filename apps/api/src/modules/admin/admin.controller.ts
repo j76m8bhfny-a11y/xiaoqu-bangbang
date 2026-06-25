@@ -17,6 +17,7 @@ import { CurrentCommunityGuard } from '../../common/guards/current-community.gua
 import { AdminGuard } from './guards/admin.guard';
 import { CurrentCommunityId } from '../../common/decorators/current-community.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { SkipCurrentCommunity } from '../../common/decorators/skip-current-community.decorator';
 import { UpdateShareTemplateDto } from './dto/update-share-template.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { getPaginationParams } from '../../common/helpers/pagination';
@@ -935,6 +936,51 @@ export class AdminController {
       body.targetTopicId,
       communityId,
     );
+    return { code: 0, message: 'ok', data };
+  }
+
+  // === 小区申请审批 ===
+  // platform_admin 可能未绑定具体小区，故所有端点跳过 CurrentCommunityGuard
+  @Get('community-applications')
+  @SkipCurrentCommunity()
+  async listCommunityApplications(
+    @Query('status') status?: string,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ) {
+    const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
+    const { items, total } = await this.adminService.listCommunityApplications(
+      { status },
+      { skip, take },
+    );
+    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+  }
+
+  @Get('community-applications/:id')
+  @SkipCurrentCommunity()
+  async getCommunityApplication(@Param('id') id: string) {
+    const data = await this.adminService.getCommunityApplicationDetail(id);
+    return { code: 0, message: 'ok', data };
+  }
+
+  @Post('community-applications/:id/approve')
+  @SkipCurrentCommunity()
+  async approveCommunityApplication(
+    @Param('id') id: string,
+    @CurrentUser('userId') adminUserId: string,
+  ) {
+    const data = await this.adminService.approveCommunityApplication(id, adminUserId);
+    return { code: 0, message: 'ok', data };
+  }
+
+  @Post('community-applications/:id/reject')
+  @SkipCurrentCommunity()
+  async rejectCommunityApplication(
+    @Param('id') id: string,
+    @CurrentUser('userId') adminUserId: string,
+    @Body() body: { reason?: string },
+  ) {
+    const data = await this.adminService.rejectCommunityApplication(id, adminUserId, body?.reason);
     return { code: 0, message: 'ok', data };
   }
 }
