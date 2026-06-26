@@ -23,7 +23,9 @@ describe('Feature: 闲置模块', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    );
     await app.init();
 
     prisma = app.get(PrismaService);
@@ -43,6 +45,12 @@ describe('Feature: 闲置模块', () => {
       .post('/api/v1/communities/select')
       .set('Authorization', `Bearer ${token}`)
       .send({ communityId });
+
+    // VerifiedMemberGuard 拦截未认证成员的写操作，测试夹具直接升级。
+    await prisma.communityMember.update({
+      where: { userId_communityId: { userId, communityId } },
+      data: { verifyStatus: 'verified' },
+    });
   });
 
   afterAll(async () => {

@@ -92,6 +92,12 @@ describe('Feature: 管理后台（全量）', () => {
       .post('/api/v1/communities/select')
       .set('Authorization', `Bearer ${userToken}`)
       .send({ communityId });
+
+    // VerifiedMemberGuard 拦截未认证成员的写操作，测试夹具直接升级两个用户。
+    await prisma.communityMember.updateMany({
+      where: { communityId, userId: { in: [adminUserId, userId] } },
+      data: { verifyStatus: 'verified' },
+    });
   });
 
   // afterAll: 跳过清理（parallel 执行时外键约束冲突由测试框架隔离）

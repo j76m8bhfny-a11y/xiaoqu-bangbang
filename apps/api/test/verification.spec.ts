@@ -23,7 +23,9 @@ describe('Feature: 小区认证', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    );
     await app.init();
 
     prisma = app.get(PrismaService);
@@ -44,6 +46,8 @@ describe('Feature: 小区认证', () => {
 
   afterAll(async () => {
     await prisma.verification.deleteMany({ where: { userId } });
+    // 认证通过会触发首批业主徽章授予，先删 user_badges 否则 community 外键无法清理。
+    await prisma.userBadge.deleteMany({ where: { userId } });
     await prisma.communityMember.deleteMany({ where: { communityId } });
     await prisma.community.deleteMany({ where: { id: communityId } });
     await prisma.user.deleteMany({ where: { id: userId } });

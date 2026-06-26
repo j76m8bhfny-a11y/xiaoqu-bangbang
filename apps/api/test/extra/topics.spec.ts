@@ -60,6 +60,12 @@ describe('Feature: 议事榜', () => {
       .post('/api/v1/communities/select')
       .set('Authorization', `Bearer ${tokenB}`)
       .send({ communityId });
+
+    // VerifiedMemberGuard 拦截未认证成员的写操作，测试夹具直接升级两个用户。
+    await prisma.communityMember.updateMany({
+      where: { communityId, userId: { in: [userIdA, userIdB] } },
+      data: { verifyStatus: 'verified' },
+    });
   });
 
   afterAll(async () => {

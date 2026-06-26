@@ -28,7 +28,9 @@ describe('Feature: 用户互动与内容扩展', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    );
     await app.init();
 
     prisma = app.get(PrismaService);
@@ -48,6 +50,12 @@ describe('Feature: 用户互动与内容扩展', () => {
       .post('/api/v1/communities/select')
       .set('Authorization', `Bearer ${token}`)
       .send({ communityId });
+
+    // VerifiedMemberGuard 拦截未认证成员的写操作，测试夹具直接升级。
+    await prisma.communityMember.update({
+      where: { userId_communityId: { userId, communityId } },
+      data: { verifyStatus: 'verified' },
+    });
 
     // 创建测试活动
     const event = await prisma.event.create({
@@ -149,9 +157,7 @@ describe('Feature: 用户互动与内容扩展', () => {
     });
 
     it('GET /badges - 获取徽章列表（无需认证）', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/badges')
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/v1/badges').expect(200);
 
       expect(res.body.code).toBe(0);
       expect(res.body.data.items).toBeInstanceOf(Array);
@@ -232,7 +238,8 @@ describe('Feature: 用户互动与内容扩展', () => {
         .post(`/api/v1/votes/${voteId}/records`)
         .set('Authorization', `Bearer ${token}`)
         .send({ selectedOptionIds: [voteOptionId] })
-        .expect([200, 201, 403]);
+        // 后端目前对重复投票返回 400 ("already voted")，保留 200/201/403 作为其它策略兜底。
+        .expect([200, 201, 400, 403]);
 
       if (res.status === 200 || res.status === 201) {
         expect(res.body.code).toBe(0);
@@ -310,6 +317,12 @@ describe('Feature: 用户互动与内容扩展', () => {
         .post('/api/v1/communities/select')
         .set('Authorization', `Bearer ${sellerToken}`)
         .send({ communityId });
+
+      // 同步升级 seller 为 verified，否则 VerifiedMemberGuard 也会拦它。
+      await prisma.communityMember.update({
+        where: { userId_communityId: { userId: sellerId, communityId } },
+        data: { verifyStatus: 'verified' },
+      });
 
       // 给当前商品设置已售出状态
       await prisma.marketItem.update({
