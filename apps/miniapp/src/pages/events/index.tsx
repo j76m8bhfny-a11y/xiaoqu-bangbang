@@ -11,6 +11,7 @@ import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
 import EventCard from '../../components/event-card';
+import BlurredList from '@/components/blurred-list';
 import './index.scss';
 
 // S1-7 events 二层 tab 重构：
@@ -161,16 +162,19 @@ export default function Events() {
           <EmptyState icon={isHelp ? '🤝' : '📦'} text={isHelp ? '暂无互助事件' : '暂无闲置物品'} />
         )}
 
-        {!list.loading &&
-          !list.error &&
-          isHelp &&
-          helpCards.map((event) => (
-            <EventCard
-              key={event.id}
-              data={event}
-              onClick={(id) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` })}
-            />
-          ))}
+        {!list.loading && !list.error && isHelp && (
+          <BlurredList
+            items={helpCards}
+            previewCount={3}
+            renderItem={(event) => (
+              <EventCard
+                key={event.id}
+                data={event}
+                onClick={(id) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` })}
+              />
+            )}
+          />
+        )}
 
         {!list.loading &&
           !list.error &&

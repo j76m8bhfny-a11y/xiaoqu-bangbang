@@ -30,10 +30,19 @@ async function request<T>(options: RequestOptions): Promise<T> {
     }
   }
 
+  // 微信 wx.request 对 GET 请求中 undefined 字段会序列化成字符串 "undefined"，
+  // 导致后端按字面值 "undefined" 过滤。先剔除掉。
+  const cleanedData =
+    method === 'GET' && data && typeof data === 'object' && !Array.isArray(data)
+      ? Object.fromEntries(
+          Object.entries(data as Record<string, unknown>).filter(([, v]) => v !== undefined),
+        )
+      : data;
+
   const res = await Taro.request({
     url: `${ENV.API_BASE_URL}${url}`,
     method,
-    data,
+    data: cleanedData,
     timeout: 10000,
     header: {
       'Content-Type': 'application/json',

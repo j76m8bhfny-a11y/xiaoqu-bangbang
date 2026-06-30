@@ -16,3 +16,7 @@ coverage/
 .turbo/
 postgres-data/
 .swc/
+
+# 构建产物与运行时上传
+*.tsbuildinfo
+apps/api/uploads/

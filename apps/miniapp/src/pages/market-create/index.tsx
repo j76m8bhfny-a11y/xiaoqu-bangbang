@@ -6,6 +6,7 @@ import { useCommunityStore } from '@/store';
 import { MarketCategory, TradeType, ConditionLevel } from '@xiaoqu-bangbang/shared';
 import { MARKET_CATEGORY_CONFIG, CONDITION_LABELS } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
+import UnverifiedFormBanner from '@/components/unverified-form-banner';
 import './index.scss';
 
 const TRADE_OPTIONS: { key: TradeType; label: string }[] = [
@@ -74,21 +75,26 @@ export default function MarketCreate() {
   };
 
   return (
-    <View className='market-create'>
-      <View className='market-create__body'>
-        <View className='market-create__card'>
-          <View className='market-create__field'>
-            <Text className='market-create__label'>分类 <Text className='market-create__required'>*</Text></Text>
-            <ScrollView scrollX className='market-create__category-scroll'>
-              <View className='market-create__category-list'>
+    <View className="market-create">
+      <UnverifiedFormBanner tip="你尚未完成业主认证，无法发布闲置物品" />
+      <View className="market-create__body">
+        <View className="market-create__card">
+          <View className="market-create__field">
+            <Text className="market-create__label">
+              分类 <Text className="market-create__required">*</Text>
+            </Text>
+            <ScrollView scrollX className="market-create__category-scroll">
+              <View className="market-create__category-list">
                 {Object.entries(MARKET_CATEGORY_CONFIG).map(([key, cfg]) => (
                   <View
                     key={key}
                     className={`market-create__category-item ${category === key ? 'market-create__category-item--active' : ''}`}
                     onClick={() => setCategory(key as MarketCategory)}
                   >
-                    <Text className='market-create__category-icon'>{cfg.icon}</Text>
-                    <Text className={`market-create__category-label ${category === key ? 'market-create__category-label--active' : ''}`}>
+                    <Text className="market-create__category-icon">{cfg.icon}</Text>
+                    <Text
+                      className={`market-create__category-label ${category === key ? 'market-create__category-label--active' : ''}`}
+                    >
                       {cfg.label}
                     </Text>
                   </View>
@@ -97,24 +103,28 @@ export default function MarketCreate() {
             </ScrollView>
           </View>
 
-          <View className='market-create__field'>
-            <Text className='market-create__label'>标题 <Text className='market-create__required'>*</Text></Text>
+          <View className="market-create__field">
+            <Text className="market-create__label">
+              标题 <Text className="market-create__required">*</Text>
+            </Text>
             <Input
-              className='market-create__input'
-              placeholder='请输入物品标题'
-              placeholderClass='market-create__placeholder'
+              className="market-create__input"
+              placeholder="请输入物品标题"
+              placeholderClass="market-create__placeholder"
               value={title}
               onInput={(e) => setTitle(e.detail.value)}
               maxlength={30}
             />
           </View>
 
-          <View className='market-create__field'>
-            <Text className='market-create__label'>详细描述 <Text className='market-create__required'>*</Text></Text>
+          <View className="market-create__field">
+            <Text className="market-create__label">
+              详细描述 <Text className="market-create__required">*</Text>
+            </Text>
             <Textarea
-              className='market-create__textarea'
-              placeholder='请描述物品详情、使用情况等...'
-              placeholderClass='market-create__placeholder'
+              className="market-create__textarea"
+              placeholder="请描述物品详情、使用情况等..."
+              placeholderClass="market-create__placeholder"
               value={description}
               onInput={(e) => setDescription(e.detail.value)}
               maxlength={500}
@@ -122,26 +132,26 @@ export default function MarketCreate() {
             />
           </View>
 
-          <View className='market-create__field'>
-            <Text className='market-create__label'>图片</Text>
+          <View className="market-create__field">
+            <Text className="market-create__label">图片</Text>
             <ImagePicker images={images} onChange={setImages} />
           </View>
 
-          <View className='market-create__field'>
-            <Text className='market-create__label'>价格</Text>
+          <View className="market-create__field">
+            <Text className="market-create__label">价格</Text>
             <Input
-              className='market-create__input'
-              type='digit'
-              placeholder='请输入价格，免费可不填'
-              placeholderClass='market-create__placeholder'
+              className="market-create__input"
+              type="digit"
+              placeholder="请输入价格，免费可不填"
+              placeholderClass="market-create__placeholder"
               value={price}
               onInput={(e) => setPrice(e.detail.value)}
             />
           </View>
 
-          <View className='market-create__field'>
-            <Text className='market-create__label'>交易方式</Text>
-            <View className='market-create__radio-group'>
+          <View className="market-create__field">
+            <Text className="market-create__label">交易方式</Text>
+            <View className="market-create__radio-group">
               {TRADE_OPTIONS.map((opt) => (
                 <View
                   key={opt.key}
@@ -158,9 +168,9 @@ export default function MarketCreate() {
             </View>
           </View>
 
-          <View className='market-create__field'>
-            <Text className='market-create__label'>成色</Text>
-            <View className='market-create__condition-group'>
+          <View className="market-create__field">
+            <Text className="market-create__label">成色</Text>
+            <View className="market-create__condition-group">
               {CONDITION_OPTIONS.map((opt) => {
                 const cfg = CONDITION_LABELS[opt.key];
                 const isActive = conditionLevel === opt.key;
@@ -168,7 +178,11 @@ export default function MarketCreate() {
                   <View
                     key={opt.key}
                     className={`market-create__condition ${isActive ? 'market-create__condition--active' : ''}`}
-                    style={isActive ? { background: cfg.color + '1a', borderColor: cfg.color } : undefined}
+                    style={
+                      isActive
+                        ? { background: cfg.color + '1a', borderColor: cfg.color }
+                        : undefined
+                    }
                     onClick={() => setConditionLevel(opt.key)}
                   >
                     <Text
@@ -183,12 +197,12 @@ export default function MarketCreate() {
             </View>
           </View>
 
-          <View className='market-create__field'>
-            <Text className='market-create__label'>联系方式</Text>
+          <View className="market-create__field">
+            <Text className="market-create__label">联系方式</Text>
             <Input
-              className='market-create__input'
-              placeholder='微信号/手机号（选填）'
-              placeholderClass='market-create__placeholder'
+              className="market-create__input"
+              placeholder="微信号/手机号（选填）"
+              placeholderClass="market-create__placeholder"
               value={contactText}
               onInput={(e) => setContactText(e.detail.value)}
             />
@@ -196,14 +210,12 @@ export default function MarketCreate() {
         </View>
       </View>
 
-      <View className='market-create__footer'>
+      <View className="market-create__footer">
         <View
           className={`market-create__submit ${submitting ? 'market-create__submit--disabled' : ''}`}
           onClick={submitting ? undefined : handleSubmit}
         >
-          <Text className='market-create__submit-text'>
-            {submitting ? '发布中...' : '发布'}
-          </Text>
+          <Text className="market-create__submit-text">{submitting ? '发布中...' : '发布'}</Text>
         </View>
       </View>
     </View>

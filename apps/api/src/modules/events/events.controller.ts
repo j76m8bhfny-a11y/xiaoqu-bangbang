@@ -47,7 +47,7 @@ export class EventsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async create(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
