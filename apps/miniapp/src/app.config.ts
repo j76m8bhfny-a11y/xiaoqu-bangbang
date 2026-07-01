@@ -8,6 +8,7 @@ export default defineAppConfig({
     //           以兼容老路径/历史链接，但不再出现在 tabBar。
     'pages/topics/index',
     'pages/topic-detail/index',
+    'pages/topic-create/index',
     'pages/ranking/index',
     // ponytail: home 即「我的」（S1-5 重写），mine 页源码保留过渡期，
     //           不进 pages 列表以减小包体积。
