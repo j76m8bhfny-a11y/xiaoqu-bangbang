@@ -14,6 +14,8 @@ describe('Feature: 事件系统', () => {
   let prisma: PrismaService;
   let token: string;
   let userId: string;
+  let token2: string;
+  let userId2: string;
   let communityId: string;
 
   beforeAll(async () => {
@@ -51,21 +53,35 @@ describe('Feature: 事件系统', () => {
       where: { userId_communityId: { userId, communityId } },
       data: { verifyStatus: 'verified' },
     });
+
+    // 第二个用户：用于验证匿名事件对「非本人」脱敏
+    const res2 = await request(app.getHttpServer())
+      .post('/api/v1/auth/wechat-login')
+      .send({ code: 'events-test-user-2' });
+    token2 = res2.body.data.token;
+    userId2 = res2.body.data.user.id;
+
+    await request(app.getHttpServer())
+      .post('/api/v1/communities/select')
+      .set('Authorization', `Bearer ${token2}`)
+      .send({ communityId });
   });
 
   afterAll(async () => {
-    await prisma.notification.deleteMany({ where: { userId } });
-    await prisma.eventFavorite.deleteMany({ where: { userId } });
-    await prisma.eventLike.deleteMany({ where: { userId } });
-    await prisma.eventThank.deleteMany({ where: { fromUserId: userId } });
-    await prisma.eventComment.deleteMany({ where: { userId } });
-    await prisma.eventApplication.deleteMany({ where: { userId } });
-    await prisma.eventCompletionConfirmation.deleteMany({ where: { userId } });
-    await prisma.report.deleteMany({ where: { reporterId: userId } });
+    await prisma.notification.deleteMany({ where: { userId: { in: [userId, userId2] } } });
+    await prisma.eventFavorite.deleteMany({ where: { userId: { in: [userId, userId2] } } });
+    await prisma.eventLike.deleteMany({ where: { userId: { in: [userId, userId2] } } });
+    await prisma.eventThank.deleteMany({ where: { fromUserId: { in: [userId, userId2] } } });
+    await prisma.eventComment.deleteMany({ where: { userId: { in: [userId, userId2] } } });
+    await prisma.eventApplication.deleteMany({ where: { userId: { in: [userId, userId2] } } });
+    await prisma.eventCompletionConfirmation.deleteMany({
+      where: { userId: { in: [userId, userId2] } },
+    });
+    await prisma.report.deleteMany({ where: { reporterId: { in: [userId, userId2] } } });
     await prisma.event.deleteMany({ where: { communityId } });
     await prisma.communityMember.deleteMany({ where: { communityId } });
     await prisma.community.deleteMany({ where: { id: communityId } });
-    await prisma.user.deleteMany({ where: { id: userId } });
+    await prisma.user.deleteMany({ where: { id: { in: [userId, userId2] } } });
     await app.close();
   });
 
@@ -156,6 +172,55 @@ describe('Feature: 事件系统', () => {
         .expect(201);
 
       expect(res.body.code).toBe(0);
+    });
+  });
+
+  describe('Scenario: 匿名事件隐私脱敏', () => {
+    let anonEventId: string;
+
+    beforeAll(async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/events')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          type: 'help_request',
+          title: '匿名求助',
+          description: '希望匿名发布',
+          isAnonymous: true,
+        });
+      anonEventId = res.body.data.id;
+    });
+
+    it('should hide real creator identity from other users in detail', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/events/${anonEventId}`)
+        .set('Authorization', `Bearer ${token2}`)
+        .expect(200);
+
+      expect(res.body.data.isAnonymous).toBe(true);
+      expect(res.body.data.creator).toBeNull();
+      expect(res.body.data.creatorId).not.toBe(userId);
+    });
+
+    it('should hide real creator identity from other users in list', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/events')
+        .set('Authorization', `Bearer ${token2}`)
+        .expect(200);
+
+      const anon = res.body.data.items.find((e: any) => e.id === anonEventId);
+      expect(anon).toBeDefined();
+      expect(anon.creator).toBeNull();
+      expect(anon.creatorId).not.toBe(userId);
+    });
+
+    it('should keep creatorId for the owner so edit button works', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/events/${anonEventId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.data.creatorId).toBe(userId);
     });
   });
 });

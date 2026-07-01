@@ -29,6 +29,7 @@ export class EventsController {
   @Get()
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async list(
+    @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
     @Query('type') type?: string,
     @Query('status') status?: string,
@@ -40,7 +41,12 @@ export class EventsController {
     const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
     const excludeTypes = excludeTypesRaw ? excludeTypesRaw.split(',').filter(Boolean) : undefined;
     const [items, total] = await Promise.all([
-      this.eventsService.list(communityId, { type, status, keyword, excludeTypes }, { skip, take }),
+      this.eventsService.list(
+        communityId,
+        { type, status, keyword, excludeTypes },
+        { skip, take },
+        userId,
+      ),
       this.eventsService.count(communityId, { type, status, keyword, excludeTypes }),
     ]);
     return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
@@ -74,8 +80,12 @@ export class EventsController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async findOne(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
-    const event = await this.eventsService.findOne(id, communityId);
+  async findOne(
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    const event = await this.eventsService.findOne(id, communityId, userId);
     return { code: 0, message: 'ok', data: event };
   }
 

@@ -23,6 +23,7 @@ export class EventsService {
     communityId: string,
     query?: { type?: string; status?: string; keyword?: string; excludeTypes?: string[] },
     pagination?: { skip: number; take: number },
+    viewerUserId?: string,
   ) {
     const where: any = {
       communityId,
@@ -66,7 +67,24 @@ export class EventsService {
       take: pagination?.take,
     });
 
-    return items;
+    return items.map((item) => this.maskAnonymous(item, viewerUserId));
+  }
+
+  /**
+   * 匿名事件脱敏：对「非本人」隐藏真实身份（creator 置空、creatorId 抹除），
+   * 本人保留 creatorId 以支持前端编辑按钮判断。
+   */
+  private maskAnonymous<T extends { isAnonymous: boolean; creatorId: string; creator: unknown }>(
+    event: T,
+    viewerUserId?: string,
+  ): T {
+    if (!event.isAnonymous) return event;
+    const isOwner = !!viewerUserId && event.creatorId === viewerUserId;
+    return {
+      ...event,
+      creator: null,
+      creatorId: isOwner ? event.creatorId : '',
+    };
   }
 
   async count(
@@ -92,7 +110,7 @@ export class EventsService {
     return this.prisma.event.count({ where });
   }
 
-  async findOne(id: string, communityId: string) {
+  async findOne(id: string, communityId: string, viewerUserId?: string) {
     const event = await this.prisma.event.findFirst({
       where: { id, deletedAt: null },
       include: {
@@ -133,7 +151,7 @@ export class EventsService {
       data: { viewCount: { increment: 1 } },
     });
 
-    return event;
+    return this.maskAnonymous(event, viewerUserId);
   }
 
   async create(userId: string, communityId: string, dto: any) {
@@ -200,6 +218,7 @@ export class EventsService {
         expectedTime: dto.expectedTime ? new Date(dto.expectedTime) : null,
         isAnonymous: dto.isAnonymous ?? false,
         topicId: dto.topicId ?? null,
+        capacity: dto.capacity ?? null,
         aiComment,
         status,
         aiReviewStatus,
