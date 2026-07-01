@@ -1,6 +1,6 @@
 import { View, Text, ScrollView } from '@tarojs/components';
-import { useEffect, useState } from 'react';
-import Taro from '@tarojs/taro';
+import { useEffect, useState, useRef } from 'react';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { topicService, voteService, committeeService } from '@/services';
 import { useAuthGuard } from '@/hooks';
 import { useCommunityStore } from '@/store';
@@ -20,6 +20,18 @@ export default function Plaza() {
   const [topics, setTopics] = useState<TopicDto[]>([]);
   const [topicStatus, setTopicStatus] = useState<'open' | 'closed'>('open');
   const [loadingTopics, setLoadingTopics] = useState(false);
+
+  // 发起议题 navigateBack 回本页后，用 didShow 兜底刷新议题列表。
+  // 函数式 setState 触发下方议题 useEffect 重拉，跳过首次显示避免与 mount 重复。
+  const [refreshTick, setRefreshTick] = useState(0);
+  const firstShowRef = useRef(true);
+  useDidShow(() => {
+    if (firstShowRef.current) {
+      firstShowRef.current = false;
+      return;
+    }
+    setRefreshTick((t) => t + 1);
+  });
 
   const [latestAnnouncement, setLatestAnnouncement] = useState<CommitteeAnnouncementDto | null>(
     null,
@@ -72,7 +84,7 @@ export default function Plaza() {
     return () => {
       cancelled = true;
     };
-  }, [communityId, topicStatus]);
+  }, [communityId, topicStatus, refreshTick]);
 
   return (
     <View className="plaza">
@@ -149,17 +161,10 @@ export default function Plaza() {
           </View>
           <View
             className="plaza__topic-create"
-            onClick={() =>
-              Taro.showToast({
-                title: '发议题功能开发中',
-                icon: 'none',
-              })
-            }
+            onClick={() => Taro.navigateTo({ url: '/pages/topic-create/index' })}
           >
             <Text className="plaza__topic-create-text">+ 发议题</Text>
           </View>
-          {/* ponytail: 议题独立于 event 表，需要专门的 topic-create 页（CreateTopicRequest）；
-                      Sprint 1 仅做浏览/互动，发起议题留待 Sprint 2 配套 topic-create 页一并实现。 */}
         </View>
 
         {loadingTopics && <Loading />}

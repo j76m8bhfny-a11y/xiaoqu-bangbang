@@ -17,4 +17,5 @@
 
 ### 新增
 
+- 新增「发起议题」页面 `pages/topic-create`：补齐议事榜（plaza）原「发议题功能开发中」占位入口。表单含标题（必填 ≤50）+ 描述（选填 ≤500），顶部复用未认证提示横幅，提交对接 `POST /topics`（后端 VerifiedMemberGuard 兜底），成功后返回 plaza；plaza 新增 `useDidShow` 兜底刷新，发起后列表自动更新。
 - `/health` 探活端点，用于验收阶段快速确认服务状态。（commit `32bf4a6`）
