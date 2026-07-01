@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Input, Image } from '@tarojs/components';
-import { useState, useEffect } from 'react';
-import Taro from '@tarojs/taro';
+import { useState, useEffect, useRef } from 'react';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { useCommunityStore } from '@/store';
 import { EventType } from '@xiaoqu-bangbang/shared';
 import type { MarketItemDto } from '@xiaoqu-bangbang/shared';
@@ -77,11 +77,26 @@ export default function Events() {
     [communityId, marketFilter, searchText, outer],
   );
 
+  // refreshTick：由 useDidShow 触发自增，驱动下方 useEffect 重新拉取列表。
+  // 用函数式 setState 触发，避免在 useDidShow 里直接调 refresh 的闭包陷阱。
+  const [refreshTick, setRefreshTick] = useState(0);
+  const firstShowRef = useRef(true);
+
+  // 发布/编辑后 navigateBack 回到本页，useEffect 的依赖未变不会刷新。
+  // 用页面 didShow 生命周期兜底刷新；跳过首次显示，避免与首次 mount 的拉取重复。
+  useDidShow(() => {
+    if (firstShowRef.current) {
+      firstShowRef.current = false;
+      return;
+    }
+    setRefreshTick((t) => t + 1);
+  });
+
   useEffect(() => {
     if (!communityId) return;
     if (outer === 'help') helpList.refresh();
     else marketList.refresh();
-  }, [communityId, outer, helpFilter, marketFilter, searchText]);
+  }, [communityId, outer, helpFilter, marketFilter, searchText, refreshTick]);
 
   const isHelp = outer === 'help';
   const list = isHelp ? helpList : marketList;
