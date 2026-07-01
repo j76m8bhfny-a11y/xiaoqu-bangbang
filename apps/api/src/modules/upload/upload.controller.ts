@@ -1,7 +1,15 @@
-import { Controller, Post, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
+import { SkipCurrentCommunity } from '../../common/decorators/skip-current-community.decorator';
 import { UploadService } from './upload.service';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -12,6 +20,7 @@ export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
   @Post()
+  @SkipCurrentCommunity()
   @UseInterceptors(FileInterceptor('file', UploadService.multerOptions()))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
@@ -19,6 +28,6 @@ export class UploadController {
     }
 
     const url = this.uploadService.getFileUrl(file.filename);
-    return { url };
+    return { code: 0, message: 'ok', data: { url } };
   }
 }

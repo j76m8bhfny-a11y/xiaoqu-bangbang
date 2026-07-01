@@ -23,8 +23,10 @@ import { UploadModule } from './modules/upload/upload.module';
 import { TopicsModule } from './modules/topics/topics.module';
 import { CommunityApplicationsModule } from './modules/community-applications/community-applications.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { HealthController } from './health.controller';
 
 @Module({
+  controllers: [HealthController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     ServeStaticModule.forRoot({

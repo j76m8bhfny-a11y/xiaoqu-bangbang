@@ -45,4 +45,8 @@ export class CreateEventDto {
   @IsOptional()
   @IsString()
   topicId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  capacity?: number;
 }

@@ -14,10 +14,18 @@ export class UploadService {
   static multerOptions(): MulterOptions {
     return {
       storage: multer.diskStorage({
-        destination: (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
+        destination: (
+          _req: Request,
+          _file: Express.Multer.File,
+          cb: (error: Error | null, destination: string) => void,
+        ) => {
           cb(null, UPLOAD_DIR);
         },
-        filename: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
+        filename: (
+          _req: Request,
+          file: Express.Multer.File,
+          cb: (error: Error | null, filename: string) => void,
+        ) => {
           const ext = path.extname(file.originalname) || '.jpg';
           const name = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
           cb(null, name);
@@ -26,7 +34,11 @@ export class UploadService {
       limits: {
         fileSize: MAX_FILE_SIZE,
       },
-      fileFilter: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
+      fileFilter: (
+        _req: Request,
+        file: Express.Multer.File,
+        cb: (error: Error | null, acceptFile: boolean) => void,
+      ) => {
         if (ALLOWED_MIMES.includes(file.mimetype)) {
           cb(null, true);
         } else {
@@ -37,6 +49,7 @@ export class UploadService {
   }
 
   getFileUrl(filename: string): string {
-    return `/uploads/${filename}`;
+    const base = process.env.PUBLIC_BASE_URL || `http://127.0.0.1:${process.env.PORT || 3000}`;
+    return `${base}/uploads/${filename}`;
   }
 }

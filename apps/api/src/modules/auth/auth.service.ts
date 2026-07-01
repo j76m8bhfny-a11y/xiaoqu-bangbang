@@ -30,7 +30,10 @@ export class AuthService {
     }
 
     const token = this.jwtService.sign({ sub: user.id, openid: user.openid });
-    return { token, user };
+    // 复用 getMe 组装完整 user（含 verifyStatus / currentCommunityName / roles），
+    // 否则前端拿到的 user 缺 verifyStatus 字段，永远显示未认证。
+    const userDto = await this.getMe(user.id);
+    return { token, user: { ...userDto, openid: user.openid } };
   }
 
   async getMe(userId: string) {
