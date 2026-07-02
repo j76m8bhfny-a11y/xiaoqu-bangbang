@@ -13,7 +13,7 @@
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__header-sub {
@@ -45,7 +45,7 @@
   &__search-input {
     flex: 1;
     font-size: $font-size-sm;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__search-placeholder {
@@ -106,7 +106,7 @@
 
     &--active {
       background: $color-bg-green;
-      box-shadow: 0 2px 8px rgba(53, 232, 154, 0.2);
+      box-shadow: 0 2px 8px rgba(74, 140, 94, 0.2);
     }
   }
 
@@ -234,7 +234,7 @@
     display: block;
     font-size: $font-size-sm;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

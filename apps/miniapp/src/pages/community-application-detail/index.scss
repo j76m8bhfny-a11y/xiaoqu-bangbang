@@ -65,7 +65,7 @@
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     margin-bottom: 8px;
     padding-right: 120px;
   }
@@ -133,7 +133,7 @@
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     margin-bottom: $spacing-md;
   }
 
@@ -170,7 +170,7 @@
   &__applicant-name {
     display: block;
     font-size: $font-size-sm;
-    color: $color-dark;
+    color: $color-text;
     font-weight: $font-weight-medium;
   }
 
@@ -257,7 +257,7 @@
     height: 88px;
     border-radius: $radius-pill;
     background: $color-primary;
-    box-shadow: 0 4px 16px rgba(53, 232, 154, 0.3);
+    box-shadow: 0 4px 16px rgba(74, 140, 94, 0.3);
 
     &--disabled {
       background: #ccc;

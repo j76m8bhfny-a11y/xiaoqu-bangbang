@@ -11,7 +11,7 @@ export class VotesController {
   constructor(@Inject(VotesService) private votesService: VotesService) {}
 
   @Get()
-  @UseGuards(CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async list(
     @CurrentCommunityId() communityId: string,
     @Query('page') page?: number,
@@ -26,11 +26,8 @@ export class VotesController {
   }
 
   @Get(':id')
-  @UseGuards(CurrentCommunityGuard)
-  async findOne(
-    @Param('id') id: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  async findOne(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
     const data = await this.votesService.findOne(id, communityId);
     return { code: 0, message: 'ok', data };
   }

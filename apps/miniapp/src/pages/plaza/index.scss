@@ -1,49 +1,76 @@
+@use '../../styles/tokens.scss' as *;
+
+// 「小区事」页 v2 · 草木绿 · 老年友好
+// 结构 = 小区标识条 → 业委会通知(最醒目) → 进行中投票(促参与) → 邻居议事(议题列表)
+// 分层：官方通知草绿描边、投票暖色点缀、议题白卡片。
+
 .plaza {
   min-height: 100vh;
-  background: #fff8ec;
+  background: $color-bg;
 
   &__scroll {
     height: 100vh;
   }
 
-  &__card {
-    background: #ffffff;
-    margin: 16rpx 24rpx;
-    padding: 24rpx;
-    border-radius: 20rpx;
-    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  // ── 顶部小区标识条 ──
+  &__community-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md $spacing-lg;
   }
 
+  &__community-name {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+
+  &__community-switch {
+    font-size: $font-size-sm;
+    color: $color-primary;
+  }
+
+  // ── 通用卡片 ──
+  &__card {
+    background: $color-card;
+    margin: $spacing-sm $spacing-lg;
+    padding: $spacing-lg;
+    border-radius: $radius-md;
+    box-shadow: $shadow-card;
+  }
+
+  // 业委会通知：草绿左描边，突出「官方、重要」
   &__committee {
-    margin-top: 24rpx;
+    border-left: 8px solid $color-primary;
   }
 
   &__card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16rpx;
+    margin-bottom: $spacing-md;
   }
 
   &__card-title {
-    font-size: 30rpx;
-    font-weight: 700;
-    color: #1f2937;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text;
   }
 
   &__card-more {
-    font-size: 26rpx;
-    color: #35e89a;
+    font-size: $font-size-sm;
+    color: $color-primary;
   }
 
   &__empty-line {
-    font-size: 26rpx;
-    color: #9ca3af;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
   }
 
   &__committee-item {
-    padding: 16rpx 0;
-    border-top: 1rpx solid #f3f4f6;
+    padding: $spacing-sm 0;
+    border-top: 2px solid $color-border;
 
     &:first-child {
       border-top: none;
@@ -52,22 +79,26 @@
   }
 
   &__committee-title {
-    font-size: 28rpx;
-    color: #1f2937;
-    font-weight: 500;
-    line-height: 1.4;
+    font-size: $font-size-md;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+    line-height: 1.5;
   }
 
   &__committee-date {
     display: block;
-    font-size: 22rpx;
-    color: #9ca3af;
-    margin-top: 6rpx;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-top: 6px;
   }
 
+  // ── 进行中投票：暖底 + 去投票大按钮 ──
   &__vote-item {
-    padding: 16rpx 0;
-    border-top: 1rpx solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-md 0;
+    border-top: 2px solid $color-border;
 
     &:first-of-type {
       border-top: none;
@@ -75,101 +106,122 @@
     }
   }
 
+  &__vote-detail {
+    flex: 1;
+    min-width: 0;
+  }
+
   &__vote-title {
-    font-size: 28rpx;
-    color: #1f2937;
-    font-weight: 500;
+    font-size: $font-size-md;
+    color: $color-text;
+    font-weight: $font-weight-medium;
   }
 
   &__vote-meta {
     display: block;
-    font-size: 22rpx;
-    color: #9ca3af;
-    margin-top: 6rpx;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-top: 6px;
   }
 
+  &__vote-btn {
+    flex-shrink: 0;
+    background: $color-accent;
+    border-radius: $radius-pill;
+    padding: $spacing-sm $spacing-lg;
+  }
+
+  &__vote-btn-text {
+    font-size: $font-size-md;
+    color: #fff;
+    font-weight: $font-weight-bold;
+  }
+
+  // ── 邻居议事 ──
   &__topics-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24rpx 24rpx 8rpx;
+    padding: $spacing-lg $spacing-lg $spacing-sm;
   }
 
   &__topic-tabs {
     display: flex;
-    gap: 16rpx;
+    gap: $spacing-sm;
   }
 
   &__topic-tab {
-    padding: 10rpx 24rpx;
-    border-radius: 24rpx;
-    background: #f3f4f6;
-    color: #6b7280;
-    font-size: 26rpx;
+    padding: $spacing-xs $spacing-lg;
+    border-radius: $radius-pill;
+    background: $color-card;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
 
     &--active {
-      background: #35e89a;
-      color: #ffffff;
-      font-weight: 600;
+      background: $color-primary;
+      color: #fff;
+      font-weight: $font-weight-bold;
     }
   }
 
   &__topic-create {
-    background: #ffa940;
-    border-radius: 24rpx;
-    padding: 10rpx 24rpx;
+    background: $color-primary-deep;
+    border-radius: $radius-pill;
+    padding: $spacing-xs $spacing-lg;
   }
 
   &__topic-create-text {
-    font-size: 26rpx;
-    color: #ffffff;
-    font-weight: 600;
+    font-size: $font-size-sm;
+    color: #fff;
+    font-weight: $font-weight-bold;
   }
 
   &__topic-item {
-    background: #ffffff;
-    margin: 12rpx 24rpx;
-    padding: 24rpx;
-    border-radius: 20rpx;
-    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+    background: $color-card;
+    margin: $spacing-sm $spacing-lg;
+    padding: $spacing-lg;
+    border-radius: $radius-md;
+    box-shadow: $shadow-card;
   }
 
   &__topic-top {
     display: flex;
     align-items: center;
-    gap: 12rpx;
-    margin-bottom: 12rpx;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
   }
 
   &__topic-status {
-    font-size: 22rpx;
-    padding: 4rpx 12rpx;
-    border-radius: 8rpx;
+    font-size: $font-size-xs;
+    padding: 4px 14px;
+    border-radius: $radius-sm;
     flex-shrink: 0;
 
     &--open {
-      background: #d1fae5;
-      color: #065f46;
+      background: $color-bg-green;
+      color: $color-primary-deep;
     }
 
     &--closed {
-      background: #e5e7eb;
-      color: #4b5563;
+      background: $color-border;
+      color: $color-text-secondary;
     }
   }
 
   &__topic-title {
-    font-size: 28rpx;
-    font-weight: 600;
-    color: #1f2937;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
     flex: 1;
   }
 
+  // 议题数据：4 项均配中文词，flex-wrap 防溢出
   &__topic-meta {
     display: flex;
-    gap: 24rpx;
-    font-size: 24rpx;
-    color: #6b7280;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
   }
 
   &__bottom-spacer {

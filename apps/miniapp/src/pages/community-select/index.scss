@@ -10,7 +10,12 @@
   &__hero {
     position: relative;
     padding: $spacing-xl $spacing-lg $spacing-lg;
-    background: linear-gradient(165deg, #35e89a 0%, #2bc484 40%, #1fa86e 100%);
+    background: linear-gradient(
+      165deg,
+      $color-primary 0%,
+      $color-primary-deep 40%,
+      $color-primary-deep 100%
+    );
     border-radius: 0 0 $radius-lg $radius-lg;
     overflow: hidden;
 
@@ -99,7 +104,7 @@
   &__search-input {
     flex: 1;
     font-size: $font-size-sm;
-    color: $color-dark;
+    color: $color-text;
     height: 48px;
   }
 
@@ -174,7 +179,7 @@
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     margin-bottom: 8px;
   }
 
@@ -314,7 +319,7 @@
     padding: 12px 32px;
     border-radius: $radius-pill;
     background: $color-primary;
-    box-shadow: 0 4px 12px rgba(53, 232, 154, 0.3);
+    box-shadow: 0 4px 12px rgba(74, 140, 94, 0.3);
   }
 
   &__empty-cta-text {

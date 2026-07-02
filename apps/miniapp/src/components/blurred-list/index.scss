@@ -1,3 +1,5 @@
+@use '../../styles/tokens.scss' as *;
+
 .bl {
   &__veil-wrap {
     position: relative;
@@ -40,7 +42,7 @@
   }
 
   &__veil-cta {
-    background: #35e89a;
+    background: $color-primary;
     border-radius: 36rpx;
     padding: 16rpx 48rpx;
   }

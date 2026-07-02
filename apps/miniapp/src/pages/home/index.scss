@@ -1,356 +1,270 @@
 @use '../../styles/tokens.scss' as *;
 
-$radius-xl: 40px;
+// 「我的」页 v2 · 功能宫格样板
+// 草木绿、大按钮、圆润卡片、字号放大、留白充足。
 
-.mine {
+.home {
   min-height: 100vh;
   background: $color-bg;
 
-  &__user-card {
-    position: relative;
-    overflow: hidden;
+  &__scroll {
+    height: 100vh;
+    padding: 0 $spacing-lg;
+    box-sizing: border-box;
   }
 
-  &__user-bg {
-    height: 280px;
-    background: linear-gradient(135deg, $color-primary 0%, #2ad488 50%, $color-cream 100%);
-    border-radius: 0 0 $radius-xl $radius-xl;
+  // ── 顶部：用户卡片 + 统计 ──
+  &__header {
+    margin-top: $spacing-lg;
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-deep 100%);
+    border-radius: $radius-lg;
+    padding: $spacing-lg;
+    box-shadow: $shadow-card;
   }
 
-  &__user-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+  &__user {
     display: flex;
     align-items: center;
     gap: $spacing-md;
-    padding: 0 $spacing-lg $spacing-lg;
   }
 
   &__avatar {
-    width: 120px;
-    height: 120px;
+    width: 108px;
+    height: 108px;
     border-radius: 50%;
     background: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 4px solid #fff;
-    box-shadow: 0 4px 16px rgba(23, 23, 23, 0.1);
+    border: 4px solid rgba(255, 255, 255, 0.6);
     flex-shrink: 0;
   }
 
   &__avatar-text {
-    font-size: 60px;
+    font-size: 52px;
+    color: $color-primary-deep;
+    font-weight: $font-weight-bold;
   }
 
   &__avatar-img {
-    width: 120px;
-    height: 120px;
+    width: 108px;
+    height: 108px;
     border-radius: 50%;
   }
 
   &__user-detail {
     flex: 1;
+    min-width: 0;
   }
 
   &__user-name {
     display: block;
-    font-size: $font-size-lg;
+    font-size: $font-size-xl;
     font-weight: $font-weight-bold;
     color: #fff;
-    margin-bottom: $spacing-xs;
-  }
-
-  &__user-tags {
-    display: flex;
-    gap: $spacing-xs;
-  }
-
-  &__user-tag {
-    padding: 2px 12px;
-    border-radius: $radius-pill;
-
-    &--verified {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    &--community {
-      background: rgba(255, 255, 255, 0.2);
-    }
-  }
-
-  &__user-tag-text {
-    font-size: 20px;
-    color: #fff;
-    font-weight: $font-weight-medium;
-  }
-
-  &__stats {
-    display: flex;
-    justify-content: space-around;
-    padding: $spacing-md $spacing-md $spacing-sm;
-    margin: -$spacing-md $spacing-md 0;
-    background: #fff;
-    border-radius: $radius-md;
-    box-shadow: 0 4px 16px rgba(23, 23, 23, 0.06);
-    position: relative;
-    z-index: 10;
-  }
-
-  &__stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-  }
-
-  &__stat-icon {
-    font-size: 32px;
-    margin-bottom: 2px;
-  }
-
-  &__stat-value {
-    font-size: $font-size-lg;
-    font-weight: $font-weight-bold;
-    color: $color-dark;
-  }
-
-  &__stat-label {
-    font-size: 20px;
-    color: $color-text-secondary;
-  }
-
-  &__content {
-    height: calc(100vh - 480px);
-  }
-
-  &__activities {
-    padding: $spacing-md $spacing-md 0;
-  }
-
-  &__section-title {
     margin-bottom: $spacing-sm;
   }
 
-  &__section-title-text {
-    font-size: $font-size-md;
-    font-weight: $font-weight-bold;
-    color: $color-dark;
-  }
-
-  &__activity-grid {
+  &__tags {
     display: flex;
-    gap: $spacing-sm;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
   }
 
-  &__activity-item {
+  &__tag {
+    padding: 4px 16px;
+    border-radius: $radius-pill;
+    background: rgba(255, 255, 255, 0.22);
+
+    &--community {
+      background: rgba(255, 255, 255, 0.18);
+    }
+  }
+
+  &__tag-text {
+    font-size: $font-size-xs;
+    color: #fff;
+  }
+
+  &__user-arrow {
+    font-size: 44px;
+    color: rgba(255, 255, 255, 0.7);
+    flex-shrink: 0;
+  }
+
+  // 统计条：卡片内浅色分隔区
+  &__stats {
+    display: flex;
+    margin-top: $spacing-lg;
+    padding-top: $spacing-md;
+    border-top: 2px solid rgba(255, 255, 255, 0.22);
+  }
+
+  &__stat {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: $spacing-sm $spacing-xs;
-    background: #fff;
-    border-radius: $radius-md;
-    position: relative;
-    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+    gap: 4px;
   }
 
-  &__activity-icon-wrap {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: $color-bg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 6px;
-  }
-
-  &__activity-icon {
-    font-size: 36px;
-  }
-
-  &__activity-label {
-    font-size: 20px;
-    color: $color-text;
-    font-weight: $font-weight-medium;
-  }
-
-  &__activity-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    min-width: 32px;
-    height: 32px;
-    border-radius: 16px;
-    background: $color-danger;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 8px;
-  }
-
-  &__activity-badge-text {
-    font-size: 18px;
-    color: #fff;
+  &__stat-value {
+    font-size: $font-size-xxl;
     font-weight: $font-weight-bold;
+    color: #fff;
+    line-height: 1.1;
   }
 
+  &__stat-label {
+    font-size: $font-size-xs;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  // ── 主功能大宫格 2×2 ──
+  &__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+    margin-top: $spacing-lg;
+  }
+
+  &__grid-item {
+    width: calc(50% - #{$spacing-md} / 2);
+    box-sizing: border-box;
+    background: $color-card;
+    border-radius: $radius-md;
+    padding: $spacing-lg $spacing-md;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    box-shadow: $shadow-card;
+  }
+
+  &__grid-icon {
+    font-size: 68px;
+    line-height: 1;
+  }
+
+  &__grid-label {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+
+  &__grid-desc {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  // ── 待办提醒 ──
+  &__todos {
+    margin-top: $spacing-xl;
+  }
+
+  &__section-title {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+    margin-bottom: $spacing-md;
+  }
+
+  &__todo-row {
+    display: flex;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+  }
+
+  &__todo {
+    flex: 1;
+    min-width: calc(33% - #{$spacing-md});
+    background: $color-bg-green;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__todo-icon {
+    font-size: 44px;
+  }
+
+  &__todo-detail {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__todo-value {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-primary-deep;
+    line-height: 1.1;
+  }
+
+  &__todo-label {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  // ── 设置类列表 ──
   &__menu-group {
-    margin: $spacing-sm $spacing-md 0;
-    background: #fff;
+    margin-top: $spacing-lg;
+    background: $color-card;
     border-radius: $radius-md;
     overflow: hidden;
-    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+    box-shadow: $shadow-card;
   }
 
   &__menu-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: $spacing-md;
-    border-bottom: 1px solid $color-border;
+    padding: $spacing-md $spacing-lg;
+    min-height: 96px; // ≈48pt 触控高度
+    box-sizing: border-box;
+    background: $color-card;
 
-    &:last-child {
-      border-bottom: none;
+    // 覆盖 Button 默认样式
+    &::after {
+      border: none;
     }
 
-    // Button openType=share 复用 menu-item 样式时去掉微信默认按钮外观
-    &--share {
-      background: transparent;
-      border: none;
-      border-radius: 0;
-      width: 100%;
-      line-height: 1.4;
-      text-align: left;
+    & + & {
+      border-top: 2px solid $color-border;
+    }
 
-      &::after {
-        border: none;
-      }
+    &--share {
+      width: 100%;
+      line-height: normal;
+      text-align: left;
+      padding: $spacing-md $spacing-lg;
+      border-radius: 0;
     }
   }
 
   &__menu-left {
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
+    gap: $spacing-md;
   }
 
   &__menu-icon {
-    font-size: $font-size-md;
+    font-size: 40px;
   }
 
   &__menu-label {
-    font-size: $font-size-sm;
-    color: $color-dark;
-    font-weight: $font-weight-medium;
-  }
-
-  &__menu-right {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-  }
-
-  &__menu-badge {
-    min-width: 32px;
-    height: 32px;
-    border-radius: 16px;
-    background: $color-danger;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 8px;
-  }
-
-  &__menu-badge-text {
-    font-size: 18px;
-    color: #fff;
-    font-weight: $font-weight-bold;
+    font-size: $font-size-md;
+    color: $color-text;
   }
 
   &__menu-arrow {
-    font-size: $font-size-lg;
+    font-size: 40px;
     color: $color-text-secondary;
   }
 
   &__bottom-spacer {
-    height: 120px;
-  }
-
-  // 双发布入口（S1-5 新增）
-  &__publish-row {
-    display: flex;
-    gap: 20rpx;
-    padding: 24rpx;
-  }
-
-  &__publish-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12rpx;
-    height: 96rpx;
-    border-radius: 20rpx;
-    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
-
-    &--plaza {
-      background: linear-gradient(135deg, #ffd591, #ffa940);
-    }
-
-    &--events {
-      background: linear-gradient(135deg, #6ee7b7, #35e89a);
-    }
-  }
-
-  &__publish-icon {
-    font-size: 36rpx;
-  }
-
-  &__publish-text {
-    font-size: 30rpx;
-    font-weight: 600;
-    color: #ffffff;
-  }
-
-  // 活跃数据行（S1-5 新增，dashboard 概览）
-  &__active-row {
-    display: flex;
-    gap: 16rpx;
-    padding: 0 24rpx 24rpx;
-    flex-wrap: wrap;
-  }
-
-  &__active-item {
-    flex: 1;
-    min-width: 150rpx;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #ffffff;
-    border-radius: 16rpx;
-    padding: 20rpx 12rpx;
-    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-  }
-
-  &__active-icon {
-    font-size: 36rpx;
-    margin-bottom: 6rpx;
-  }
-
-  &__active-value {
-    font-size: 32rpx;
-    font-weight: 700;
-    color: #35e89a;
-    line-height: 1.2;
-  }
-
-  &__active-label {
-    font-size: 22rpx;
-    color: #7a7a7a;
-    margin-top: 4rpx;
+    height: $spacing-xl;
   }
 }

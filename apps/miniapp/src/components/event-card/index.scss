@@ -5,7 +5,8 @@
   border-radius: $radius-lg;
   padding: $spacing-md;
   margin-bottom: $spacing-sm;
-  box-shadow: 0 2px 12px rgba(23, 23, 23, 0.04);
+  box-shadow: $shadow-card;
+  box-sizing: border-box;
 
   &__header {
     display: flex;
@@ -39,7 +40,7 @@
     display: block;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     line-height: 1.4;
     margin-bottom: 6px;
   }
@@ -60,9 +61,18 @@
   &__meta {
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: space-between;
+    gap: $spacing-sm;
     margin-bottom: $spacing-sm;
-    flex-wrap: wrap;
+  }
+
+  &__meta-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
   }
 
   &__creator {
@@ -104,17 +114,19 @@
   &__location {
     font-size: $font-size-xs;
     color: $color-text-secondary;
+    white-space: nowrap;
   }
 
   &__footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 
   &__stats {
     display: flex;
     gap: $spacing-sm;
+    flex-shrink: 0;
   }
 
   &__stat {
@@ -123,13 +135,13 @@
   }
 
   &__cta {
-    padding: 8px 24px;
+    padding: 12px 30px;
     border-radius: $radius-pill;
   }
 
   &__cta-text {
-    font-size: $font-size-xs;
+    font-size: $font-size-sm;
     color: #fff;
-    font-weight: $font-weight-medium;
+    font-weight: $font-weight-bold;
   }
 }

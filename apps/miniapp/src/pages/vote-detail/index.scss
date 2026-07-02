@@ -75,7 +75,7 @@
     padding: $spacing-sm $spacing-md 0;
     font-size: $font-size-xxl;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     line-height: 1.4;
   }
 
@@ -106,7 +106,7 @@
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     margin-bottom: $spacing-sm;
   }
 
@@ -163,7 +163,7 @@
   &__option-text {
     flex: 1;
     font-size: $font-size-md;
-    color: $color-dark;
+    color: $color-text;
     line-height: 1.5;
   }
 
@@ -175,7 +175,7 @@
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     margin-bottom: $spacing-sm;
   }
 
@@ -196,7 +196,7 @@
 
   &__result-content {
     font-size: $font-size-sm;
-    color: $color-dark;
+    color: $color-text;
     font-weight: $font-weight-medium;
   }
 

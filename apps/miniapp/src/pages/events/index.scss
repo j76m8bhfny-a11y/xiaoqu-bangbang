@@ -12,7 +12,7 @@
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__header-sub {
@@ -33,7 +33,7 @@
     border-radius: $radius-pill;
     padding: $spacing-xs $spacing-md;
     gap: $spacing-xs;
-    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+    box-shadow: $shadow-card;
   }
 
   &__search-icon {
@@ -44,7 +44,7 @@
   &__search-input {
     flex: 1;
     font-size: $font-size-sm;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__search-placeholder {
@@ -52,9 +52,25 @@
     font-size: $font-size-sm;
   }
 
-  &__filter-scroll {
-    white-space: nowrap;
+  &__search-clear {
+    flex-shrink: 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    padding: 0 6px;
+  }
+
+  // 筛选行：左侧横向筛选 pill + 右侧搜索开关（搜索默认收起）
+  &__filter-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
     padding: 0 $spacing-md $spacing-sm;
+  }
+
+  &__filter-scroll {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
   }
 
   &__filter-list {
@@ -73,7 +89,7 @@
 
     &--active {
       background: $color-primary;
-      box-shadow: 0 2px 12px rgba(53, 232, 154, 0.3);
+      box-shadow: 0 2px 12px rgba(74, 140, 94, 0.2);
     }
   }
 
@@ -88,34 +104,25 @@
     }
   }
 
-  &__status-bar {
-    display: flex;
-    gap: $spacing-sm;
-    padding: 0 $spacing-md $spacing-sm;
-  }
-
-  &__status-tab {
-    padding: 8px 24px;
-    border-radius: $radius-pill;
+  // 搜索开关：默认状态灰底，有搜索词时草绿高亮提示
+  &__search-toggle {
+    flex-shrink: 0;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 50%;
     background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
-    transition: all 0.2s;
 
     &--active {
-      background: $color-accent;
-      box-shadow: 0 2px 12px rgba(255, 159, 67, 0.3);
+      background: $color-bg-green;
     }
   }
 
-  &__status-text {
-    font-size: $font-size-xs;
-    color: $color-text;
-    font-weight: $font-weight-medium;
-
-    &--active {
-      color: #fff;
-      font-weight: $font-weight-bold;
-    }
+  &__search-toggle-icon {
+    font-size: $font-size-md;
   }
 
   &__list {
@@ -163,7 +170,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 20px rgba(53, 232, 154, 0.4);
+    box-shadow: $shadow-btn;
   }
 
   &__fab-plus {
@@ -186,7 +193,7 @@
     background: #fff;
     border-radius: $radius-pill;
     padding: 6px;
-    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+    box-shadow: $shadow-card;
   }
 
   &__outer-tab {
@@ -198,7 +205,7 @@
 
     &--active {
       background: $color-primary;
-      box-shadow: 0 2px 12px rgba(53, 232, 154, 0.3);
+      box-shadow: 0 2px 12px rgba(74, 140, 94, 0.2);
     }
   }
 
@@ -216,12 +223,14 @@
   // S1-7 闲置卡片
   &__market-item {
     display: flex;
+    align-items: stretch;
     gap: 12px;
     background: #fff;
     border-radius: 16px;
     padding: 12px;
     margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+    box-shadow: $shadow-card;
+    box-sizing: border-box;
   }
 
   &__market-img {
@@ -230,6 +239,16 @@
     border-radius: 12px;
     flex-shrink: 0;
     background: #f3f4f6;
+
+    &--empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  &__market-img-emoji {
+    font-size: 64px;
   }
 
   &__market-body {
@@ -243,7 +262,7 @@
   &__market-title {
     font-size: $font-size-sm;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -259,23 +278,38 @@
     overflow: hidden;
   }
 
-  &__market-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  &__market-seller {
+    font-size: $font-size-xs - 2;
+    color: $color-text-secondary;
     margin-top: auto;
   }
 
+  // 右侧：价格竖直居中
+  &__market-side {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 6px;
+    padding-left: $spacing-xs;
+    min-width: 120rpx;
+  }
+
   &__market-price {
-    font-size: $font-size-md;
+    font-size: $font-size-lg;
     font-weight: $font-weight-bold;
-    color: #ff6b6b;
+    color: $color-danger;
+
+    &--free {
+      color: $color-primary-deep;
+    }
   }
 
   &__market-sold {
     font-size: $font-size-xs;
-    background: #e5e7eb;
-    color: #4b5563;
+    background: $color-border;
+    color: $color-text-secondary;
     padding: 2px 10px;
     border-radius: 8px;
   }

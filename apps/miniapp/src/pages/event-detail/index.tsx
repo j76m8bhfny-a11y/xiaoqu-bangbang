@@ -63,9 +63,9 @@ const REWARD_TYPE_LABELS: Record<string, string> = {
 
 const FEEDBACK_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
   submitted: { label: '已提交', color: '#3586FF', bgColor: '#EBF2FF' },
-  received: { label: '已接收', color: '#FF9F43', bgColor: '#FFF1DD' },
-  processing: { label: '处理中', color: '#7C6EF6', bgColor: '#F0EDFF' },
-  resolved: { label: '已解决', color: '#4CAF82', bgColor: '#E9FFF4' },
+  received: { label: '已接收', color: '#e0a458', bgColor: '#fbf0dd' },
+  processing: { label: '处理中', color: '#5b9e6f', bgColor: '#eaf4ec' },
+  resolved: { label: '已解决', color: '#5b9e6f', bgColor: '#eaf4ec' },
   closed: { label: '已关闭', color: '#999', bgColor: '#F5F5F5' },
 };
 
@@ -304,7 +304,7 @@ export default function EventDetail() {
 
   const typeConfig = EVENT_TYPE_CONFIG[event.type] ?? EVENT_TYPE_CONFIG.discussion;
   const statusLabel = EVENT_STATUS_LABELS[event.status] ?? event.status;
-  const isCreator = user?.id === event.creatorId;
+  const isCreator = !!user?.id && user.id === event.creatorId;
   const isHelperType = event.type === EventType.HELP_REQUEST;
   const isPublicFeedback = event.type === EventType.PUBLIC_FEEDBACK;
 
@@ -377,7 +377,7 @@ export default function EventDetail() {
               className="event-detail__swiper"
               indicatorDots
               indicatorColor="rgba(0,0,0,0.2)"
-              indicatorActiveColor="#35e89a"
+              indicatorActiveColor="#5b9e6f"
               circular
               autoplay={false}
             >
@@ -581,40 +581,16 @@ export default function EventDetail() {
         </View>
 
         <View className="event-detail__lifecycle">
-          {isCreator &&
-            (event.status === EventStatus.OPEN || event.status === EventStatus.IN_PROGRESS) && (
-              <View
-                className="event-detail__lifecycle-btn event-detail__lifecycle-btn--edit"
-                onClick={() => Taro.navigateTo({ url: `/pages/event-edit/index?id=${event.id}` })}
-              >
-                <Text className="event-detail__lifecycle-btn-text" style={{ color: '#35E89A' }}>
-                  ✏️ 编辑
-                </Text>
-              </View>
-            )}
-          {isCreator && (
-            <>
-              {(event.status === EventStatus.OPEN || event.status === EventStatus.IN_PROGRESS) && (
-                <View
-                  className="event-detail__lifecycle-btn event-detail__lifecycle-btn--close"
-                  onClick={handleClose}
-                >
-                  <Text className="event-detail__lifecycle-btn-text" style={{ color: '#999' }}>
-                    关闭事件
-                  </Text>
-                </View>
-              )}
-              {event.status === EventStatus.IN_PROGRESS && (
-                <View
-                  className="event-detail__lifecycle-btn event-detail__lifecycle-btn--confirm"
-                  onClick={handleConfirmCompletion}
-                >
-                  <Text className="event-detail__lifecycle-btn-text">
-                    {submitting ? '提交中...' : '确认完成'}
-                  </Text>
-                </View>
-              )}
-            </>
+          {/* 状态推进主按钮：确认完成 / 申请完成 / 送花感谢 */}
+          {isCreator && event.status === EventStatus.IN_PROGRESS && (
+            <View
+              className="event-detail__lifecycle-btn event-detail__lifecycle-btn--confirm"
+              onClick={handleConfirmCompletion}
+            >
+              <Text className="event-detail__lifecycle-btn-text">
+                {submitting ? '提交中...' : '确认完成'}
+              </Text>
+            </View>
           )}
           {user &&
             event.selectedHelperId === user.id &&
@@ -638,14 +614,29 @@ export default function EventDetail() {
               </Text>
             </View>
           )}
-          <View
-            className="event-detail__lifecycle-btn event-detail__lifecycle-btn--report"
-            onClick={handleReport}
-          >
-            <Text className="event-detail__lifecycle-btn-text" style={{ color: '#999' }}>
-              🚫 举报
-            </Text>
-          </View>
+
+          {/* 创建者管理区：编辑 / 关闭 并排（仅本人、进行中可见） */}
+          {isCreator &&
+            (event.status === EventStatus.OPEN || event.status === EventStatus.IN_PROGRESS) && (
+              <View className="event-detail__manage-row">
+                <View
+                  className="event-detail__manage-btn"
+                  onClick={() => Taro.navigateTo({ url: `/pages/event-edit/index?id=${event.id}` })}
+                >
+                  <Text className="event-detail__manage-btn-text">✏️ 编辑</Text>
+                </View>
+                <View className="event-detail__manage-btn" onClick={handleClose}>
+                  <Text className="event-detail__manage-btn-text">🔒 关闭事件</Text>
+                </View>
+              </View>
+            )}
+
+          {/* 举报：仅非本人可见，弱化为小号文字避免误点 */}
+          {!isCreator && (
+            <View className="event-detail__report-link" onClick={handleReport}>
+              <Text className="event-detail__report-link-text">🚫 举报该事件</Text>
+            </View>
+          )}
         </View>
 
         <View className="event-detail__bottom-spacer" />

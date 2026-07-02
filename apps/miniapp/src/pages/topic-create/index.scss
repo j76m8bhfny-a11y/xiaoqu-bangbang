@@ -1,6 +1,8 @@
+@use '../../styles/tokens.scss' as *;
+
 .topic-create {
   min-height: 100vh;
-  background: #f5f6f7;
+  background: $color-bg;
   padding: 24rpx;
   box-sizing: border-box;
 
@@ -15,14 +17,14 @@
     display: block;
     font-size: 28rpx;
     font-weight: 600;
-    color: #1f2937;
+    color: $color-text;
     margin-bottom: 16rpx;
   }
 
   &__input {
     width: 100%;
     font-size: 30rpx;
-    color: #1f2937;
+    color: $color-text;
     padding: 8rpx 0;
   }
 
@@ -30,7 +32,7 @@
     width: 100%;
     min-height: 200rpx;
     font-size: 30rpx;
-    color: #1f2937;
+    color: $color-text;
     line-height: 1.5;
   }
 
@@ -38,19 +40,19 @@
     display: block;
     text-align: right;
     font-size: 22rpx;
-    color: #9ca3af;
+    color: $color-text-secondary;
     margin-top: 8rpx;
   }
 
   &__submit {
     margin-top: 16rpx;
-    background: #07c160;
+    background: $color-primary;
     border-radius: 44rpx;
     padding: 24rpx;
     text-align: center;
 
     &--disabled {
-      background: #9ec7ad;
+      background: $color-primary-soft;
     }
   }
 

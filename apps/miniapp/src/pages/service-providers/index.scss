@@ -12,7 +12,7 @@
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__header-sub {
@@ -43,7 +43,7 @@
 
     &--active {
       background: $color-primary;
-      box-shadow: 0 2px 12px rgba(53, 232, 154, 0.3);
+      box-shadow: 0 2px 12px rgba(74, 140, 94, 0.3);
     }
   }
 
@@ -107,7 +107,7 @@
   &__card-name {
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

@@ -53,8 +53,12 @@ export class MarketController {
 
   @Get('items/:id')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async findOne(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
-    const item = await this.marketService.findOne(id, communityId);
+  async findOne(
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    const item = await this.marketService.findOne(id, communityId, userId);
     return { code: 0, message: 'ok', data: item };
   }
 
@@ -104,6 +108,17 @@ export class MarketController {
       communityId,
     );
     return { code: 0, message: 'ok', data: comment };
+  }
+
+  @Post('items/:id/like')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
+  async toggleLike(
+    @CurrentUser('userId') userId: string,
+    @Param('id') itemId: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const result = await this.marketService.toggleLike(userId, itemId, communityId);
+    return { code: 0, message: 'ok', data: result };
   }
 
   @Get('items/:id/reviews')

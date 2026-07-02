@@ -1,11 +1,16 @@
 import { View, Text, ScrollView } from '@tarojs/components';
+import { useState } from 'react';
 import Taro from '@tarojs/taro';
 import { useRequest } from '@/hooks';
 import { committeeService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
-import type { CommitteeMemberDto, CommitteeAnnouncementDto, PaginatedData } from '@xiaoqu-bangbang/shared';
+import type {
+  CommitteeMemberDto,
+  CommitteeAnnouncementDto,
+  PaginatedData,
+} from '@xiaoqu-bangbang/shared';
 import { ClaimStatus } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
@@ -16,9 +21,9 @@ interface CommitteeOverviewDto {
 }
 
 const CLAIM_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  [ClaimStatus.UNCLAIMED]: { label: '待认领', color: '#FF9F43', bgColor: '#FFF1DD' },
+  [ClaimStatus.UNCLAIMED]: { label: '待认领', color: '#e0a458', bgColor: '#fbf0dd' },
   [ClaimStatus.PENDING]: { label: '审核中', color: '#3586FF', bgColor: '#EBF2FF' },
-  [ClaimStatus.CLAIMED]: { label: '已认领', color: '#4CAF82', bgColor: '#E9FFF4' },
+  [ClaimStatus.CLAIMED]: { label: '已认领', color: '#5b9e6f', bgColor: '#eaf4ec' },
   [ClaimStatus.REJECTED]: { label: '已拒绝', color: '#FF6B6B', bgColor: '#FFF0F0' },
 };
 
@@ -28,17 +33,30 @@ function formatDate(isoString: string): string {
 }
 
 export default function Committee() {
-  const { data: overview, loading: overviewLoading, error: overviewError, refresh: refreshOverview } = useRequest<CommitteeOverviewDto>(
-    () => committeeService.getOverview(),
-  );
+  const [membersExpanded, setMembersExpanded] = useState(false);
 
-  const { data: membersData, loading: membersLoading, error: membersError, refresh: refreshMembers } = useRequest<PaginatedData<CommitteeMemberDto>>(
-    () => committeeService.getMembers(),
-  );
+  const {
+    data: overview,
+    loading: overviewLoading,
+    error: overviewError,
+    refresh: refreshOverview,
+  } = useRequest<CommitteeOverviewDto>(() => committeeService.getOverview());
+
+  const {
+    data: membersData,
+    loading: membersLoading,
+    error: membersError,
+    refresh: refreshMembers,
+  } = useRequest<PaginatedData<CommitteeMemberDto>>(() => committeeService.getMembers());
   const members = membersData?.items;
 
-  const { data: announcementsData, loading: announcementsLoading, error: announcementsError, refresh: refreshAnnouncements } = useRequest<PaginatedData<CommitteeAnnouncementDto>>(
-    () => committeeService.getAnnouncements(),
+  const {
+    data: announcementsData,
+    loading: announcementsLoading,
+    error: announcementsError,
+    refresh: refreshAnnouncements,
+  } = useRequest<PaginatedData<CommitteeAnnouncementDto>>(() =>
+    committeeService.getAnnouncements(),
   );
   const announcements = announcementsData?.items;
 
@@ -60,7 +78,7 @@ export default function Committee() {
   };
 
   if (loading) {
-    return <Loading text='加载业委会信息...' />;
+    return <Loading text="加载业委会信息..." />;
   }
 
   if (error) {
@@ -68,50 +86,86 @@ export default function Committee() {
   }
 
   return (
-    <View className='committee'>
-      <ScrollView scrollY className='committee__scroll'>
+    <View className="committee">
+      <ScrollView scrollY className="committee__scroll">
         {/* Stats Header */}
-        <View className='committee__stats'>
-          <View className='committee__stat-card'>
-            <Text className='committee__stat-value'>{overview?.memberCount ?? 0}</Text>
-            <Text className='committee__stat-label'>业委会成员</Text>
+        <View className="committee__stats">
+          <View className="committee__stat-card">
+            <Text className="committee__stat-value">{overview?.memberCount ?? 0}</Text>
+            <Text className="committee__stat-label">业委会成员</Text>
           </View>
-          <View className='committee__stat-card'>
-            <Text className='committee__stat-value'>{overview?.announcementCount ?? 0}</Text>
-            <Text className='committee__stat-label'>公告通知</Text>
+          <View className="committee__stat-card">
+            <Text className="committee__stat-value">{overview?.announcementCount ?? 0}</Text>
+            <Text className="committee__stat-label">公告通知</Text>
           </View>
         </View>
 
-        {/* Members Section */}
-        <View className='committee__section'>
-          <Text className='committee__section-header'>👥 业委会成员</Text>
-          {(!members || members.length === 0) ? (
-            <EmptyState icon='👥' text='暂无成员信息' />
+        {/* Members Section — 名单默认折叠，点击标题展开，避免过长占屏 */}
+        <View className="committee__section">
+          <View
+            className="committee__section-header-row"
+            onClick={() => setMembersExpanded((v) => !v)}
+          >
+            <Text className="committee__section-header">👥 业委会成员</Text>
+            <View className="committee__section-toggle">
+              <Text className="committee__section-toggle-text">
+                {membersExpanded ? '收起' : `查看名单 (${members?.length ?? 0})`}
+              </Text>
+              <Text className="committee__section-toggle-arrow">{membersExpanded ? '▲' : '›'}</Text>
+            </View>
+          </View>
+
+          {!membersExpanded ? (
+            <View className="committee__member-preview" onClick={() => setMembersExpanded(true)}>
+              {!members || members.length === 0 ? (
+                <Text className="committee__member-preview-hint">暂无成员信息</Text>
+              ) : (
+                <>
+                  <View className="committee__member-preview-avatars">
+                    {members.slice(0, 4).map((m) => (
+                      <View key={m.id} className="committee__member-preview-avatar">
+                        <Text className="committee__member-preview-avatar-text">{m.name[0]}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  <Text className="committee__member-preview-hint">
+                    点击查看全部 {members.length} 位成员 ›
+                  </Text>
+                </>
+              )}
+            </View>
+          ) : !members || members.length === 0 ? (
+            <EmptyState icon="👥" text="暂无成员信息" />
           ) : (
             members.map((member) => {
-              const statusConfig = CLAIM_STATUS_CONFIG[member.claimStatus] ?? CLAIM_STATUS_CONFIG[ClaimStatus.UNCLAIMED];
+              const statusConfig =
+                CLAIM_STATUS_CONFIG[member.claimStatus] ??
+                CLAIM_STATUS_CONFIG[ClaimStatus.UNCLAIMED];
               return (
                 <View
                   key={member.id}
-                  className='committee__member-card'
+                  className="committee__member-card"
                   onClick={() => handleMemberClick(member.id)}
                 >
-                  <View className='committee__member-avatar'>
+                  <View className="committee__member-avatar">
                     {member.avatarUrl ? (
-                      <Text className='committee__member-avatar-emoji'>{member.name[0]}</Text>
+                      <Text className="committee__member-avatar-emoji">{member.name[0]}</Text>
                     ) : (
-                      <Text className='committee__member-avatar-emoji'>{member.name[0]}</Text>
+                      <Text className="committee__member-avatar-emoji">{member.name[0]}</Text>
                     )}
                   </View>
-                  <View className='committee__member-info'>
-                    <Text className='committee__member-name'>{member.name}</Text>
-                    <Text className='committee__member-position'>{member.position}</Text>
+                  <View className="committee__member-info">
+                    <Text className="committee__member-name">{member.name}</Text>
+                    <Text className="committee__member-position">{member.position}</Text>
                   </View>
                   <View
-                    className='committee__member-tag'
+                    className="committee__member-tag"
                     style={{ backgroundColor: statusConfig.bgColor }}
                   >
-                    <Text className='committee__member-tag-text' style={{ color: statusConfig.color }}>
+                    <Text
+                      className="committee__member-tag-text"
+                      style={{ color: statusConfig.color }}
+                    >
                       {statusConfig.label}
                     </Text>
                   </View>
@@ -122,34 +176,32 @@ export default function Committee() {
         </View>
 
         {/* Announcements Section */}
-        <View className='committee__section'>
-          <Text className='committee__section-header'>📢 公告通知</Text>
-          {(!announcements || announcements.length === 0) ? (
-            <EmptyState icon='📢' text='暂无公告' />
+        <View className="committee__section">
+          <Text className="committee__section-header">📢 公告通知</Text>
+          {!announcements || announcements.length === 0 ? (
+            <EmptyState icon="📢" text="暂无公告" />
           ) : (
             announcements.map((ann) => (
               <View
                 key={ann.id}
-                className='committee__announcement-card'
+                className="committee__announcement-card"
                 onClick={() => handleAnnouncementClick(ann.id)}
               >
-                <View className='committee__announcement-top'>
-                  <Text className='committee__announcement-title'>{ann.title}</Text>
+                <View className="committee__announcement-top">
+                  <Text className="committee__announcement-title">{ann.title}</Text>
                   {ann.isPinned && (
-                    <View className='committee__announcement-pin'>
-                      <Text className='committee__announcement-pin-text'>📌 置顶</Text>
+                    <View className="committee__announcement-pin">
+                      <Text className="committee__announcement-pin-text">📌 置顶</Text>
                     </View>
                   )}
                 </View>
-                <Text className='committee__announcement-date'>
-                  {formatDate(ann.publishedAt)}
-                </Text>
+                <Text className="committee__announcement-date">{formatDate(ann.publishedAt)}</Text>
               </View>
             ))
           )}
         </View>
 
-        <View className='committee__bottom-spacer' />
+        <View className="committee__bottom-spacer" />
       </ScrollView>
     </View>
   );

@@ -177,7 +177,7 @@ export default function EventCreate() {
                   </Text>
                   {!preselectedTopicId && (
                     <Text
-                      style={{ marginLeft: '12px', color: '#7c3aed', fontSize: '12px' }}
+                      style={{ marginLeft: '12px', color: '#5b9e6f', fontSize: '12px' }}
                       onClick={() => setTopicId('')}
                     >
                       重选
@@ -188,7 +188,7 @@ export default function EventCreate() {
                 <View>
                   {title.trim() && suggestions.length > 0 && (
                     <View style={{ marginBottom: '8px' }}>
-                      <Text style={{ fontSize: '12px', color: '#7c3aed' }}>🤖 推荐议题：</Text>
+                      <Text style={{ fontSize: '12px', color: '#5b9e6f' }}>🤖 推荐议题：</Text>
                       {suggestions.map((s) => (
                         <View
                           key={s.topicId}
@@ -318,7 +318,7 @@ export default function EventCreate() {
             <Switch
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.detail.value)}
-              color="#35e89a"
+              color="#5b9e6f"
             />
           </View>
         </View>

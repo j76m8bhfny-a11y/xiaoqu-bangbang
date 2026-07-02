@@ -1,3 +1,5 @@
+@use '../../styles/tokens.scss' as *;
+
 .mu {
   &__pills {
     display: flex;
@@ -13,8 +15,8 @@
     border: 2rpx solid transparent;
 
     &--active {
-      background: #e9fff4;
-      border-color: #35e89a;
+      background: #eaf4ec;
+      border-color: $color-primary;
     }
   }
 

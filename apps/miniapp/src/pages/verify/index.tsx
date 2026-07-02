@@ -115,12 +115,12 @@ export default function Verify() {
   };
 
   return (
-    <View className='verify'>
-      <ScrollView scrollY className='verify__body'>
+    <View className="verify">
+      <ScrollView scrollY className="verify__body">
         {/* ===== Form Section ===== */}
-        <View className='verify__card'>
-          <Text className='verify__section-title'>材料类型</Text>
-          <View className='verify__type-group'>
+        <View className="verify__card">
+          <Text className="verify__section-title">材料类型</Text>
+          <View className="verify__type-group">
             {MATERIAL_OPTIONS.map((opt) => (
               <View
                 key={opt.key}
@@ -136,17 +136,15 @@ export default function Verify() {
             ))}
           </View>
 
-          <Text className='verify__section-title'>上传材料照片</Text>
+          <Text className="verify__section-title">上传材料照片</Text>
           <ImagePicker images={images} maxCount={1} onChange={setImages} />
 
-          <View className='verify__consent-row'>
-            <Text className='verify__consent-text'>
-              我同意授权认证，并确认所提供信息真实有效
-            </Text>
+          <View className="verify__consent-row">
+            <Text className="verify__consent-text">我同意授权认证，并确认所提供信息真实有效</Text>
             <Switch
               checked={consentAccepted}
               onChange={(e) => setConsentAccepted(e.detail.value)}
-              color='#35e89a'
+              color="#5b9e6f"
             />
           </View>
 
@@ -154,42 +152,39 @@ export default function Verify() {
             className={`verify__submit ${submitting ? 'verify__submit--disabled' : ''}`}
             onClick={submitting ? undefined : handleSubmit}
           >
-            <Text className='verify__submit-text'>
-              {submitting ? '提交中...' : '提交认证'}
-            </Text>
+            <Text className="verify__submit-text">{submitting ? '提交中...' : '提交认证'}</Text>
           </View>
         </View>
 
         {/* ===== My Verification Records ===== */}
-        <View className='verify__records'>
-          <Text className='verify__section-title'>我的认证记录</Text>
+        <View className="verify__records">
+          <Text className="verify__section-title">我的认证记录</Text>
 
-          {recordsLoading && <Loading text='加载中...' />}
+          {recordsLoading && <Loading text="加载中..." />}
 
-          {recordsError && (
-            <ErrorState message='加载失败' onRetry={refreshRecords} />
-          )}
+          {recordsError && <ErrorState message="加载失败" onRetry={refreshRecords} />}
 
-          {records && records.length === 0 && (
-            <EmptyState icon='📋' text='暂无认证记录' />
-          )}
+          {records && records.length === 0 && <EmptyState icon="📋" text="暂无认证记录" />}
 
           {records && records.length > 0 && (
-            <View className='verify__record-list'>
+            <View className="verify__record-list">
               {records.map((record) => {
-                const statusInfo = STATUS_MAP[record.status] ?? { label: record.status, color: 'gray' };
+                const statusInfo = STATUS_MAP[record.status] ?? {
+                  label: record.status,
+                  color: 'gray',
+                };
                 return (
-                  <View key={record.id} className='verify__record-item'>
-                    <View className='verify__record-left'>
-                      <Text className='verify__record-type'>
+                  <View key={record.id} className="verify__record-item">
+                    <View className="verify__record-left">
+                      <Text className="verify__record-type">
                         {MATERIAL_LABEL_MAP[record.materialType] ?? record.materialType}
                       </Text>
                       {record.reviewedAt && (
-                        <Text className='verify__record-date'>{formatDate(record.reviewedAt)}</Text>
+                        <Text className="verify__record-date">{formatDate(record.reviewedAt)}</Text>
                       )}
                     </View>
                     <View className={`verify__status-tag verify__status-tag--${statusInfo.color}`}>
-                      <Text className='verify__status-tag-text'>{statusInfo.label}</Text>
+                      <Text className="verify__status-tag-text">{statusInfo.label}</Text>
                     </View>
                   </View>
                 );

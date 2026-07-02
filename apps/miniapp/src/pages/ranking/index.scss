@@ -12,7 +12,7 @@
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__header-sub {
@@ -40,7 +40,7 @@
 
     &--active {
       background: $color-primary;
-      box-shadow: 0 2px 12px rgba(53, 232, 154, 0.3);
+      box-shadow: 0 2px 12px rgba(74, 140, 94, 0.2);
     }
   }
 
@@ -74,7 +74,7 @@
 
     &--active {
       background: $color-cream;
-      box-shadow: 0 2px 8px rgba(255, 233, 168, 0.4);
+      box-shadow: 0 2px 8px rgba(224, 164, 88, 0.2);
     }
   }
 
@@ -83,7 +83,7 @@
     color: $color-text-secondary;
 
     &--active {
-      color: $color-dark;
+      color: $color-text;
       font-weight: $font-weight-bold;
     }
   }
@@ -139,17 +139,17 @@
       width: 120px;
       height: 120px;
       border-width: 6px;
-      box-shadow: 0 4px 20px rgba(53, 232, 154, 0.4);
+      box-shadow: 0 4px 20px rgba(74, 140, 94, 0.28);
     }
 
     &--second {
-      border-color: #FFD93D;
-      background: #FFFBE6;
+      border-color: $color-accent;
+      background: $color-bg-orange;
     }
 
     &--third {
-      border-color: #FF9F43;
-      background: #FFF1DD;
+      border-color: $color-primary-soft;
+      background: $color-bg-green;
     }
   }
 
@@ -164,7 +164,7 @@
   &__podium-name {
     font-size: $font-size-xs;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     margin-bottom: 2px;
   }
 
@@ -181,17 +181,17 @@
 
     &--first {
       height: 120px;
-      background: linear-gradient(180deg, $color-primary, #2ad488);
+      background: linear-gradient(180deg, $color-primary, $color-primary-deep);
     }
 
     &--second {
       height: 90px;
-      background: linear-gradient(180deg, #FFD93D, #f0c830);
+      background: linear-gradient(180deg, $color-accent, #c98a3f);
     }
 
     &--third {
       height: 70px;
-      background: linear-gradient(180deg, $color-accent, #e88e38);
+      background: linear-gradient(180deg, $color-primary-soft, $color-primary);
     }
   }
 
@@ -207,7 +207,7 @@
     border-radius: $radius-md;
     margin-bottom: $spacing-xs;
     gap: $spacing-sm;
-    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+    box-shadow: $shadow-card;
   }
 
   &__list-rank {
@@ -242,23 +242,14 @@
     display: block;
     font-size: $font-size-sm;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__list-help {
     display: block;
-    font-size: 20px;
+    font-size: $font-size-xs;
     color: $color-text-secondary;
     margin-top: 2px;
-  }
-
-  &__list-badges {
-    display: flex;
-    gap: 2px;
-  }
-
-  &__list-badge {
-    font-size: 24px;
   }
 
   &__list-flowers {
@@ -296,7 +287,8 @@
   }
 
   &__badge-card {
-    width: calc(50% - 6px);
+    width: calc(50% - #{$spacing-sm} / 2);
+    box-sizing: border-box;
     background: #fff;
     border-radius: $radius-md;
     padding: $spacing-sm;
@@ -304,7 +296,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+    box-shadow: $shadow-card;
 
     &--earned {
       border: 2px solid $color-primary;
@@ -335,12 +327,12 @@
   &__badge-name {
     font-size: $font-size-sm;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     margin-bottom: 4px;
   }
 
   &__badge-desc {
-    font-size: 20px;
+    font-size: $font-size-xs;
     color: $color-text-secondary;
     line-height: 1.3;
     margin-bottom: $spacing-xs;
@@ -360,7 +352,7 @@
   }
 
   &__badge-status-text {
-    font-size: 20px;
+    font-size: $font-size-xs;
     color: $color-primary;
     font-weight: $font-weight-medium;
 
