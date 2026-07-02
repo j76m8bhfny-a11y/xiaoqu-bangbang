@@ -14,7 +14,7 @@
 
   // 页面级滚动容器（替代 ScrollView，使 sticky Tab 可靠吸顶）
   &__content {
-    padding-bottom: 160px;
+    padding-bottom: 200px;
   }
 
   // ── 头部 ──────────────────────────────────────────
@@ -524,5 +524,134 @@
     font-size: $font-size-sm;
     color: #fff;
     font-weight: $font-weight-bold;
+  }
+
+  // ── 骨架屏 ────────────────────────────────────────
+  &__skeleton-card {
+    padding: $spacing-md;
+  }
+
+  &__skeleton-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__skeleton-line {
+    height: 32px;
+    border-radius: $radius-sm;
+    background: linear-gradient(90deg, $color-bg 0%, $color-border 50%, $color-bg 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+
+    &--sm {
+      width: 120px;
+      height: 28px;
+    }
+    &--md {
+      width: 200px;
+      height: 32px;
+    }
+    &--lg {
+      width: 280px;
+      height: 40px;
+    }
+    &--full {
+      width: 100%;
+      height: 28px;
+    }
+  }
+
+  &__skeleton-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, $color-bg 0%, $color-border 50%, $color-bg 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes skeleton-shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  // ── 错误重试 ──────────────────────────────────────
+  &__error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-xl $spacing-md;
+    gap: $spacing-sm;
+
+    &--inline {
+      padding: $spacing-lg $spacing-md;
+    }
+  }
+
+  &__error-text {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+
+  &__error-hint {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    text-align: center;
+  }
+
+  &__error-retry {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    padding: 16px 48px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    margin-top: $spacing-xs;
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__error-retry-text {
+    font-size: $font-size-md;
+    color: #fff;
+    font-weight: $font-weight-bold;
+  }
+
+  // ── 热评"查看全部"链接 ───────────────────────────
+  &__comment-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 12px 0;
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__comment-more-text {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__comment-more-arrow {
+    font-size: $font-size-md;
+    color: $color-primary;
+    line-height: 1;
   }
 }

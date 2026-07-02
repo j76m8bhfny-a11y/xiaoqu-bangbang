@@ -1,9 +1,8 @@
 import { View, Text, Input, Image } from '@tarojs/components';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Taro from '@tarojs/taro';
 import { topicService, eventService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
-import Loading from '@/components/loading';
 import EmptyState from '@/components/empty-state';
 import type { TopicTimelineItem, TopicCommentDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
@@ -20,19 +19,23 @@ export default function TopicDetail() {
   const router = Taro.getCurrentInstance().router;
   const id = router?.params?.id ?? '';
 
-  const { data: topic, refresh: refreshTopic } = useRequest(() => topicService.getById(id), [id], {
-    enabled: !!id,
-  });
+  const {
+    data: topic,
+    error: topicError,
+    refresh: refreshTopic,
+  } = useRequest(() => topicService.getById(id), [id], { enabled: !!id });
 
   const {
     data: timeline,
     loading: timelineLoading,
+    error: timelineError,
     refresh: refreshTimeline,
   } = useRequest(() => topicService.timeline(id, 1, 20), [id], { enabled: !!id });
 
   const {
     data: commentsData,
     loading: commentsLoading,
+    error: commentsError,
     refresh: refreshComments,
   } = useRequest(() => topicService.comments(id, { sort: 'new', page: 1, pageSize: 50 }), [id], {
     enabled: !!id,
@@ -148,10 +151,46 @@ export default function TopicDetail() {
     }
   };
 
+  // 热评预计算：每个事件只取点赞最高的1条，其余进入"查看全部"
+  const hotCommentByEvent = useMemo(() => {
+    const map: Record<string, TopicCommentDto | undefined> = {};
+    if (timeline?.items) {
+      for (const it of timeline.items) {
+        const ev = it.data;
+        if (ev.comments && ev.comments.length > 0) {
+          const sorted = [...ev.comments].sort((a, b) => b.likeCount - a.likeCount);
+          map[ev.id] = sorted[0];
+        }
+      }
+    }
+    return map;
+  }, [timeline]);
+
+  // ── 加载/错误态 ──────────────────────────────────
+  if (topicError && !topic) {
+    return (
+      <View className="topic-detail">
+        <View className="topic-detail__error">
+          <Text className="topic-detail__error-text">加载失败</Text>
+          <Text className="topic-detail__error-hint">{topicError.message}</Text>
+          <View className="topic-detail__error-retry" onClick={() => refreshTopic()}>
+            <Text className="topic-detail__error-retry-text">重试</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   if (!topic) {
     return (
       <View className="topic-detail">
-        <Loading />
+        <View className="topic-detail__content">
+          <View className="topic-detail__header">
+            <View className="topic-detail__skeleton-line topic-detail__skeleton-line--sm" />
+            <View className="topic-detail__skeleton-line topic-detail__skeleton-line--lg" />
+            <View className="topic-detail__skeleton-line topic-detail__skeleton-line--md" />
+          </View>
+        </View>
       </View>
     );
   }
@@ -219,13 +258,13 @@ export default function TopicDetail() {
 
           {isClosed && topic.closedSummary && (
             <View className="topic-detail__summary">
-              <Text className="topic-detail__summary-label">📜 完结总结</Text>
+              <Text className="topic-detail__summary-label">{'\u{1f4dc}'} 完结总结</Text>
               <View className="topic-detail__summary-text">{topic.closedSummary}</View>
             </View>
           )}
         </View>
 
-        {/* Tab 切换：与头部留白区隔 */}
+        {/* Tab 切换：下划线式 + 粘性吸顶 */}
         <View className="topic-detail__tabs">
           <View className={eventsTabCls} onClick={() => setTab('events')}>
             <Text className="topic-detail__tab-text">相关事件 {topic.eventCount}</Text>
@@ -238,13 +277,34 @@ export default function TopicDetail() {
         <View className="topic-detail__pane">
           {tab === 'events' ? (
             <>
-              {timelineLoading && <Loading />}
-              {!timelineLoading && items.length === 0 && (
+              {/* 骨架屏 */}
+              {timelineLoading && items.length === 0 && (
+                <>
+                  {[0, 1].map((i) => (
+                    <View key={i} className="topic-detail__event topic-detail__skeleton-card">
+                      <View className="topic-detail__skeleton-line topic-detail__skeleton-line--lg" />
+                      <View className="topic-detail__skeleton-line topic-detail__skeleton-line--md" />
+                      <View className="topic-detail__skeleton-line topic-detail__skeleton-line--full" />
+                    </View>
+                  ))}
+                </>
+              )}
+              {/* 错误重试 */}
+              {timelineError && items.length === 0 && (
+                <View className="topic-detail__error topic-detail__error--inline">
+                  <Text className="topic-detail__error-text">事件加载失败</Text>
+                  <View className="topic-detail__error-retry" onClick={() => refreshTimeline()}>
+                    <Text className="topic-detail__error-retry-text">重试</Text>
+                  </View>
+                </View>
+              )}
+              {!timelineLoading && !timelineError && items.length === 0 && (
                 <EmptyState icon="📋" text="还没有相关事件\n点右下角 ＋ 新建一个" />
               )}
               {items.map((it) => {
                 const ev = it.data;
                 const liked = !!eventLiked[ev.id];
+                const hotComment = hotCommentByEvent[ev.id];
                 return (
                   <View key={ev.id} className="topic-detail__event">
                     {/* 事件标题左 + 交互右 */}
@@ -289,19 +349,35 @@ export default function TopicDetail() {
 
                     {ev.aiComment && (
                       <View className="topic-detail__ai">
-                        <View className="topic-detail__ai-label">🤖 AI 点评</View>
+                        <View className="topic-detail__ai-label">{'\u{1f916}'} AI 点评</View>
                         <View className="topic-detail__ai-text">{ev.aiComment}</View>
                       </View>
                     )}
 
-                    {ev.comments && ev.comments.length > 0 && (
+                    {/* 热评：只显示1条最高赞 + 查看全部 */}
+                    {hotComment && (
                       <View className="topic-detail__comments">
-                        {ev.comments.slice(0, 3).map((c) => (
-                          <View key={c.id} className="topic-detail__comment">
-                            <View className="topic-detail__comment-author">{c.userNickname}</View>
-                            <View className="topic-detail__comment-content">{c.content}</View>
+                        <View className="topic-detail__comment">
+                          <View className="topic-detail__comment-author">
+                            {hotComment.userNickname}
                           </View>
-                        ))}
+                          <View className="topic-detail__comment-content">
+                            {hotComment.content}
+                          </View>
+                        </View>
+                        {ev.commentCount > 1 && (
+                          <View
+                            className="topic-detail__comment-more"
+                            onClick={() =>
+                              Taro.navigateTo({ url: `/pages/event-detail/index?id=${ev.id}` })
+                            }
+                          >
+                            <Text className="topic-detail__comment-more-text">
+                              查看全部 {ev.commentCount} 条评论
+                            </Text>
+                            <Text className="topic-detail__comment-more-arrow">{'\u203a'}</Text>
+                          </View>
+                        )}
                       </View>
                     )}
 
@@ -310,7 +386,9 @@ export default function TopicDetail() {
                         className="topic-detail__event-comment-btn"
                         onClick={() => handleCommentEvent(ev.id)}
                       >
-                        <Text className="topic-detail__event-comment-text">💬 评论此事件</Text>
+                        <Text className="topic-detail__event-comment-text">
+                          {'\u{1f4ac}'} 评论此事件
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -319,8 +397,33 @@ export default function TopicDetail() {
             </>
           ) : (
             <>
-              {commentsLoading && <Loading />}
-              {!commentsLoading && topicComments.length === 0 && (
+              {/* 骨架屏 */}
+              {commentsLoading && topicComments.length === 0 && (
+                <>
+                  {[0, 1].map((i) => (
+                    <View
+                      key={i}
+                      className="topic-detail__discuss-item topic-detail__skeleton-card"
+                    >
+                      <View className="topic-detail__skeleton-avatar" />
+                      <View className="topic-detail__skeleton-lines">
+                        <View className="topic-detail__skeleton-line topic-detail__skeleton-line--sm" />
+                        <View className="topic-detail__skeleton-line topic-detail__skeleton-line--full" />
+                      </View>
+                    </View>
+                  ))}
+                </>
+              )}
+              {/* 错误重试 */}
+              {commentsError && topicComments.length === 0 && (
+                <View className="topic-detail__error topic-detail__error--inline">
+                  <Text className="topic-detail__error-text">评论加载失败</Text>
+                  <View className="topic-detail__error-retry" onClick={() => refreshComments()}>
+                    <Text className="topic-detail__error-retry-text">重试</Text>
+                  </View>
+                </View>
+              )}
+              {!commentsLoading && !commentsError && topicComments.length === 0 && (
                 <EmptyState icon="💬" text="还没有讨论\n来说说你的看法吧" />
               )}
               {topicComments.map((c) => (
@@ -345,7 +448,9 @@ export default function TopicDetail() {
                       className="topic-detail__discuss-like"
                       onClick={() => handleLikeComment(c.id)}
                     >
-                      <Text className="topic-detail__discuss-like-text">👍 {c.likeCount}</Text>
+                      <Text className="topic-detail__discuss-like-text">
+                        {'\u{1f44d}'} {c.likeCount}
+                      </Text>
                     </View>
                   </View>
                 </View>
