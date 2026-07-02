@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Input, Image } from '@tarojs/components';
+import { View, Text, Input, Image } from '@tarojs/components';
 import { useState } from 'react';
 import Taro from '@tarojs/taro';
 import { topicService, eventService } from '@/services';
@@ -169,7 +169,8 @@ export default function TopicDetail() {
 
   return (
     <View className="topic-detail">
-      <ScrollView scrollY className="topic-detail__scroll">
+      {/* 页面级滚动：sticky Tab 在原生 scroll-view 内不可靠，改用页面滚动 */}
+      <View className="topic-detail__content">
         {/* 议题头部：标题左 + 投票图标右，舒展留白 */}
         <View className="topic-detail__header">
           <View className="topic-detail__header-top">
@@ -352,7 +353,7 @@ export default function TopicDetail() {
             </>
           )}
         </View>
-      </ScrollView>
+      </View>
 
       {/* FAB：右下角圆形加号，仅相关事件 Tab + 未关闭时显示 */}
       {tab === 'events' && !isClosed && (

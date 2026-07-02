@@ -12,8 +12,8 @@
   min-height: 100vh;
   background: $color-bg;
 
-  &__scroll {
-    height: 100vh;
+  // 页面级滚动容器（替代 ScrollView，使 sticky Tab 可靠吸顶）
+  &__content {
     padding-bottom: 160px;
   }
 
@@ -103,7 +103,7 @@
   }
 
   &__vote-count {
-    font-size: $font-size-xs;
+    font-size: $font-size-sm;
     color: $color-text-secondary;
     font-weight: $font-weight-medium;
     margin-top: 2px;
@@ -178,7 +178,9 @@
   &__tab {
     flex: 1;
     text-align: center;
-    padding: 20px 0 16px;
+    padding: 28px 0 24px;
+    min-height: 88px;
+    box-sizing: border-box;
     position: relative;
 
     &::after {
@@ -216,9 +218,9 @@
     font-weight: $font-weight-medium;
   }
 
-  // ── 内容区：紧贴 Tab，同背景，无间隔 ───────────
+  // ── 内容区：紧贴 Tab，同背景，顶部留呼吸 ─────────
   &__pane {
-    padding: $spacing-sm $spacing-md 0;
+    padding: $spacing-md $spacing-md 0;
   }
 
   // ── 事件卡片 ──────────────────────────────────────
@@ -251,7 +253,7 @@
 
   &__event-meta-text {
     display: block;
-    font-size: $font-size-xs;
+    font-size: $font-size-sm;
     color: $color-text-secondary;
     margin-top: 4px;
   }
@@ -263,6 +265,7 @@
     align-items: center;
     justify-content: center;
     width: 88px;
+    min-height: 88px;
     flex-shrink: 0;
 
     &:active {
@@ -282,7 +285,7 @@
   }
 
   &__event-like-count {
-    font-size: $font-size-xs;
+    font-size: $font-size-sm;
     color: $color-text-secondary;
     font-weight: $font-weight-medium;
     margin-top: 2px;
@@ -312,8 +315,10 @@
   &__event-comment-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    min-height: 72px;
     margin-top: $spacing-sm;
-    padding: 8px 20px;
+    padding: 16px 32px;
     border-radius: $radius-pill;
     background: $color-bg-green;
 
@@ -323,7 +328,7 @@
   }
 
   &__event-comment-text {
-    font-size: $font-size-xs;
+    font-size: $font-size-sm;
     color: $color-primary;
     font-weight: $font-weight-medium;
   }
@@ -363,7 +368,7 @@
     margin-bottom: 8px;
 
     &-author {
-      font-size: $font-size-xs;
+      font-size: $font-size-sm;
       font-weight: $font-weight-bold;
       color: $color-text-secondary;
       margin-bottom: 2px;
@@ -434,7 +439,9 @@
   &__discuss-like {
     display: inline-flex;
     align-items: center;
-    padding: 4px 16px;
+    justify-content: center;
+    min-height: 72px;
+    padding: 16px 28px;
     border-radius: $radius-pill;
     background: $color-bg;
 
@@ -444,7 +451,7 @@
   }
 
   &__discuss-like-text {
-    font-size: $font-size-xs;
+    font-size: $font-size-sm;
     color: $color-text-secondary;
   }
 
