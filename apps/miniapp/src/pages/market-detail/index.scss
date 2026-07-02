@@ -34,7 +34,7 @@
   }
 
   &__card {
-    margin: $spacing-sm $spacing-md;
+    margin: $spacing-sm $spacing-lg;
     padding: $spacing-md;
     background: #fff;
     border-radius: $radius-md;
@@ -189,7 +189,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: $spacing-sm $spacing-md;
+    padding: $spacing-sm $spacing-lg;
     padding-bottom: calc(#{$spacing-sm} + env(safe-area-inset-bottom));
     background: #fff;
     box-shadow: 0 -2px 12px rgba(23, 23, 23, 0.06);
@@ -276,7 +276,7 @@
 
   // 评论区
   &__comments {
-    padding: $spacing-md;
+    padding: $spacing-md $spacing-lg;
   }
 
   &__comments-header {

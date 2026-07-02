@@ -5,7 +5,7 @@
   background: $color-bg;
 
   &__header {
-    padding: $spacing-lg $spacing-md $spacing-sm;
+    padding: $spacing-lg $spacing-lg $spacing-sm;
   }
 
   &__header-title {
@@ -23,7 +23,7 @@
   }
 
   &__search-wrap {
-    padding: 0 $spacing-md $spacing-sm;
+    padding: 0 $spacing-lg $spacing-sm;
   }
 
   &__search {
@@ -64,7 +64,7 @@
     display: flex;
     align-items: center;
     gap: $spacing-sm;
-    padding: 0 $spacing-md $spacing-sm;
+    padding: 0 $spacing-lg $spacing-sm;
   }
 
   &__filter-scroll {
@@ -127,7 +127,7 @@
 
   &__list {
     height: calc(100vh - 320px);
-    padding: 0 $spacing-md;
+    padding: 0 $spacing-lg;
   }
 
   &__empty {
@@ -153,7 +153,7 @@
 
   &__fab {
     position: fixed;
-    right: $spacing-md;
+    right: $spacing-lg;
     bottom: 200px;
     display: flex;
     flex-direction: column;
@@ -189,7 +189,7 @@
   // S1-7 第一层 tab：互助/闲置
   &__outer-tabs {
     display: flex;
-    margin: 0 $spacing-md $spacing-sm;
+    margin: 0 $spacing-lg $spacing-sm;
     background: #fff;
     border-radius: $radius-pill;
     padding: 6px;

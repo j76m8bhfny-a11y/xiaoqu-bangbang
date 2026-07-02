@@ -20,12 +20,16 @@
   // ── 头部 ──────────────────────────────────────────
   &__header {
     background: #fff;
-    padding: $spacing-md $spacing-md $spacing-lg;
+    padding: $spacing-md $spacing-lg $spacing-lg;
+    border-radius: 0 0 $radius-lg $radius-lg;
+    box-shadow: 0 4px 16px rgba(91, 158, 111, 0.06);
+    position: relative;
+    z-index: 10;
   }
 
   &__header-top {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: $spacing-md;
   }
 
@@ -173,6 +177,7 @@
     position: sticky;
     top: 0;
     z-index: 50;
+    padding: 0 $spacing-lg;
   }
 
   &__tab {
@@ -220,7 +225,7 @@
 
   // ── 内容区：紧贴 Tab，同背景，顶部留呼吸 ─────────
   &__pane {
-    padding: $spacing-md $spacing-md 0;
+    padding: $spacing-md $spacing-lg 0;
   }
 
   // ── 事件卡片 ──────────────────────────────────────
