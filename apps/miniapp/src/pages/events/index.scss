@@ -128,6 +128,7 @@
   &__list {
     height: calc(100vh - 320px);
     padding: 0 $spacing-lg;
+    box-sizing: border-box;
   }
 
   &__empty {
@@ -231,11 +232,12 @@
     margin-bottom: 12px;
     box-shadow: $shadow-card;
     box-sizing: border-box;
+    overflow: hidden;
   }
 
   &__market-img {
-    width: 160rpx;
-    height: 160rpx;
+    width: 120rpx;
+    height: 120rpx;
     border-radius: 12px;
     flex-shrink: 0;
     background: #f3f4f6;
@@ -293,7 +295,6 @@
     justify-content: center;
     gap: 6px;
     padding-left: $spacing-xs;
-    min-width: 120rpx;
   }
 
   &__market-price {
