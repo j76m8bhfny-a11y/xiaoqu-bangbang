@@ -7,15 +7,29 @@
 
   &__scroll {
     height: 100vh;
-    padding-bottom: 160px;
+    padding-bottom: 200px;
   }
 
+  // ── 卡片容器：左右 lg(24) 呼吸间距 ──
+  &__card {
+    margin: 0 $spacing-lg $spacing-sm;
+    padding: $spacing-md;
+    background: #fff;
+    border-radius: $radius-lg;
+    box-shadow: 0 2px 12px rgba(23, 23, 23, 0.05);
+  }
+
+  &__card--first {
+    margin-top: $spacing-md;
+  }
+
+  // ── 头部卡片内：标签 + 标题 + 描述 + 时间 ──
   &__tags {
     display: flex;
     align-items: center;
     gap: $spacing-xs;
-    padding: $spacing-md $spacing-md 0;
     flex-wrap: wrap;
+    margin-bottom: $spacing-sm;
   }
 
   &__tag {
@@ -72,25 +86,21 @@
 
   &__title {
     display: block;
-    padding: $spacing-sm $spacing-md 0;
-    font-size: $font-size-xxl;
+    font-size: $font-size-xl;
     font-weight: $font-weight-bold;
     color: $color-text;
     line-height: 1.4;
+    margin-bottom: $spacing-xs;
   }
 
   &__description {
     display: block;
-    padding: $spacing-xs $spacing-md 0;
-    font-size: $font-size-md;
-    color: $color-text;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
     line-height: 1.7;
     white-space: pre-wrap;
     word-break: break-word;
-  }
-
-  &__time {
-    padding: $spacing-xs $spacing-md $spacing-md;
+    margin-bottom: $spacing-sm;
   }
 
   &__time-text {
@@ -98,10 +108,7 @@
     color: $color-text-secondary;
   }
 
-  &__options {
-    padding: 0 $spacing-md $spacing-md;
-  }
-
+  // ── 选项卡片 ──
   &__options-header {
     display: block;
     font-size: $font-size-md;
@@ -114,13 +121,16 @@
     display: flex;
     align-items: center;
     gap: $spacing-sm;
-    background: #fff;
+    background: $color-bg;
     border-radius: $radius-md;
     padding: $spacing-md;
     margin-bottom: $spacing-xs;
-    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
     border: 2px solid transparent;
     transition: all 0.2s;
+
+    &:active {
+      opacity: 0.7;
+    }
 
     &--selected {
       border-color: $color-primary;
@@ -167,10 +177,7 @@
     line-height: 1.5;
   }
 
-  &__results {
-    padding: 0 $spacing-md $spacing-md;
-  }
-
+  // ── 结果卡片 ──
   &__results-header {
     display: block;
     font-size: $font-size-md;
@@ -180,11 +187,10 @@
   }
 
   &__result-item {
-    background: #fff;
+    background: $color-bg;
     border-radius: $radius-md;
     padding: $spacing-sm $spacing-md;
     margin-bottom: $spacing-xs;
-    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
   }
 
   &__result-info {
@@ -231,6 +237,7 @@
     height: 40px;
   }
 
+  // ── 底部操作栏 ──
   &__action-bar {
     position: fixed;
     bottom: 0;
@@ -240,7 +247,7 @@
     align-items: center;
     justify-content: center;
     gap: $spacing-sm;
-    padding: $spacing-sm $spacing-md;
+    padding: $spacing-sm $spacing-lg;
     padding-bottom: calc(#{$spacing-sm} + env(safe-area-inset-bottom));
     background: #fff;
     box-shadow: 0 -2px 12px rgba(23, 23, 23, 0.08);
@@ -249,7 +256,7 @@
 
   &__submit-btn {
     flex: 1;
-    height: 80px;
+    height: 88px;
     border-radius: $radius-pill;
     background: $color-primary;
     display: flex;
@@ -275,7 +282,7 @@
 
   &__results-btn {
     flex: 1;
-    height: 80px;
+    height: 88px;
     border-radius: $radius-pill;
     background: $color-accent;
     display: flex;
@@ -296,7 +303,7 @@
 
   &__voted-badge {
     flex: 1;
-    height: 80px;
+    height: 88px;
     border-radius: $radius-pill;
     background: #f0f0f0;
     display: flex;

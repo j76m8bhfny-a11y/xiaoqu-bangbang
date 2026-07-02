@@ -5,7 +5,7 @@
   background: $color-bg;
 
   &__header {
-    padding: $spacing-lg $spacing-md $spacing-sm;
+    padding: $spacing-lg $spacing-lg $spacing-sm;
   }
 
   &__header-title {
@@ -24,7 +24,7 @@
 
   &__list {
     height: calc(100vh - 160px);
-    padding: 0 $spacing-md;
+    padding: 0 $spacing-lg;
   }
 
   &__card {
