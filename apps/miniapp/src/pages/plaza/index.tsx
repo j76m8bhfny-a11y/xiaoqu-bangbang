@@ -55,8 +55,13 @@ export default function Plaza() {
         ]);
         if (cancelled) return;
         setLatestAnnouncement(annRes.items?.[0] ?? null);
-        // ponytail: 取前 2 条活跃投票即可（status='active'）；更多走 /pages/votes
-        setActiveVotes((voteRes.items ?? []).filter((v: any) => v.status === 'active').slice(0, 2));
+        // ponytail: 取前 2 条进行中投票（status='published' 且未过期）；更多走 /pages/votes
+        const now = Date.now();
+        setActiveVotes(
+          (voteRes.items ?? [])
+            .filter((v: any) => v.status === 'published' && new Date(v.endAt).getTime() > now)
+            .slice(0, 2),
+        );
       } catch (_) {
         // swallow，子卡片各自降级
       }
