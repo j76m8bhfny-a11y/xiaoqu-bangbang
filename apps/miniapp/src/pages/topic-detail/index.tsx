@@ -1,5 +1,5 @@
 import { View, Text, Input, Image } from '@tarojs/components';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Taro from '@tarojs/taro';
 import { topicService, eventService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
@@ -108,26 +108,6 @@ export default function TopicDetail() {
     }
   };
 
-  const handleCommentEvent = async (eventId: string) => {
-    if (!topic) return;
-    const res = await Taro.showModal({
-      title: '评论此事件',
-      editable: true,
-      placeholderText: '说点什么…',
-    } as any);
-    if (!res.confirm || !(res as any).content?.trim()) return;
-    try {
-      await topicService.createComment(topic.id, {
-        eventId,
-        content: (res as any).content.trim(),
-      });
-      refreshTimeline();
-      Taro.showToast({ title: '评论成功', icon: 'success' });
-    } catch (e: any) {
-      Taro.showToast({ title: e.message || '发送失败', icon: 'none' });
-    }
-  };
-
   const handleLikeComment = async (commentId: string) => {
     try {
       await topicService.likeComment(commentId);
@@ -150,21 +130,6 @@ export default function TopicDetail() {
       Taro.showToast({ title: e.message || '操作失败', icon: 'none' });
     }
   };
-
-  // 热评预计算：每个事件只取点赞最高的1条，其余进入"查看全部"
-  const hotCommentByEvent = useMemo(() => {
-    const map: Record<string, TopicCommentDto | undefined> = {};
-    if (timeline?.items) {
-      for (const it of timeline.items) {
-        const ev = it.data;
-        if (ev.comments && ev.comments.length > 0) {
-          const sorted = [...ev.comments].sort((a, b) => b.likeCount - a.likeCount);
-          map[ev.id] = sorted[0];
-        }
-      }
-    }
-    return map;
-  }, [timeline]);
 
   // ── 加载/错误态 ──────────────────────────────────
   if (topicError && !topic) {
@@ -304,7 +269,6 @@ export default function TopicDetail() {
               {items.map((it) => {
                 const ev = it.data;
                 const liked = !!eventLiked[ev.id];
-                const hotComment = hotCommentByEvent[ev.id];
                 return (
                   <View key={ev.id} className="topic-detail__event">
                     {/* 事件标题左 + 交互右 */}
@@ -351,44 +315,6 @@ export default function TopicDetail() {
                       <View className="topic-detail__ai">
                         <View className="topic-detail__ai-label">{'\u{1f916}'} AI 点评</View>
                         <View className="topic-detail__ai-text">{ev.aiComment}</View>
-                      </View>
-                    )}
-
-                    {/* 热评：只显示1条最高赞 + 查看全部 */}
-                    {hotComment && (
-                      <View className="topic-detail__comments">
-                        <View className="topic-detail__comment">
-                          <View className="topic-detail__comment-author">
-                            {hotComment.userNickname}
-                          </View>
-                          <View className="topic-detail__comment-content">
-                            {hotComment.content}
-                          </View>
-                        </View>
-                        {ev.commentCount > 1 && (
-                          <View
-                            className="topic-detail__comment-more"
-                            onClick={() =>
-                              Taro.navigateTo({ url: `/pages/event-detail/index?id=${ev.id}` })
-                            }
-                          >
-                            <Text className="topic-detail__comment-more-text">
-                              查看全部 {ev.commentCount} 条评论
-                            </Text>
-                            <Text className="topic-detail__comment-more-arrow">{'\u203a'}</Text>
-                          </View>
-                        )}
-                      </View>
-                    )}
-
-                    {!isClosed && (
-                      <View
-                        className="topic-detail__event-comment-btn"
-                        onClick={() => handleCommentEvent(ev.id)}
-                      >
-                        <Text className="topic-detail__event-comment-text">
-                          {'\u{1f4ac}'} 评论此事件
-                        </Text>
                       </View>
                     )}
                   </View>

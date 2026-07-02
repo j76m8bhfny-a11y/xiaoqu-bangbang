@@ -354,33 +354,6 @@
     }
   }
 
-  // ── 事件内评论预览 ─────────────────────────────────
-  &__comments {
-    margin-top: $spacing-sm;
-    padding-left: $spacing-sm;
-    border-left: 2px solid $color-border;
-  }
-
-  &__comment {
-    background: $color-bg;
-    padding: $spacing-sm;
-    border-radius: $radius-sm;
-    margin-bottom: 8px;
-
-    &-author {
-      font-size: $font-size-sm;
-      font-weight: $font-weight-bold;
-      color: $color-text-secondary;
-      margin-bottom: 2px;
-    }
-
-    &-content {
-      font-size: $font-size-sm;
-      color: $color-text;
-      line-height: 1.5;
-    }
-  }
-
   // ── 议题讨论项 ────────────────────────────────────
   &__discuss-item {
     display: flex;
@@ -630,28 +603,5 @@
   }
 
   // ── 热评"查看全部"链接 ───────────────────────────
-  &__comment-more {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    margin-top: 8px;
-    padding: 12px 0;
-
-    &:active {
-      opacity: 0.7;
-    }
-  }
-
-  &__comment-more-text {
-    font-size: $font-size-sm;
-    color: $color-primary;
-    font-weight: $font-weight-medium;
-  }
-
-  &__comment-more-arrow {
-    font-size: $font-size-md;
-    color: $color-primary;
-    line-height: 1;
-  }
+  // 已移除：评论统一到议题讨论 Tab，事件卡片不再展示评论
 }
