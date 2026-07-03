@@ -225,7 +225,7 @@ export default function EventEdit() {
             <Switch
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.detail.value)}
-              color="#35e89a"
+              color="#5b9e6f"
             />
           </View>
         </View>

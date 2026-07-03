@@ -50,6 +50,8 @@ export default function Events() {
   );
   const [marketFilter, setMarketFilter] = useState<string>('all');
   const [searchText, setSearchText] = useState('');
+  // 搜索对老人是次要功能：默认收起为图标，点击才展开输入框，让首屏聚焦列表与发布。
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // ===== 互助 (events) 列表 =====
   // communityId 由后端 currentCommunityId guard 注入，前端不再透传。
@@ -57,6 +59,9 @@ export default function Events() {
     (page, pageSize) =>
       eventService.list({
         type: helpFilter === 'all' ? undefined : (helpFilter as EventType),
+        // 议题类事件(public_feedback/discussion)属于「小区事」议题，不在邻里帮互助列表展示；
+        // 选具体分类时 type 已限定，无需再排除。
+        excludeTypes: helpFilter === 'all' ? 'public_feedback,discussion' : undefined,
         keyword: searchText || undefined,
         page,
         pageSize,
@@ -132,37 +137,53 @@ export default function Events() {
         ))}
       </View>
 
-      <View className="events__search-wrap">
-        <View className="events__search">
-          <Text className="events__search-icon">🔍</Text>
-          <Input
-            className="events__search-input"
-            placeholder={isHelp ? '搜索互助事件...' : '搜索闲置物品...'}
-            placeholderClass="events__search-placeholder"
-            value={searchText}
-            onInput={(e) => setSearchText(e.detail.value)}
-          />
+      {/* 第二层 filter + 搜索图标（搜索默认收起） */}
+      <View className="events__filter-row">
+        <ScrollView scrollX className="events__filter-scroll">
+          <View className="events__filter-list">
+            {filters.map((tab) => (
+              <View
+                key={tab.key}
+                className={`events__filter-tab ${currentFilter === tab.key ? 'events__filter-tab--active' : ''}`}
+                onClick={() => setCurrentFilter(tab.key)}
+              >
+                <Text
+                  className={`events__filter-text ${currentFilter === tab.key ? 'events__filter-text--active' : ''}`}
+                >
+                  {tab.label}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+        <View
+          className={`events__search-toggle ${searchText ? 'events__search-toggle--active' : ''}`}
+          onClick={() => setSearchOpen((o) => !o)}
+        >
+          <Text className="events__search-toggle-icon">{searchOpen ? '✕' : '🔍'}</Text>
         </View>
       </View>
 
-      {/* 第二层 filter */}
-      <ScrollView scrollX className="events__filter-scroll">
-        <View className="events__filter-list">
-          {filters.map((tab) => (
-            <View
-              key={tab.key}
-              className={`events__filter-tab ${currentFilter === tab.key ? 'events__filter-tab--active' : ''}`}
-              onClick={() => setCurrentFilter(tab.key)}
-            >
-              <Text
-                className={`events__filter-text ${currentFilter === tab.key ? 'events__filter-text--active' : ''}`}
-              >
-                {tab.label}
+      {searchOpen && (
+        <View className="events__search-wrap">
+          <View className="events__search">
+            <Text className="events__search-icon">🔍</Text>
+            <Input
+              className="events__search-input"
+              placeholder={isHelp ? '搜索互助事件...' : '搜索闲置物品...'}
+              placeholderClass="events__search-placeholder"
+              value={searchText}
+              focus
+              onInput={(e) => setSearchText(e.detail.value)}
+            />
+            {searchText ? (
+              <Text className="events__search-clear" onClick={() => setSearchText('')}>
+                ✕
               </Text>
-            </View>
-          ))}
+            ) : null}
+          </View>
         </View>
-      </ScrollView>
+      )}
 
       <ScrollView
         scrollY
@@ -200,18 +221,25 @@ export default function Events() {
               className="events__market-item"
               onClick={() => Taro.navigateTo({ url: `/pages/market-detail/index?id=${it.id}` })}
             >
-              {it.images?.[0] && (
+              {it.images?.[0] ? (
                 <Image className="events__market-img" src={it.images[0]} mode="aspectFill" />
+              ) : (
+                <View className="events__market-img events__market-img--empty">
+                  <Text className="events__market-img-emoji">📦</Text>
+                </View>
               )}
               <View className="events__market-body">
                 <Text className="events__market-title">{it.title}</Text>
                 <Text className="events__market-desc">{it.description}</Text>
-                <View className="events__market-meta">
-                  <Text className="events__market-price">
-                    {it.price != null ? `¥${it.price}` : '免费'}
-                  </Text>
-                  {it.status === 'sold' && <Text className="events__market-sold">已售</Text>}
-                </View>
+                <Text className="events__market-seller">{it.sellerNickname}</Text>
+              </View>
+              <View className="events__market-side">
+                <Text
+                  className={`events__market-price ${it.tradeType === 'free' ? 'events__market-price--free' : ''}`}
+                >
+                  {it.tradeType === 'free' ? '免费' : `¥${it.price}`}
+                </Text>
+                {it.status === 'sold' && <Text className="events__market-sold">已售</Text>}
               </View>
             </View>
           ))}

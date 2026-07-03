@@ -1,10 +1,12 @@
+@use '../../styles/tokens.scss' as *;
+
 .up {
   min-height: 100vh;
-  background: #f5f6fa;
+  background: $color-bg;
   padding-bottom: 80px;
 
   &__hero {
-    background: linear-gradient(135deg, #35e89a 0%, #2bc785 100%);
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-deep 100%);
     padding: 80px 32px 48px;
     display: flex;
     flex-direction: column;
@@ -31,7 +33,7 @@
 
   &__avatar-text {
     font-size: 72px;
-    color: #2bc785;
+    color: $color-primary-deep;
     font-weight: 700;
   }
 
@@ -69,7 +71,7 @@
 
   &__tag-text {
     font-size: 22px;
-    color: #1f1f1f;
+    color: $color-text;
     font-weight: 500;
   }
 
@@ -90,7 +92,7 @@
 
   &__edit-text {
     font-size: 24px;
-    color: #2bc785;
+    color: $color-primary-deep;
     font-weight: 500;
   }
 
@@ -120,12 +122,12 @@
   &__stat-value {
     font-size: 32px;
     font-weight: 700;
-    color: #1f1f1f;
+    color: $color-text;
   }
 
   &__stat-label {
     font-size: 22px;
-    color: #999;
+    color: $color-text-secondary;
   }
 
   &__section {
@@ -138,7 +140,7 @@
   &__section-title {
     font-size: 28px;
     font-weight: 600;
-    color: #1f1f1f;
+    color: $color-text;
     margin-bottom: 24px;
     display: block;
   }
@@ -149,7 +151,7 @@
   }
 
   &__empty-text {
-    color: #999;
+    color: $color-text-secondary;
     font-size: 26px;
   }
 
@@ -166,7 +168,7 @@
     align-items: center;
     gap: 8px;
     padding: 20px 8px;
-    background: #f9f9fb;
+    background: $color-bg;
     border-radius: 12px;
   }
 
@@ -181,7 +183,7 @@
 
   &__badge-name {
     font-size: 22px;
-    color: #1f1f1f;
+    color: $color-text;
     text-align: center;
     line-height: 1.3;
   }
@@ -193,7 +195,7 @@
   }
 
   &__footer-tip-text {
-    color: #999;
+    color: $color-text-secondary;
     font-size: 22px;
   }
 }

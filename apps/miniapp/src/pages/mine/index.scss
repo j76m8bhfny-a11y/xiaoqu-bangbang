@@ -13,7 +13,7 @@ $radius-xl: 40px;
 
   &__user-bg {
     height: 280px;
-    background: linear-gradient(135deg, $color-primary 0%, #2ad488 50%, $color-cream 100%);
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-deep 100%);
     border-radius: 0 0 $radius-xl $radius-xl;
   }
 
@@ -82,7 +82,7 @@ $radius-xl: 40px;
   }
 
   &__user-tag-text {
-    font-size: 20px;
+    font-size: $font-size-xs;
     color: #fff;
     font-weight: $font-weight-medium;
   }
@@ -94,7 +94,7 @@ $radius-xl: 40px;
     margin: -$spacing-md $spacing-md 0;
     background: #fff;
     border-radius: $radius-md;
-    box-shadow: 0 4px 16px rgba(23, 23, 23, 0.06);
+    box-shadow: $shadow-card;
     position: relative;
     z-index: 10;
   }
@@ -114,11 +114,11 @@ $radius-xl: 40px;
   &__stat-value {
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__stat-label {
-    font-size: 20px;
+    font-size: $font-size-xs;
     color: $color-text-secondary;
   }
 
@@ -137,7 +137,7 @@ $radius-xl: 40px;
   &__section-title-text {
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__activity-grid {
@@ -154,7 +154,7 @@ $radius-xl: 40px;
     background: #fff;
     border-radius: $radius-md;
     position: relative;
-    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+    box-shadow: $shadow-card;
   }
 
   &__activity-icon-wrap {
@@ -173,7 +173,7 @@ $radius-xl: 40px;
   }
 
   &__activity-label {
-    font-size: 20px;
+    font-size: $font-size-xs;
     color: $color-text;
     font-weight: $font-weight-medium;
   }
@@ -203,7 +203,7 @@ $radius-xl: 40px;
     background: #fff;
     border-radius: $radius-md;
     overflow: hidden;
-    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+    box-shadow: $shadow-card;
   }
 
   &__menu-item {
@@ -230,7 +230,7 @@ $radius-xl: 40px;
 
   &__menu-label {
     font-size: $font-size-sm;
-    color: $color-dark;
+    color: $color-text;
     font-weight: $font-weight-medium;
   }
 

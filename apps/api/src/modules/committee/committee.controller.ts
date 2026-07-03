@@ -12,14 +12,14 @@ export class CommitteeController {
   constructor(@Inject(CommitteeService) private committeeService: CommitteeService) {}
 
   @Get('committee')
-  @UseGuards(CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async getOverview(@CurrentCommunityId() communityId: string) {
     const data = await this.committeeService.getOverview(communityId);
     return { code: 0, message: 'ok', data };
   }
 
   @Get('committee/members')
-  @UseGuards(CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async getMembers(
     @CurrentCommunityId() communityId: string,
     @Query('page') page?: number,
@@ -34,11 +34,8 @@ export class CommitteeController {
   }
 
   @Get('committee/members/:id')
-  @UseGuards(CurrentCommunityGuard)
-  async getMemberDetail(
-    @Param('id') id: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  async getMemberDetail(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
     const data = await this.committeeService.getMemberDetail(id, communityId);
     return { code: 0, message: 'ok', data };
   }
@@ -62,7 +59,7 @@ export class CommitteeController {
   }
 
   @Get('committee/announcements')
-  @UseGuards(CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async getAnnouncements(
     @CurrentCommunityId() communityId: string,
     @Query('page') page?: number,
@@ -77,12 +74,24 @@ export class CommitteeController {
   }
 
   @Get('committee/announcements/:id')
-  @UseGuards(CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async getAnnouncementDetail(
     @Param('id') id: string,
     @CurrentCommunityId() communityId: string,
+    @CurrentUser('userId') userId: string,
   ) {
-    const data = await this.committeeService.getAnnouncementDetail(id, communityId);
+    const data = await this.committeeService.getAnnouncementDetail(id, communityId, userId);
+    return { code: 0, message: 'ok', data };
+  }
+
+  @Post('committee/announcements/:id/like')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  async toggleAnnouncementLike(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.committeeService.toggleAnnouncementLike(userId, id, communityId);
     return { code: 0, message: 'ok', data };
   }
 }

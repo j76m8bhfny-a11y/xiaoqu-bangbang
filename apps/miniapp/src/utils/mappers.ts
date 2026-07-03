@@ -13,47 +13,49 @@ export const EVENT_TYPE_CONFIG: Record<
   string,
   { label: string; color: string; bgColor: string; ctaText: string; ctaColor: string }
 > = {
+  // 两色语义制（草木绿系统）：需求类=暖橙(提醒·需要关注)，供给/善意类=草绿(善意·提供)。
+  // 标签文字用加深色保证在浅底上对比达标；CTA 统一草绿深色，与全站按钮一致。
   help_request: {
     label: '求助',
-    color: '#FF6B6B',
-    bgColor: '#FFF0F0',
+    color: '#9A5A12', // 深琥珀（需求）
+    bgColor: '#FBF0DD',
     ctaText: '我来帮',
-    ctaColor: '#35E89A',
+    ctaColor: '#4A8C5E',
   },
   help_offer: {
     label: '我能帮忙',
-    color: '#35E89A',
-    bgColor: '#E9FFF4',
+    color: '#35704A', // 深草绿（供给）
+    bgColor: '#EAF4EC',
     ctaText: '我需要',
-    ctaColor: '#35E89A',
+    ctaColor: '#4A8C5E',
   },
   public_welfare: {
     label: '公益',
-    color: '#FFD93D',
-    bgColor: '#FFFBE6',
+    color: '#35704A',
+    bgColor: '#EAF4EC',
     ctaText: '我要报名',
-    ctaColor: '#FF9F43',
+    ctaColor: '#4A8C5E',
   },
   lost_found: {
     label: '寻宠寻物',
-    color: '#7C6EF6',
-    bgColor: '#F0EDFF',
+    color: '#9A5A12',
+    bgColor: '#FBF0DD',
     ctaText: '提供线索',
-    ctaColor: '#7C6EF6',
+    ctaColor: '#4A8C5E',
   },
   public_feedback: {
     label: '公共反馈',
-    color: '#4ECDC4',
-    bgColor: '#E8FAF8',
+    color: '#35704A',
+    bgColor: '#EAF4EC',
     ctaText: '关注进展',
-    ctaColor: '#4ECDC4',
+    ctaColor: '#4A8C5E',
   },
   discussion: {
     label: '讨论',
-    color: '#4ECDC4',
-    bgColor: '#E8FAF8',
+    color: '#35704A',
+    bgColor: '#EAF4EC',
     ctaText: '参与讨论',
-    ctaColor: '#4ECDC4',
+    ctaColor: '#4A8C5E',
   },
 };
 
@@ -102,11 +104,11 @@ export function mapRankingItemToUser(dto: RankingItemDto): RankingUser {
 
 export function mapBannerDtoToItem(dto: BannerDto): BannerItem {
   const colorMap: Record<string, { bg: string; accent: string }> = {
-    event: { bg: '#E9FFF4', accent: '#35E89A' },
-    market: { bg: '#FFF1DD', accent: '#FF9F43' },
-    announcement: { bg: '#F0EDFF', accent: '#7C6EF6' },
+    event: { bg: '#eaf4ec', accent: '#5b9e6f' },
+    market: { bg: '#fbf0dd', accent: '#e0a458' },
+    announcement: { bg: '#eaf4ec', accent: '#5b9e6f' },
   };
-  const colors = colorMap[dto.linkType] || { bg: '#E9FFF4', accent: '#35E89A' };
+  const colors = colorMap[dto.linkType] || { bg: '#eaf4ec', accent: '#5b9e6f' };
   return {
     id: dto.id,
     title: dto.title,
@@ -156,9 +158,9 @@ export const MARKET_CATEGORY_CONFIG: Record<string, { label: string; icon: strin
 };
 
 export const CONDITION_LABELS: Record<string, { label: string; color: string }> = {
-  new: { label: '全新', color: '#35E89A' },
-  like_new: { label: '九成新', color: '#35E89A' },
-  good: { label: '八成新', color: '#FF9F43' },
+  new: { label: '全新', color: '#5b9e6f' },
+  like_new: { label: '九成新', color: '#5b9e6f' },
+  good: { label: '八成新', color: '#e0a458' },
   used: { label: '七成新', color: '#FF6B6B' },
   old: { label: '旧物', color: '#999' },
 };

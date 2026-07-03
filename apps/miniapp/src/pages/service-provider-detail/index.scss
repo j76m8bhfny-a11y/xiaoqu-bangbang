@@ -36,7 +36,7 @@
   &__name {
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     margin-bottom: $spacing-xs;
   }
 
@@ -82,7 +82,7 @@
     display: block;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     margin-bottom: $spacing-sm;
   }
 
@@ -114,7 +114,7 @@
 
   &__contact-value {
     font-size: $font-size-md;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__no-contact {

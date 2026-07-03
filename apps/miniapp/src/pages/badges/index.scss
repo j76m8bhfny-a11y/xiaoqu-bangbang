@@ -34,10 +34,10 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+    box-shadow: $shadow-card;
 
     &--earned {
-      border-left: 4px solid #35e89a;
+      border-left: 4px solid $color-primary;
       opacity: 1;
     }
 
@@ -54,7 +54,7 @@
 
   &__card-name {
     font-size: $font-size-md;
-    color: $color-dark;
+    color: $color-text;
     font-weight: $font-weight-bold;
     margin-bottom: 4px;
   }
@@ -70,7 +70,7 @@
     font-weight: $font-weight-medium;
 
     &--earned {
-      color: #35e89a;
+      color: $color-primary;
     }
 
     &--locked {

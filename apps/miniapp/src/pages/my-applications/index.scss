@@ -1,13 +1,15 @@
+@use '../../styles/tokens.scss' as *;
+
 .myapp {
   min-height: 100vh;
-  background: #fff8ec;
+  background: $color-bg;
   display: flex;
   flex-direction: column;
 
   &__tabs {
     display: flex;
     background: #ffffff;
-    border-bottom: 1rpx solid #eee2c8;
+    border-bottom: 1rpx solid $color-border;
     padding: 0 32rpx;
   }
 
@@ -19,7 +21,7 @@
 
     &--active {
       .myapp__tab-text {
-        color: #35e89a;
+        color: $color-primary;
         font-weight: 600;
       }
 
@@ -31,7 +33,7 @@
         transform: translateX(-50%);
         width: 80rpx;
         height: 6rpx;
-        background: #35e89a;
+        background: $color-primary;
         border-radius: 4rpx;
       }
     }
@@ -39,7 +41,7 @@
 
   &__tab-text {
     font-size: 30rpx;
-    color: #7a7a7a;
+    color: $color-text-secondary;
   }
 
   &__body {
@@ -57,9 +59,9 @@
     display: inline-block;
     margin-top: 32rpx;
     padding: 22rpx 56rpx;
-    background: #35e89a;
+    background: $color-primary;
     border-radius: 999rpx;
-    box-shadow: 0 6rpx 16rpx rgba(53, 232, 154, 0.3);
+    box-shadow: 0 6rpx 16rpx rgba(74, 140, 94, 0.3);
   }
 
   &__empty-cta-text {
@@ -86,7 +88,7 @@
   &__item-name {
     flex: 1;
     font-size: 32rpx;
-    color: #2a2a2a;
+    color: $color-text;
     font-weight: 600;
     overflow: hidden;
     white-space: nowrap;
@@ -100,16 +102,16 @@
     flex-shrink: 0;
 
     &--orange {
-      background: #fff3e0;
+      background: $color-bg-orange;
     }
     &--green {
-      background: #e6fbef;
+      background: $color-bg-green;
     }
     &--red {
       background: #ffe9e9;
     }
     &--gray {
-      background: #f0f0f0;
+      background: $color-border;
     }
   }
 
@@ -117,22 +119,22 @@
     font-size: 22rpx;
 
     .myapp__status--orange & {
-      color: #f5a623;
+      color: $color-accent;
     }
     .myapp__status--green & {
-      color: #2bbd7c;
+      color: $color-primary;
     }
     .myapp__status--red & {
-      color: #e34d4d;
+      color: $color-danger;
     }
     .myapp__status--gray & {
-      color: #7a7a7a;
+      color: $color-text-secondary;
     }
   }
 
   &__item-location {
     font-size: 26rpx;
-    color: #9a9a9a;
+    color: $color-text-secondary;
     margin-bottom: 16rpx;
   }
 
@@ -140,7 +142,7 @@
     display: flex;
     gap: 24rpx;
     font-size: 24rpx;
-    color: #7a7a7a;
+    color: $color-text-secondary;
   }
 
   &__item-reject {
@@ -148,9 +150,9 @@
     margin-top: 16rpx;
     padding: 16rpx 20rpx;
     background: #fff7f7;
-    border-left: 4rpx solid #e34d4d;
+    border-left: 4rpx solid $color-danger;
     font-size: 24rpx;
-    color: #b94646;
+    color: $color-danger;
     border-radius: 8rpx;
   }
 
@@ -158,13 +160,13 @@
     margin: 32rpx 0;
     padding: 24rpx 0;
     background: #ffffff;
-    border: 2rpx dashed #35e89a;
+    border: 2rpx dashed $color-primary;
     border-radius: 24rpx;
     text-align: center;
   }
 
   &__new-btn-text {
-    color: #35e89a;
+    color: $color-primary;
     font-size: 28rpx;
     font-weight: 600;
   }

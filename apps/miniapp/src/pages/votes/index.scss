@@ -5,14 +5,14 @@
   background: $color-bg;
 
   &__header {
-    padding: $spacing-lg $spacing-md $spacing-sm;
+    padding: $spacing-lg $spacing-lg $spacing-sm;
   }
 
   &__header-title {
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__header-sub {
@@ -24,7 +24,7 @@
 
   &__list {
     height: calc(100vh - 160px);
-    padding: 0 $spacing-md;
+    padding: 0 $spacing-lg;
   }
 
   &__card {
@@ -47,7 +47,7 @@
   &__card-title {
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     line-height: 1.4;
   }
 

@@ -87,7 +87,7 @@ export class MarketService {
     return this.prisma.marketItem.count({ where });
   }
 
-  async findOne(id: string, communityId: string) {
+  async findOne(id: string, communityId: string, viewerUserId?: string) {
     const item = await this.prisma.marketItem.findFirst({
       where: { id, communityId, deletedAt: null },
       select: {
@@ -105,6 +105,7 @@ export class MarketService {
         status: true,
         aiReviewStatus: true,
         aiReviewResult: true,
+        likeCount: true,
         soldAt: true,
         createdAt: true,
         updatedAt: true,
@@ -118,19 +119,58 @@ export class MarketService {
       throw new NotFoundException('商品不存在');
     }
 
-    return item;
+    // 当前浏览者是否已点赞
+    let isLiked = false;
+    if (viewerUserId) {
+      const like = await this.prisma.marketLike.findUnique({
+        where: { itemId_userId: { itemId: id, userId: viewerUserId } },
+      });
+      isLiked = !!like;
+    }
+
+    return { ...item, isLiked };
+  }
+
+  async toggleLike(userId: string, itemId: string, communityId: string) {
+    const item = await this.prisma.marketItem.findFirst({
+      where: { id: itemId, deletedAt: null },
+    });
+    if (!item) {
+      throw new NotFoundException('商品不存在');
+    }
+    if (item.communityId !== communityId) {
+      throw new ForbiddenException('无权操作该商品');
+    }
+
+    const existing = await this.prisma.marketLike.findUnique({
+      where: { itemId_userId: { itemId, userId } },
+    });
+
+    if (existing) {
+      await this.prisma.marketLike.delete({ where: { id: existing.id } });
+      const updated = await this.prisma.marketItem.update({
+        where: { id: itemId },
+        data: { likeCount: { decrement: 1 } },
+      });
+      return { liked: false, likeCount: updated.likeCount };
+    }
+
+    await this.prisma.marketLike.create({ data: { itemId, userId } });
+    const updated = await this.prisma.marketItem.update({
+      where: { id: itemId },
+      data: { likeCount: { increment: 1 } },
+    });
+    return { liked: true, likeCount: updated.likeCount };
   }
 
   async create(userId: string, communityId: string, dto: CreateMarketItemDto) {
     // AI 审核文本内容 - use temp id for logging before creation
     const tempId = crypto.randomUUID();
     const textToReview = `${dto.title} ${dto.description}`;
-    const aiResult = await this.aiReviewService.reviewText(
-      textToReview,
-      'market_item',
-      tempId,
-      { title: dto.title, description: dto.description },
-    );
+    const aiResult = await this.aiReviewService.reviewText(textToReview, 'market_item', tempId, {
+      title: dto.title,
+      description: dto.description,
+    });
 
     // 审核图片
     if (dto.images && dto.images.length > 0) {
@@ -267,7 +307,13 @@ export class MarketService {
     return updated;
   }
 
-  async addComment(userId: string, itemId: string, content: string, parentId: string | undefined, communityId: string) {
+  async addComment(
+    userId: string,
+    itemId: string,
+    content: string,
+    parentId: string | undefined,
+    communityId: string,
+  ) {
     const item = await this.prisma.marketItem.findFirst({
       where: { id: itemId, deletedAt: null },
     });
@@ -290,12 +336,9 @@ export class MarketService {
     }
 
     // AI 审核评论内容
-    const aiResult = await this.aiReviewService.reviewText(
+    const aiResult = await this.aiReviewService.reviewText(content, 'market_comment', itemId, {
       content,
-      'market_comment',
-      itemId,
-      { content },
-    );
+    });
 
     let commentStatus = 'visible';
     let aiReviewStatus = 'pass';
@@ -372,12 +415,11 @@ export class MarketService {
     // AI 审核评价内容
     const textToReview = dto.content ?? '';
     const aiResult = textToReview
-      ? await this.aiReviewService.reviewText(
-          textToReview,
-          'market_review',
-          itemId,
-          { revieweeId: dto.revieweeId, rating: dto.rating, content: dto.content },
-        )
+      ? await this.aiReviewService.reviewText(textToReview, 'market_review', itemId, {
+          revieweeId: dto.revieweeId,
+          rating: dto.rating,
+          content: dto.content,
+        })
       : { result: 'pass' as const, labels: [], score: 0 };
 
     let reviewStatus = 'visible';

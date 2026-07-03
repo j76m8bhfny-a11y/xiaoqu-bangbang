@@ -22,14 +22,14 @@ const TYPE_ICON_MAP: Record<string, string> = {
 };
 
 const TYPE_COLOR_MAP: Record<string, string> = {
-  review_result: '#7C6EF6',
-  event_response: '#35E89A',
-  completion: '#4ECDC4',
-  badge: '#FFD93D',
-  feedback: '#FF9F43',
-  vote: '#4ECDC4',
-  announcement: '#FF9F43',
-  system: '#7C6EF6',
+  review_result: '#5b9e6f',
+  event_response: '#5b9e6f',
+  completion: '#5b9e6f',
+  badge: '#e0a458',
+  feedback: '#e0a458',
+  vote: '#5b9e6f',
+  announcement: '#e0a458',
+  system: '#5b9e6f',
 };
 
 function _formatTime(iso: string): string {
@@ -49,9 +49,8 @@ export default function Notifications() {
   const { unreadCount, setUnreadCount, decrementUnread } = useNotificationStore();
 
   const fetcher = useCallback(
-    (page: number, pageSize: number) =>
-      notificationService.list({ page, pageSize }),
-    []
+    (page: number, pageSize: number) => notificationService.list({ page, pageSize }),
+    [],
   );
 
   const { items, loading, loadingMore, hasMore, error, refresh, loadMore } =
@@ -95,45 +94,47 @@ export default function Notifications() {
   };
 
   return (
-    <View className='notifications'>
-      <View className='notifications__header'>
-        <Text className='notifications__title'>消息通知</Text>
+    <View className="notifications">
+      <View className="notifications__header">
+        <Text className="notifications__title">消息通知</Text>
         {unreadCount > 0 && (
-          <View className='notifications__mark-all' onClick={handleMarkAllRead}>
-            <Text className='notifications__mark-all-text'>全部已读</Text>
+          <View className="notifications__mark-all" onClick={handleMarkAllRead}>
+            <Text className="notifications__mark-all-text">全部已读</Text>
           </View>
         )}
       </View>
 
-      <ScrollView scrollY className='notifications__list' onScrollToLower={handleScrollToLower}>
+      <ScrollView scrollY className="notifications__list" onScrollToLower={handleScrollToLower}>
         {loading && <Loading />}
         {error && <ErrorState message={error.message} onRetry={refresh} />}
         {!loading && !error && items.length === 0 && (
-          <EmptyState icon='\u{1F4EC}' text='\u6682\u65E0\u6D88\u606F' />
+          <EmptyState icon="\u{1F4EC}" text="\u6682\u65E0\u6D88\u606F" />
         )}
-        {!loading && !error && items.map((item) => {
-          const icon = TYPE_ICON_MAP[item.type] ?? '\u{1F514}';
-          const color = TYPE_COLOR_MAP[item.type] ?? '#7C6EF6';
-          return (
-            <View
-              key={item.id}
-              className='notifications__item'
-              onClick={() => handleNotificationClick(item)}
-            >
-              <View className='notifications__item-icon' style={{ background: color + '1a' }}>
-                <Text className='notifications__item-emoji'>{icon}</Text>
+        {!loading &&
+          !error &&
+          items.map((item) => {
+            const icon = TYPE_ICON_MAP[item.type] ?? '\u{1F514}';
+            const color = TYPE_COLOR_MAP[item.type] ?? '#5b9e6f';
+            return (
+              <View
+                key={item.id}
+                className="notifications__item"
+                onClick={() => handleNotificationClick(item)}
+              >
+                <View className="notifications__item-icon" style={{ background: color + '1a' }}>
+                  <Text className="notifications__item-emoji">{icon}</Text>
+                </View>
+                <View className="notifications__item-content">
+                  <Text className="notifications__item-title">{item.title}</Text>
+                  <Text className="notifications__item-desc">{item.content}</Text>
+                  <Text className="notifications__item-time">{_formatTime(item.createdAt)}</Text>
+                </View>
+                {!item.isRead && <View className="notifications__item-dot" />}
               </View>
-              <View className='notifications__item-content'>
-                <Text className='notifications__item-title'>{item.title}</Text>
-                <Text className='notifications__item-desc'>{item.content}</Text>
-                <Text className='notifications__item-time'>{_formatTime(item.createdAt)}</Text>
-              </View>
-              {!item.isRead && <View className='notifications__item-dot' />}
-            </View>
-          );
-        })}
-        {loadingMore && <Loading text='\u52A0\u8F7D\u66F4\u591A...' />}
-        <View className='notifications__bottom-spacer' />
+            );
+          })}
+        {loadingMore && <Loading text="\u52A0\u8F7D\u66F4\u591A..." />}
+        <View className="notifications__bottom-spacer" />
       </ScrollView>
     </View>
   );

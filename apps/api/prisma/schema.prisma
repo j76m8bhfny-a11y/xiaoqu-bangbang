@@ -38,6 +38,8 @@ model User {
   eventFavorites          EventFavorite[]
   eventComments           EventComment[]
   marketComments          MarketComment[]               @relation("MarketCommentUser")
+  marketLikes             MarketLike[]
+  announcementLikes       AnnouncementLike[]
   completionConfirmations EventCompletionConfirmation[]
   notifications           Notification[]
   marketItems             MarketItem[]                  @relation("MarketSeller")
@@ -416,6 +418,7 @@ model MarketItem {
   conditionLevel String    @map("condition_level") // new/like_new/good/used/old
   contactText    String?   @map("contact_text")
   status         String    @default("pending_review") // pending_review/on_sale/sold/closed/rejected
+  likeCount      Int       @default(0) @map("like_count")
   aiReviewStatus String    @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
   aiReviewResult Json?     @map("ai_review_result")
   soldAt         DateTime? @map("sold_at")
@@ -427,10 +430,24 @@ model MarketItem {
   seller    User            @relation("MarketSeller", fields: [sellerId], references: [id])
   comments  MarketComment[]
   reviews   MarketReview[]
+  likes     MarketLike[]
 
   @@index([communityId, category, status, createdAt])
   @@index([sellerId])
   @@map("market_items")
+}
+
+model MarketLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  itemId    String   @map("item_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  item MarketItem @relation(fields: [itemId], references: [id])
+  user User       @relation(fields: [userId], references: [id])
+
+  @@unique([itemId, userId])
+  @@map("market_likes")
 }
 
 model MarketComment {
@@ -624,15 +641,30 @@ model CommitteeAnnouncement {
   publisherId String    @map("publisher_id") @db.Uuid
   isPinned    Boolean   @default(false) @map("is_pinned")
   status      String    @default("draft") // draft/published/hidden
+  likeCount   Int       @default(0) @map("like_count")
   publishedAt DateTime? @map("published_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  community Community @relation(fields: [communityId], references: [id])
+  community Community          @relation(fields: [communityId], references: [id])
+  likes     AnnouncementLike[]
 
   @@index([communityId])
   @@map("committee_announcements")
+}
+
+model AnnouncementLike {
+  id             String   @id @default(uuid()) @db.Uuid
+  announcementId String   @map("announcement_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  announcement CommitteeAnnouncement @relation(fields: [announcementId], references: [id])
+  user         User                  @relation(fields: [userId], references: [id])
+
+  @@unique([announcementId, userId])
+  @@map("announcement_likes")
 }
 
 model Vote {

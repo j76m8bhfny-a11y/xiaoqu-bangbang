@@ -34,7 +34,7 @@
   }
 
   &__card {
-    margin: $spacing-sm $spacing-md;
+    margin: $spacing-sm $spacing-lg;
     padding: $spacing-md;
     background: #fff;
     border-radius: $radius-md;
@@ -79,7 +79,7 @@
     display: block;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     line-height: 1.4;
     margin-bottom: $spacing-sm;
   }
@@ -156,7 +156,7 @@
   &__nickname {
     font-size: $font-size-md;
     font-weight: $font-weight-medium;
-    color: $color-dark;
+    color: $color-text;
   }
 
   &__contact {
@@ -189,7 +189,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: $spacing-sm $spacing-md;
+    padding: $spacing-sm $spacing-lg;
     padding-bottom: calc(#{$spacing-sm} + env(safe-area-inset-bottom));
     background: #fff;
     box-shadow: 0 -2px 12px rgba(23, 23, 23, 0.06);
@@ -207,7 +207,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 16px rgba(53, 232, 154, 0.3);
+    box-shadow: 0 4px 16px rgba(74, 140, 94, 0.3);
     transition: opacity 0.2s;
 
     &:active {
@@ -220,7 +220,7 @@
     }
 
     &--mark-sold {
-      background: #FF9F43;
+      background: $color-accent;
       box-shadow: 0 4px 16px rgba(255, 159, 67, 0.3);
     }
 
@@ -228,12 +228,136 @@
       background: #f5f5f5;
       box-shadow: none;
     }
+  }
+
+  // 图标按钮（点赞/举报）
+  &__icon-btn {
+    flex-shrink: 0;
+    min-width: 88px;
+    height: 88px;
+    padding: 0 $spacing-sm;
+    border-radius: $radius-md;
+    background: $color-bg;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    transition: all 0.2s;
+
+    &:active {
+      opacity: 0.7;
+    }
+
+    &--liked {
+      background: $color-bg-green;
+    }
 
     &--report {
-      background: #f5f5f5;
-      box-shadow: none;
-      flex: 0.5;
+      min-width: 72px;
+      background: transparent;
     }
+  }
+
+  &__icon-btn-emoji {
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  &__icon-btn-label {
+    font-size: $font-size-xs - 4;
+    color: $color-text-secondary;
+  }
+
+  &__icon-btn--report &__icon-btn-emoji {
+    font-size: 30px;
+    color: $color-text-secondary;
+  }
+
+  // 评论区
+  &__comments {
+    padding: $spacing-md $spacing-lg;
+  }
+
+  &__comments-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__comments-title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+
+  &__comment-add {
+    padding: 6px 20px;
+    border-radius: $radius-pill;
+    background: $color-bg-green;
+  }
+
+  &__comment-add-text {
+    font-size: $font-size-sm;
+    color: $color-primary-deep;
+    font-weight: $font-weight-medium;
+  }
+
+  &__comments-empty {
+    display: block;
+    text-align: center;
+    padding: $spacing-lg 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__comment {
+    display: flex;
+    gap: $spacing-sm;
+    padding: $spacing-sm 0;
+    border-top: 1px solid $color-border;
+  }
+
+  &__comment-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: $color-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__comment-avatar-img {
+    width: 56px;
+    height: 56px;
+  }
+
+  &__comment-avatar-emoji {
+    font-size: 28px;
+  }
+
+  &__comment-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__comment-nickname {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: 4px;
+  }
+
+  &__comment-content {
+    display: block;
+    font-size: $font-size-md;
+    color: $color-text;
+    line-height: 1.5;
+    word-break: break-word;
   }
 
   &__btn-text {
@@ -244,10 +368,5 @@
 
   &__btn--edit &__btn-text {
     color: $color-text-secondary;
-  }
-
-  &__btn--report &__btn-text {
-    color: $color-text-secondary;
-    font-size: $font-size-sm;
   }
 }

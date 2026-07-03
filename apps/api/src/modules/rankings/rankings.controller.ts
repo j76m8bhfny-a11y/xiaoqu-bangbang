@@ -12,7 +12,7 @@ export class RankingsController {
   constructor(@Inject(RankingsService) private rankingsService: RankingsService) {}
 
   @Get('rankings')
-  @UseGuards(CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async list(
     @CurrentCommunityId() communityId: string,
     @Query() query: { periodType?: string; periodKey?: string },

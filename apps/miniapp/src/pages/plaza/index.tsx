@@ -16,6 +16,7 @@ import './index.scss';
 export default function Plaza() {
   useAuthGuard();
   const communityId = useCommunityStore((s) => s.currentCommunityId);
+  const communityName = useCommunityStore((s) => s.currentCommunityName);
 
   const [topics, setTopics] = useState<TopicDto[]>([]);
   const [topicStatus, setTopicStatus] = useState<'open' | 'closed'>('open');
@@ -54,8 +55,13 @@ export default function Plaza() {
         ]);
         if (cancelled) return;
         setLatestAnnouncement(annRes.items?.[0] ?? null);
-        // ponytail: 取前 2 条活跃投票即可（status='active'）；更多走 /pages/votes
-        setActiveVotes((voteRes.items ?? []).filter((v: any) => v.status === 'active').slice(0, 2));
+        // ponytail: 取前 2 条进行中投票（status='published' 且未过期）；更多走 /pages/votes
+        const now = Date.now();
+        setActiveVotes(
+          (voteRes.items ?? [])
+            .filter((v: any) => v.status === 'published' && new Date(v.endAt).getTime() > now)
+            .slice(0, 2),
+        );
       } catch (_) {
         // swallow，子卡片各自降级
       }
@@ -89,10 +95,19 @@ export default function Plaza() {
   return (
     <View className="plaza">
       <ScrollView scrollY className="plaza__scroll">
+        {/* 小区标识条：一眼确认「这是我家小区」，点击可切换 */}
+        <View
+          className="plaza__community-bar"
+          onClick={() => Taro.navigateTo({ url: '/pages/community-select/index' })}
+        >
+          <Text className="plaza__community-name">🏠 {communityName ?? '我的小区'}</Text>
+          <Text className="plaza__community-switch">切换 ›</Text>
+        </View>
+
         {/* 业委会公告 */}
         <View className="plaza__card plaza__committee">
           <View className="plaza__card-header">
-            <Text className="plaza__card-title">📢 业委会</Text>
+            <Text className="plaza__card-title">📢 业委会通知</Text>
             <Text
               className="plaza__card-more"
               onClick={() => Taro.navigateTo({ url: '/pages/committee/index' })}
@@ -137,10 +152,15 @@ export default function Plaza() {
                 className="plaza__vote-item"
                 onClick={() => Taro.navigateTo({ url: `/pages/vote-detail/index?id=${v.id}` })}
               >
-                <Text className="plaza__vote-title">{v.title}</Text>
-                <Text className="plaza__vote-meta">
-                  截止 {new Date(v.endAt).toLocaleDateString()}
-                </Text>
+                <View className="plaza__vote-detail">
+                  <Text className="plaza__vote-title">{v.title}</Text>
+                  <Text className="plaza__vote-meta">
+                    截止 {new Date(v.endAt).toLocaleDateString()}
+                  </Text>
+                </View>
+                <View className="plaza__vote-btn">
+                  <Text className="plaza__vote-btn-text">去投票</Text>
+                </View>
               </View>
             ))}
           </View>
@@ -194,16 +214,16 @@ export default function Plaza() {
                 <View className="plaza__topic-meta">
                   {isOpen ? (
                     <>
-                      <Text>👍 {t.likeCount}</Text>
-                      <Text>👎 {t.dislikeCount}</Text>
+                      <Text className="plaza__topic-metric">👍 赞 {t.likeCount}</Text>
+                      <Text className="plaza__topic-metric">👎 踩 {t.dislikeCount}</Text>
                     </>
                   ) : (
-                    <Text>
-                      ⭐ {t.avgRating?.toFixed(1) ?? '—'}（{t.ratingCount}）
+                    <Text className="plaza__topic-metric">
+                      ⭐ 评分 {t.avgRating?.toFixed(1) ?? '—'}（{t.ratingCount}人）
                     </Text>
                   )}
-                  <Text>💬 {t.commentCount}</Text>
-                  <Text>📋 {t.eventCount}</Text>
+                  <Text className="plaza__topic-metric">💬 评论 {t.commentCount}</Text>
+                  <Text className="plaza__topic-metric">📋 事件 {t.eventCount}</Text>
                 </View>
               </View>
             );

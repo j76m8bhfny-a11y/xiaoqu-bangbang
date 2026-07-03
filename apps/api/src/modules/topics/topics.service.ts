@@ -200,8 +200,13 @@ export class TopicsService {
     const topic = await this.prisma.topic.findUnique({ where: { id: topicId } });
     if (!topic || topic.communityId !== communityId) throw new NotFoundException('议题不存在');
 
-    const where: any = { topicId, parentId: null, status: 'visible' };
-    if (options.eventId !== undefined) where.eventId = options.eventId;
+    // 不传 eventId 时只返回议题级评论（eventId 为 null），与事件评论区分开
+    const where: any = {
+      topicId,
+      parentId: null,
+      status: 'visible',
+      eventId: options.eventId ?? null,
+    };
 
     const orderBy =
       options.sort === 'new'

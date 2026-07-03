@@ -158,7 +158,7 @@ export class CommitteeService {
     });
   }
 
-  async getAnnouncementDetail(id: string, communityId: string) {
+  async getAnnouncementDetail(id: string, communityId: string, viewerUserId?: string) {
     const announcement = await this.prisma.committeeAnnouncement.findFirst({
       where: { id, communityId, status: 'published', deletedAt: null },
     });
@@ -167,6 +167,44 @@ export class CommitteeService {
       throw new NotFoundException('公告不存在');
     }
 
-    return announcement;
+    // 当前浏览者是否已点赞
+    let isLiked = false;
+    if (viewerUserId) {
+      const like = await this.prisma.announcementLike.findUnique({
+        where: { announcementId_userId: { announcementId: id, userId: viewerUserId } },
+      });
+      isLiked = !!like;
+    }
+
+    return { ...announcement, isLiked };
+  }
+
+  async toggleAnnouncementLike(userId: string, announcementId: string, communityId: string) {
+    const announcement = await this.prisma.committeeAnnouncement.findFirst({
+      where: { id: announcementId, communityId, deletedAt: null },
+    });
+    if (!announcement) {
+      throw new NotFoundException('公告不存在');
+    }
+
+    const existing = await this.prisma.announcementLike.findUnique({
+      where: { announcementId_userId: { announcementId, userId } },
+    });
+
+    if (existing) {
+      await this.prisma.announcementLike.delete({ where: { id: existing.id } });
+      const updated = await this.prisma.committeeAnnouncement.update({
+        where: { id: announcementId },
+        data: { likeCount: { decrement: 1 } },
+      });
+      return { liked: false, likeCount: updated.likeCount };
+    }
+
+    await this.prisma.announcementLike.create({ data: { announcementId, userId } });
+    const updated = await this.prisma.committeeAnnouncement.update({
+      where: { id: announcementId },
+      data: { likeCount: { increment: 1 } },
+    });
+    return { liked: true, likeCount: updated.likeCount };
   }
 }

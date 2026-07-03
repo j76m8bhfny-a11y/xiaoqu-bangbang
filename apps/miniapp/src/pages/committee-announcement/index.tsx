@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, Swiper, SwiperItem, Image } from '@tarojs/components';
 import Taro, { useShareAppMessage } from '@tarojs/taro';
+import { useState, useEffect } from 'react';
 import { useRequest } from '@/hooks';
 import { committeeService, shareService } from '@/services';
 import Loading from '@/components/loading';
@@ -15,11 +16,48 @@ function formatDate(isoString: string): string {
 export default function CommitteeAnnouncement() {
   const { id } = Taro.getCurrentInstance().router?.params ?? {};
 
-  const { data: announcement, loading, error, refresh } = useRequest<CommitteeAnnouncementDto>(
+  const {
+    data: announcement,
+    loading,
+    error,
+    refresh,
+  } = useRequest<CommitteeAnnouncementDto & { isLiked?: boolean; likeCount?: number }>(
     () => committeeService.getAnnouncementDetail(id!),
     [id],
     { enabled: !!id },
   );
+
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [liking, setLiking] = useState(false);
+
+  useEffect(() => {
+    if (announcement) {
+      setLiked(!!announcement.isLiked);
+      setLikeCount(announcement.likeCount ?? 0);
+    }
+  }, [announcement]);
+
+  const handleToggleLike = async () => {
+    if (liking) return;
+    setLiking(true);
+    // 乐观更新
+    const prevLiked = liked;
+    const prevCount = likeCount;
+    setLiked(!prevLiked);
+    setLikeCount(prevLiked ? prevCount - 1 : prevCount + 1);
+    try {
+      const res = await committeeService.toggleAnnouncementLike(id!);
+      setLiked(res.liked);
+      setLikeCount(res.likeCount);
+    } catch (e: any) {
+      setLiked(prevLiked);
+      setLikeCount(prevCount);
+      Taro.showToast({ title: e.message || '操作失败', icon: 'none' });
+    } finally {
+      setLiking(false);
+    }
+  };
 
   const { data: shareConfig } = useRequest(
     () => shareService.getCardConfig({ targetType: 'announcement', targetId: id! }),
@@ -46,7 +84,7 @@ export default function CommitteeAnnouncement() {
   });
 
   if (loading) {
-    return <Loading text='加载公告详情...' />;
+    return <Loading text="加载公告详情..." />;
   }
 
   if (error || !announcement) {
@@ -54,49 +92,76 @@ export default function CommitteeAnnouncement() {
   }
 
   return (
-    <View className='committee-announcement'>
-      <ScrollView scrollY className='committee-announcement__scroll'>
-        {/* Title Section */}
-        <View className='committee-announcement__title-section'>
-          <Text className='committee-announcement__title'>{announcement.title}</Text>
-          {announcement.isPinned && (
-            <View className='committee-announcement__pin-tag'>
-              <Text className='committee-announcement__pin-tag-text'>📌 置顶</Text>
+    <View className="committee-announcement">
+      <ScrollView scrollY className="committee-announcement__scroll">
+        <View className="committee-announcement__card">
+          {/* 官方标识 */}
+          <View className="committee-announcement__badge">
+            <Text className="committee-announcement__badge-icon">🏛️</Text>
+            <Text className="committee-announcement__badge-text">业委会公告</Text>
+          </View>
+
+          {/* Title Section */}
+          <View className="committee-announcement__title-section">
+            <Text className="committee-announcement__title">{announcement.title}</Text>
+            {announcement.isPinned && (
+              <View className="committee-announcement__pin-tag">
+                <Text className="committee-announcement__pin-tag-text">📌 置顶</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Meta Row */}
+          <View className="committee-announcement__meta">
+            <Text className="committee-announcement__publisher">
+              {announcement.publisherNickname}
+            </Text>
+            <Text className="committee-announcement__dot">·</Text>
+            <Text className="committee-announcement__date">
+              {formatDate(announcement.publishedAt)}
+            </Text>
+          </View>
+
+          <View className="committee-announcement__divider" />
+
+          {/* Content */}
+          <Text className="committee-announcement__content">{announcement.content}</Text>
+
+          {/* Images */}
+          {announcement.images && announcement.images.length > 0 && (
+            <View className="committee-announcement__images">
+              <Swiper
+                className="committee-announcement__swiper"
+                indicatorDots
+                indicatorColor="rgba(0,0,0,0.2)"
+                indicatorActiveColor="#5b9e6f"
+                circular
+                autoplay={false}
+              >
+                {announcement.images.map((img, idx) => (
+                  <SwiperItem key={idx}>
+                    <Image className="committee-announcement__image" src={img} mode="aspectFill" />
+                  </SwiperItem>
+                ))}
+              </Swiper>
             </View>
           )}
         </View>
 
-        {/* Meta Row */}
-        <View className='committee-announcement__meta'>
-          <Text className='committee-announcement__publisher'>{announcement.publisherNickname}</Text>
-          <Text className='committee-announcement__dot'>·</Text>
-          <Text className='committee-announcement__date'>{formatDate(announcement.publishedAt)}</Text>
+        {/* 点赞区 */}
+        <View className="committee-announcement__like-section">
+          <View
+            className={`committee-announcement__like-btn ${liked ? 'committee-announcement__like-btn--active' : ''}`}
+            onClick={handleToggleLike}
+          >
+            <Text className="committee-announcement__like-icon">{liked ? '❤️' : '🤍'}</Text>
+            <Text className="committee-announcement__like-text">
+              {likeCount > 0 ? `${likeCount} 人觉得有用` : '有用'}
+            </Text>
+          </View>
         </View>
 
-        {/* Content */}
-        <Text className='committee-announcement__content'>{announcement.content}</Text>
-
-        {/* Images */}
-        {announcement.images && announcement.images.length > 0 && (
-          <View className='committee-announcement__images'>
-            <Swiper
-              className='committee-announcement__swiper'
-              indicatorDots
-              indicatorColor='rgba(0,0,0,0.2)'
-              indicatorActiveColor='#35e89a'
-              circular
-              autoplay={false}
-            >
-              {announcement.images.map((img, idx) => (
-                <SwiperItem key={idx}>
-                  <Image className='committee-announcement__image' src={img} mode='aspectFill' />
-                </SwiperItem>
-              ))}
-            </Swiper>
-          </View>
-        )}
-
-        <View className='committee-announcement__bottom-spacer' />
+        <View className="committee-announcement__bottom-spacer" />
       </ScrollView>
     </View>
   );

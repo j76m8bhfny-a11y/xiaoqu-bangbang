@@ -2,7 +2,12 @@
 
 .login {
   min-height: 100vh;
-  background: linear-gradient(180deg, $color-primary 0%, rgba(53, 232, 154, 0.08) 55%, $color-bg 100%);
+  background: linear-gradient(
+    180deg,
+    $color-primary 0%,
+    rgba(74, 140, 94, 0.08) 55%,
+    $color-bg 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,7 +28,7 @@
   &__title {
     font-size: $font-size-xxl;
     font-weight: $font-weight-bold;
-    color: $color-dark;
+    color: $color-text;
     margin-bottom: $spacing-xs;
   }
 
@@ -48,7 +53,7 @@
     }
 
     &--wechat {
-      background: #07c160;
+      background: #5b9e6f;
     }
   }
 

@@ -27,8 +27,8 @@ const DEFAULT_BANNERS: BannerItem[] = [
     subtitle: '看看谁拿到了小红花',
     tag: '好人榜',
     ctaText: '去看看',
-    bgColor: '#E9FFF4',
-    accentColor: '#35E89A',
+    bgColor: '#eaf4ec',
+    accentColor: '#5b9e6f',
   },
   {
     id: '2',
@@ -36,8 +36,8 @@ const DEFAULT_BANNERS: BannerItem[] = [
     subtitle: '一起让小区更温暖',
     tag: '公益活动',
     ctaText: '我要报名',
-    bgColor: '#FFF1DD',
-    accentColor: '#FF9F43',
+    bgColor: '#fbf0dd',
+    accentColor: '#e0a458',
   },
   {
     id: '3',
@@ -45,8 +45,8 @@ const DEFAULT_BANNERS: BannerItem[] = [
     subtitle: '业委会已联系物业处理',
     tag: '公共反馈',
     ctaText: '关注进展',
-    bgColor: '#F0EDFF',
-    accentColor: '#7C6EF6',
+    bgColor: '#eaf4ec',
+    accentColor: '#5b9e6f',
   },
 ];
 
@@ -57,9 +57,9 @@ export default function BannerCarousel({
   const [current, setCurrent] = useState(0);
 
   return (
-    <View className='banner-carousel'>
+    <View className="banner-carousel">
       <Swiper
-        className='banner-carousel__swiper'
+        className="banner-carousel__swiper"
         indicatorDots={false}
         autoplay
         circular
@@ -69,48 +69,48 @@ export default function BannerCarousel({
         {banners.map((banner) => (
           <SwiperItem key={banner.id}>
             <View
-              className='banner-carousel__item'
-              style={{ background: banner.bgColor || '#E9FFF4' }}
+              className="banner-carousel__item"
+              style={{ background: banner.bgColor || '#eaf4ec' }}
               onClick={() => onBannerClick?.(banner.id)}
             >
-              <View className='banner-carousel__content'>
+              <View className="banner-carousel__content">
                 {banner.tag && (
                   <View
-                    className='banner-carousel__tag'
-                    style={{ background: banner.accentColor || '#35E89A' }}
+                    className="banner-carousel__tag"
+                    style={{ background: banner.accentColor || '#5b9e6f' }}
                   >
-                    <Text className='banner-carousel__tag-text'>{banner.tag}</Text>
+                    <Text className="banner-carousel__tag-text">{banner.tag}</Text>
                   </View>
                 )}
-                <Text className='banner-carousel__title'>{banner.title}</Text>
+                <Text className="banner-carousel__title">{banner.title}</Text>
                 {banner.subtitle && (
-                  <Text className='banner-carousel__subtitle'>{banner.subtitle}</Text>
+                  <Text className="banner-carousel__subtitle">{banner.subtitle}</Text>
                 )}
                 {banner.ctaText && (
                   <View
-                    className='banner-carousel__cta'
-                    style={{ background: banner.accentColor || '#35E89A' }}
+                    className="banner-carousel__cta"
+                    style={{ background: banner.accentColor || '#5b9e6f' }}
                   >
-                    <Text className='banner-carousel__cta-text'>{banner.ctaText}</Text>
-                    <Text className='banner-carousel__cta-arrow'>→</Text>
+                    <Text className="banner-carousel__cta-text">{banner.ctaText}</Text>
+                    <Text className="banner-carousel__cta-arrow">→</Text>
                   </View>
                 )}
               </View>
-              <View className='banner-carousel__deco'>
+              <View className="banner-carousel__deco">
                 <View
-                  className='banner-carousel__deco-circle banner-carousel__deco-circle--1'
-                  style={{ borderColor: banner.accentColor || '#35E89A' }}
+                  className="banner-carousel__deco-circle banner-carousel__deco-circle--1"
+                  style={{ borderColor: banner.accentColor || '#5b9e6f' }}
                 />
                 <View
-                  className='banner-carousel__deco-circle banner-carousel__deco-circle--2'
-                  style={{ background: banner.accentColor || '#35E89A' }}
+                  className="banner-carousel__deco-circle banner-carousel__deco-circle--2"
+                  style={{ background: banner.accentColor || '#5b9e6f' }}
                 />
               </View>
             </View>
           </SwiperItem>
         ))}
       </Swiper>
-      <View className='banner-carousel__dots'>
+      <View className="banner-carousel__dots">
         {banners.map((_, i) => (
           <View
             key={i}
