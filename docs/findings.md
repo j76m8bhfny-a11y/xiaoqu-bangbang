@@ -982,11 +982,429 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
+## 十九、契约对齐扫描（第二轮 — 精细化）
+
+> 生成时间: 2026-07-03
+> 扫描方法: 4 个并行 agent 按 19 个 C 侧模块三端比对 (shared/api.ts ↔ api controllers ↔ miniapp services)
+> 与 P-43 关系: P-43 是第一轮概括性扫描（6 个 Critical 汇总），本节是第二轮精细化，每条带精确行号。P-43 已覆盖的标注"P-43 子项"，新发现独立列出。
+> 范围: C 侧（小程序端）。Admin 侧（admin controller ↔ admin 前端）未扫，列入后续工作。
+
+### P-88 🔴 [communities] select 响应结构完全不匹配
+
+- **位置**: `apps/api/src/modules/communities/communities.service.ts:56` vs `apps/miniapp/src/services/community.ts:17-18`
+- **问题**: 后端 `POST /communities/select` 返回 `{ currentCommunityId, communityName }`，小程序 `communityService.select()` 类型标注为 `{ success: boolean }`，两结构无任何重叠字段。小程序端 `result.success` 为 `undefined`。
+- **建议**: 小程序返回类型改为 `{ currentCommunityId: string; communityName: string }`，或新增 `SelectCommunityResponse` DTO。
+
+### P-89 🔴 [verifications] GET /me 响应包装不一致（对象 vs 数组）
+
+- **位置**: `apps/api/src/modules/verifications/verifications.controller.ts:22-25` vs `apps/miniapp/src/services/verification.ts:15-16`
+- **问题**: 后端返回 `{ code, message, data: { items } }`（data 是对象），小程序标注为 `VerificationDto[]`（期望直接数组）。经 `http.ts` 解包 `body.data` 后拿到 `{ items: [...] }` 而非 `[...]`，对结果调用 `.map()` 会运行时崩溃（对象不可迭代）。
+- **建议**: 小程序改为 `http.get<{ items: VerificationDto[] }>('/verifications/me')`。
+
+### P-90 🟡 [auth] GET /me 返回缺 openid 字段
+
+- **位置**: `apps/api/src/modules/auth/auth.service.ts:67-77` vs `packages/shared/src/api.ts:91-102`
+- **问题**: `UserDto` 定义了 10 个字段（含 `openid: string`），但 `authService.getMe()` 只返回 9 个字段（无 `openid`）。小程序端 `user.openid` 为 `undefined`。
+- **建议**: `getMe()` 返回值补 `openid`，或将 `UserDto.openid` 改为可选。
+
+### P-91 🟡 [auth] PATCH /me 响应类型漂移
+
+- **位置**: `apps/api/src/modules/auth/auth.service.ts:80-85` vs `apps/miniapp/src/services/auth.ts:16`
+- **问题**: `updateMe()` 只返回 `{ id, nickname, avatarUrl, bio }` 4 个字段，小程序标注为 `UserDto`（10 字段）。访问 `result.status`/`result.roles` 得到 `undefined`。
+- **建议**: 小程序返回类型改为 `Pick<UserDto, 'id'|'nickname'|'avatarUrl'|'bio'>`，或新增 `UpdateMeResponse` DTO。
+
+### P-92 🟡 [communities] SocialGroupDto 类型漂移（null vs non-null）
+
+- **位置**: `apps/miniapp/src/services/community.ts:4-11` vs `packages/shared/src/api.ts:137-144`
+- **问题**: 小程序本地定义 `SocialGroupDto` 的 `description`/`qrImageUrl`/`contactText` 为非空 `string`，shared 版本为 `string | null`。后端返回 `null` 时类型不匹配。
+- **建议**: 删除本地定义，从 `@xiaoqu-bangbang/shared` 导入。
+
+### P-93 🟡 [verifications] 缺 SubmitVerificationResponse DTO
+
+- **位置**: `apps/api/src/modules/verifications/verifications.service.ts:136-149` vs `packages/shared/src/api.ts:148-163`
+- **问题**: `POST /verifications` 返回 `{ id, status, ocrSummary, matchResult }`，小程序定义本地 `VerificationResultDto` 匹配，但 shared 层只有 Request DTO 无 Response DTO。
+- **建议**: shared 新增 `SubmitVerificationResponse` DTO，小程序复用。
+
+### P-94 🟡 [verifications] 后端多返回 maskedFileUrl/createdAt
+
+- **位置**: `apps/api/src/modules/verifications/verifications.service.ts:152-168` vs `packages/shared/src/api.ts:156-163`
+- **问题**: Prisma select 额外返回 `maskedFileUrl`/`createdAt`，`VerificationDto` 未声明。
+- **建议**: DTO 补字段或 select 删多余字段。
+
+### P-95 🟢 [auth] updateMe 注释类型不精确
+
+- **位置**: `apps/miniapp/src/services/auth.ts:16`
+- **问题**: 注释为 `UserDto` 但实际只返回 4 字段（见 P-91）。
+- **建议**: 与 P-91 同修。
+
+### P-96 🟢 [auth] openid 字段在 LoginResponse 和 UserDto 间隐式耦合
+
+- **位置**: `packages/shared/src/api.ts:86-89` vs `apps/api/src/modules/auth/auth.controller.ts:22-26`
+- **问题**: `LoginResponse.user` 含 `openid`（wechatLogin 补上），但 `GET /me` 不含。两个接口在 `openid` 字段上不一致。
+- **建议**: `UserDto.openid` 改可选，或统一两端都返回。
+
+### P-97 🟢 [communities] 重复定义 SocialGroupDto
+
+- **位置**: `apps/miniapp/src/services/community.ts:4-11`
+- **问题**: 本地定义 `SocialGroupDto` 与 shared 重复。
+- **建议**: 与 P-92 同修。
+
+### P-98 🟢 [verifications] 本地 VerificationResultDto 应移到 shared
+
+- **位置**: `apps/miniapp/src/services/verification.ts:4-9`
+- **问题**: 与 P-93 同类问题，类型定义分散在 service 文件。
+- **建议**: 与 P-93 同修。
+
+### P-99 🔴 [events] sendThanks 缺 toUserId 参数
+
+- **位置**: 小程序 `apps/miniapp/src/services/event.ts:53-54` | 后端 `apps/api/src/modules/events/events.controller.ts:228-243`
+- **问题**: 小程序 `sendThanks` 未传 `toUserId`，但 controller 通过 `@Body() body: { toUserId: string }` 强依赖。运行时 `body.toUserId` 为 `undefined`，Prisma 写入行为不可预测。
+- **建议**: 小程序调用时传 `{ toUserId: string }`。
+
+### P-100 🔴 [events] confirmCompletion 返回联合类型 miniapp 未覆盖
+
+- **位置**: 小程序 `apps/miniapp/src/services/event.ts:47-48` | 后端 `apps/api/src/modules/events/events.service.ts:513-577`
+- **问题**: miniapp 期望 `EventDto`，但后端在双方未全部确认时返回 `{ confirmed, waitingFor }`，仅双方都确认后才返回 `EventDto`。类型联合体与单一 `EventDto` 不匹配。
+- **建议**: miniapp 返回类型改为 `EventDto | { confirmed: string; waitingFor: string }`，或 shared 定义联合响应 DTO。
+
+### P-101 🟡 [events] requestCompletion 返回类型不匹配
+
+- **位置**: 小程序 `apps/miniapp/src/services/event.ts:44-45` | 后端 `apps/api/src/modules/events/events.service.ts:477-511`
+- **问题**: miniapp 期望 `EventDto`，后端返回 `EventCompletionConfirmation`（Prisma 模型，含 `eventId`/`userId`/`role`/`status`）。
+- **建议**: miniapp 返回类型改为对应 DTO，或 shared 定义。
+
+### P-102 🟡 [events] selectHelper 返回 EventDto 非 EventApplicationDto
+
+- **位置**: 小程序 `apps/miniapp/src/services/event.ts:41-42` | 后端 `apps/api/src/modules/events/events.controller.ts:134-149`
+- **问题**: miniapp 期望 `EventApplicationDto`，controller 返回的是更新后的 `event`（`EventDto` 结构）。
+- **建议**: miniapp 返回类型改为 `EventDto`。
+
+### P-103 🟡 [events] getComments 响应包装不匹配
+
+- **位置**: 小程序 `apps/miniapp/src/services/event.ts:62-63` | 后端 `apps/api/src/modules/events/events.controller.ts:210-215`
+- **问题**: miniapp 期望 `PaginatedData<CommentDto>`（含 page/pageSize/total），controller 返回 `{ items: comments }`（无分页信息）。
+- **建议**: miniapp 改为 `{ items: CommentDto[] }`，或 controller 补分页字段。
+
+### P-104 🟡 [events] getFeedbackLogs 响应包装不匹配
+
+- **位置**: 小程序 `apps/miniapp/src/services/event.ts:71-72` | 后端 `apps/api/src/modules/events/events.controller.ts:185-190`
+- **问题**: miniapp 期望 `FeedbackLogDto[]`（直接数组），controller 返回 `{ items: ... }`（对象包装）。miniapp 收到 `{ items: [...] }` 而非 `[...]`。
+- **建议**: miniapp 改为 `{ items: FeedbackLogDto[] }`，或 controller 去掉 items 包装。
+
+### P-105 🟡 [events] 本地 CommentDto 缺字段
+
+- **位置**: 小程序 `apps/miniapp/src/services/event.ts:7-14`
+- **问题**: 本地 `CommentDto` 只有 6 字段，后端返回含 `eventId`/`parentId`/`status`/`aiReviewStatus`/`updatedAt` 等更多字段。
+- **建议**: 事件评论 DTO 补到 shared/api.ts，与后端一致。
+
+### P-106 🟡 [events] 后端 CreateEventDto 缺 shared 的 3 个字段
+
+- **位置**: shared `packages/shared/src/api.ts:167-182` | 后端 `apps/api/src/modules/events/dto/create-event.dto.ts`
+- **问题**: shared `CreateEventRequest` 有 `videos?`/`eventTime?`/`visibility?`，后端 `CreateEventDto` 完全缺失，service create 也未处理。
+- **建议**: 后端 DTO 和 service 补字段，或 shared 移除（YAGNI）。
+
+### P-107 🟡 [events] list 的 \_count 缺 thanks/favorites
+
+- **位置**: shared `packages/shared/src/api.ts:209-215` | 后端 `apps/api/src/modules/events/events.service.ts:57-63`
+- **问题**: `EventDto._count` 定义 5 字段，后端 list 只返回 3 个（缺 `thanks`/`favorites`）。findOne 的 \_count 含 5 个，list 和 detail 不一致。
+- **建议**: 后端 list 也加上 `thanks`/`favorites` 计数。
+
+### P-108 🟢 [events] DTO 风格不一致（class-validator vs interface）
+
+- **位置**: 后端 DTOs | shared api.ts
+- **问题**: 后端用 class-validator 装饰器，shared 用 TS interface。后端枚举值硬编码字符串数组而非引用 shared enums。
+- **建议**: 后端 `@IsEnum()` 引用 shared enums。
+
+### P-109 🟡 [market] CreateMarketItemRequest 有 contactText 后端 DTO 没有
+
+- **位置**: shared `packages/shared/src/api.ts:265` | 后端 `apps/api/src/modules/market/dto/create-market-item.dto.ts`
+- **问题**: shared 有 `contactText?`，后端 DTO 完全没有，service create 也未设置。
+- **建议**: 后端补字段，或 shared 移除。
+
+### P-110 🟡 [market] MarketItemDto sellerNickname vs seller 嵌套（P-43 子项，补行号）
+
+- **位置**: shared `packages/shared/src/api.ts:272-273` | 后端 `apps/api/src/modules/market/market.service.ts:57-59, 112-114`
+- **问题**: shared 定义扁平 `sellerNickname`/`sellerAvatarUrl`，后端返回嵌套 `seller: { id, nickname, avatarUrl }`。前端取 `sellerNickname` 得 `undefined`。
+- **建议**: shared 改为 `seller: { id, nickname, avatarUrl }` 匹配后端，或后端 flatten。
+
+### P-111 🟡 [market] MarketItemDto 缺 aiReviewStatus
+
+- **位置**: shared `packages/shared/src/api.ts:268-286` | 后端 `apps/api/src/modules/market/market.service.ts:53, 106`
+- **问题**: 后端 list/findOne 都返回 `aiReviewStatus`，shared DTO 未声明。
+- **建议**: shared 补 `aiReviewStatus: string`。
+
+### P-112 🟡 [market] images 必填 vs 可选不一致
+
+- **位置**: shared `packages/shared/src/api.ts:261` | 后端 `apps/api/src/modules/market/dto/create-market-item.dto.ts:14-17`
+- **问题**: shared `images: string[]` 必填，后端 `images?: string[]` 可选（service 有 `?? []` 兜底）。
+- **建议**: 统一为可选。
+
+### P-113 🟡 [market] addComment 返回缺 user 关系
+
+- **位置**: 小程序 `apps/miniapp/src/services/market.ts:45-46` | 后端 `apps/api/src/modules/market/market.service.ts:353-365`
+- **问题**: miniapp 期望返回含 `user: { id, nickname, avatarUrl }`，后端 `addComment` 直接返回 `prisma.marketComment.create(...)` 原始结果，未 include `user`。前端 `comment.user` 为 `undefined`。
+- **建议**: 后端 Prisma 查询加 `include: { user: { select: { id, nickname, avatarUrl } } }`。
+
+### P-114 🟡 [market] getById 多传 communityId 被忽略
+
+- **位置**: 小程序 `apps/miniapp/src/services/market.ts:31-32` | 后端 `apps/api/src/modules/market/market.controller.ts:54-63`
+- **问题**: miniapp 传 `communityId` 作为 query 参数，后端用 `@CurrentCommunityId()` 注入，不接受 query。miniapp 传的值被忽略。
+- **建议**: miniapp 移除 `communityId` 参数，或统一获取方式。
+
+### P-115 🟢 [market] tradeType/conditionLevel 必填 vs 可选
+
+- **位置**: shared `packages/shared/src/api.ts:263-264` | 后端 `apps/api/src/modules/market/dto/create-market-item.dto.ts:24-31`
+- **问题**: shared 必填，后端可选（有默认值 `'free'`/`'good'`）。
+- **建议**: 统一为可选带默认值，或必填。
+
+### P-116 🟡 [topics] findById 返回 TopicDto 非 TopicDetailDto
+
+- **位置**: 小程序 `apps/miniapp/src/services/topic.ts:17` | 后端 `apps/api/src/modules/topics/topics.service.ts:86-94`
+- **问题**: miniapp 期望 `TopicDetailDto`（含 `events: TopicEventItem[]`），后端 `findById` 只调用 `toDto(topic)` 返回 `TopicDto`（无 events 数组）。议题详情页拿不到关联事件列表。
+- **建议**: 后端 `findById` 加 `include: { events: ... }` 返回 `TopicDetailDto`。
+
+### P-117 🟡 [topics] like/dislike/unlike 返回类型不匹配
+
+- **位置**: 小程序 `apps/miniapp/src/services/topic.ts:21-28` | 后端 `apps/api/src/modules/topics/topics.controller.ts:86-122`
+- **问题**: miniapp 期望 `{ likeCount, dislikeCount }`，controller 返回完整 `TopicDto`。
+- **建议**: 统一为 `TopicDto` 或精简对象。
+
+### P-118 🟡 [topics] rate 返回类型不匹配
+
+- **位置**: 小程序 `apps/miniapp/src/services/topic.ts:30-31` | 后端 `apps/api/src/modules/topics/topics.controller.ts:124-134`
+- **问题**: miniapp 期望 `{ avgRating, ratingCount }`，controller 返回完整 `TopicDto`。
+- **建议**: miniapp 改为 `TopicDto`，或后端返回精简对象。
+
+### P-119 🟡 [topics] unlike scope 参数传递方式不一致
+
+- **位置**: 小程序 `apps/miniapp/src/services/topic.ts:27-28` | 后端 `apps/api/src/modules/topics/topics.controller.ts:112-122`
+- **问题**: miniapp 通过 `http.del(url, { scope })` 发送，后端用 `@Query('scope')` 读取。依赖 Taro 将 DELETE body 序列化为 query，存在平台差异风险。
+- **建议**: miniapp 显式拼 query：`http.del(\`/topics/${id}/like?scope=${scope}\`)`，或后端改 `@Body()`。
+
+### P-120 🟡 [topics] timeline 缺 total 字段
+
+- **位置**: 小程序 `apps/miniapp/src/services/topic.ts:33-34` | 后端 `apps/api/src/modules/topics/topics.controller.ts:136-146`
+- **问题**: miniapp 期望 `PaginatedData<TopicTimelineItem>`（含 total），controller 返回 `{ items, page, pageSize }`（缺 total）。分页组件无法计算总页数。
+- **建议**: controller 补 `total`，或 miniapp 改为非分页类型。
+
+### P-121 🟡 [topics] likeComment/dislikeComment/unlikeComment 返回类型不匹配
+
+- **位置**: 小程序 `apps/miniapp/src/services/topic.ts:44-51` | 后端 `apps/api/src/modules/topics/topics.controller.ts:42-67`
+- **问题**: miniapp 期望 `{ likeCount, dislikeCount }`，controller 返回完整 comment DTO。
+- **建议**: 统一响应类型。
+
+### P-122 🟡 [topics] create Body 内联类型非 shared DTO
+
+- **位置**: 后端 `apps/api/src/modules/topics/topics.controller.ts:74` | shared `packages/shared/src/api.ts:797-800`
+- **问题**: controller 用内联 `{ title: string; description?: string }`，未引用 shared `CreateTopicRequest`。
+- **建议**: 引用 shared DTO。
+
+### P-123 🟡 [topics] comments sort 参数类型不一致
+
+- **位置**: 小程序 `apps/miniapp/src/services/topic.ts:36-39` | 后端 `apps/api/src/modules/topics/topics.controller.ts:148-165`
+- **问题**: miniapp `sort: string`，后端 `sort?: 'hot' | 'new'`。miniapp 类型过宽。
+- **建议**: miniapp 改为 `'hot' | 'new'`。
+
+### P-124 🟢 [topics] controller 守卫层级叠加
+
+- **位置**: `apps/api/src/modules/topics/topics.controller.ts:21`
+- **问题**: 类级 `@UseGuards(JwtAuthGuard, CurrentCommunityGuard)`，方法级又加 `@UseGuards(VerifiedMemberGuard)`，NestJS 合并不覆盖，实际 3 守卫叠加。
+- **建议**: 明确守卫层级，避免不必要叠加。
+
+### P-125 🟢 [topics] topic-suggestions 逻辑在 events/topics service 重复
+
+- **位置**: `apps/api/src/modules/events/events.service.ts:246-262` 和 `apps/api/src/modules/topics/topics.service.ts:399-415`
+- **问题**: tokenize + jaccard 逻辑完全重复，topicsService.suggestTopics 未被 controller 引用。
+- **建议**: 删除 topics service 中的重复实现。
+
+### P-126 🟡 [votes] list 返回字段远少于 VoteDto（P-43 子项，补行号）
+
+- **位置**: `apps/api/src/modules/votes/votes.service.ts:15-24` vs `packages/shared/src/api.ts:351-364`
+- **问题**: `list()` select 仅 9 字段，`VoteDto` 要求 `description`/`maxChoices`/`resultVisibility`/`options`（options 必选）。miniapp 标注 `PaginatedData<VoteDto>`，实际缺 4 字段。
+- **建议**: 拆分 `VoteListItemDto`（轻量）和 `VoteDetailDto`（完整），或扩展 select。
+
+### P-127 🟡 [votes] VoteDto 缺 createdAt 字段
+
+- **位置**: `packages/shared/src/api.ts:351-364`
+- **问题**: 后端 list/findOne 返回 `createdAt`，`VoteDto` 未声明。
+- **建议**: shared 补 `createdAt: string`。
+
+### P-128 🟢 [votes] VoteResultDto 未在 shared 定义
+
+- **位置**: 小程序 `apps/miniapp/src/services/vote.ts:4-9`
+- **问题**: 小程序本地定义 `VoteResultDto`，后端返回相同结构，shared 无对应 DTO。
+- **建议**: 提升到 shared/api.ts。
+
+### P-129 🟡 [committee] overview 无 shared DTO
+
+- **位置**: 小程序 `apps/miniapp/src/services/committee.ts:9-13`
+- **问题**: 本地 `CommitteeOverviewDto`，shared 无对应。
+- **建议**: shared 补 DTO。
+
+### P-130 🟡 [committee] members 列表缺 claimedUserId
+
+- **位置**: `apps/api/src/modules/committee/committee.service.ts:34-43` vs `packages/shared/src/api.ts:322-332`
+- **问题**: `getMembers` select 缺 `claimedUserId`，`CommitteeMemberDto` 要求该字段。
+- **建议**: select 补 `claimedUserId`。
+
+### P-131 🟡 [committee] member 详情无 shared DTO
+
+- **位置**: 小程序 `apps/miniapp/src/services/committee.ts:15-17`
+- **问题**: 本地 `CommitteeMemberDetailDto extends CommitteeMemberDto`（含 claims），shared 无对应。
+- **建议**: shared 补 DTO。
+
+### P-132 🟡 [committee] ClaimDto materialUrls 可选性不一致
+
+- **位置**: 后端 `apps/api/src/modules/committee/dto/claim.dto.ts:7-10` vs `packages/shared/src/api.ts:334-337`
+- **问题**: 后端 `@IsOptional()` 可选，shared `materialUrls: string[]` 必选。
+- **建议**: 统一为可选 `materialUrls?: string[]`。
+
+### P-133 🟡 [committee] myClaims 无 shared DTO
+
+- **位置**: 小程序 `apps/miniapp/src/services/committee.ts:19-26`
+- **问题**: 本地 `CommitteeMemberClaimDto`，shared 无对应。
+- **建议**: shared 补 DTO。
+
+### P-134 🟡 [committee] announcements 列表字段少于 DTO（P-43 子项，补行号）
+
+- **位置**: `apps/api/src/modules/committee/committee.service.ts:140-148` vs `packages/shared/src/api.ts:339-347`
+- **问题**: `getAnnouncements` select 仅 5 字段，`CommitteeAnnouncementDto` 要求 `content`/`images`/`publisherNickname` 3 个必选字段。
+- **建议**: 拆分 `AnnouncementListItemDto` 和 `CommitteeAnnouncementDto`，或扩展 select。
+
+### P-135 🟡 [committee] AnnouncementDto 缺 likeCount
+
+- **位置**: `packages/shared/src/api.ts:339-347` vs 小程序 `apps/miniapp/src/services/committee.ts:47-49`
+- **问题**: 后端详情返回 `likeCount`，shared DTO 未声明。miniapp 期望 `CommitteeAnnouncementDto & { isLiked; likeCount }`。
+- **建议**: shared 补 `likeCount: number`。
+
+### P-136 🟡 [committee] publisherNickname 可能是虚拟字段
+
+- **位置**: `packages/shared/src/api.ts:344` vs `apps/api/src/modules/committee/committee.service.ts:161-180`
+- **问题**: `CommitteeAnnouncementDto` 有 `publisherNickname: string`，但 service `getAnnouncementDetail` 用 `findFirst` 无 `include`，若 DB 用 `publisherId` 外键则返回无 `publisherNickname`。
+- **建议**: 确认 DB 字段名，若为 `publisherId` 则 service 加 `include: { publisher: { select: { nickname: true } } }` 并映射。
+
+### P-137 🟢 [committee] toggleAnnouncementLike 无 shared DTO
+
+- **位置**: 小程序 `apps/miniapp/src/services/committee.ts:51-52`
+- **问题**: miniapp 期望 `{ liked, likeCount }`，shared 无响应 DTO。
+- **建议**: 可选，shared 补类型。
+
+### P-138 🟡 [community-applications] create 返回原始 DB 记录非 DTO
+
+- **位置**: `apps/api/src/modules/community-applications/community-applications.service.ts:22-24`
+- **问题**: `create` 直接返回 `prisma.communityApplication.create(...)` 原始记录，缺 `CommunityApplicationDto` 的 `applicantNickname`/`applicantAvatarUrl`/`hasSupported`/`recentSupporters` 等字段。
+- **建议**: 创建后调用 `toPublicDto` 转换。
+
+### P-139 🟡 [community-applications] list 分页类型不一致
+
+- **位置**: 小程序 `apps/miniapp/src/services/community-application.ts:19-22` vs 后端 `apps/api/src/modules/community-applications/community-applications.controller.ts:39`
+- **问题**: miniapp 声明 `{ items, total }`，后端返回 `{ items, page, pageSize, total }`。
+- **建议**: miniapp 改为 `PaginatedData<CommunityApplicationDto>`。
+
+### P-140 🟡 [community-applications] me/supported 返回非 PaginatedData
+
+- **位置**: `apps/api/src/modules/community-applications/community-applications.controller.ts:44-46, 51-53`
+- **问题**: `listMine`/`listSupported` 返回 `{ items }`（无 page/pageSize/total），与 `list` 端点格式不同。
+- **建议**: 保持现状（无分页合理），但 shared 补 `ListResponse<T>` 类型统一。
+
+### P-141 🟢 [community-applications] support 返回类型无 shared DTO
+
+- **位置**: 小程序 `apps/miniapp/src/services/community-application.ts:35`
+- **问题**: miniapp 期望 `{ ok: boolean }`，shared 无 DTO。
+- **建议**: 可选，shared 补类型。
+
+### P-142 🟢 [community-applications] materialType 字符串字面量非枚举
+
+- **位置**: 后端 `apps/api/src/modules/community-applications/dto/create-application.dto.ts:30-31` vs `packages/shared/src/api.ts:861`
+- **问题**: 两端都用字符串字面量而非引用 `MaterialType` 枚举。
+- **建议**: 统一引用 shared enums。
+
+### P-143 🔴 [rankings] nickname/avatarUrl 嵌套 vs 扁平（P-43 子项，补行号）
+
+- **位置**: shared `packages/shared/src/api.ts:298-310` vs 后端 `apps/api/src/modules/rankings/rankings.service.ts:248-264` vs 小程序 `apps/miniapp/src/pages/ranking/index.tsx:70`
+- **问题**: `RankingItemDto` 定义扁平 `nickname`/`avatarUrl`，后端返回嵌套 `{ user: { id, nickname, avatarUrl } }`。小程序 `top3[1].nickname` 得 `undefined`，`nickname.slice(0, 1)` 崩溃。
+- **建议**: controller 层做 DTO 映射 flatten，或 shared 改嵌套结构。
+
+### P-144 🔴 [rankings] isVerified/thanksCount/latestAction 缺失（P-43 子项，补行号）
+
+- **位置**: shared `packages/shared/src/api.ts:312-318` vs 后端 `apps/api/src/modules/rankings/rankings.service.ts:273-284`
+- **问题**: `RankingItemDto` 定义 `isVerified`/`thanksCount`/`latestAction`，后端从 `rankingSnapshot` 表查询，该表不含这 3 字段，运行时缺失。
+- **建议**: controller 层补充计算，或 DTO 移除。
+
+### P-145 🔴 [rankings] getMyBadges 返回结构不匹配
+
+- **位置**: 小程序 `apps/miniapp/src/services/ranking.ts:22-23` | 后端 `apps/api/src/modules/rankings/rankings.controller.ts:55-61`
+- **问题**: miniapp 期望 `{ items: BadgeDto[] }`，后端返回 `{ badges, contributions }`。`body.data.items` 为 `undefined`，徽章页 `myBadgesData?.items ?? []` 永远空数组，所有徽章显示"未解锁"。
+- **建议**: 后端改返回 `{ items: badges }`，或 miniapp 解构 `{ badges, contributions }`。
+
+### P-146 🟡 [rankings] BadgeDto icon vs iconUrl
+
+- **位置**: 小程序 `apps/miniapp/src/services/ranking.ts:5-10` vs 后端 `apps/api/src/modules/rankings/rankings.service.ts:286-298`
+- **问题**: miniapp `BadgeDto` 有 `icon: string`，后端返回 `iconUrl: string | null`。徽章图标不显示。
+- **建议**: 统一字段名。
+
+### P-147 🟡 [rankings] list communityId 参数被忽略
+
+- **位置**: 小程序 `apps/miniapp/src/services/ranking.ts:13` vs 后端 `apps/api/src/modules/rankings/rankings.controller.ts:14-27`
+- **问题**: miniapp 传 `communityId` 作为查询参数，controller 用 `@CurrentCommunityId()` 注入，不接受查询参数。
+- **建议**: controller 增加 `@Query('communityId')`，或 miniapp 去掉参数。
+
+### P-148 🔴 [share] ShareCardConfig title vs shareTitle（P-43 子项，补行号）
+
+- **位置**: shared `packages/shared/src/api.ts:415-422` vs 后端 `apps/api/src/modules/share/share.service.ts:80-89` vs 小程序 `apps/miniapp/src/pages/event-detail/index.tsx:131-132`
+- **问题**: `ShareCardConfig` 定义 `title`/`path`，后端返回 `shareTitle`/`sharePath`。所有消费方（event-detail/market-detail/committee-announcement/vote-detail）用 `shareConfig.title`/`shareConfig.path` 得 `undefined`，分享功能完全失效。
+- **建议**: 后端改返回 `title`/`path`，或 shared 和所有消费方改 `shareTitle`/`sharePath`。
+
+### P-149 🟡 [share] disabledReason undefined vs null
+
+- **位置**: shared `packages/shared/src/api.ts:420` vs 后端 `apps/api/src/modules/share/share.service.ts:80-89`
+- **问题**: `ShareCardConfig.disabledReason` 为 `string | null`，后端未赋值时为 `undefined`，JSON 中缺字段而非 `null`。
+- **建议**: 后端显式 `disabledReason: disabledReason ?? null`。
+
+### P-150 🟢 [share] logShare 返回类型 unknown
+
+- **位置**: 小程序 `apps/miniapp/src/services/share.ts:8-9`
+- **问题**: `http.post('/share/logs', data)` 无泛型参数，类型为 `unknown`，后端实际返回 `{ id, createdAt }`。
+- **建议**: 补 `http.post<{ id: string; createdAt: string }>`。
+
+### P-151 🟡 [banners] 分页字段缺失
+
+- **位置**: 小程序 `apps/miniapp/src/services/banner.ts:5-6` vs 后端 `apps/api/src/modules/banners/banners.controller.ts:9-13`
+- **问题**: miniapp 声明 `PaginatedData<BannerDto>`（含 page/pageSize/total），controller 返回 `{ items }`（无分页字段）。
+- **建议**: miniapp 改为 `{ items: BannerDto[] }`，或 controller 补分页字段。
+
+### P-152 🟡 [banners] communityId 查询参数被忽略
+
+- **位置**: 小程序 `apps/miniapp/src/services/banner.ts:5-6` vs 后端 `apps/api/src/modules/banners/banners.controller.ts:10`
+- **问题**: miniapp 传 `communityId` 作为查询参数，controller 用 `@CurrentCommunityId() @Optional()` 且无 `CurrentCommunityGuard`。无 guard 时 `CurrentCommunityId()` 可能返回 `undefined`，service 始终只返回全局 banner。
+- **建议**: controller 增加 `@Query('communityId')`，或添加 `CurrentCommunityGuard`。
+
+### P-153 🟡 [serviceProviders] 分页字段缺失
+
+- **位置**: 小程序 `apps/miniapp/src/services/banner.ts:10-11` vs 后端 `apps/api/src/modules/serviceProviders/service-providers.controller.ts:14-18`
+- **问题**: 同 P-151，miniapp 声明 `PaginatedData`，controller 返回 `{ items }`。
+- **建议**: 同 P-151。
+
+### P-154 🟢 [serviceProviders] DTO 缺 coverUrl/sortOrder/createdAt
+
+- **位置**: `apps/api/src/modules/serviceProviders/service-providers.service.ts:22-35` vs `packages/shared/src/api.ts:388-398`
+- **问题**: 后端返回 `coverUrl`/`sortOrder`/`createdAt`，`ServiceProviderDto` 未声明。小程序未使用这些字段，不影响功能。
+- **建议**: 如需使用，shared 补字段。
+
+### 横向检查结论
+
+- **响应包装（R8 红线）**: 所有 controller 均用 `{ code, message, data }` 包装 ✅
+- **错误码（R9 红线）**: 后端用 NestJS 内置 exception，由 `AllExceptionsFilter` 映射为 `ErrorCodes` 枚举值 ✅
+- **notifications 模块**: ✅ 三端完全一致，无差异
+- **upload 模块**: ✅ 三端完全一致，无差异
+
+---
+
 ## 汇总
 
-| 严重度      | 数量   | 编号                                                                                                                                                       |
-| ----------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔴 阻塞发布 | 11     | P-01, P-06, P-22, P-24, P-41, P-42, P-43, P-46, P-55, P-69, P-72                                                                                           |
-| 🟡 建议修   | 40     | P-02~P-05, P-07~P-10, P-16~P-21, P-23, P-25, P-36~P-38, P-44, P-45, P-47~P-49, P-56, P-58, P-61, P-63, P-67, P-68, P-71, P-73, P-74, P-78, P-79, P-80~P-84 |
-| 🟢 可延后   | 36     | P-11~P-15, P-26~P-35, P-39, P-40, P-50~P-54, P-57, P-59, P-60, P-62, P-64~P-66, P-70, P-75~P-77, P-85~P-87                                                 |
-| **合计**    | **87** |                                                                                                                                                            |
+| 严重度      | 数量    | 编号                                                                                                                                                                                                                                                                                 |
+| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🔴 阻塞发布 | 19      | P-01, P-06, P-22, P-24, P-41, P-42, P-43, P-46, P-55, P-69, P-72, P-88, P-89, P-99, P-100, P-143, P-144, P-145, P-148                                                                                                                                                                |
+| 🟡 建议修   | 85      | P-02~P-05, P-07~P-10, P-16~P-21, P-23, P-25, P-36~P-38, P-44, P-45, P-47~P-49, P-56, P-58, P-61, P-63, P-67, P-68, P-71, P-73, P-74, P-78, P-79, P-80~P-84, P-90~P-94, P-101~P-107, P-109~P-114, P-116~P-123, P-126~P-127, P-129~P-136, P-138~P-140, P-146~P-147, P-149, P-151~P-153 |
+| 🟢 可延后   | 50      | P-11~P-15, P-26~P-35, P-39, P-40, P-50~P-54, P-57, P-59, P-60, P-62, P-64~P-66, P-70, P-75~P-77, P-85~P-87, P-95~P-98, P-108, P-115, P-124~P-125, P-128, P-137, P-141~P-142, P-150, P-154                                                                                            |
+| **合计**    | **154** |                                                                                                                                                                                                                                                                                      |
