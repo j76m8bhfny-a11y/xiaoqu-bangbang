@@ -661,6 +661,7 @@ export class AdminController {
       title: string;
       description?: string;
       qrImageUrl: string;
+      contactText?: string;
       visibleTo?: string;
       sortOrder?: number;
     },
@@ -678,8 +679,10 @@ export class AdminController {
       title: string;
       description: string;
       qrImageUrl: string;
+      contactText: string;
       visibleTo: string;
       sortOrder: number;
+      status: string;
     }>,
   ) {
     const data = await this.adminService.updateSocialGroup(id, communityId, body);

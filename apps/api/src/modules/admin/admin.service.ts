@@ -1090,6 +1090,7 @@ export class AdminService {
       title: string;
       description?: string;
       qrImageUrl: string;
+      contactText?: string;
       visibleTo?: string;
       sortOrder?: number;
     },
@@ -1100,6 +1101,7 @@ export class AdminService {
         title: dto.title,
         description: dto.description,
         qrImageUrl: dto.qrImageUrl,
+        contactText: dto.contactText,
         visibleTo: dto.visibleTo ?? 'verified_only',
         sortOrder: dto.sortOrder ?? 0,
         status: 'active',
@@ -1114,8 +1116,10 @@ export class AdminService {
       title: string;
       description: string;
       qrImageUrl: string;
+      contactText: string;
       visibleTo: string;
       sortOrder: number;
+      status: string;
     }>,
   ) {
     // P-339: 校验社群属于当前 admin 的小区
