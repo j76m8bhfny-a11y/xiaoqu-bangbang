@@ -230,7 +230,7 @@ export class EventsController {
   async sendThanks(
     @CurrentUser('userId') fromUserId: string,
     @Param('id') eventId: string,
-    @Body() body: { toUserId: string },
+    @Body() body: { toUserId?: string },
     @CurrentCommunityId() communityId: string,
   ) {
     const thank = await this.eventsService.sendThanks(

@@ -223,4 +223,40 @@ describe('Feature: 事件系统', () => {
       expect(res.body.data.creatorId).toBe(userId);
     });
   });
+
+  // P-99: sendThanks 应能从不传 toUserId 的请求中自动推导
+  describe('P-99: sendThanks 自动推导 toUserId', () => {
+    let eventId: string;
+
+    beforeAll(async () => {
+      const event = await prisma.event.create({
+        data: {
+          communityId,
+          creatorId: userId,
+          type: 'help_request',
+          title: 'P-99 测试事件',
+          description: '测试 sendThanks',
+          status: 'in_progress',
+          selectedHelperId: userId2,
+          rewardType: 'free',
+        },
+      });
+      eventId = event.id;
+    });
+
+    afterAll(async () => {
+      await prisma.eventThank.deleteMany({ where: { eventId } });
+      await prisma.event.delete({ where: { id: eventId } });
+    });
+
+    it('POST /events/:id/thanks 不传 toUserId 时应自动从事件推导', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/events/${eventId}/thanks`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({});
+
+      expect(res.status).toBe(201);
+      expect(res.body.code).toBe(0);
+    });
+  });
 });

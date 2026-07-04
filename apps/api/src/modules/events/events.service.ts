@@ -697,7 +697,12 @@ export class EventsService {
     return { liked: true };
   }
 
-  async sendThanks(fromUserId: string, eventId: string, toUserId: string, communityId: string) {
+  async sendThanks(
+    fromUserId: string,
+    eventId: string,
+    toUserId: string | undefined,
+    communityId: string,
+  ) {
     const event = await this.prisma.event.findFirst({
       where: { id: eventId, deletedAt: null },
     });
@@ -708,13 +713,19 @@ export class EventsService {
     if (event.communityId !== communityId) {
       throw new ForbiddenException('无权操作该事件');
     }
-    if (fromUserId === toUserId) {
+
+    // P-99: 如果前端未传 toUserId，从事件的 selectedHelperId 自动推导
+    const targetUserId = toUserId ?? event.selectedHelperId;
+    if (!targetUserId) {
+      throw new BadRequestException('未指定感谢对象');
+    }
+    if (fromUserId === targetUserId) {
       throw new BadRequestException('不能感谢自己');
     }
 
     const existing = await this.prisma.eventThank.findUnique({
       where: {
-        eventId_fromUserId_toUserId: { eventId, fromUserId, toUserId },
+        eventId_fromUserId_toUserId: { eventId, fromUserId, toUserId: targetUserId },
       },
     });
 
@@ -723,7 +734,7 @@ export class EventsService {
     }
 
     const thank = await this.prisma.eventThank.create({
-      data: { eventId, fromUserId, toUserId },
+      data: { eventId, fromUserId, toUserId: targetUserId },
     });
 
     await this.prisma.event.update({
