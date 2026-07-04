@@ -889,6 +889,10 @@ async function seed() {
     // 小花类
     { code: 'flower_10', name: '花开满园', description: '累计获得10朵小红花' },
     { code: 'flower_50', name: '花团锦簇', description: '累计获得50朵小红花' },
+    // 特殊类 (Standard M10.6)
+    { code: 'first_owner_top30', name: '先锋业主', description: '前30名认证业主' },
+    { code: 'founder', name: '小区创始人', description: '小区申请通过' },
+    { code: 'seed', name: '种子贡献者', description: '助力小区创建' },
   ];
 
   for (const def of badgeDefs) {
