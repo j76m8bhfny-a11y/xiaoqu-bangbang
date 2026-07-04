@@ -27,7 +27,9 @@ describe('Feature: 投票系统（全量）', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    );
     await app.init();
 
     prisma = app.get(PrismaService);
@@ -117,9 +119,7 @@ describe('Feature: 投票系统（全量）', () => {
     });
 
     it('GET /votes - 无 token 应返回 401/403', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/votes')
-        .expect([401, 403]);
+      const res = await request(app.getHttpServer()).get('/api/v1/votes').expect([401, 403]);
 
       expect([401, 403]).toContain(res.status);
     });
@@ -247,6 +247,62 @@ describe('Feature: 投票系统（全量）', () => {
 
       expect(res.body.code).toBe(0);
       expect(res.body.data.items).toBeInstanceOf(Array);
+    });
+  });
+
+  // P-24: 投票跨小区漏洞 — 用户不能给其他小区的投票投票
+  describe('【安全】跨小区投票隔离', () => {
+    let communityBId: string;
+    let voteBId: string;
+    let optionBId: string;
+
+    beforeAll(async () => {
+      const communityB = await prisma.community.create({
+        data: { name: '投票隔离小区B', city: '南京', district: '鼓楼区', address: '隔离路5号' },
+      });
+      communityBId = communityB.id;
+
+      const now = new Date();
+      const voteB = await prisma.vote.create({
+        data: {
+          communityId: communityBId,
+          title: '小区B投票',
+          description: '跨小区隔离测试',
+          voteType: 'single',
+          onlyVerified: false, // 关闭认证限制以暴露跨小区漏洞
+          startAt: now,
+          endAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+          status: 'published',
+          createdBy: adminUserId,
+        },
+      });
+      voteBId = voteB.id;
+
+      const optionB = await prisma.voteOption.create({
+        data: { voteId: voteBId, content: '选项A', sortOrder: 0 },
+      });
+      optionBId = optionB.id;
+    });
+
+    afterAll(async () => {
+      try {
+        await prisma.voteRecord.deleteMany({ where: { voteId: voteBId } });
+        await prisma.voteOption.deleteMany({ where: { voteId: voteBId } });
+        await prisma.vote.delete({ where: { id: voteBId } });
+        await prisma.community.delete({ where: { id: communityBId } });
+      } catch {
+        // 忽略清理错误
+      }
+    });
+
+    it('POST /votes/:id/records - 不能给其他小区的投票投票', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/votes/${voteBId}/records`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ selectedOptionIds: [optionBId] });
+
+      // 应返回 403/404，而非 201
+      expect([403, 404]).toContain(res.status);
     });
   });
 });

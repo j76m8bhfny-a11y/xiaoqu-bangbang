@@ -37,9 +37,15 @@ export class VotesController {
   async submitVote(
     @CurrentUser('userId') userId: string,
     @Param('id') voteId: string,
+    @CurrentCommunityId() communityId: string,
     @Body() body: { selectedOptionIds: string[] },
   ) {
-    const data = await this.votesService.submitVote(userId, voteId, body.selectedOptionIds);
+    const data = await this.votesService.submitVote(
+      userId,
+      voteId,
+      communityId,
+      body.selectedOptionIds,
+    );
     return { code: 0, message: 'ok', data };
   }
 

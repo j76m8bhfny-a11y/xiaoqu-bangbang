@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -57,9 +63,15 @@ export class VotesService {
     return vote;
   }
 
-  async submitVote(userId: string, voteId: string, selectedOptionIds: string[]) {
-    const vote = await this.prisma.vote.findUnique({
-      where: { id: voteId },
+  async submitVote(
+    userId: string,
+    voteId: string,
+    communityId: string,
+    selectedOptionIds: string[],
+  ) {
+    // P-24: 校验投票属于当前用户的小区
+    const vote = await this.prisma.vote.findFirst({
+      where: { id: voteId, communityId, deletedAt: null },
     });
 
     if (!vote || vote.deletedAt) {
@@ -182,7 +194,8 @@ export class VotesService {
     const results = options.map((opt) => ({
       ...opt,
       count: optionCounts[opt.id],
-      percentage: totalVoters > 0 ? Math.round((optionCounts[opt.id] / totalVoters) * 10000) / 100 : 0,
+      percentage:
+        totalVoters > 0 ? Math.round((optionCounts[opt.id] / totalVoters) * 10000) / 100 : 0,
     }));
 
     return {
