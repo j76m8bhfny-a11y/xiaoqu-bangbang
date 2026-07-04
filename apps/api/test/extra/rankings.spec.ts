@@ -35,22 +35,22 @@ describe('P-01: 积分映射', () => {
 
   const getFlowerCount = (action: string) => (rankingsService as any).getFlowerCount(action);
 
-  it('public_feedback → feedback → 1 朵花（不是 help_free 3 朵）', () => {
+  it('public_feedback → feedback → 1 朵花 (P-01)', () => {
     const action = getEventAction('public_feedback');
     expect(action).toBe('feedback');
     expect(getFlowerCount(action)).toBe(1);
   });
 
-  it('discussion → feedback → 1 朵花（不是 help_free 3 朵）', () => {
+  it('discussion → feedback → 1 朵花 (P-01)', () => {
     const action = getEventAction('discussion');
     expect(action).toBe('feedback');
     expect(getFlowerCount(action)).toBe(1);
   });
 
-  it('help_request (free) → help_free → 3 朵花（回归）', () => {
+  it('help_request (free) → help_free → 1 朵花 (P-61 统一为1朵)', () => {
     const action = getEventAction('help_request', 'free');
     expect(action).toBe('help_free');
-    expect(getFlowerCount(action)).toBe(3);
+    expect(getFlowerCount(action)).toBe(1);
   });
 
   it('help_request (paid) → help_paid → 1 朵花（回归）', () => {
@@ -311,8 +311,8 @@ describe('P-277+P-278+P-279: 勋章规则', () => {
         sourceType: 'event',
         sourceId: crypto.randomUUID(),
         action: 'help_free',
-        score: 3,
-        flowerCount: 3,
+        score: 1,
+        flowerCount: 1,
         reason: '完成事件: help_request',
         occurredAt: new Date(),
       },

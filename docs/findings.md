@@ -16,7 +16,7 @@
 
 ## 一、激励体系重构（设计变更）
 
-### P-01 🔴 积分映射 bug — public_feedback/discussion 给了 3 朵，应为 1 朵
+### P-01 ✅ 积分映射 bug — public_feedback/discussion 给了 3 朵，应为 1 朵
 
 **位置**: `apps/api/src/modules/rankings/rankings.service.ts:78-91`
 
@@ -745,7 +745,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD §4.4 补充解释——单帮手是一对一劳动需帮手主动表态"做完了"（R11），多帮手是确认"谁来了"（参与确认，非 R11）。场景1 step6 改为"帮手申请完成→创建者确认"。业务规则同步更新。
 
-### P-61 🟡 help_free/help_paid 小红花统一为 1 朵
+### P-61 ✅ help_free/help_paid 小红花统一为 1 朵
 
 **问题**: §4.9 激励表 help_free 给 3 朵、help_paid 给 1 朵，不解释反直觉（付费反而花少？）。且 rewardType 字段影响积分计算增加复杂度。
 

@@ -204,7 +204,7 @@ export class RankingsService {
 
   private getFlowerCount(action: string): number {
     const flowerMap: Record<string, number> = {
-      help_free: 3,
+      help_free: 1,
       help_paid: 1,
       public_welfare: 5,
       lost_found: 2,
