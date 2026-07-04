@@ -973,19 +973,33 @@ export class AdminService {
       where: { communityId, periodType: 'month', periodKey },
     });
 
+    // P-281: 查询所有相关用户的徽章数
+    const allUserIds = [
+      ...new Set([...totalSorted.map(([id]) => id), ...monthlySorted.map(([id]) => id)]),
+    ];
+    const userBadgeCounts =
+      allUserIds.length > 0
+        ? await this.prisma.userBadge.groupBy({
+            by: ['userId'],
+            where: { userId: { in: allUserIds } },
+            _count: { id: true },
+          })
+        : [];
+    const badgeCountMap = new Map(userBadgeCounts.map((ub) => [ub.userId, ub._count.id]));
+
     for (let i = 0; i < totalSorted.length; i++) {
       const [userId, data] = totalSorted[i];
       await this.prisma.rankingSnapshot.create({
         data: {
           communityId,
           periodType: 'total',
-          periodKey: 'all',
+          periodKey: 'total',
           userId,
           rankNo: i + 1,
           score: data.score,
           flowerCount: data.flowerCount,
           helpCount: data.helpCount,
-          badgeCount: 0,
+          badgeCount: badgeCountMap.get(userId) ?? 0,
         },
       });
     }
@@ -1002,7 +1016,7 @@ export class AdminService {
           score: data.score,
           flowerCount: data.flowerCount,
           helpCount: data.helpCount,
-          badgeCount: 0,
+          badgeCount: badgeCountMap.get(userId) ?? 0,
         },
       });
     }
