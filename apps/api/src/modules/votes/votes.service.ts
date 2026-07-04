@@ -98,14 +98,12 @@ export class VotesService {
       throw new BadRequestException('您已投过票');
     }
 
-    // 检查仅认证用户限制
-    if (vote.onlyVerified) {
-      const member = await this.prisma.communityMember.findUnique({
-        where: { userId_communityId: { userId, communityId: vote.communityId } },
-      });
-      if (!member || member.verifyStatus !== 'verified') {
-        throw new ForbiddenException('仅认证用户可参与投票');
-      }
+    // 所有投票始终要求认证用户参与
+    const member = await this.prisma.communityMember.findUnique({
+      where: { userId_communityId: { userId, communityId: vote.communityId } },
+    });
+    if (!member || member.verifyStatus !== 'verified') {
+      throw new ForbiddenException('仅认证用户可参与投票');
     }
 
     // 检查选项数量限制
