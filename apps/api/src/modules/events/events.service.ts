@@ -521,6 +521,13 @@ export class EventsService {
     if (event.communityId !== communityId) {
       throw new ForbiddenException('无权操作该事件');
     }
+    // P-223: 防止重复确认已完成/已取消的事件（积分刷取漏洞）
+    if (event.status === 'completed') {
+      throw new BadRequestException('事件已完成，不可重复确认');
+    }
+    if (event.status === 'cancelled') {
+      throw new BadRequestException('事件已取消，不可确认完成');
+    }
     if (event.creatorId !== userId && event.selectedHelperId !== userId) {
       throw new ForbiddenException('只有创建者或帮手可以确认完成');
     }

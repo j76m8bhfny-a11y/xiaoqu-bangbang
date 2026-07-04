@@ -78,6 +78,8 @@ describe('Feature: 事件系统', () => {
       where: { userId: { in: [userId, userId2] } },
     });
     await prisma.report.deleteMany({ where: { reporterId: { in: [userId, userId2] } } });
+    await prisma.contributionRecord.deleteMany({ where: { userId: { in: [userId, userId2] } } });
+    await prisma.rankingSnapshot.deleteMany({ where: { userId: { in: [userId, userId2] } } });
     await prisma.event.deleteMany({ where: { communityId } });
     await prisma.communityMember.deleteMany({ where: { communityId } });
     await prisma.community.deleteMany({ where: { id: communityId } });
@@ -257,6 +259,51 @@ describe('Feature: 事件系统', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.code).toBe(0);
+    });
+  });
+
+  // P-223: confirmCompletion 重复确认应被拒绝（积分刷取漏洞）
+  describe('P-223: confirmCompletion 防止重复确认', () => {
+    let eventId: string;
+
+    beforeAll(async () => {
+      const event = await prisma.event.create({
+        data: {
+          communityId,
+          creatorId: userId,
+          type: 'help_request',
+          title: 'P-223 测试事件',
+          description: '测试重复确认',
+          status: 'in_progress',
+          selectedHelperId: userId2,
+          rewardType: 'free',
+        },
+      });
+      eventId = event.id;
+
+      // 双方确认完成
+      await request(app.getHttpServer())
+        .post(`/api/v1/events/${eventId}/complete/confirm`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({});
+      await request(app.getHttpServer())
+        .post(`/api/v1/events/${eventId}/complete/confirm`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send({});
+    });
+
+    afterAll(async () => {
+      await prisma.eventCompletionConfirmation.deleteMany({ where: { eventId } });
+      await prisma.event.delete({ where: { id: eventId } });
+    });
+
+    it('POST /events/:id/complete/confirm 重复确认应返回 400', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/events/${eventId}/complete/confirm`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({});
+
+      expect(res.status).toBe(400);
     });
   });
 });
