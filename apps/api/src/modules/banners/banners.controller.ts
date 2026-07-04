@@ -7,8 +7,11 @@ export class BannersController {
   constructor(@Inject(BannersService) private bannersService: BannersService) {}
 
   @Get()
-  async list(@CurrentCommunityId() @Optional() communityId?: string) {
-    const items = await this.bannersService.list(communityId);
+  async list(
+    @CurrentCommunityId() @Optional() communityId?: string,
+    @Query('position') position?: string,
+  ) {
+    const items = await this.bannersService.list(communityId, position);
     return { code: 0, message: 'ok', data: { items } };
   }
 }

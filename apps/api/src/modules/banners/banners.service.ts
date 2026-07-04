@@ -5,17 +5,25 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class BannersService {
   constructor(@Inject(PrismaService) private prisma: PrismaService) {}
 
-  async list(communityId?: string) {
+  async list(communityId?: string, position?: string) {
     const now = new Date();
 
     const where: any = {
       status: 'published',
       deletedAt: null,
-      OR: [
-        { startAt: null },
-        { startAt: { lte: now } },
+      OR: [{ startAt: null }, { startAt: { lte: now } }],
+      // P-287: 过滤已过期的 banner
+      AND: [
+        {
+          OR: [{ endAt: null }, { endAt: { gte: now } }],
+        },
       ],
     };
+
+    // P-289: 按位置筛选
+    if (position) {
+      where.position = position;
+    }
 
     // If communityId is provided, show community-specific + global banners
     if (communityId) {
