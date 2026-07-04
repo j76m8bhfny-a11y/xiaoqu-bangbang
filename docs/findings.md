@@ -1400,11 +1400,323 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
+## 二十、Admin 侧契约对齐扫描
+
+> 生成时间: 2026-07-04
+> 扫描方法: 4 个并行 agent 按功能域三端比对 (shared/api.ts ↔ admin controller ↔ admin service ↔ admin 前端)
+> 范围: Admin 侧 20 个前端页面 + admin controller (986行) / admin service (1878行)
+> 通过模块: rankings ✅ + audit-logs ✅ 三端完全一致
+
+### P-155 🟡 [admin 全局] ErrorCodes 硬编码未用枚举
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts` 全文件 + `apps/api/src/modules/admin/guards/admin.guard.ts:21-36`
+- **问题**: controller 硬编码 `code: 0`/`code: 40101`/`code: 40301`/`code: 40302`/`code: 40303`，guard 同样硬编码。数字值与 `ErrorCodes` 枚举一致，但未引用枚举（R9 红线）。
+- **建议**: 替换为 `ErrorCodes.SUCCESS`/`ErrorCodes.UNAUTHORIZED`/`ErrorCodes.FORBIDDEN` 等枚举引用。
+
+### P-156 🟡 [reviews] rejectReason vs reason 字段名不一致
+
+- **位置**: shared `packages/shared/src/api.ts:544-547` vs `apps/api/src/modules/admin/admin.controller.ts:92-100` vs `apps/admin/src/app/reviews/page.tsx:69-79`
+- **问题**: shared `AdminReviewActionRequest.rejectReason`，controller 接收 `body: { reason? }`，前端发送 `{ reason }`。三端字段名不一致。
+- **建议**: 统一为 `rejectReason`（与 shared DTO 一致）。
+
+### P-157 🟢 [reviews] AdminReviewActionRequest.action 字段未使用
+
+- **位置**: `packages/shared/src/api.ts:544-547` vs `apps/api/src/modules/admin/admin.controller.ts:86-106`
+- **问题**: shared DTO 的 `action: 'approve'|'reject'|'manual-visible-admin-only'` 将动作作为字段，但 controller 拆分为三个独立路由，`action` 从未被接收。
+- **建议**: 删除 `AdminReviewActionRequest` 或更新 DTO 反映实际接口。
+
+### P-158 🟡 [verifications] rejectReason vs reason 字段名不一致
+
+- **位置**: shared `packages/shared/src/api.ts:550-553` vs `apps/api/src/modules/admin/admin.controller.ts:136-144` vs `apps/admin/src/app/verifications/page.tsx:68-79`
+- **问题**: shared `AdminVerificationReviewRequest.rejectReason?`（可选），controller 接收 `body: { reason: string }`（必填），前端发送 `{ reason }`。字段名和可选性都不一致。
+- **建议**: 统一为 `rejectReason`，并确认是否必填。
+
+### P-159 🟡 [reports] takedown/warn/ban 缺 reason body
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:704-732` vs `apps/admin/src/app/reports/page.tsx:52-68`
+- **问题**: controller 声明可选 `@Body() body?: { reason?: string }`，但前端三个 mutation 调用均不带 body。管理员操作缺乏理由记录，审计无依据。
+- **建议**: 前端添加理由输入 Modal 发送 `{ reason }`，或删除 controller 的 body 声明。
+
+### P-160 🟡 [reports] 状态值不匹配
+
+- **位置**: `apps/api/src/modules/admin/admin.service.ts:1040,1073,1088,1191` vs `apps/admin/src/app/reports/page.tsx:14-20`
+- **问题**: service 设置 status 为 `dismissed`/`takedown`/`warned`/`banned`，前端 `statusLabels` 只定义 `pending`/`processed`/`rejected`。前端显示未翻译的英文状态。
+- **建议**: 前端 `statusLabels` 补全 `dismissed`/`takedown`/`warned`/`banned`。
+
+### P-161 🟡 [events] type/keyword 筛选参数被后端忽略
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:148-160` vs `apps/api/src/modules/admin/admin.service.ts:320-353` vs `apps/admin/src/app/events/page.tsx:56-62`
+- **问题**: 前端 filter 含 `type` 和 `keyword` 并发送，但 controller 只声明 `@Query() query: { status?: string }`，service 也只处理 `query?.status`。前端筛选不生效。
+- **建议**: controller 和 service 增加 `type`/`keyword` 处理，或前端移除未实现的筛选 UI。
+
+### P-162 🟡 [events] AdminFeedbackLogRequest.visibleToPublic 必填 vs 可选
+
+- **位置**: shared `packages/shared/src/api.ts:707-712` vs `apps/api/src/modules/admin/admin.controller.ts:182-190`
+- **问题**: shared `visibleToPublic: boolean`（必填），controller `visibleToPublic?: boolean`（可选，service 默认 `?? true`）。
+- **建议**: shared 改为可选 `visibleToPublic?: boolean`。
+
+### P-163 🟢 [events] FeedbackLogDto 无 GET 端点消费
+
+- **位置**: `packages/shared/src/api.ts:440-449`
+- **问题**: shared 定义了 `FeedbackLogDto`（读模型），但 controller 仅有 `POST events/:id/feedback-logs` 创建端点，无 GET 读取列表。前端也只支持添加，不显示历史。
+- **建议**: 如需展示历史反馈日志，添加 `GET /admin/events/:id/feedback-logs`。
+
+### P-164 🔴 [dashboard] AdminDashboardDto 严重不匹配（P-43 子项，补行号）
+
+- **位置**: `packages/shared/src/api.ts:736-754` vs `apps/api/src/modules/admin/admin.service.ts:56-64`
+- **问题**: `AdminDashboardDto` 定义 9 字段 + `todoItems`，service `getDashboard()` 只返回 4 字段（`eventCount`/`marketCount`/`userCount`/`pendingReviews`），且字段名不一致（`eventCount` vs `totalEvents`，`userCount` vs `totalUsers`）。前端用 `?? 0` 保护不崩，但 `pendingVerifications`/`totalCommunities`/`todayMutualHelp` 等 6 项永远显示 0。
+- **建议**: service 补齐所有 9 字段计算，字段名与 DTO 对齐，补 `todoItems` 数组。
+
+### P-165 🟡 [committee] POST /members 缺 termStart/termEnd
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:208-213` vs `packages/shared/src/api.ts:556-563`
+- **问题**: controller body `{ name, position, avatarUrl?, responsibility? }` 缺 `termStart`/`termEnd`，shared `CreateCommitteeMemberRequest` 有这两个字段。
+- **建议**: controller body 和 service dto 补 `termStart?`/`termEnd?`。
+
+### P-166 🟡 [committee] PATCH /members/:id 缺字段
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:216-225` vs `packages/shared/src/api.ts:565-572`
+- **问题**: controller body `Partial<{ name, position, avatarUrl, responsibility }>` 缺 `termStart`/`termEnd`/`status`，shared `UpdateCommitteeMemberRequest` 有这些字段。
+- **建议**: controller body 补齐字段。
+
+### P-167 🟢 [committee] 前端编辑弹窗缺字段
+
+- **位置**: `apps/admin/src/app/committee/page.tsx:190-205`
+- **问题**: 编辑弹窗缺 `termStart`/`termEnd`/`avatarUrl` 输入字段。
+- **建议**: 后续补充 Form.Item。
+
+### P-168 🟡 [committee-claims] reject reason vs rejectReason
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:261-269` vs `packages/shared/src/api.ts:576-579`
+- **问题**: controller body `{ reason: string }`，shared `AdminClaimReviewRequest` 定义 `{ action, rejectReason? }`。字段名不一致且缺 `action`。
+- **建议**: 统一为 `rejectReason`。
+
+### P-169 🔴 [announcements] getAnnouncements 缺 publisherNickname
+
+- **位置**: `apps/api/src/modules/admin/admin.service.ts:846-853` vs `packages/shared/src/api.ts:339-347`
+- **问题**: `getAnnouncements` 返回 raw Prisma 数据，发布者字段是 `publisherId`（UUID），shared `CommitteeAnnouncementDto` 定义 `publisherNickname: string`。service 未 join adminUser 表获取 nickname，**前端 `publisherNickname` 列为空**。
+- **建议**: service 加 `include` 或 join publisher 表获取 nickname。
+
+### P-170 🟡 [announcements] POST 缺 isPinned/status
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:287-295` vs `packages/shared/src/api.ts:582-588`
+- **问题**: controller body `{ title, content, images? }` 缺 `isPinned`/`status`，shared `CreateAnnouncementRequest` 有。service 默认写死 `isPinned: false`/`status: 'draft'`。
+- **建议**: controller body 补 `isPinned?`/`status?`。
+
+### P-171 🟡 [announcements] PATCH 缺 images
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:297-305` vs `packages/shared/src/api.ts:590-596`
+- **问题**: controller body `Partial<{ title, content, isPinned, status }>` 缺 `images`，shared `UpdateAnnouncementRequest` 有。前端实际发送了 `images`，但 controller 类型未声明。
+- **建议**: controller body 补 `images?: string[]`。
+
+### P-172 🟡 [announcements] getAnnouncements 泄漏多余字段
+
+- **位置**: `apps/api/src/modules/admin/admin.service.ts:846-853`
+- **问题**: 返回 raw Prisma 数据泄漏 `communityId`/`publisherId`/`status`/`likeCount`/`createdAt`/`updatedAt`/`deletedAt` 等非 DTO 字段。
+- **建议**: 添加 `toAnnouncementDto` 映射，只返回 DTO 定义字段。
+
+### P-173 🟡 [votes] getVotes 缺 options include
+
+- **位置**: `apps/api/src/modules/admin/admin.service.ts:490-497` vs `packages/shared/src/api.ts:351-364`
+- **问题**: `getVotes` 无 `include: { options: true }`，返回数据缺 `options: VoteOptionDto[]` 字段。shared `VoteDto` 声明 `options` 为必填。
+- **建议**: findMany 加 `include: { options: { orderBy: { sortOrder: 'asc' } } }`。
+
+### P-174 🟡 [votes] POST options 类型不一致
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:322-341` vs `packages/shared/src/api.ts:599-609`
+- **问题**: controller body `options: string[]`（纯字符串数组），shared `CreateVoteRequest` 定义 `options: { content: string; sortOrder: number }[]`（对象数组）。service 内部转换，运行时无问题但类型不一致。
+- **建议**: 统一为对象数组或字符串数组。
+
+### P-175 🟡 [votes] POST description optional vs required
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:322-341` vs `packages/shared/src/api.ts:599-609`
+- **问题**: controller `description?: string`（可选），shared `description: string`（必填）。service 有 `?? ''` 兜底。
+- **建议**: 统一为可选。
+
+### P-176 🟡 [votes] POST onlyVerified 不在 shared DTO
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:322-341` vs `packages/shared/src/api.ts:599-609`
+- **问题**: controller body 含 `onlyVerified?: boolean`，前端发送该字段，但 shared `CreateVoteRequest` 无此字段。
+- **建议**: shared 补 `onlyVerified?: boolean`。
+
+### P-177 🔴 [votes] PATCH /votes/:id 只允许 3 字段
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:344-352` vs `packages/shared/src/api.ts:611-621`
+- **问题**: controller body `Partial<{ title, description, endAt }>` 只允许 3 字段，shared `UpdateVoteRequest` 定义了 `voteType`/`maxChoices`/`resultVisibility`/`isAnonymous`/`startAt`/`status` 等 9 字段。**前端无法修改投票类型、可见性、匿名设置等关键属性**。
+- **建议**: controller body 扩展为完整 `UpdateVoteRequest`。
+
+### P-178 🟢 [votes] PATCH /votes/:id 无审计日志
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:344-352`
+- **问题**: 未声明 `@CurrentUser('userId')`，service `updateVote` 无 `logAudit` 调用。对比 publish/close 都有审计日志（R6 红线相关）。
+- **建议**: 增加 adminId 参数和审计日志记录。
+
+### P-179 🟡 [banners] updateBanner body 字段不全
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:419` vs `packages/shared/src/api.ts:638-650`
+- **问题**: controller body `Partial<{ title, subtitle, imageUrl, sortOrder }>` 缺 `linkType`/`linkId`/`linkUrl`/`position`/`status`/`startAt`/`endAt`，shared `UpdateBannerRequest` 有这些字段。前端编辑弹窗也只发送 4 字段。
+- **建议**: 如需编辑则补全，否则 shared 标注降级。
+
+### P-180 🟡 [banners] BannerDto 缺 position/status/sortOrder
+
+- **位置**: `packages/shared/src/api.ts:378-386` vs `apps/admin/src/app/banners/page.tsx:76-87`
+- **问题**: `BannerDto` 缺 `position`/`status`/`sortOrder`，前端表格使用了这些字段。controller 返回 raw Prisma 数据含全部字段，运行时无错但类型不安全。
+- **建议**: shared 补字段。
+
+### P-181 🟡 [banners] createBanner linkType/position optional vs required
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:398-410` vs `packages/shared/src/api.ts:624-636`
+- **问题**: controller `linkType?`/`position?`（可选），shared `linkType`/`position`（必填）。service 有默认值处理。
+- **建议**: 统一为可选 + 默认值，或必填。
+
+### P-182 🟡 [service-providers] createServiceProvider communityId required 但前端不提供
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:463-475` vs `packages/shared/src/api.ts:653-663`
+- **问题**: controller body `communityId: string`（必填），shared `CreateServiceProviderRequest` 无 `communityId`，前端表单也无输入项。运行时 `communityId` 可能为 `undefined`，DB 写入失败。
+- **建议**: 从 `@CurrentCommunityId()` 注入，或 shared 显式声明。
+
+### P-183 🟡 [service-providers] description/contactText required vs optional
+
+- **位置**: `packages/shared/src/api.ts:657-658` vs `apps/api/src/modules/admin/admin.controller.ts:470-471`
+- **问题**: shared `description`/`contactText` 必填，controller 和 service 可选（有 `?? ''` 兜底）。
+- **建议**: 统一为可选 + 默认值。
+
+### P-184 🟡 [service-providers] updateServiceProvider body 字段不全
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:484-485` vs `packages/shared/src/api.ts:665-676`
+- **问题**: controller body `Partial<{ name, category, description, sortOrder }>` 缺 `logoUrl`/`coverUrl`/`contactText`/`serviceArea`/`recommendationSource`/`status`。前端编辑弹窗也只提供 4 字段。
+- **建议**: 同步更新或裁剪 shared DTO。
+
+### P-185 🟡 [service-providers] ServiceProviderDto 缺 status/sortOrder
+
+- **位置**: `packages/shared/src/api.ts:388-398` vs `apps/admin/src/app/service-providers/page.tsx:94-98`
+- **问题**: DTO 缺 `status`/`sortOrder`，前端表格使用了。
+- **建议**: shared 补字段。
+
+### P-186 🔴 [social-groups] createSocialGroup body 缺 contactText
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:647-654`
+- **问题**: controller body 类型**没有** `contactText` 字段，但 `CreateSocialGroupRequest` (shared/api.ts:687-694) 有，Prisma schema 有，前端表单有"联系方式"输入框。**前端发送的 `contactText` 被 controller 忽略，数据无法入库**。
+- **建议**: controller body 和 service dto 补 `contactText?: string`。
+
+### P-187 🟡 [social-groups] updateSocialGroup 缺 contactText/status
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:663-670` vs `packages/shared/src/api.ts:696-704`
+- **问题**: controller body 仅 `title, description, qrImageUrl, visibleTo, sortOrder`，缺 `contactText`/`status`。前端编辑表单有 `contactText` 但更新时被忽略。
+- **建议**: 补 `contactText?`/`status?`。
+
+### P-188 🟡 [social-groups] SocialGroupDto 缺 status/sortOrder
+
+- **位置**: `packages/shared/src/api.ts:137-144` vs `apps/admin/src/app/social-groups/page.tsx:62-65`
+- **问题**: DTO 缺 `status`/`sortOrder`，前端表格使用了。运行时返回 raw Prisma 数据正常，但类型不安全。
+- **建议**: shared 补字段。
+
+### P-189 🟡 [social-groups] createSocialGroup qrImageUrl required vs optional
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:651` vs `packages/shared/src/api.ts:691`
+- **问题**: controller `qrImageUrl: string`（必填），shared `qrImageUrl?: string`（可选）。
+- **建议**: 统一为可选。
+
+### P-190 🟢 [community-applications] controller 无类型标注
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:944-985`
+- **问题**: list 和 getDetail 返回值未标注 TypeScript 类型，实际结构与 `AdminCommunityApplicationDto` 一致（service 的 `toAdminApplicationDto` 对齐）。
+- **建议**: 标注返回类型 `ApiResponse<PaginatedData<AdminCommunityApplicationDto>>`。
+
+### P-191 🔴 [settings] 前端 camelCase vs 后端 snake_case
+
+- **位置**: 前端 `apps/admin/src/app/settings/page.tsx:45-53` vs 后端 `apps/api/src/modules/admin/dto/update-settings.dto.ts:6-30`
+- **问题**: 前端发送 `appName`/`defaultShareTitle`/`bannerDisplayCount` 等 camelCase 键，后端 DTO 定义 `app_name`/`default_share_title`/`banner_count` 等 snake_case 键。DTO 有 `[key: string]` 索引签名所以 camelCase 通过验证，但 `system_settings` 表以 camelCase 存储。其他模块按 snake_case 读取时找不到值。
+- **建议**: 统一为 camelCase（匹配 shared `UpdateSystemSettingsRequest`/`SystemSettingsDto`）。
+
+### P-192 🟡 [settings] UpdateSettingsDto string vs number
+
+- **位置**: `apps/api/src/modules/admin/dto/update-settings.dto.ts:18-22` vs `packages/shared/src/api.ts:715-723`
+- **问题**: 后端 DTO `banner_count?: string`/`provider_count?: string`，shared `bannerDisplayCount: number`/`providerDisplayCount: number`。Prisma SystemSetting.value 是 String，前端用 `Number()` 解析。
+- **建议**: 统一类型，或标注需转换。
+
+### P-193 🟡 [settings] GET 返回 Record 非 SystemSettingsDto
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:783-786` vs `packages/shared/src/api.ts:715-723`
+- **问题**: service `getSettings()` 返回 `Record<string, string>`，前端也声明 `ApiResponse<Record<string, string>>`。非 shared `SystemSettingsDto`，缺编译时检查。
+- **建议**: 返回类型标注为 `ApiResponse<SystemSettingsDto>`，service 映射到 DTO。
+
+### P-194 🟢 [share] ShareTemplateDto status 缺枚举约束
+
+- **位置**: `packages/shared/src/api.ts:499-505`
+- **问题**: `status: string` 仅泛型 string，Prisma 模型为 `active`/`inactive`。
+- **建议**: 定义 `'active' | 'inactive'` 联合类型。
+
+### P-195 🟢 [share] 缺 UpdateShareTemplateRequest
+
+- **位置**: `packages/shared/src/api.ts`
+- **问题**: 有 `ShareTemplateDto` 但无 `UpdateShareTemplateRequest`。后端自定义 `UpdateShareTemplateDto`，与前端一致，但未在 shared 体现。
+- **建议**: shared 补类型。
+
+### P-196 🟡 [contributions] 缺 Response DTO
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:529-541` vs `apps/admin/src/app/rankings/page.tsx:29-34`
+- **问题**: 后端返回 raw Prisma `contributionRecord`，前端用 `PaginatedData<any>`。缺类型化 DTO。
+- **建议**: shared 新增 `AdminContributionDto`。
+
+### P-197 🟡 [badges] 颁勋章请求体字段不对齐
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:564-579` vs `packages/shared/src/api.ts:679-684` vs `apps/admin/src/app/rankings/page.tsx:37-38`
+- **问题**: (1) 前端发送 `communityId` 在 body，controller 从 `@CurrentCommunityId()` 获取，body 中的被忽略。(2) 前端未发送 `reason`。(3) shared `AdminAwardBadgeRequest` 含 `userId`（URL 参数）和 `sourceType`（controller 未用），与实际签名不匹配。
+- **建议**: 统一请求 DTO，删除 body 中的 `communityId`，增加 `reason` 支持。
+
+### P-198 🟡 [badges] GET /badges 缺 Response DTO
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:543-547` vs `apps/admin/src/app/rankings/page.tsx:25`
+- **问题**: 返回 `{ items: any[] }`，Badge 实体无 shared DTO。
+- **建议**: shared 定义 `BadgeDto`。
+
+### P-199 🟢 [market] 缺 Admin MarketItem DTO
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:735-748` vs `apps/admin/src/app/market/page.tsx:38-43`
+- **问题**: 后端返回精选字段子集，前端用 `PaginatedData<any>`。`MarketItemDto` 是全量字段，与 admin 返回子集不匹配。
+- **建议**: 定义 `AdminMarketItemDto` 或指明子集。
+
+### P-200 🟡 [topics] listTopics 缺聚合字段
+
+- **位置**: `apps/api/src/modules/admin/admin.service.ts:1302-1321` vs `packages/shared/src/api.ts:758-778`
+- **问题**: `listTopics` 直接返回 Prisma 记录，`TopicDto` 包含 `likeCount`/`dislikeCount`/`ratingSum`/`ratingCount`/`avgRating`/`eventCount`/`commentCount`/`latestEventPreview` 等聚合字段。前端展示了部分聚合字段，值为 `undefined`。
+- **建议**: service 补充聚合字段计算。
+
+### P-201 🟡 [topics] 缺 MergeSuggestion Response DTO
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:818-825` vs `apps/admin/src/app/topics/page.tsx:391-395`
+- **问题**: `GET /admin/topics/merge-suggestions` 返回含 `sourceTopic`/`targetTopic` 嵌套对象，shared 无 `MergeSuggestionDto`，前端用 `any`。
+- **建议**: shared 新增 `MergeSuggestionDto`。
+
+### P-202 🟢 [topics] 详情返回结构不完全对齐
+
+- **位置**: `apps/api/src/modules/admin/admin.service.ts:1323-1334` vs `packages/shared/src/api.ts:793-795`
+- **问题**: `getTopicById` 用 `include: { events }` 返回 Prisma 数据，`TopicDetailDto` 定义为 `TopicDto & { events: TopicEventItem[] }`。字段名可能与 DTO 不完全匹配。
+- **建议**: 检查 Prisma topic 模型字段与 `TopicDto` 是否完全匹配。
+
+### P-203 🟡 [dashboard] 无 ApiResponse 类型标注
+
+- **位置**: `apps/api/src/modules/admin/admin.controller.ts:66-69`
+- **问题**: `getDashboard()` 直接返回 `{ code: 0, message: 'ok', data }`，运行时结构正确但无类型约束。与 P-164 相关。
+- **建议**: 加 `@ApiResponse` 装饰器或显式返回类型标注。
+
+### Admin 侧横向检查结论
+
+- **响应包装（R8 红线）**: 所有 admin controller 均用 `{ code, message, data }` 包装 ✅
+- **AdminGuard（R6 相关）**: controller 类级别 `@UseGuards(JwtAuthGuard, CurrentCommunityGuard, AdminGuard)`，login 端点 `@Public()`，community-applications `@SkipCurrentCommunity()` ✅
+- **ErrorCodes（R9 红线）**: ⚠️ admin controller 和 guard 硬编码错误码，未用枚举（见 P-155）
+- **rankings 模块**: ✅ 三端完全一致
+- **audit-logs 模块**: ✅ 三端完全一致（唯一完美对齐的子模块）
+- **community-applications 模块**: ✅ 请求/响应 DTO 对齐（仅缺类型标注 P-190）
+
+---
+
 ## 汇总
 
-| 严重度      | 数量    | 编号                                                                                                                                                                                                                                                                                 |
-| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 🔴 阻塞发布 | 19      | P-01, P-06, P-22, P-24, P-41, P-42, P-43, P-46, P-55, P-69, P-72, P-88, P-89, P-99, P-100, P-143, P-144, P-145, P-148                                                                                                                                                                |
-| 🟡 建议修   | 85      | P-02~P-05, P-07~P-10, P-16~P-21, P-23, P-25, P-36~P-38, P-44, P-45, P-47~P-49, P-56, P-58, P-61, P-63, P-67, P-68, P-71, P-73, P-74, P-78, P-79, P-80~P-84, P-90~P-94, P-101~P-107, P-109~P-114, P-116~P-123, P-126~P-127, P-129~P-136, P-138~P-140, P-146~P-147, P-149, P-151~P-153 |
-| 🟢 可延后   | 50      | P-11~P-15, P-26~P-35, P-39, P-40, P-50~P-54, P-57, P-59, P-60, P-62, P-64~P-66, P-70, P-75~P-77, P-85~P-87, P-95~P-98, P-108, P-115, P-124~P-125, P-128, P-137, P-141~P-142, P-150, P-154                                                                                            |
-| **合计**    | **154** |                                                                                                                                                                                                                                                                                      |
+| 严重度      | 数量    | 编号                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ----------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔴 阻塞发布 | 24      | P-01, P-06, P-22, P-24, P-41, P-42, P-43, P-46, P-55, P-69, P-72, P-88, P-89, P-99, P-100, P-143, P-144, P-145, P-148, P-164, P-169, P-177, P-186, P-191                                                                                                                                                                                                                                                                |
+| 🟡 建议修   | 120     | P-02~P-05, P-07~P-10, P-16~P-21, P-23, P-25, P-36~P-38, P-44, P-45, P-47~P-49, P-56, P-58, P-61, P-63, P-67, P-68, P-71, P-73, P-74, P-78, P-79, P-80~P-84, P-90~P-94, P-101~P-107, P-109~P-114, P-116~P-123, P-126~P-127, P-129~P-136, P-138~P-140, P-146~P-147, P-149, P-151~P-153, P-155~P-156, P-158~P-162, P-165~P-166, P-168, P-170~P-176, P-179~P-185, P-187~P-189, P-192~P-193, P-196~P-198, P-200~P-201, P-203 |
+| 🟢 可延后   | 59      | P-11~P-15, P-26~P-35, P-39, P-40, P-50~P-54, P-57, P-59, P-60, P-62, P-64~P-66, P-70, P-75~P-77, P-85~P-87, P-95~P-98, P-108, P-115, P-124~P-125, P-128, P-137, P-141~P-142, P-150, P-154, P-157, P-163, P-167, P-178, P-190, P-194~P-195, P-199, P-202                                                                                                                                                                 |
+| **合计**    | **203** |                                                                                                                                                                                                                                                                                                                                                                                                                         |
