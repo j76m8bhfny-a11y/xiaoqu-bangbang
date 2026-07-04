@@ -3,31 +3,31 @@ import { IsString, IsOptional } from 'class-validator';
 export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
-  app_name?: string;
+  appName?: string;
 
   @IsOptional()
   @IsString()
-  default_share_title?: string;
+  defaultShareTitle?: string;
 
   @IsOptional()
   @IsString()
-  default_share_image?: string;
+  defaultShareImage?: string;
 
   @IsOptional()
   @IsString()
-  banner_count?: string;
+  bannerDisplayCount?: string;
 
   @IsOptional()
   @IsString()
-  provider_count?: string;
+  providerDisplayCount?: string;
 
   @IsOptional()
   @IsString()
-  privacy_version?: string;
+  privacyVersion?: string;
 
   @IsOptional()
   @IsString()
-  default_review_policy?: string;
+  defaultReviewPolicy?: string;
 
   // Allow any additional key-value pairs
   [key: string]: string | undefined;
