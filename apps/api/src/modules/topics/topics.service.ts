@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AiReviewService } from '../ai-review/ai-review.service';
 
 interface TopicListQuery {
   status?: string;
@@ -36,6 +37,7 @@ export class TopicsService {
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(NotificationsService) private notificationsService: NotificationsService,
+    @Inject(AiReviewService) private aiReviewService: AiReviewService,
   ) {}
 
   // ===== 议题 CRUD =====
@@ -111,15 +113,40 @@ export class TopicsService {
     if (title.length > 30) {
       throw new BadRequestException('议题标题不能超过 30 字');
     }
+
+    // AI 审核：与 events/market 一致，用 tempId 记录日志再回填
+    const tempId = crypto.randomUUID();
+    const aiResult = await this.aiReviewService.reviewText(
+      `${title} ${data.description ?? ''}`,
+      'topic',
+      tempId,
+      { title, description: data.description },
+    );
+    let aiReviewStatus: string;
+    if (aiResult.result === 'reject') {
+      aiReviewStatus = 'reject';
+    } else if (aiResult.result === 'manual_review') {
+      aiReviewStatus = 'manual_review';
+    } else {
+      aiReviewStatus = 'pass';
+    }
+
     const topic = await this.prisma.topic.create({
       data: {
         communityId,
         title,
         description: data.description,
         createdBy: userId,
-        aiReviewStatus: 'pass',
+        aiReviewStatus,
       },
     });
+
+    // 回填 AI 审核日志的 targetId
+    await this.prisma.aiReviewLog.updateMany({
+      where: { targetType: 'topic', targetId: tempId },
+      data: { targetId: topic.id },
+    });
+
     return this.toDto(topic);
   }
 
@@ -516,6 +543,7 @@ export class TopicsService {
       closedAt: topic.closedAt ? topic.closedAt.toISOString() : undefined,
       createdBy: topic.createdBy,
       createdAt: topic.createdAt.toISOString(),
+      aiReviewStatus: topic.aiReviewStatus,
       latestEventPreview: latestEvent
         ? { title: latestEvent.title, firstImage: (latestEvent.images as any)?.[0] }
         : undefined,

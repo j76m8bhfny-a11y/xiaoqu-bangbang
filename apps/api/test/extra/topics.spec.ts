@@ -491,4 +491,35 @@ describe('Feature: 议事榜', () => {
       expect(ids).not.toContain(earlyHotTopicId);
     });
   });
+
+  // P-244: topics create 应触发 AI 审核，aiReviewStatus 来自 AI 结果
+  describe('P-244: 创建议题触发 AI 审核', () => {
+    const createdIds: string[] = [];
+
+    afterAll(async () => {
+      await prisma.topic.deleteMany({ where: { id: { in: createdIds } } });
+    });
+
+    it('POST /topics 违规内容应返回 aiReviewStatus=reject', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ title: '这是色情内容', description: '违规' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.aiReviewStatus).toBe('reject');
+      if (res.body.data.id) createdIds.push(res.body.data.id);
+    });
+
+    it('POST /topics 正常内容应返回 aiReviewStatus=pass', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ title: 'P-244 正常议题', description: '社区花坛维护' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.aiReviewStatus).toBe('pass');
+      if (res.body.data.id) createdIds.push(res.body.data.id);
+    });
+  });
 });
