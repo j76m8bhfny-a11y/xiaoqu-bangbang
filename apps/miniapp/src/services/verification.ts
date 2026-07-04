@@ -4,7 +4,12 @@ import type { SubmitVerificationRequest, VerificationDto } from '@xiaoqu-bangban
 interface VerificationResultDto {
   id: string;
   status: string;
-  ocrSummary: { communityName: string; address: string; ownerName: string; confidence: number } | null;
+  ocrSummary: {
+    communityName: string;
+    address: string;
+    ownerName: string;
+    confidence: number;
+  } | null;
   matchResult: { matched: boolean; confidence: number } | null;
 }
 
@@ -12,6 +17,5 @@ export const verificationService = {
   submit: (data: SubmitVerificationRequest) =>
     http.post<VerificationResultDto>('/verifications', data),
 
-  getMine: () =>
-    http.get<VerificationDto[]>('/verifications/me'),
+  getMine: () => http.get<{ items: VerificationDto[] }>('/verifications/me'),
 };

@@ -46,7 +46,7 @@ export default function Verify() {
     loading: recordsLoading,
     error: recordsError,
     refresh: refreshRecords,
-  } = useRequest<VerificationDto[]>(() => verificationService.getMine());
+  } = useRequest<{ items: VerificationDto[] }>(() => verificationService.getMine());
 
   const handleSubmit = async () => {
     if (images.length === 0) {
@@ -164,11 +164,11 @@ export default function Verify() {
 
           {recordsError && <ErrorState message="加载失败" onRetry={refreshRecords} />}
 
-          {records && records.length === 0 && <EmptyState icon="📋" text="暂无认证记录" />}
+          {records && records.items.length === 0 && <EmptyState icon="📋" text="暂无认证记录" />}
 
-          {records && records.length > 0 && (
+          {records && records.items.length > 0 && (
             <View className="verify__record-list">
-              {records.map((record) => {
+              {records.items.map((record) => {
                 const statusInfo = STATUS_MAP[record.status] ?? {
                   label: record.status,
                   color: 'gray',
