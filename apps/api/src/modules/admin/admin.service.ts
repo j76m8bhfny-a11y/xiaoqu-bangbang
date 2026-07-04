@@ -945,12 +945,25 @@ export class AdminService {
 
   // === Announcements ===
   async getAnnouncements(communityId: string, pagination?: { skip: number; take: number }) {
-    return this.prisma.committeeAnnouncement.findMany({
+    const announcements = await this.prisma.committeeAnnouncement.findMany({
       where: { communityId },
       orderBy: { createdAt: 'desc' },
       skip: pagination?.skip,
       take: pagination?.take,
     });
+
+    // P-169: 手动 join adminUser 获取 publisherNickname
+    const publisherIds = [...new Set(announcements.map((a) => a.publisherId))];
+    const admins = await this.prisma.adminUser.findMany({
+      where: { id: { in: publisherIds } },
+      select: { id: true, username: true },
+    });
+    const nicknameMap = new Map(admins.map((a) => [a.id, a.username]));
+
+    return announcements.map((a) => ({
+      ...a,
+      publisherNickname: nicknameMap.get(a.publisherId) ?? '未知',
+    }));
   }
 
   async countAnnouncements(communityId: string) {

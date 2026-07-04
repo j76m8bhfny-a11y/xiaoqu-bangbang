@@ -383,6 +383,11 @@ describe('Feature: 管理后台（全量）', () => {
 
       expect(res.body.code).toBe(0);
       expect(res.body.data.items).toBeInstanceOf(Array);
+      // P-169: 每条公告应有 publisherNickname
+      for (const item of res.body.data.items) {
+        expect(item).toHaveProperty('publisherNickname');
+        expect(typeof item.publisherNickname).toBe('string');
+      }
     });
 
     it('PATCH /admin/committee/announcements/:id - 更新公告', async () => {
