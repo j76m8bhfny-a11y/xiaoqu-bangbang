@@ -266,6 +266,10 @@ export class MarketService {
       throw new ForbiddenException('只能修改自己发布的商品');
     }
 
+    if (item.status === 'sold' || item.status === 'closed') {
+      throw new BadRequestException('已售或已下架商品不可编辑');
+    }
+
     const updated = await this.prisma.marketItem.update({
       where: { id },
       data: {

@@ -180,4 +180,65 @@ describe('Feature: 闲置模块', () => {
       expect(res.status).toBe(409);
     });
   });
+
+  // P-235: 已售/已下架商品不可编辑，应返回 400
+  describe('P-235: 编辑已售/已下架闲置返回 400', () => {
+    let soldItemId: string;
+    let closedItemId: string;
+    let activeItemId: string;
+
+    beforeAll(async () => {
+      const base = {
+        communityId,
+        sellerId: userId,
+        category: 'free',
+        title: 'P-235 闲置',
+        description: '测试编辑状态校验',
+        tradeType: 'free',
+        conditionLevel: 'good',
+      };
+      const [sold, closed, active] = await Promise.all([
+        prisma.marketItem.create({ data: { ...base, title: 'P-235 已售', status: 'sold' } }),
+        prisma.marketItem.create({ data: { ...base, title: 'P-235 已下架', status: 'closed' } }),
+        prisma.marketItem.create({ data: { ...base, title: 'P-235 在售', status: 'active' } }),
+      ]);
+      soldItemId = sold.id;
+      closedItemId = closed.id;
+      activeItemId = active.id;
+    });
+
+    afterAll(async () => {
+      await prisma.marketItem.deleteMany({
+        where: { id: { in: [soldItemId, closedItemId, activeItemId] } },
+      });
+    });
+
+    it('PATCH /market/items/:id 已售商品编辑应返回 400', async () => {
+      const res = await request(app.getHttpServer())
+        .patch(`/api/v1/market/items/${soldItemId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: '尝试改标题' });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('PATCH /market/items/:id 已下架商品编辑应返回 400', async () => {
+      const res = await request(app.getHttpServer())
+        .patch(`/api/v1/market/items/${closedItemId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: '尝试改标题' });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('PATCH /market/items/:id 在售商品编辑应返回 200', async () => {
+      const res = await request(app.getHttpServer())
+        .patch(`/api/v1/market/items/${activeItemId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: '改后的标题' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.title).toBe('改后的标题');
+    });
+  });
 });
