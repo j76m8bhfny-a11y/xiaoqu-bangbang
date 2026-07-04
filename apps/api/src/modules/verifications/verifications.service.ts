@@ -112,14 +112,13 @@ export class VerificationsService {
       },
     });
 
-    // 标记原图为待删除
-    await this.prisma.verification.update({
-      where: { id: verification.id },
-      data: { originalFileDeletedAt: new Date() },
-    });
-
+    // R5 红线: 仅 approved 时标记原图待删除
     // 如果认证通过，更新 community_members
     if (verificationStatus === 'approved') {
+      await this.prisma.verification.update({
+        where: { id: verification.id },
+        data: { originalFileDeletedAt: new Date() },
+      });
       await this.prisma.communityMember.upsert({
         where: { userId_communityId: { userId, communityId: dto.communityId } },
         update: { verifyStatus: 'verified' },

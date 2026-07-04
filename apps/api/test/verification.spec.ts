@@ -112,4 +112,59 @@ describe('Feature: 小区认证', () => {
       expect(item).toHaveProperty('materialType');
     });
   });
+
+  describe('Scenario: P-216 originalFileDeletedAt 仅 approved 时标记', () => {
+    it('approved 认证应标记 originalFileDeletedAt', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/verifications')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          communityId,
+          materialType: 'property_cert',
+          fileUrl: 'https://example.com/p216-approved.jpg',
+          consentAccepted: true,
+          consentVersion: '2026-05-privacy-v1',
+        })
+        .expect(201);
+
+      const verification = await prisma.verification.findUnique({
+        where: { id: res.body.data.id },
+      });
+      // R5 红线: 仅 approved 时标记原图删除
+      expect(verification.status).toBe('approved');
+      expect(verification.originalFileDeletedAt).not.toBeNull();
+    });
+
+    it('manual_review 认证不应标记 originalFileDeletedAt', async () => {
+      // 创建名字不匹配 OCR 结果的小区 → manual_review
+      const mismatchCommunity = await prisma.community.create({
+        data: { name: 'P216测试小区', city: '南京', district: '鼓楼区', address: 'P216路1号' },
+      });
+
+      try {
+        const res = await request(app.getHttpServer())
+          .post('/api/v1/verifications')
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            communityId: mismatchCommunity.id,
+            materialType: 'property_cert',
+            fileUrl: 'https://example.com/p216-manual.jpg',
+            consentAccepted: true,
+            consentVersion: '2026-05-privacy-v1',
+          })
+          .expect(201);
+
+        const verification = await prisma.verification.findUnique({
+          where: { id: res.body.data.id },
+        });
+        // R5 红线: manual_review 不应标记原图删除
+        expect(verification.status).toBe('manual_review');
+        expect(verification.originalFileDeletedAt).toBeNull();
+      } finally {
+        await prisma.verification.deleteMany({ where: { communityId: mismatchCommunity.id } });
+        await prisma.communityMember.deleteMany({ where: { communityId: mismatchCommunity.id } });
+        await prisma.community.delete({ where: { id: mismatchCommunity.id } });
+      }
+    });
+  });
 });
