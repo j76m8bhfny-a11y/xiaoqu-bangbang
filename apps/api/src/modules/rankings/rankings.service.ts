@@ -85,6 +85,9 @@ export class RankingsService {
         return 'public_welfare';
       case 'lost_found':
         return 'lost_found';
+      case 'public_feedback':
+      case 'discussion':
+        return 'feedback';
       default:
         return 'help_free';
     }
