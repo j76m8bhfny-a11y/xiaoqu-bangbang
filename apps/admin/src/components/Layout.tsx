@@ -21,6 +21,7 @@ import {
   SettingOutlined,
   GroupOutlined,
   MessageOutlined,
+  NotificationOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '@/store/auth';
@@ -64,6 +65,12 @@ const allMenuItems = [
     key: '/committee',
     label: '业委会管理',
     icon: <TeamOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
+  {
+    key: '/committee/announcements',
+    label: '公告管理',
+    icon: <NotificationOutlined />,
     roles: ['platform_admin', 'committee_admin'],
   },
   {
