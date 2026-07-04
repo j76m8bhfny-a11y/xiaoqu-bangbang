@@ -921,7 +921,7 @@ export class EventsService {
 
     // P-43: 返回字段名对齐 EventRateDto 契约 (content/tags 而非 ratingContent/ratingTags)
     const { ratingContent, ratingTags, ...rest } = confirmation;
-    return { ...rest, content: ratingContent, tags: ratingTags };
+    return { ...rest, targetUserId: dto.targetUserId, content: ratingContent, tags: ratingTags };
   }
 
   async getFeedbackLogs(eventId: string, communityId: string) {

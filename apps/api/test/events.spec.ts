@@ -635,4 +635,49 @@ describe('Feature: 事件系统', () => {
       expect(application).not.toHaveProperty('user');
     });
   });
+
+  describe('Scenario: P-43-3 EventRateDto 契约对齐', () => {
+    let completedEventId: string;
+
+    beforeAll(async () => {
+      // 直接创建一个已完成的事件，用于测试 rateHelper
+      const event = await prisma.event.create({
+        data: {
+          communityId,
+          creatorId: userId,
+          selectedHelperId: userId2,
+          type: 'help_request',
+          title: 'P-43-3 已完成事件',
+          description: '测试评价 DTO',
+          status: 'completed',
+          completedAt: new Date(),
+        },
+      });
+      completedEventId = event.id;
+    });
+
+    afterAll(async () => {
+      await prisma.eventCompletionConfirmation.deleteMany({ where: { eventId: completedEventId } });
+      await prisma.event.delete({ where: { id: completedEventId } }).catch(() => {});
+    });
+
+    it('POST /events/:id/rate 返回应包含 targetUserId + content + tags', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/events/${completedEventId}/rate`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ targetUserId: userId2, rating: 5, content: '帮了大忙', tags: ['热心'] })
+        .expect(201);
+
+      expect(res.body.code).toBe(0);
+      expect(res.body.data).toHaveProperty('targetUserId');
+      expect(res.body.data.targetUserId).toBe(userId2);
+      expect(res.body.data).toHaveProperty('content');
+      expect(res.body.data.content).toBe('帮了大忙');
+      expect(res.body.data).toHaveProperty('tags');
+      expect(res.body.data.tags).toEqual(['热心']);
+      // 不应有 ratingContent/ratingTags 旧字段
+      expect(res.body.data).not.toHaveProperty('ratingContent');
+      expect(res.body.data).not.toHaveProperty('ratingTags');
+    });
+  });
 });
