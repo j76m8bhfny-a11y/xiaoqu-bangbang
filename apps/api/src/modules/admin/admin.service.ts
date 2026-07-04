@@ -726,36 +726,23 @@ export class AdminService {
   async updateBanner(
     id: string,
     dto: Partial<{ title: string; subtitle: string; imageUrl: string; sortOrder: number }>,
-    communityId: string,
   ) {
-    const banner = await this.prisma.banner.findUnique({
-      where: { id },
-      select: { communityId: true },
-    });
-    if (!banner || banner.communityId !== communityId)
-      throw new ForbiddenException('无权操作该资源');
+    const banner = await this.prisma.banner.findUnique({ where: { id } });
+    if (!banner) throw new ForbiddenException('无权操作该资源');
     return this.prisma.banner.update({ where: { id }, data: dto });
   }
 
-  async publishBanner(adminId: string, id: string, communityId: string) {
-    const banner = await this.prisma.banner.findUnique({
-      where: { id },
-      select: { communityId: true },
-    });
-    if (!banner || banner.communityId !== communityId)
-      throw new ForbiddenException('无权操作该资源');
+  async publishBanner(adminId: string, id: string) {
+    const banner = await this.prisma.banner.findUnique({ where: { id } });
+    if (!banner) throw new ForbiddenException('无权操作该资源');
     await this.prisma.banner.update({ where: { id }, data: { status: 'published' } });
     await this.logAudit(adminId, 'publish_banner', 'banner', id);
     return { id, status: 'published' };
   }
 
-  async offlineBanner(adminId: string, id: string, communityId: string) {
-    const banner = await this.prisma.banner.findUnique({
-      where: { id },
-      select: { communityId: true },
-    });
-    if (!banner || banner.communityId !== communityId)
-      throw new ForbiddenException('无权操作该资源');
+  async offlineBanner(adminId: string, id: string) {
+    const banner = await this.prisma.banner.findUnique({ where: { id } });
+    if (!banner) throw new ForbiddenException('无权操作该资源');
     await this.prisma.banner.update({ where: { id }, data: { status: 'offline' } });
     await this.logAudit(adminId, 'offline_banner', 'banner', id);
     return { id, status: 'offline' };
@@ -775,21 +762,23 @@ export class AdminService {
     return this.prisma.serviceProvider.count({ where: { communityId } });
   }
 
-  async createServiceProvider(dto: {
-    communityId: string;
-    name: string;
-    category: string;
-    logoUrl?: string;
-    coverUrl?: string;
-    description?: string;
-    contactText?: string;
-    serviceArea?: string;
-    recommendationSource?: string;
-    sortOrder?: number;
-  }) {
+  async createServiceProvider(
+    communityId: string,
+    dto: {
+      name: string;
+      category: string;
+      logoUrl?: string;
+      coverUrl?: string;
+      description?: string;
+      contactText?: string;
+      serviceArea?: string;
+      recommendationSource?: string;
+      sortOrder?: number;
+    },
+  ) {
     return this.prisma.serviceProvider.create({
       data: {
-        communityId: dto.communityId,
+        communityId,
         name: dto.name,
         category: dto.category,
         logoUrl: dto.logoUrl,
@@ -807,24 +796,15 @@ export class AdminService {
   async updateServiceProvider(
     id: string,
     dto: Partial<{ name: string; category: string; description: string; sortOrder: number }>,
-    communityId: string,
   ) {
-    const provider = await this.prisma.serviceProvider.findUnique({
-      where: { id },
-      select: { communityId: true },
-    });
-    if (!provider || provider.communityId !== communityId)
-      throw new ForbiddenException('无权操作该资源');
+    const provider = await this.prisma.serviceProvider.findUnique({ where: { id } });
+    if (!provider) throw new ForbiddenException('无权操作该资源');
     return this.prisma.serviceProvider.update({ where: { id }, data: dto });
   }
 
-  async publishServiceProvider(adminId: string, id: string, communityId: string) {
-    const provider = await this.prisma.serviceProvider.findUnique({
-      where: { id },
-      select: { communityId: true },
-    });
-    if (!provider || provider.communityId !== communityId)
-      throw new ForbiddenException('无权操作该资源');
+  async publishServiceProvider(adminId: string, id: string) {
+    const provider = await this.prisma.serviceProvider.findUnique({ where: { id } });
+    if (!provider) throw new ForbiddenException('无权操作该资源');
     await this.prisma.serviceProvider.update({
       where: { id },
       data: { status: 'published', reviewedBy: adminId },
@@ -833,25 +813,17 @@ export class AdminService {
     return { id, status: 'published' };
   }
 
-  async offlineServiceProvider(adminId: string, id: string, communityId: string) {
-    const provider = await this.prisma.serviceProvider.findUnique({
-      where: { id },
-      select: { communityId: true },
-    });
-    if (!provider || provider.communityId !== communityId)
-      throw new ForbiddenException('无权操作该资源');
+  async offlineServiceProvider(adminId: string, id: string) {
+    const provider = await this.prisma.serviceProvider.findUnique({ where: { id } });
+    if (!provider) throw new ForbiddenException('无权操作该资源');
     await this.prisma.serviceProvider.update({ where: { id }, data: { status: 'offline' } });
     await this.logAudit(adminId, 'offline_service_provider', 'service_provider', id);
     return { id, status: 'offline' };
   }
 
-  async rejectServiceProvider(adminId: string, id: string, reason: string, communityId: string) {
-    const provider = await this.prisma.serviceProvider.findUnique({
-      where: { id },
-      select: { communityId: true },
-    });
-    if (!provider || provider.communityId !== communityId)
-      throw new ForbiddenException('无权操作该资源');
+  async rejectServiceProvider(adminId: string, id: string, reason: string) {
+    const provider = await this.prisma.serviceProvider.findUnique({ where: { id } });
+    if (!provider) throw new ForbiddenException('无权操作该资源');
     await this.prisma.serviceProvider.update({
       where: { id },
       data: { status: 'rejected', reviewedBy: adminId },

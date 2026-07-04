@@ -21,7 +21,7 @@ import { SkipCurrentCommunity } from '../../common/decorators/skip-current-commu
 import { UpdateShareTemplateDto } from './dto/update-share-template.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { getPaginationParams } from '../../common/helpers/pagination';
-import { Public } from '../../common/constants';
+import { Public, PlatformAdminOnly } from '../../common/constants';
 import { JwtService } from '@nestjs/jwt';
 
 @Controller('admin')
@@ -409,6 +409,7 @@ export class AdminController {
   }
 
   @Post('banners')
+  @PlatformAdminOnly()
   async createBanner(
     @Body()
     body: {
@@ -430,32 +431,26 @@ export class AdminController {
   }
 
   @Patch('banners/:id')
+  @PlatformAdminOnly()
   async updateBanner(
     @Param('id') id: string,
     @Body() body: Partial<{ title: string; subtitle: string; imageUrl: string; sortOrder: number }>,
-    @CurrentCommunityId() communityId: string,
   ) {
-    const data = await this.adminService.updateBanner(id, body, communityId);
+    const data = await this.adminService.updateBanner(id, body);
     return { code: 0, message: 'ok', data };
   }
 
   @Post('banners/:id/publish')
-  async publishBanner(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
-    const data = await this.adminService.publishBanner(userId, id, communityId);
+  @PlatformAdminOnly()
+  async publishBanner(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    const data = await this.adminService.publishBanner(userId, id);
     return { code: 0, message: 'ok', data };
   }
 
   @Post('banners/:id/offline')
-  async offlineBanner(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
-    const data = await this.adminService.offlineBanner(userId, id, communityId);
+  @PlatformAdminOnly()
+  async offlineBanner(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    const data = await this.adminService.offlineBanner(userId, id);
     return { code: 0, message: 'ok', data };
   }
 
@@ -475,10 +470,11 @@ export class AdminController {
   }
 
   @Post('service-providers')
+  @PlatformAdminOnly()
   async createServiceProvider(
+    @CurrentCommunityId() communityId: string,
     @Body()
     body: {
-      communityId: string;
       name: string;
       category: string;
       logoUrl?: string;
@@ -490,54 +486,43 @@ export class AdminController {
       sortOrder?: number;
     },
   ) {
-    const data = await this.adminService.createServiceProvider(body);
+    const data = await this.adminService.createServiceProvider(communityId, body);
     return { code: 0, message: 'ok', data };
   }
 
   @Patch('service-providers/:id')
+  @PlatformAdminOnly()
   async updateServiceProvider(
     @Param('id') id: string,
     @Body()
     body: Partial<{ name: string; category: string; description: string; sortOrder: number }>,
-    @CurrentCommunityId() communityId: string,
   ) {
-    const data = await this.adminService.updateServiceProvider(id, body, communityId);
+    const data = await this.adminService.updateServiceProvider(id, body);
     return { code: 0, message: 'ok', data };
   }
 
   @Post('service-providers/:id/publish')
-  async publishServiceProvider(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
-    const data = await this.adminService.publishServiceProvider(userId, id, communityId);
+  @PlatformAdminOnly()
+  async publishServiceProvider(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    const data = await this.adminService.publishServiceProvider(userId, id);
     return { code: 0, message: 'ok', data };
   }
 
   @Post('service-providers/:id/offline')
-  async offlineServiceProvider(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId: string,
-    @CurrentCommunityId() communityId: string,
-  ) {
-    const data = await this.adminService.offlineServiceProvider(userId, id, communityId);
+  @PlatformAdminOnly()
+  async offlineServiceProvider(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    const data = await this.adminService.offlineServiceProvider(userId, id);
     return { code: 0, message: 'ok', data };
   }
 
   @Post('service-providers/:id/reject')
+  @PlatformAdminOnly()
   async rejectServiceProvider(
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,
     @Body() body: { reason: string },
-    @CurrentCommunityId() communityId: string,
   ) {
-    const data = await this.adminService.rejectServiceProvider(
-      userId,
-      id,
-      body.reason,
-      communityId,
-    );
+    const data = await this.adminService.rejectServiceProvider(userId, id, body.reason);
     return { code: 0, message: 'ok', data };
   }
 

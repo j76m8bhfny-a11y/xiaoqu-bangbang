@@ -15,6 +15,8 @@ describe('Feature: 管理后台（全量）', () => {
   let prisma: PrismaService;
   let adminToken: string;
   let adminUserId: string;
+  let platformAdminToken: string;
+  let platformAdminUserId: string;
   let userToken: string;
   let userId: string;
   let communityId: string;
@@ -64,6 +66,29 @@ describe('Feature: 管理后台（全量）', () => {
         userId: adminUserId,
         username: `admin_${adminUserId.slice(0, 8)}`,
         role: 'committee_admin',
+        communityId,
+      },
+    });
+
+    // platform_admin 用户（用于 Banner/ServiceProvider 管理测试）
+    const platformAdminRes = await request(app.getHttpServer())
+      .post('/api/v1/auth/wechat-login')
+      .send({ code: 'platform-admin-001' });
+    platformAdminToken = platformAdminRes.body.data.token;
+    platformAdminUserId = platformAdminRes.body.data.user.id;
+
+    await request(app.getHttpServer())
+      .post('/api/v1/communities/select')
+      .set('Authorization', `Bearer ${platformAdminToken}`)
+      .send({ communityId });
+
+    await prisma.adminUser.upsert({
+      where: { userId: platformAdminUserId },
+      update: { role: 'platform_admin' },
+      create: {
+        userId: platformAdminUserId,
+        username: `padmin_${platformAdminUserId.slice(0, 8)}`,
+        role: 'platform_admin',
         communityId,
       },
     });
@@ -120,8 +145,12 @@ describe('Feature: 管理后台（全量）', () => {
       await prisma.topic.deleteMany({ where: { communityId } });
       await prisma.auditLog.deleteMany({ where: { operatorId: { in: [adminUserId, userId] } } });
       await prisma.communityMember.deleteMany({ where: { communityId } });
-      await prisma.adminUser.deleteMany({ where: { userId: { in: [adminUserId, userId] } } });
-      await prisma.user.deleteMany({ where: { id: { in: [adminUserId, userId] } } });
+      await prisma.adminUser.deleteMany({
+        where: { userId: { in: [adminUserId, userId, platformAdminUserId] } },
+      });
+      await prisma.user.deleteMany({
+        where: { id: { in: [adminUserId, userId, platformAdminUserId] } },
+      });
       if (badgeId) {
         await prisma.badge.delete({ where: { id: badgeId } });
       }
@@ -207,10 +236,23 @@ describe('Feature: 管理后台（全量）', () => {
       expect(res.body.data.items).toBeInstanceOf(Array);
     });
 
-    it('POST /admin/banners - 创建Banner', async () => {
+    // P-321: committee_admin 不能创建 Banner（仅 platform_admin）
+    it('POST /admin/banners - committee_admin 应403', async () => {
       const res = await request(app.getHttpServer())
         .post('/api/v1/admin/banners')
         .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          communityId,
+          title: '测试Banner',
+          imageUrl: 'https://example.com/banner.jpg',
+        })
+        .expect(403);
+    });
+
+    it('POST /admin/banners - platform_admin 创建Banner', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/admin/banners')
+        .set('Authorization', `Bearer ${platformAdminToken}`)
         .send({
           communityId,
           title: '测试Banner',
@@ -233,7 +275,7 @@ describe('Feature: 管理后台（全量）', () => {
 
       const res = await request(app.getHttpServer())
         .patch(`/api/v1/admin/banners/${bannerId}`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${platformAdminToken}`)
         .send({ title: '修改后的Banner标题', sortOrder: 10 })
         .expect(200);
 
@@ -245,7 +287,7 @@ describe('Feature: 管理后台（全量）', () => {
 
       const res = await request(app.getHttpServer())
         .post(`/api/v1/admin/banners/${bannerId}/publish`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${platformAdminToken}`)
         .expect(201);
 
       expect(res.body.code).toBe(0);
@@ -257,7 +299,7 @@ describe('Feature: 管理后台（全量）', () => {
 
       const res = await request(app.getHttpServer())
         .post(`/api/v1/admin/banners/${bannerId}/offline`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${platformAdminToken}`)
         .expect(201);
 
       expect(res.body.code).toBe(0);
@@ -347,21 +389,42 @@ describe('Feature: 管理后台（全量）', () => {
 
   // ===== 服务商管理 =====
   describe('【管理】服务商管理', () => {
-    it('POST /admin/service-providers - 创建服务商', async () => {
+    // P-325: committee_admin 不能创建服务商（仅 platform_admin）
+    it('POST /admin/service-providers - committee_admin 应403', async () => {
       const res = await request(app.getHttpServer())
         .post('/api/v1/admin/service-providers')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          communityId,
+          name: '测试保洁公司',
+          category: 'cleaning',
+          description: '专业家庭保洁',
+        })
+        .expect(403);
+    });
+
+    // P-326: createServiceProvider 应使用 @CurrentCommunityId，忽略 body.communityId
+    it('POST /admin/service-providers - platform_admin 创建服务商，忽略 body.communityId', async () => {
+      const communityB = await prisma.community.create({
+        data: { name: '服务商隔离小区', city: '南京', district: '鼓楼区', address: '隔离路4号' },
+      });
+
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/admin/service-providers')
+        .set('Authorization', `Bearer ${platformAdminToken}`)
+        .send({
+          communityId: communityB.id, // 尝试在 body 中指定其他小区
           name: '测试保洁公司',
           category: 'cleaning',
           description: '专业家庭保洁',
         })
         .expect(201);
 
-      expect(res.body.code).toBe(0);
-      expect(res.body.data).toHaveProperty('id');
+      // 创建的服务商应属于 platform_admin 的当前小区（communityId），而非 communityB.id
+      expect(res.body.data.communityId).toBe(communityId);
       serviceProviderId = res.body.data.id;
+
+      // 清理
+      await prisma.community.delete({ where: { id: communityB.id } });
     });
 
     it('GET /admin/service-providers - 获取服务商列表', async () => {
@@ -378,7 +441,7 @@ describe('Feature: 管理后台（全量）', () => {
 
       const res = await request(app.getHttpServer())
         .patch(`/api/v1/admin/service-providers/${serviceProviderId}`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${platformAdminToken}`)
         .send({ name: '更名的保洁公司', sortOrder: 1 })
         .expect(200);
 
@@ -390,7 +453,7 @@ describe('Feature: 管理后台（全量）', () => {
 
       const res = await request(app.getHttpServer())
         .post(`/api/v1/admin/service-providers/${serviceProviderId}/publish`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${platformAdminToken}`)
         .expect(201);
 
       expect(res.body.code).toBe(0);

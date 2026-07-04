@@ -1,7 +1,13 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Inject,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { IS_PUBLIC_KEY } from '../../../common/constants';
+import { IS_PUBLIC_KEY, PLATFORM_ADMIN_ONLY_KEY } from '../../../common/constants';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
@@ -27,6 +33,12 @@ export class AdminGuard implements CanActivate {
 
     if (!admin) {
       throw new ForbiddenException({ code: 40302, message: '无管理员权限' });
+    }
+
+    // P-321/P-325: 部分路由仅 platform_admin 可访问
+    const platformAdminOnly = this.reflector.get(PLATFORM_ADMIN_ONLY_KEY, context.getHandler());
+    if (platformAdminOnly && admin.role !== 'platform_admin') {
+      throw new ForbiddenException({ code: 40304, message: '仅平台管理员可操作' });
     }
 
     // committee_admin can only manage their own community
