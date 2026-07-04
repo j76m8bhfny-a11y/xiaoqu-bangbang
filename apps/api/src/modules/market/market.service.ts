@@ -379,7 +379,11 @@ export class MarketService {
     return comment;
   }
 
-  async getComments(itemId: string, communityId: string) {
+  async getComments(
+    itemId: string,
+    communityId: string,
+    pagination?: { skip: number; take: number },
+  ) {
     // Verify item belongs to the community
     const item = await this.prisma.marketItem.findFirst({
       where: { id: itemId, communityId, deletedAt: null },
@@ -388,25 +392,30 @@ export class MarketService {
       throw new NotFoundException('商品不存在');
     }
 
-    const comments = await this.prisma.marketComment.findMany({
-      where: { itemId, deletedAt: null, status: 'visible' },
-      select: {
-        id: true,
-        itemId: true,
-        userId: true,
-        parentId: true,
-        content: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-        user: {
-          select: { id: true, nickname: true, avatarUrl: true },
+    const where = { itemId, deletedAt: null, status: 'visible' };
+    const [comments, total] = await Promise.all([
+      this.prisma.marketComment.findMany({
+        where,
+        select: {
+          id: true,
+          itemId: true,
+          userId: true,
+          parentId: true,
+          content: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+          user: {
+            select: { id: true, nickname: true, avatarUrl: true },
+          },
         },
-      },
-      orderBy: { createdAt: 'asc' },
-    });
+        orderBy: { createdAt: 'asc' },
+        ...(pagination ?? {}),
+      }),
+      this.prisma.marketComment.count({ where }),
+    ]);
 
-    return comments;
+    return { items: comments, total };
   }
 
   async addReview(

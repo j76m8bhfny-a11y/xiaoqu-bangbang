@@ -87,9 +87,18 @@ export class MarketController {
 
   @Get('items/:id/comments')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async getComments(@Param('id') itemId: string, @CurrentCommunityId() communityId: string) {
-    const comments = await this.marketService.getComments(itemId, communityId);
-    return { code: 0, message: 'ok', data: { items: comments } };
+  async getComments(
+    @Param('id') itemId: string,
+    @CurrentCommunityId() communityId: string,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ) {
+    const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
+    const { items, total } = await this.marketService.getComments(itemId, communityId, {
+      skip,
+      take,
+    });
+    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
   }
 
   @Post('items/:id/comments')

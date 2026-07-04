@@ -241,4 +241,53 @@ describe('Feature: 闲置模块', () => {
       expect(res.body.data.title).toBe('改后的标题');
     });
   });
+
+  describe('Scenario: P-236 评论分页', () => {
+    let itemId: string;
+
+    beforeAll(async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/market/items')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          title: 'P-236 测试商品',
+          description: '测试评论分页',
+          category: 'other',
+          price: 0,
+        })
+        .expect(201);
+      itemId = res.body.data.id;
+
+      // 直接用 prisma 创建 3 条评论
+      for (let i = 0; i < 3; i++) {
+        await prisma.marketComment.create({
+          data: {
+            itemId,
+            userId,
+            content: `评论 ${i + 1}`,
+            status: 'visible',
+          },
+        });
+      }
+    });
+
+    afterAll(async () => {
+      await prisma.marketComment.deleteMany({ where: { itemId } });
+      await prisma.marketItem.delete({ where: { id: itemId } }).catch(() => {});
+    });
+
+    it('GET /market/items/:id/comments 应支持分页', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/market/items/${itemId}/comments`)
+        .query({ page: 1, pageSize: 2 })
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.code).toBe(0);
+      expect(res.body.data).toHaveProperty('page', 1);
+      expect(res.body.data).toHaveProperty('pageSize', 2);
+      expect(res.body.data).toHaveProperty('total', 3);
+      expect(res.body.data.items).toHaveLength(2);
+    });
+  });
 });
