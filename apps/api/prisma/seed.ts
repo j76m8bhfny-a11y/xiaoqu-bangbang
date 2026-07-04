@@ -871,10 +871,42 @@ async function seed() {
   });
 
   // ============================================================
-  // 11. Badges
+  // 11. Badges — Standard M10.6 定义的四类勋章
   // ============================================================
   console.log('Creating badges...');
 
+  const badgeDefs = [
+    // 互助类
+    { code: 'helper_1', name: '初来乍到', description: '完成第一次互助' },
+    { code: 'helper_5', name: '热心邻居', description: '完成5次互助' },
+    { code: 'helper_20', name: '互助达人', description: '完成20次互助' },
+    // 议事类
+    { code: 'feedback_5', name: '议事参与者', description: '参与5次议事' },
+    { code: 'feedback_20', name: '议事达人', description: '参与20次议事' },
+    // 议题类
+    { code: 'topic_1', name: '议题提出者', description: '提出1个议题' },
+    { code: 'topic_5', name: '议题达人', description: '提出5个议题' },
+    // 小花类
+    { code: 'flower_10', name: '花开满园', description: '累计获得10朵小红花' },
+    { code: 'flower_50', name: '花团锦簇', description: '累计获得50朵小红花' },
+  ];
+
+  for (const def of badgeDefs) {
+    await prisma.badge.upsert({
+      where: { code: def.code },
+      update: {},
+      create: {
+        code: def.code,
+        name: def.name,
+        description: def.description,
+        iconUrl: '',
+        ruleJson: {},
+        status: 'active',
+      },
+    });
+  }
+
+  // 保留旧 badge codes 用于向后兼容（已有 userBadge 关联）
   await prisma.badge.upsert({
     where: { id: BADGE_HELPFUL_ID },
     update: {},

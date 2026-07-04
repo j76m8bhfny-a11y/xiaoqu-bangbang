@@ -154,3 +154,185 @@ describe('P-143: 排行榜列表返回扁平结构', () => {
     expect(item.user).toBeUndefined();
   });
 });
+
+// P-277+P-278+P-279: 勋章规则缺失
+describe('P-277+P-278+P-279: 勋章规则', () => {
+  let app: INestApplication;
+  let prisma: PrismaService;
+  let rankingsService: RankingsService;
+  let userId: string;
+  let communityId: string;
+  const badgeIds: string[] = [];
+  const crIds: string[] = [];
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+    prisma = app.get(PrismaService);
+    rankingsService = app.get(RankingsService);
+
+    const community = await prisma.community.create({
+      data: { name: '勋章测试小区', city: '南京', district: '鼓楼区', address: '勋章路1号' },
+    });
+    communityId = community.id;
+
+    const user = await prisma.user.create({
+      data: { openid: 'badge-test-user', nickname: '勋章测试用户', avatarUrl: '' },
+    });
+    userId = user.id;
+
+    await prisma.communityMember.create({
+      data: { userId, communityId, verifyStatus: 'verified' },
+    });
+
+    // 创建 Standard 定义的勋章（seed 文件缺少这些 codes）
+    const badges = [
+      { code: 'helper_1', name: '初来乍到', description: '完成第一次互助' },
+      { code: 'helper_5', name: '热心邻居', description: '完成5次互助' },
+      { code: 'helper_20', name: '互助达人', description: '完成20次互助' },
+      { code: 'flower_10', name: '花开满园', description: '累计获得10朵小红花' },
+      { code: 'flower_50', name: '花团锦簇', description: '累计获得50朵小红花' },
+      { code: 'feedback_5', name: '议事参与者', description: '参与5次议事' },
+      { code: 'feedback_20', name: '议事达人', description: '参与20次议事' },
+      { code: 'topic_1', name: '议题提出者', description: '提出1个议题' },
+      { code: 'topic_5', name: '议题达人', description: '提出5个议题' },
+    ];
+
+    for (const b of badges) {
+      const badge = await prisma.badge.create({
+        data: {
+          code: b.code,
+          name: b.name,
+          description: b.description,
+          ruleJson: {},
+          status: 'active',
+        },
+      });
+      badgeIds.push(badge.id);
+    }
+  });
+
+  afterAll(async () => {
+    await prisma.userBadge.deleteMany({ where: { userId } });
+    await prisma.userBadge.deleteMany({ where: { badgeId: { in: badgeIds } } });
+    await prisma.contributionRecord.deleteMany({ where: { userId } });
+    await prisma.rankingSnapshot.deleteMany({ where: { userId } });
+    await prisma.notification.deleteMany({ where: { userId } });
+    await prisma.communityMember.deleteMany({ where: { userId } });
+    await prisma.badge.deleteMany({ where: { id: { in: badgeIds } } });
+    await prisma.user
+      .update({ where: { id: userId }, data: { currentCommunityId: null } })
+      .catch(() => {});
+    await prisma.community.deleteMany({ where: { id: communityId } });
+    await prisma.user.deleteMany({ where: { id: userId } });
+    await app.close();
+  });
+
+  it('feedback_5 勋章应在 5 次 feedback 贡献后颁发 (P-277)', async () => {
+    // 创建 5 条 feedback 贡献记录
+    for (let i = 0; i < 5; i++) {
+      const cr = await prisma.contributionRecord.create({
+        data: {
+          userId,
+          communityId,
+          sourceType: 'event',
+          sourceId: crypto.randomUUID(),
+          action: 'feedback',
+          score: 1,
+          flowerCount: 1,
+          reason: '议事反馈',
+          occurredAt: new Date(),
+        },
+      });
+      crIds.push(cr.id);
+    }
+
+    // 触发勋章检查
+    await (rankingsService as any).checkAndAwardBadges(
+      userId,
+      communityId,
+      'event',
+      crypto.randomUUID(),
+    );
+
+    const userBadges = await prisma.userBadge.findMany({
+      where: { userId, communityId },
+      include: { badge: { select: { code: true } } },
+    });
+
+    const feedbackBadge = userBadges.find((ub) => ub.badge.code === 'feedback_5');
+    expect(feedbackBadge).toBeTruthy();
+  });
+
+  it('topic_1 勋章应在 1 次 topic 贡献后颁发 (P-278)', async () => {
+    // 创建 1 条 topic 贡献记录
+    const cr = await prisma.contributionRecord.create({
+      data: {
+        userId,
+        communityId,
+        sourceType: 'topic',
+        sourceId: crypto.randomUUID(),
+        action: 'topic',
+        score: 1,
+        flowerCount: 1,
+        reason: '议题审核通过',
+        occurredAt: new Date(),
+      },
+    });
+    crIds.push(cr.id);
+
+    // 触发勋章检查
+    await (rankingsService as any).checkAndAwardBadges(
+      userId,
+      communityId,
+      'topic',
+      crypto.randomUUID(),
+    );
+
+    const userBadges = await prisma.userBadge.findMany({
+      where: { userId, communityId },
+      include: { badge: { select: { code: true } } },
+    });
+
+    const topicBadge = userBadges.find((ub) => ub.badge.code === 'topic_1');
+    expect(topicBadge).toBeTruthy();
+  });
+
+  it('helper_1 勋章应在 1 次 help 贡献后颁发 (回归)', async () => {
+    // 创建 1 条 help_free 贡献记录
+    const cr = await prisma.contributionRecord.create({
+      data: {
+        userId,
+        communityId,
+        sourceType: 'event',
+        sourceId: crypto.randomUUID(),
+        action: 'help_free',
+        score: 3,
+        flowerCount: 3,
+        reason: '互助',
+        occurredAt: new Date(),
+      },
+    });
+    crIds.push(cr.id);
+
+    // 触发勋章检查
+    await (rankingsService as any).checkAndAwardBadges(
+      userId,
+      communityId,
+      'event',
+      crypto.randomUUID(),
+    );
+
+    const userBadges = await prisma.userBadge.findMany({
+      where: { userId, communityId },
+      include: { badge: { select: { code: true } } },
+    });
+
+    const helperBadge = userBadges.find((ub) => ub.badge.code === 'helper_1');
+    expect(helperBadge).toBeTruthy();
+  });
+});

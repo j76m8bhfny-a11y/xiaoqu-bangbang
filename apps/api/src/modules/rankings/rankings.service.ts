@@ -191,63 +191,109 @@ export class RankingsService {
     sourceType: string,
     sourceId: string,
   ) {
-    // Count total contributions for this user in this community
-    const contributionCount = await this.prisma.contributionRecord.count({
-      where: {
-        userId,
-        communityId,
-        status: 'valid',
-      },
-    });
+    // Count contributions by action category (Standard M10.6)
+    const baseWhere = { userId, communityId, status: 'valid' as const };
 
-    // Get total flowers
-    const flowerResult = await this.prisma.contributionRecord.aggregate({
-      where: { userId, communityId, status: 'valid' },
-      _sum: { flowerCount: true },
-    });
+    const [helpCount, feedbackCount, topicCount, flowerResult] = await Promise.all([
+      this.prisma.contributionRecord.count({
+        where: {
+          ...baseWhere,
+          action: { in: ['help_free', 'help_paid', 'public_welfare', 'lost_found'] },
+        },
+      }),
+      this.prisma.contributionRecord.count({
+        where: { ...baseWhere, action: 'feedback' },
+      }),
+      this.prisma.contributionRecord.count({
+        where: { ...baseWhere, action: 'topic' },
+      }),
+      this.prisma.contributionRecord.aggregate({
+        where: baseWhere,
+        _sum: { flowerCount: true },
+      }),
+    ]);
     const totalFlowers = flowerResult._sum.flowerCount ?? 0;
 
-    // Define badge rules: code -> min flowers/contributions
+    // Define badge rules per Standard M10.6
     const badgeRules = [
+      // 互助类
       {
         code: 'helper_1',
-        minContributions: 1,
-        minFlowers: 0,
+        countType: 'help' as const,
+        minCount: 1,
         name: '初来乍到',
         description: '完成第一次互助',
       },
       {
         code: 'helper_5',
-        minContributions: 5,
-        minFlowers: 0,
+        countType: 'help' as const,
+        minCount: 5,
         name: '热心邻居',
         description: '完成5次互助',
       },
       {
         code: 'helper_20',
-        minContributions: 20,
-        minFlowers: 0,
+        countType: 'help' as const,
+        minCount: 20,
         name: '互助达人',
         description: '完成20次互助',
       },
+      // 议事类
+      {
+        code: 'feedback_5',
+        countType: 'feedback' as const,
+        minCount: 5,
+        name: '议事参与者',
+        description: '参与5次议事',
+      },
+      {
+        code: 'feedback_20',
+        countType: 'feedback' as const,
+        minCount: 20,
+        name: '议事达人',
+        description: '参与20次议事',
+      },
+      // 议题类
+      {
+        code: 'topic_1',
+        countType: 'topic' as const,
+        minCount: 1,
+        name: '议题提出者',
+        description: '提出1个议题',
+      },
+      {
+        code: 'topic_5',
+        countType: 'topic' as const,
+        minCount: 5,
+        name: '议题达人',
+        description: '提出5个议题',
+      },
+      // 小花类
       {
         code: 'flower_10',
-        minContributions: 0,
-        minFlowers: 10,
+        countType: 'flower' as const,
+        minCount: 10,
         name: '花开满园',
         description: '累计获得10朵小红花',
       },
       {
         code: 'flower_50',
-        minContributions: 0,
-        minFlowers: 50,
+        countType: 'flower' as const,
+        minCount: 50,
         name: '花团锦簇',
         description: '累计获得50朵小红花',
       },
     ];
 
+    const countMap: Record<string, number> = {
+      help: helpCount,
+      feedback: feedbackCount,
+      topic: topicCount,
+      flower: totalFlowers,
+    };
+
     for (const rule of badgeRules) {
-      if (contributionCount >= rule.minContributions && totalFlowers >= rule.minFlowers) {
+      if (countMap[rule.countType] >= rule.minCount) {
         // Check if badge exists and user doesn't already have it
         const badge = await this.prisma.badge.findUnique({
           where: { code: rule.code },
