@@ -47,11 +47,11 @@ export class TopicsService {
       where.title = { contains: query.keyword, mode: 'insensitive' };
     }
 
-    const [topics, total] = await Promise.all([
+    // ponytail: 全表拉取后内存排序再分页。小区议题量级 < 1000 可接受。
+    // 升级路径：DB 加 score 物化字段 + 复合索引，或用 materialized view。
+    const [allTopics, total] = await Promise.all([
       this.prisma.topic.findMany({
         where,
-        skip: pagination.skip,
-        take: pagination.take,
         orderBy: { createdAt: 'desc' },
         include: {
           events: {
@@ -66,7 +66,7 @@ export class TopicsService {
     ]);
 
     // 内存排序：净赞数 + 时间权重（未完结）；平均星级 + 完结时间权重（完结）
-    const scored = topics.map((t) => {
+    const scored = allTopics.map((t) => {
       let score: number;
       if (status === 'closed') {
         const avg = t.ratingCount > 0 ? t.ratingSum / t.ratingCount : 0;
@@ -79,7 +79,8 @@ export class TopicsService {
     });
     scored.sort((a, b) => b.score - a.score);
 
-    const items = scored.map(({ topic }) => this.toDto(topic));
+    const paged = scored.slice(pagination.skip, pagination.skip + pagination.take);
+    const items = paged.map(({ topic }) => this.toDto(topic));
     return { items, total };
   }
 

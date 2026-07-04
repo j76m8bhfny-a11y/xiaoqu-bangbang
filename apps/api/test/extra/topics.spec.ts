@@ -427,4 +427,68 @@ describe('Feature: 议事榜', () => {
       expect(res.body.data.events.some((e: any) => e.id === eventId)).toBe(true);
     });
   });
+
+  // P-243: 跨页排序应全局按 score，而非页内重排
+  describe('P-243: 跨页排序全局按 score', () => {
+    const topicIds: string[] = [];
+    let earlyHotTopicId: string;
+
+    beforeAll(async () => {
+      // 早期但高赞的议题：score = 100 + 0 = 100
+      const early = await prisma.topic.create({
+        data: {
+          communityId,
+          title: 'P-243 早期高赞议题',
+          description: '应在 page 1',
+          createdBy: userIdA,
+          aiReviewStatus: 'pass',
+          likeCount: 100,
+          createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        },
+      });
+      earlyHotTopicId = early.id;
+      topicIds.push(early.id);
+
+      // 12 个晚期低赞议题：score = 0 + 5 = 5，应排在早期高赞之后
+      for (let i = 0; i < 12; i++) {
+        const t = await prisma.topic.create({
+          data: {
+            communityId,
+            title: `P-243 晚期议题 ${i}`,
+            description: '低赞',
+            createdBy: userIdA,
+            aiReviewStatus: 'pass',
+            likeCount: 0,
+          },
+        });
+        topicIds.push(t.id);
+      }
+    });
+
+    afterAll(async () => {
+      await prisma.topic.deleteMany({ where: { id: { in: topicIds } } });
+    });
+
+    it('GET /topics?page=1&pageSize=10 应包含早期高赞议题（score 全局最高）', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/topics?page=1&pageSize=10')
+        .set('Authorization', `Bearer ${tokenA}`);
+
+      expect(res.status).toBe(200);
+      const ids: string[] = res.body.data.items.map((t: any) => t.id);
+      expect(ids).toContain(earlyHotTopicId);
+      // 且应排在首位
+      expect(ids[0]).toBe(earlyHotTopicId);
+    });
+
+    it('GET /topics?page=2&pageSize=10 不应包含早期高赞议题', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/topics?page=2&pageSize=10')
+        .set('Authorization', `Bearer ${tokenA}`);
+
+      expect(res.status).toBe(200);
+      const ids: string[] = res.body.data.items.map((t: any) => t.id);
+      expect(ids).not.toContain(earlyHotTopicId);
+    });
+  });
 });
