@@ -52,7 +52,12 @@ export class RankingsController {
   @Get('badges')
   @Public()
   async getBadges() {
-    const items = await this.rankingsService.getBadges();
+    const rawItems = await this.rankingsService.getBadges();
+    // P-146: map iconUrl → icon to match miniapp BadgeDto
+    const items = rawItems.map(({ iconUrl, ...rest }) => ({
+      ...rest,
+      icon: iconUrl ?? '',
+    }));
     return { code: 0, message: 'ok', data: { items } };
   }
 
@@ -63,6 +68,14 @@ export class RankingsController {
     @Query('communityId') communityId?: string,
   ) {
     const { badges, contributions } = await this.rankingsService.getMyBadges(userId, communityId);
-    return { code: 0, message: 'ok', data: { items: badges, contributions } };
+    // P-145: flatten to BadgeDto { id: badge.id, name, icon, description }
+    // id must be badge.id (not userBadge.id) so miniapp can match against getBadges list
+    const items = badges.map((ub: any) => ({
+      id: ub.badge.id,
+      name: ub.badge.name,
+      icon: ub.badge.iconUrl ?? '',
+      description: ub.badge.description,
+    }));
+    return { code: 0, message: 'ok', data: { items, contributions } };
   }
 }

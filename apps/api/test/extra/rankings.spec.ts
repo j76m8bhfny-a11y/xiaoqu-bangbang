@@ -385,3 +385,135 @@ describe('P-277+P-278+P-279: 勋章规则', () => {
     expect(helperBadge).toBeUndefined();
   });
 });
+
+// P-145+P-146: getMyBadges 返回结构 + BadgeDto icon 字段
+describe('P-145+P-146: 徽章返回结构', () => {
+  let app: INestApplication;
+  let prisma: PrismaService;
+  let userToken: string;
+  let userId: string;
+  let badgeId: string;
+  let userBadgeId: string;
+  let communityId: string;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    );
+    await app.init();
+    prisma = app.get(PrismaService);
+
+    // 创建测试社区
+    const community = await prisma.community.create({
+      data: { name: 'P145测试小区', city: '南京', district: '鼓楼区', address: '测试路1号' },
+    });
+    communityId = community.id;
+
+    // 创建测试徽章
+    const badge = await prisma.badge.create({
+      data: {
+        code: 'test_badge_p145',
+        name: 'P145测试徽章',
+        description: '测试徽章返回结构',
+        iconUrl: 'https://example.com/badge-icon.png',
+        ruleJson: {},
+        status: 'active',
+      },
+    });
+    badgeId = badge.id;
+
+    // 登录用户
+    const loginRes = await request(app.getHttpServer())
+      .post('/api/v1/auth/wechat-login')
+      .send({ code: 'p145-test-user' });
+    userToken = loginRes.body.data.token;
+    userId = loginRes.body.data.user.id;
+
+    // 给用户颁发徽章
+    const userBadge = await prisma.userBadge.create({
+      data: {
+        userId,
+        communityId,
+        badgeId,
+        sourceType: 'event',
+        sourceId: crypto.randomUUID(),
+      },
+    });
+    userBadgeId = userBadge.id;
+  });
+
+  afterAll(async () => {
+    await prisma.userBadge.deleteMany({ where: { userId } });
+    await prisma.badge.deleteMany({ where: { id: badgeId } });
+    await prisma.notification.deleteMany({ where: { userId } });
+    await prisma.communityMember.deleteMany({ where: { userId } });
+    await prisma.community.deleteMany({ where: { id: communityId } });
+    await prisma.user
+      .update({ where: { id: userId }, data: { currentCommunityId: null } })
+      .catch(() => {});
+    await prisma.user.deleteMany({ where: { id: userId } });
+    await app.close();
+  });
+
+  it('GET /me/badges 返回 items 数组（非 badges），且每项为扁平 BadgeDto 结构 (P-145)', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/v1/me/badges')
+      .set('Authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.code).toBe(0);
+    // P-145: 应有 items 字段，而非 badges 字段
+    expect(res.body.data.items).toBeDefined();
+    expect(res.body.data.badges).toBeUndefined();
+
+    const item = res.body.data.items.find((b: any) => b.id === badgeId);
+    expect(item).toBeTruthy();
+    // P-145: 扁平结构 — 应有 name/icon/description，不应有嵌套 badge 对象
+    expect(item.name).toBe('P145测试徽章');
+    expect(item.description).toBe('测试徽章返回结构');
+    expect(item.badge).toBeUndefined();
+    expect(item.badgeId).toBeUndefined();
+    expect(item.userId).toBeUndefined();
+  });
+
+  it('GET /me/badges items[].id 是 badge.id（不是 userBadge.id）(P-145)', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/v1/me/badges')
+      .set('Authorization', `Bearer ${userToken}`);
+
+    const item = res.body.data.items.find((b: any) => b.id === badgeId);
+    expect(item).toBeTruthy();
+    // id 应为 badge.id，不是 userBadge.id
+    expect(item.id).toBe(badgeId);
+    expect(item.id).not.toBe(userBadgeId);
+  });
+
+  it('GET /me/badges items[].icon 使用 icon 字段名（非 iconUrl）(P-146)', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/v1/me/badges')
+      .set('Authorization', `Bearer ${userToken}`);
+
+    const item = res.body.data.items.find((b: any) => b.id === badgeId);
+    expect(item).toBeTruthy();
+    // P-146: 应有 icon 字段，不应有 iconUrl 字段
+    expect(item.icon).toBe('https://example.com/badge-icon.png');
+    expect(item.iconUrl).toBeUndefined();
+  });
+
+  it('GET /badges 返回 items[].icon（非 iconUrl）(P-146)', async () => {
+    const res = await request(app.getHttpServer()).get('/api/v1/badges');
+
+    expect(res.status).toBe(200);
+    expect(res.body.code).toBe(0);
+    const item = res.body.data.items.find((b: any) => b.id === badgeId);
+    expect(item).toBeTruthy();
+    expect(item.icon).toBe('https://example.com/badge-icon.png');
+    expect(item.iconUrl).toBeUndefined();
+  });
+});
