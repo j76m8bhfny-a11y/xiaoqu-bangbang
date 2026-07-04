@@ -152,6 +152,47 @@ describe('Feature: 管理后台（全量）', () => {
 
       expect([401, 403]).toContain(res.status);
     });
+
+    // P-301: pendingReviews 应按 communityId 过滤，committee_admin 不应看到其他小区的待审核数
+    it('GET /admin/dashboard - pendingReviews 不包含其他小区的数据', async () => {
+      // 在另一个小区创建待审核事件 + AI审核日志
+      const communityB = await prisma.community.create({
+        data: { name: '隔离测试小区B', city: '南京', district: '鼓楼区', address: '隔离路2号' },
+      });
+      const eventB = await prisma.event.create({
+        data: {
+          communityId: communityB.id,
+          creatorId: adminUserId,
+          title: '其他小区待审核事件',
+          description: '测试描述',
+          type: 'help_request',
+          aiReviewStatus: 'manual_review',
+          status: 'pending_review',
+        },
+      });
+      // 创建 AI 审核日志（result=manual_review，当前代码会跨小区统计）
+      await prisma.aiReviewLog.create({
+        data: {
+          targetType: 'event',
+          targetId: eventB.id,
+          inputSummary: { title: '其他小区待审核事件' },
+          result: 'manual_review',
+        },
+      });
+
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/admin/dashboard')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      // pendingReviews 不应包含 communityB 的审核日志
+      expect(res.body.data.pendingReviews).toBe(0);
+
+      // 清理
+      await prisma.aiReviewLog.deleteMany({ where: { targetId: eventB.id } });
+      await prisma.event.deleteMany({ where: { communityId: communityB.id } });
+      await prisma.community.delete({ where: { id: communityB.id } });
+    });
   });
 
   // ===== Banner 管理 =====

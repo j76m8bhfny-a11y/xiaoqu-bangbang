@@ -54,13 +54,25 @@ export class AdminService {
   }
 
   async getDashboard(communityId: string) {
-    const [eventCount, marketCount, userCount, pendingReviews] = await Promise.all([
-      this.prisma.event.count({ where: { communityId, deletedAt: null } }),
-      this.prisma.marketItem.count({ where: { communityId, deletedAt: null } }),
-      this.prisma.communityMember.count({ where: { communityId } }),
-      this.prisma.aiReviewLog.count({ where: { result: 'manual_review' } }),
-    ]);
-    return { eventCount, marketCount, userCount, pendingReviews };
+    const [eventCount, marketCount, userCount, pendingEventReviews, pendingMarketReviews] =
+      await Promise.all([
+        this.prisma.event.count({ where: { communityId, deletedAt: null } }),
+        this.prisma.marketItem.count({ where: { communityId, deletedAt: null } }),
+        this.prisma.communityMember.count({ where: { communityId } }),
+        // P-301: 按 communityId 过滤待审核数，不再跨小区统计 aiReviewLog
+        this.prisma.event.count({
+          where: { communityId, aiReviewStatus: 'manual_review', deletedAt: null },
+        }),
+        this.prisma.marketItem.count({
+          where: { communityId, aiReviewStatus: 'manual_review', deletedAt: null },
+        }),
+      ]);
+    return {
+      eventCount,
+      marketCount,
+      userCount,
+      pendingReviews: pendingEventReviews + pendingMarketReviews,
+    };
   }
 
   // === Content Review ===
