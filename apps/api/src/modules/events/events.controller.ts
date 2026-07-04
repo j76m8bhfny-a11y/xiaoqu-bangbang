@@ -90,7 +90,7 @@ export class EventsController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async update(
     @CurrentUser('userId') userId: string,
     @Param('id') id: string,
@@ -102,7 +102,7 @@ export class EventsController {
   }
 
   @Post(':id/close')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async close(
     @CurrentUser('userId') userId: string,
     @Param('id') id: string,
@@ -120,7 +120,7 @@ export class EventsController {
   }
 
   @Post(':id/applications')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async respond(
     @CurrentUser('userId') userId: string,
     @Param('id') eventId: string,
@@ -132,7 +132,7 @@ export class EventsController {
   }
 
   @Post(':id/applications/:applicationId/select')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async selectHelper(
     @CurrentUser('userId') userId: string,
     @Param('id') eventId: string,
@@ -149,7 +149,7 @@ export class EventsController {
   }
 
   @Post(':id/complete/request')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async requestCompletion(
     @CurrentUser('userId') userId: string,
     @Param('id') eventId: string,
@@ -160,7 +160,7 @@ export class EventsController {
   }
 
   @Post(':id/complete/confirm')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async confirmCompletion(
     @CurrentUser('userId') userId: string,
     @Param('id') eventId: string,

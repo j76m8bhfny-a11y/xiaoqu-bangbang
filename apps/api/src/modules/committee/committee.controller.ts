@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, Query, UseGuards, Inject } from '@n
 import { CommitteeService } from './committee.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
+import { VerifiedMemberGuard } from '../../common/guards/verified-member.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CurrentCommunityId } from '../../common/decorators/current-community.decorator';
 import { ClaimDto } from './dto/claim.dto';
@@ -41,7 +42,7 @@ export class CommitteeController {
   }
 
   @Post('committee/members/:id/claim')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async claimMembership(
     @CurrentUser('userId') userId: string,
     @Param('id') memberId: string,
@@ -85,7 +86,7 @@ export class CommitteeController {
   }
 
   @Post('committee/announcements/:id/like')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async toggleAnnouncementLike(
     @CurrentUser('userId') userId: string,
     @Param('id') id: string,

@@ -174,7 +174,25 @@ export class MarketService {
       return { liked: false, likeCount: updated.likeCount };
     }
 
-    await this.prisma.marketLike.create({ data: { itemId, userId } });
+    try {
+      await this.prisma.marketLike.create({ data: { itemId, userId } });
+    } catch (e: any) {
+      // P-79: 并发竞态 — 已点赞则转为取消
+      if (e?.code === 'P2002') {
+        const existing = await this.prisma.marketLike.findUnique({
+          where: { itemId_userId: { itemId, userId } },
+        });
+        if (existing) {
+          await this.prisma.marketLike.delete({ where: { id: existing.id } });
+          const updated = await this.prisma.marketItem.update({
+            where: { id: itemId },
+            data: { likeCount: { decrement: 1 } },
+          });
+          return { liked: false, likeCount: updated.likeCount };
+        }
+      }
+      throw e;
+    }
     const updated = await this.prisma.marketItem.update({
       where: { id: itemId },
       data: { likeCount: { increment: 1 } },

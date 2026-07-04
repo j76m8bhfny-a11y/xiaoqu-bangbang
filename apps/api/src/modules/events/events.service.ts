@@ -741,9 +741,27 @@ export class EventsService {
       return { liked: false };
     }
 
-    await this.prisma.eventLike.create({
-      data: { eventId, userId },
-    });
+    try {
+      await this.prisma.eventLike.create({
+        data: { eventId, userId },
+      });
+    } catch (e: any) {
+      // P-79: 并发竞态 — 已被点赞则转为取消
+      if (e?.code === 'P2002') {
+        const existing = await this.prisma.eventLike.findUnique({
+          where: { eventId_userId: { eventId, userId } },
+        });
+        if (existing) {
+          await this.prisma.eventLike.delete({ where: { id: existing.id } });
+          await this.prisma.event.update({
+            where: { id: eventId },
+            data: { likeCount: { decrement: 1 } },
+          });
+          return { liked: false };
+        }
+      }
+      throw e;
+    }
     await this.prisma.event.update({
       where: { id: eventId },
       data: { likeCount: { increment: 1 } },

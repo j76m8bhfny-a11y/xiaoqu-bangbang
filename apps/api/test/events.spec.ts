@@ -65,6 +65,12 @@ describe('Feature: 事件系统', () => {
       .post('/api/v1/communities/select')
       .set('Authorization', `Bearer ${token2}`)
       .send({ communityId });
+
+    // P-219: respond/confirmCompletion 等写操作现在需要 VerifiedMemberGuard
+    await prisma.communityMember.update({
+      where: { userId_communityId: { userId: userId2, communityId } },
+      data: { verifyStatus: 'verified' },
+    });
   });
 
   afterAll(async () => {

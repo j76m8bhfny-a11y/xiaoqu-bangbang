@@ -41,6 +41,7 @@ export class AuthService {
       where: { id: userId },
       select: {
         id: true,
+        openid: true,
         nickname: true,
         avatarUrl: true,
         bio: true,
@@ -66,6 +67,7 @@ export class AuthService {
 
     return {
       id: user.id,
+      openid: user.openid,
       nickname: user.nickname,
       avatarUrl: user.avatarUrl,
       bio: user.bio,
