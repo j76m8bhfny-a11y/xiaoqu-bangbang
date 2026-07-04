@@ -360,7 +360,18 @@ export class AdminController {
   @Patch('votes/:id')
   async updateVote(
     @Param('id') id: string,
-    @Body() body: Partial<{ title: string; description: string; endAt: string }>,
+    @Body()
+    body: Partial<{
+      title: string;
+      description: string;
+      voteType: string;
+      maxChoices: number;
+      resultVisibility: string;
+      isAnonymous: boolean;
+      startAt: string;
+      endAt: string;
+      status: string;
+    }>,
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.updateVote(id, body, communityId);

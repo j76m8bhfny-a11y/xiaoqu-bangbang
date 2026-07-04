@@ -637,7 +637,17 @@ export class AdminService {
 
   async updateVote(
     id: string,
-    dto: Partial<{ title: string; description: string; endAt: string }>,
+    dto: Partial<{
+      title: string;
+      description: string;
+      voteType: string;
+      maxChoices: number;
+      resultVisibility: string;
+      isAnonymous: boolean;
+      startAt: string;
+      endAt: string;
+      status: string;
+    }>,
     communityId: string,
   ) {
     this.assertMaxLength('标题', dto.title, 50);
