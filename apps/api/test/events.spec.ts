@@ -493,4 +493,96 @@ describe('Feature: 事件系统', () => {
       expect(feedbackNotification).toBeTruthy();
     });
   });
+
+  describe('Scenario: P-225 ai_topic_suggest 开关', () => {
+    let topicId: string;
+
+    beforeAll(async () => {
+      const topic = await prisma.topic.create({
+        data: {
+          communityId,
+          title: '小区绿化问题讨论',
+          description: '讨论小区绿化改善方案',
+          createdBy: userId,
+          aiReviewStatus: 'pass',
+        },
+      });
+      topicId = topic.id;
+    });
+
+    afterAll(async () => {
+      await prisma.topic.delete({ where: { id: topicId } }).catch(() => {});
+    });
+
+    it('开关关闭时应返回空数组', async () => {
+      await prisma.systemSetting.upsert({
+        where: { key: 'ai_topic_suggest' },
+        update: { value: 'false' },
+        create: { key: 'ai_topic_suggest', value: 'false' },
+      });
+
+      try {
+        const res = await request(app.getHttpServer())
+          .get('/api/v1/events/topic-suggestions')
+          .query({ title: '绿化' })
+          .set('Authorization', `Bearer ${token}`)
+          .expect(200);
+
+        expect(res.body.code).toBe(0);
+        expect(res.body.data.items).toHaveLength(0);
+      } finally {
+        await prisma.systemSetting.delete({ where: { key: 'ai_topic_suggest' } });
+      }
+    });
+
+    it('开关开启时应返回推荐议题', async () => {
+      await prisma.systemSetting.upsert({
+        where: { key: 'ai_topic_suggest' },
+        update: { value: 'true' },
+        create: { key: 'ai_topic_suggest', value: 'true' },
+      });
+
+      try {
+        const res = await request(app.getHttpServer())
+          .get('/api/v1/events/topic-suggestions')
+          .query({ title: '绿化' })
+          .set('Authorization', `Bearer ${token}`)
+          .expect(200);
+
+        expect(res.body.code).toBe(0);
+        expect(res.body.data.items.length).toBeGreaterThan(0);
+      } finally {
+        await prisma.systemSetting.delete({ where: { key: 'ai_topic_suggest' } });
+      }
+    });
+  });
+
+  describe('Scenario: P-295 事件图片 AI 审核', () => {
+    it('创建带图片的事件应调用 reviewImage', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/events')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          type: 'help_request',
+          title: 'P-295 测试事件',
+          description: '测试图片审核',
+          images: ['https://example.com/p295-img.jpg'],
+        })
+        .expect(201);
+
+      const eventId = res.body.data.id;
+
+      try {
+        const logs = await prisma.aiReviewLog.findMany({
+          where: { targetType: 'event', targetId: eventId },
+        });
+        // 1 条文本审核 + 1 条图片审核 = 2 条
+        expect(logs.length).toBeGreaterThanOrEqual(2);
+      } finally {
+        await prisma.aiReviewLog.deleteMany({ where: { targetId: eventId } });
+        await prisma.notification.deleteMany({ where: { targetId: eventId } });
+        await prisma.event.delete({ where: { id: eventId } }).catch(() => {});
+      }
+    });
+  });
 });

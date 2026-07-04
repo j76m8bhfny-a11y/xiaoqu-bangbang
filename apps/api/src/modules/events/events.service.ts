@@ -193,6 +193,20 @@ export class EventsService {
       aiReviewStatus = 'manual_review';
     }
 
+    // P-295: 审核图片（与 market 一致）
+    if (dto.images && dto.images.length > 0) {
+      for (const imageUrl of dto.images) {
+        const imageResult = await this.aiReviewService.reviewImage(imageUrl, 'event', tempId, {
+          imageUrl,
+        });
+        if (imageResult.result === 'reject') {
+          status = 'rejected';
+          aiReviewStatus = 'reject';
+          break;
+        }
+      }
+    }
+
     // mock AI 点评（议事类事件 + 审核通过 + 开关开启时生成）
     let aiComment: string | null = null;
     if (isTopicType && aiResult.result === 'pass') {
@@ -253,6 +267,12 @@ export class EventsService {
   }
 
   async suggestTopics(communityId: string, title: string, description: string) {
+    // P-225: ai_topic_suggest 开关关闭时返回空
+    const setting = await this.prisma.systemSetting.findUnique({
+      where: { key: 'ai_topic_suggest' },
+    });
+    if (setting && setting.value !== 'true') return [];
+
     const topics = await this.prisma.topic.findMany({
       where: { communityId, status: 'open' },
       select: { id: true, title: true, description: true },

@@ -11,12 +11,24 @@ export interface AiReviewResult {
 export class AiReviewService {
   constructor(@Inject(PrismaService) private prisma: PrismaService) {}
 
+  private async isContentReviewEnabled(): Promise<boolean> {
+    const setting = await this.prisma.systemSetting.findUnique({
+      where: { key: 'ai_content_review' },
+    });
+    return setting ? setting.value === 'true' : true;
+  }
+
   async reviewText(
     text: string,
     targetType: string,
     targetId: string,
     inputSummary: any = {},
   ): Promise<AiReviewResult> {
+    // P-296: ai_content_review 开关关闭时跳过审核
+    if (!(await this.isContentReviewEnabled())) {
+      return { result: 'pass', labels: [], score: 0 };
+    }
+
     // Mock: 检测明显违规关键词
     const violationKeywords = ['色情', '暴力', '赌博', '诈骗', '毒品'];
     const sensitiveKeywords = ['投诉', '举报', '冲突', '纠纷'];
@@ -56,6 +68,11 @@ export class AiReviewService {
     targetId: string,
     inputSummary: any = {},
   ): Promise<AiReviewResult> {
+    // P-296: ai_content_review 开关关闭时跳过审核
+    if (!(await this.isContentReviewEnabled())) {
+      return { result: 'pass', labels: [], score: 0 };
+    }
+
     // Mock: 图片审核默认通过
     const result: AiReviewResult = { result: 'pass', labels: [], score: 0.05 };
 
