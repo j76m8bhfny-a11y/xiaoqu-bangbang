@@ -6,12 +6,8 @@ export class RankingsService {
   constructor(@Inject(PrismaService) private prisma: PrismaService) {}
 
   /**
-   * Handle full contribution flow after event completion:
-   * 1. Create contribution record with flowers for helper (if exists)
-   * 2. Create contribution record with flowers for creator (public_welfare: 5, feedback: 1)
-   * 3. Check and award badges
-   * 4. Recalculate rankings
-   * 5. Create notifications
+   * 互助类事件完成时触发: helper 花朵 + public_welfare 创建者 5 朵 + completion 通知
+   * 仅处理互助类 (help_request/public_welfare/lost_found)，议事类走 handleEventApproved
    */
   async handleEventCompletion(event: {
     id: string;
@@ -42,7 +38,7 @@ export class RankingsService {
       });
     }
 
-    // 2. Creator contribution record (Standard M10.5: public_welfare 各5朵, 议事 创建者1朵)
+    // 2. Creator contribution record (Standard M10.5: public_welfare 创建者 5 朵)
     const creatorFlowers = this.getCreatorFlowerCount(event.type);
     if (creatorFlowers > 0) {
       await this.prisma.contributionRecord.create({
@@ -71,7 +67,7 @@ export class RankingsService {
     // 4. Recalculate rankings for this community
     await this.recalculateRankings(event.communityId);
 
-    // 5. Create notifications
+    // 5. Create notifications (互助类完成 → type='completion')
     if (helperId) {
       await this.prisma.notification.create({
         data: {
@@ -86,17 +82,60 @@ export class RankingsService {
       });
     }
 
-    // P-283: 议事事件创建者收到 type='feedback' 通知，其他事件 type='completion'
-    const isFeedbackEvent = event.type === 'public_feedback' || event.type === 'discussion';
     await this.prisma.notification.create({
       data: {
         userId: event.creatorId,
         communityId: event.communityId,
-        type: isFeedbackEvent ? 'feedback' : 'completion',
+        type: 'completion',
         title: '事件已完成',
-        content: isFeedbackEvent
-          ? '您发起的议事已确认完成，感谢参与社区建设！'
-          : '您发布的事件已确认完成，感谢您使用互帮互助！',
+        content: '您发布的事件已确认完成，感谢您使用互帮互助！',
+        targetType: 'event',
+        targetId: event.id,
+      },
+    });
+  }
+
+  /**
+   * 议事类事件审核通过时触发 (Map.md §3.4: pending_review → open 即发激励)
+   * 创建者得 1 朵花 (action='feedback') + type='feedback' 通知
+   */
+  async handleEventApproved(event: {
+    id: string;
+    communityId: string;
+    creatorId: string;
+    type: string;
+  }) {
+    const flowerCount = 1;
+
+    // 1. Creator contribution record
+    await this.prisma.contributionRecord.create({
+      data: {
+        userId: event.creatorId,
+        communityId: event.communityId,
+        sourceType: 'event',
+        sourceId: event.id,
+        action: 'feedback',
+        score: flowerCount,
+        flowerCount,
+        reason: `发起事件: ${event.type}`,
+        occurredAt: new Date(),
+      },
+    });
+
+    // 2. Check and award badges
+    await this.checkAndAwardBadges(event.creatorId, event.communityId, 'event', event.id);
+
+    // 3. Recalculate rankings
+    await this.recalculateRankings(event.communityId);
+
+    // 4. Create notification (议事类 → type='feedback')
+    await this.prisma.notification.create({
+      data: {
+        userId: event.creatorId,
+        communityId: event.communityId,
+        type: 'feedback',
+        title: '议事已发布',
+        content: '您发起的议事已审核通过，感谢参与社区建设！',
         targetType: 'event',
         targetId: event.id,
       },
@@ -175,15 +214,13 @@ export class RankingsService {
   }
 
   /**
-   * Standard M10.5: public_welfare 各5朵, 议事(public_feedback/discussion) 创建者1朵
+   * Standard M10.5: 互助类 public_welfare 创建者 5 朵
+   * 议事类创建者 1 朵走 handleEventApproved，不经过此方法
    */
   private getCreatorFlowerCount(eventType: string): number {
     switch (eventType) {
       case 'public_welfare':
         return 5;
-      case 'public_feedback':
-      case 'discussion':
-        return 1;
       default:
         return 0;
     }

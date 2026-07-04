@@ -233,11 +233,19 @@ export class EventsService {
       data: { targetId: event.id },
     });
 
-    // 议事类事件审核通过 → 议题 eventCount +1
+    // 议事类事件审核通过 → 议题 eventCount +1 + 创建者激励 (Map.md §3.4: open 即发激励)
     if (isTopicType && dto.topicId && status === 'open') {
       await this.prisma.topic.update({
         where: { id: dto.topicId },
         data: { eventCount: { increment: 1 } },
+      });
+
+      // 议事类审核通过 → 创建者 1 朵花 + type='feedback' 通知
+      await this.rankingsService.handleEventApproved({
+        id: event.id,
+        communityId: event.communityId,
+        creatorId: event.creatorId,
+        type: event.type,
       });
     }
 

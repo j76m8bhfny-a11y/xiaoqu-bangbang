@@ -352,24 +352,22 @@ describe('Feature: 事件系统', () => {
   });
 
   // P-273: public_welfare 创建者应得 5 朵花（Standard M10.5: 各5朵）
-  // P-274: public_feedback 创建者应得 1 朵花（Standard M10.5: 议事创建者1朵）
-  describe('P-273+P-274: 事件创建者积分', () => {
+  // 互助类走 confirmCompletion 双方确认完成 → handleEventCompletion
+  describe('P-273: 互助类事件创建者积分', () => {
     let welfareEventId: string;
-    let feedbackEventId: string;
 
     afterAll(async () => {
-      const eventIds = [welfareEventId, feedbackEventId].filter(Boolean);
-      if (eventIds.length > 0) {
+      if (welfareEventId) {
         await prisma.contributionRecord.deleteMany({
-          where: { sourceType: 'event', sourceId: { in: eventIds } },
+          where: { sourceType: 'event', sourceId: welfareEventId },
         });
         await prisma.notification.deleteMany({
-          where: { targetType: 'event', targetId: { in: eventIds } },
+          where: { targetType: 'event', targetId: welfareEventId },
         });
         await prisma.eventCompletionConfirmation.deleteMany({
-          where: { eventId: { in: eventIds } },
+          where: { eventId: welfareEventId },
         });
-        await prisma.event.deleteMany({ where: { id: { in: eventIds } } });
+        await prisma.event.deleteMany({ where: { id: welfareEventId } });
       }
     });
 
@@ -412,44 +410,28 @@ describe('Feature: 事件系统', () => {
       expect(helperCr).toBeTruthy();
       expect(helperCr?.flowerCount).toBe(5);
     });
-
-    it('public_feedback 完成后创建者得 1 朵花 (P-274)', async () => {
-      const event = await prisma.event.create({
-        data: {
-          communityId,
-          creatorId: userId,
-          type: 'public_feedback',
-          title: 'P-274 议事反馈',
-          description: '楼道灯问题',
-          status: 'in_progress',
-          selectedHelperId: userId2,
-          rewardType: 'free',
-        },
-      });
-      feedbackEventId = event.id;
-
-      // 双方确认完成
-      await request(app.getHttpServer())
-        .post(`/api/v1/events/${feedbackEventId}/complete/confirm`)
-        .set('Authorization', `Bearer ${token}`)
-        .send({});
-      await request(app.getHttpServer())
-        .post(`/api/v1/events/${feedbackEventId}/complete/confirm`)
-        .set('Authorization', `Bearer ${token2}`)
-        .send({});
-
-      // 验证创建者得 1 朵花
-      const creatorCr = await prisma.contributionRecord.findFirst({
-        where: { sourceType: 'event', sourceId: feedbackEventId, userId },
-      });
-      expect(creatorCr).toBeTruthy();
-      expect(creatorCr?.flowerCount).toBe(1);
-    });
   });
 
-  // P-283: feedback 通知类型触发点 — 议事事件完成时创建者收到 type='feedback' 通知
-  describe('P-283: feedback 通知类型触发', () => {
+  // P-274+P-283: 议事类事件审核通过即发激励（Map.md §3.4: pending_review → open 即发激励）
+  // 议事类不走 confirmCompletion，不走 handleEventCompletion
+  describe('P-274+P-283: 议事类事件审核通过触发激励', () => {
+    let topicId: string;
     let feedbackEventId: string;
+
+    beforeAll(async () => {
+      // 议事类事件必须挂议题
+      const topic = await prisma.topic.create({
+        data: {
+          communityId,
+          createdBy: userId,
+          title: 'P-274 议题',
+          description: '楼道灯问题讨论',
+          aiReviewStatus: 'pass',
+          status: 'open',
+        },
+      });
+      topicId = topic.id;
+    });
 
     afterAll(async () => {
       if (feedbackEventId) {
@@ -459,37 +441,42 @@ describe('Feature: 事件系统', () => {
         await prisma.notification.deleteMany({
           where: { targetType: 'event', targetId: feedbackEventId },
         });
-        await prisma.eventCompletionConfirmation.deleteMany({
-          where: { eventId: feedbackEventId },
-        });
-        await prisma.event.delete({ where: { id: feedbackEventId } });
+        await prisma.event.deleteMany({ where: { id: feedbackEventId } });
+      }
+      if (topicId) {
+        await prisma.topic.delete({ where: { id: topicId } }).catch(() => {});
       }
     });
 
-    it('public_feedback 完成后创建者收到 type=feedback 通知', async () => {
-      const event = await prisma.event.create({
-        data: {
-          communityId,
-          creatorId: userId,
-          type: 'public_feedback',
-          title: 'P-283 议事通知测试',
-          description: '楼道照明问题',
-          status: 'in_progress',
-          selectedHelperId: userId2,
-          rewardType: 'free',
-        },
-      });
-      feedbackEventId = event.id;
-
-      // 双方确认完成
-      await request(app.getHttpServer())
-        .post(`/api/v1/events/${feedbackEventId}/complete/confirm`)
+    it('public_feedback 审核通过后创建者得 1 朵花 + type=feedback 通知 (P-274+P-283)', async () => {
+      // 通过 API 创建议事类事件 → AI 审核通过 → status='open' → 触发激励
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/events')
         .set('Authorization', `Bearer ${token}`)
-        .send({});
-      await request(app.getHttpServer())
-        .post(`/api/v1/events/${feedbackEventId}/complete/confirm`)
-        .set('Authorization', `Bearer ${token2}`)
-        .send({});
+        .send({
+          type: 'public_feedback',
+          title: 'P-274 议事反馈',
+          description: '楼道灯问题',
+          topicId,
+        })
+        .expect(201);
+
+      feedbackEventId = res.body.data.id;
+      expect(res.body.data.status).toBe('open');
+
+      // 验证创建者得 1 朵花
+      const creatorCr = await prisma.contributionRecord.findFirst({
+        where: { sourceType: 'event', sourceId: feedbackEventId, userId },
+      });
+      expect(creatorCr).toBeTruthy();
+      expect(creatorCr?.flowerCount).toBe(1);
+      expect(creatorCr?.action).toBe('feedback');
+
+      // 验证无 helper 贡献记录（议事类无帮手）
+      const helperCr = await prisma.contributionRecord.findFirst({
+        where: { sourceType: 'event', sourceId: feedbackEventId, userId: userId2 },
+      });
+      expect(helperCr).toBeNull();
 
       // 验证创建者收到 type='feedback' 通知
       const feedbackNotification = await prisma.notification.findFirst({
