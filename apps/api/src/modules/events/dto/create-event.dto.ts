@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsArray, IsBoolean, IsEnum, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateEventDto {
   @IsEnum([
@@ -12,9 +20,11 @@ export class CreateEventDto {
   type: string;
 
   @IsString()
+  @MaxLength(100)
   title: string;
 
   @IsString()
+  @MaxLength(2000)
   description: string;
 
   @IsOptional()
@@ -32,10 +42,12 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   locationText?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(100)
   expectedTime?: string;
 
   @IsOptional()

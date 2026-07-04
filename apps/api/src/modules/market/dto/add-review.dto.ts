@@ -1,4 +1,4 @@
-import { IsUUID, IsInt, Min, Max, IsOptional, IsArray, IsString } from 'class-validator';
+import { IsUUID, IsInt, Min, Max, IsOptional, IsArray, IsString, MaxLength } from 'class-validator';
 
 export class AddMarketReviewDto {
   @IsUUID()
@@ -16,5 +16,6 @@ export class AddMarketReviewDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   content?: string;
 }

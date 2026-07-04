@@ -1,7 +1,8 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsArray, MaxLength } from 'class-validator';
 
 export class ClaimDto {
   @IsString()
+  @MaxLength(2000)
   statement: string;
 
   @IsOptional()

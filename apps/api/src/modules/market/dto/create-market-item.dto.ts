@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsOptional, IsArray, IsNumber } from 'class-validator';
+import { IsString, IsEnum, IsOptional, IsArray, IsNumber, MaxLength } from 'class-validator';
 
 export class CreateMarketItemDto {
   @IsString()
@@ -6,9 +6,11 @@ export class CreateMarketItemDto {
   category: string;
 
   @IsString()
+  @MaxLength(100)
   title: string;
 
   @IsString()
+  @MaxLength(2000)
   description: string;
 
   @IsOptional()

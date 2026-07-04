@@ -1,7 +1,8 @@
-import { IsString, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsUUID, MaxLength } from 'class-validator';
 
 export class AddEventCommentDto {
   @IsString()
+  @MaxLength(500)
   content: string;
 
   @IsOptional()
