@@ -70,7 +70,12 @@ export class MarketService {
       take: pagination?.take,
     });
 
-    return items;
+    // P-43: flatten seller 对象对齐 MarketItemDto 契约
+    return items.map(({ seller, ...item }) => ({
+      ...item,
+      sellerNickname: seller?.nickname ?? '',
+      sellerAvatarUrl: seller?.avatarUrl ?? null,
+    }));
   }
 
   async count(
@@ -135,7 +140,14 @@ export class MarketService {
       isLiked = !!like;
     }
 
-    return { ...item, isLiked };
+    // P-43: flatten seller 对象对齐 MarketItemDto 契约
+    const { seller, ...rest } = item;
+    return {
+      ...rest,
+      sellerNickname: seller?.nickname ?? '',
+      sellerAvatarUrl: seller?.avatarUrl ?? null,
+      isLiked,
+    };
   }
 
   async toggleLike(userId: string, itemId: string, communityId: string) {

@@ -290,4 +290,39 @@ describe('Feature: 闲置模块', () => {
       expect(res.body.data.items).toHaveLength(2);
     });
   });
+
+  describe('Scenario: P-43-2 MarketItemDto 扁平化', () => {
+    let itemId: string;
+
+    beforeAll(async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/market/items')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          title: 'P-43-2 测试商品',
+          description: '测试 seller 扁平化',
+          category: 'other',
+          price: 10,
+        })
+        .expect(201);
+      itemId = res.body.data.id;
+    });
+
+    afterAll(async () => {
+      await prisma.marketItem.delete({ where: { id: itemId } }).catch(() => {});
+    });
+
+    it('GET /market/items/:id 应返回扁平 sellerNickname', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/market/items/${itemId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.code).toBe(0);
+      expect(res.body.data).toHaveProperty('sellerNickname');
+      expect(res.body.data.sellerNickname).toBeTruthy();
+      expect(res.body.data).toHaveProperty('sellerAvatarUrl');
+      expect(res.body.data).not.toHaveProperty('seller');
+    });
+  });
 });

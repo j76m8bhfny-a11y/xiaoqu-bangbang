@@ -585,4 +585,54 @@ describe('Feature: 事件系统', () => {
       }
     });
   });
+
+  describe('Scenario: P-43-1 EventApplicationDto 扁平化', () => {
+    let eventId: string;
+
+    beforeAll(async () => {
+      await prisma.communityMember.update({
+        where: { userId_communityId: { userId: userId2, communityId } },
+        data: { verifyStatus: 'verified' },
+      });
+
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/events')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          type: 'help_request',
+          title: 'P-43-1 测试事件',
+          description: '测试申请 DTO 扁平化',
+        })
+        .expect(201);
+      eventId = res.body.data.id;
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/events/${eventId}/applications`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send({ actionType: 'join', message: '我来帮忙' })
+        .expect(201);
+    });
+
+    afterAll(async () => {
+      await prisma.eventApplication.deleteMany({ where: { eventId } });
+      await prisma.notification.deleteMany({ where: { targetId: eventId } });
+      await prisma.aiReviewLog.deleteMany({ where: { targetId: eventId } });
+      await prisma.event.delete({ where: { id: eventId } }).catch(() => {});
+    });
+
+    it('GET /events/:id/applications 应返回扁平 userNickname', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/events/${eventId}/applications`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.code).toBe(0);
+      expect(res.body.data.items).toHaveLength(1);
+      const application = res.body.data.items[0];
+      expect(application).toHaveProperty('userNickname');
+      expect(application.userNickname).toBeTruthy();
+      expect(application).toHaveProperty('userAvatarUrl');
+      expect(application).not.toHaveProperty('user');
+    });
+  });
 });

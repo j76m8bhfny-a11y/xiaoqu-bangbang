@@ -445,13 +445,19 @@ export class EventsService {
     if (event.communityId !== communityId) {
       throw new ForbiddenException('无权访问该事件');
     }
-    return this.prisma.eventApplication.findMany({
+    const applications = await this.prisma.eventApplication.findMany({
       where: { eventId, deletedAt: null },
       include: {
         user: { select: { id: true, nickname: true, avatarUrl: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
+    // P-43: flatten user 对象对齐 EventApplicationDto 契约
+    return applications.map(({ user, ...app }) => ({
+      ...app,
+      userNickname: user?.nickname ?? '',
+      userAvatarUrl: user?.avatarUrl ?? null,
+    }));
   }
 
   async selectHelper(
@@ -913,7 +919,9 @@ export class EventsService {
       },
     });
 
-    return confirmation;
+    // P-43: 返回字段名对齐 EventRateDto 契约 (content/tags 而非 ratingContent/ratingTags)
+    const { ratingContent, ratingTags, ...rest } = confirmation;
+    return { ...rest, content: ratingContent, tags: ratingTags };
   }
 
   async getFeedbackLogs(eventId: string, communityId: string) {
