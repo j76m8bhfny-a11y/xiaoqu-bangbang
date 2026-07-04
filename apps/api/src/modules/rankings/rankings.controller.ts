@@ -56,7 +56,7 @@ export class RankingsController {
     @CurrentUser('userId') userId: string,
     @Query('communityId') communityId?: string,
   ) {
-    const data = await this.rankingsService.getMyBadges(userId, communityId);
-    return { code: 0, message: 'ok', data };
+    const { badges, contributions } = await this.rankingsService.getMyBadges(userId, communityId);
+    return { code: 0, message: 'ok', data: { items: badges, contributions } };
   }
 }
