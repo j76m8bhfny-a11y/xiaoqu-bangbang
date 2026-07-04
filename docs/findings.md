@@ -1949,11 +1949,406 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
+## 二十四、Admin层纵向审查
+
+> 范围: M18.1-M18.19 (Admin API) + M19.1-M19.19 (Admin 前端)
+> 方式: 3 个并行 agent — Agent 1 审 M18.1-M18.9, Agent 2 审 M18.10-M18.19, Agent 3 审 M19.1-M19.19
+> 已排除契约对齐扫描阶段已记录的 P-164/P-169/P-177/P-191/P-265/P-266/P-267/P-280/P-281/P-282/P-262/P-155
+
+### P-300 🟢 M18.1 login token sub 取值问题
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:44`, `admin.guard.ts:18`
+
+**问题**: login 签发 token 时 sub 使用 `admin.userId ?? admin.id`，但 AdminGuard 用 `request.user.userId` 查 adminUser。若 adminUser.userId 为 null（纯后台账号未绑定微信用户），登录成功后所有后续请求在 AdminGuard 查不到 admin 返回 40302。当前若所有 admin 均已绑定 userId 则无影响。
+
+### P-301 🔴 M18.2 pendingReviews 未按 communityId 过滤
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:61`
+
+**问题**: pendingReviews 查询 `aiReviewLog.count({ where: { result: 'manual_review' } })` 没有按 communityId 过滤。committee_admin 登录后能看到全平台所有小区的待审核数量，违反"committee_admin 只能管本小区"的权限边界。
+
+### P-302 🔴 M18.3 内容审核跨小区操作
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:72-106`, `admin.service.ts:69-212`
+
+**问题**: getReviews/countReviews/approveReview/rejectReview/manualVisibleAdminOnly 均未接收 communityId 参数，也未校验 target 内容是否属于当前 admin 的小区。committee_admin 可以查看和审核所有小区的内容审核记录。controller 的 getReviews 也没有 @CurrentCommunityId() 参数。
+
+### P-303 🟡 M18.3 manualVisibleAdminOnly 未通知创建者
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:183-212`
+
+**问题**: PRD M18.3 要求"操作后通知创建者"，approve 和 reject 都发了通知，但 manual-visible-admin-only 操作后未通知创建者内容被设为仅管理员可见。
+
+### P-304 🟡 M18.3 approve/reject 只处理 event 和 market_item
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:109-138, 150-178`
+
+**问题**: approveReview 和 rejectReview 只处理 targetType 为 'event' 和 'market_item' 两种情况，不处理 'event_comment' 和 'market_comment'。若有 comment 类型的 review 进入 approve/reject 流程，不会更新目标状态也不会通知，只更新了 aiReviewLog 的 result，导致目标 comment 状态不一致。
+
+### P-305 🟡 M18.3 manualVisibleAdminOnly 未更新 aiReviewLog result
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:183-212`
+
+**问题**: manualVisibleAdminOnly 没有更新 aiReviewLog 的 result 字段。操作后记录仍为 'manual_review'，会一直出现在待审核列表中，导致管理员重复处理。应将 result 更新为 'manual_handled' 或类似值。
+
+### P-306 🟢 M18.3 manualVisibleAdminOnly 状态处理不统一
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:193-197`
+
+**问题**: manualVisibleAdminOnly 对 market_item 设置 `status: 'pending_review'`，对 event 设置 `visibility: 'admin_only'`，对 comment 设置 `status: 'hidden'`。三种 target 处理方式不统一。market_item 设为 pending_review 可能导致商品重新进入 AI 审核流程而非仅管理员可见。
+
+### P-307 🔴 M18.4 getVerificationDetail 无 communityId 校验
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:124-128`, `admin.service.ts:245-264`
+
+**问题**: getVerificationDetail 没有校验 communityId。controller 没有传 @CurrentCommunityId()，service 直接按 id 查询返回。committee_admin 可以通过传入任意 verification id 查看其他小区的认证详情（含 OCR 结果、AI 结果、材料文件 URL 等敏感信息）。
+
+### P-308 🔴 M18.4 approve/rejectVerification 无 communityId 校验
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:130-144`, `admin.service.ts:266-317`
+
+**问题**: approveVerification 和 rejectVerification 没有校验 verification 的 communityId 是否与当前 admin 一致。committee_admin 可以审核其他小区的认证申请，包括为其他小区用户设置 verified 状态和发放徽章。
+
+### P-309 🟡 M18.4 认证审核无状态检查
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:266-296`
+
+**问题**: approveVerification 没有检查 verification.status 是否为 'pending'。若已 approved 的记录被再次 approve，会重复执行 upsert member、maybeAwardFirstOwnerBadge、发通知等操作。rejectVerification 同理。应在操作前校验 status === 'pending'。
+
+### P-310 🔴 M18.5 addFeedbackLog 无 communityId 校验
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:182-190`, `admin.service.ts:377-395`
+
+**问题**: addFeedbackLog 没有校验 event 是否属于当前 admin 的小区。controller 没有传 communityId，service 通过 event 查询获取 communityId 但不校验。committee_admin 可以为任意小区的事件添加反馈记录。
+
+### P-311 🟡 M18.5 addFeedbackLog 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:377-395`
+
+**问题**: addFeedbackLog 没有写审计日志。作为管理操作（添加处理反馈记录），应记录操作者、事件 ID、状态变更等信息到 audit_logs。其他管理操作如 hideEvent/restoreEvent 都写了审计日志。
+
+### P-312 🟡 M18.5 addFeedbackLog event 不存在不抛错
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:383-388`
+
+**问题**: addFeedbackLog 中 `event?.communityId ?? null`，若 event 不存在（已被删除），communityId 为 null 但代码不会抛错，会继续创建一条 communityId 为 null 的反馈记录。应先检查 event 是否存在。
+
+### P-313 🟡 M18.6 rejectTopic 不更新 status 且不通知
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:1383-1392`
+
+**问题**: rejectTopic 只更新 `aiReviewStatus: 'reject'`，不更新 topic 的 `status` 字段。reject 后 topic.status 仍为 'open'，议题对用户仍可见可互动。应同时设置 status 为 'rejected' 或类似终态。此外 rejectTopic 没有通知议题创建者。
+
+### P-314 🟡 M18.6 mergeTopics 未通知相关方
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:1426-1470`
+
+**问题**: mergeTopics 没有通知源议题和目标议题的创建者及参与者。源议题被删除后，其创建者和事件发布者不知道议题已被合并。应在合并后通知相关方告知内容已迁移到目标议题。
+
+### P-315 🟡 M18.7 hideMarketItem 状态值与 PRD 不一致
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:1236`
+
+**问题**: hideMarketItem 设置 `status: 'hidden'`，但 PRD M18.7 验收标准为 "hide(status→closed)"。代码与 PRD 状态值不一致。需确认 schema 中 market_item 的 status 枚举是否包含 'closed'。
+
+### P-316 🟡 M18.8 业委会成员/公告 create/update 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:411-418, 420-432, 859-874, 876-888`
+
+**问题**: createCommitteeMember、updateCommitteeMember、createAnnouncement、updateAnnouncement 四个操作均没有写审计日志。deleteCommitteeMember 有写审计日志，但 create/update 遗漏。
+
+### P-317 🟡 M18.8 approve/rejectClaim 未通知申请人
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:459-473, 475-487`
+
+**问题**: approveClaim 和 rejectClaim 没有通知申请人。用户申请认领业委会成员身份后，审核结果应通知申请人。approveClaim 通过后申请人不知道已获得身份，rejectClaim 拒绝后不知道被拒绝及原因。
+
+### P-318 🟡 M18.8 认领审核无状态检查
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:459-473`
+
+**问题**: approveClaim 没有检查 claim.status 是否为 'pending'。若已 approved 或 rejected 的 claim 被再次 approve，会重复设置 committeeMember 的 claimedUserId 和 claimStatus，可能覆盖其他人的认领。rejectClaim 同理。
+
+### P-319 🟡 M18.9 create/updateVote 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:503-538, 540-551`
+
+**问题**: createVote 和 updateVote 没有写审计日志。publishVote 和 closeVote 有写审计日志，但创建和编辑投票这两个关键操作遗漏。
+
+### P-320 🟡 M18.9 publish/closeVote 未通知小区成员
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:553-562, 564-573`
+
+**问题**: publishVote 和 closeVote 没有通知小区成员。投票发布后成员需要知道有新投票可参与，投票关闭后参与者需要知道结果已出。
+
+### P-321 🔴 M18.10 Banner 管理未限制仅 platform_admin
+
+**位置**: `apps/api/src/modules/admin/guards/admin.guard.ts:32-38`, `admin.controller.ts:380-444`
+
+**问题**: Banner 管理路由未限制仅 platform_admin。AdminGuard 允许 committee_admin 访问所有 admin 路由（只要 currentCommunityId 匹配），标准明确要求 Banner 管理"仅 platform_admin"。committee_admin 可以创建/修改/发布/下架 Banner。
+
+### P-322 🔴 M18.10 platform_admin 无法管理全平台 Banner
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:646-682`
+
+**问题**: updateBanner/publishBanner/offlineBanner 使用 banner.communityId !== communityId 做归属校验。对于全平台 Banner（communityId=null），platform_admin 的 currentCommunityId 不为 null，校验必然失败，导致 platform_admin 无法管理全平台 Banner。应当对 platform_admin 放开 communityId 限制。
+
+### P-323 🟡 M18.10 createBanner 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:615-658`
+
+**问题**: createBanner 未调用 logAudit 写入审计日志。标准 M18.15 要求"所有 admin 写操作写入 audit_logs"。
+
+### P-324 🟡 M18.10 updateBanner 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:615-658`
+
+**问题**: updateBanner 未调用 logAudit 写入审计日志。
+
+### P-325 🔴 M18.11 服务商管理未限制仅 platform_admin
+
+**位置**: `apps/api/src/modules/admin/guards/admin.guard.ts:32-38`, `admin.controller.ts:446-526`
+
+**问题**: 服务商管理路由未限制仅 platform_admin，committee_admin 可访问全部服务商管理接口。标准明确要求"仅 platform_admin"。
+
+### P-326 🔴 M18.11 createServiceProvider communityId 从 body 传入
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:461-479`, `admin.service.ts:698-725`
+
+**问题**: createServiceProvider 的 communityId 从 body 传入（body.communityId: string），未与 @CurrentCommunityId() 做比对。committee_admin 可为任意社区创建服务商记录。
+
+### P-327 🟡 M18.11 createServiceProvider 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:698-739`
+
+**问题**: createServiceProvider 未调用 logAudit 写入审计日志。
+
+### P-328 🟡 M18.11 updateServiceProvider 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:698-739`
+
+**问题**: updateServiceProvider 未调用 logAudit 写入审计日志。
+
+### P-329 🟡 M18.12 createBadge 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:28-54, 784-843`
+
+**问题**: createBadge 未调用 logAudit 写入审计日志。
+
+### P-330 🟡 M18.12 awardBadge 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:28-54, 784-843`
+
+**问题**: awardBadge 未调用 logAudit 写入审计日志。手动颁发徽章是高风险操作，缺审计日志会导致无法追溯。
+
+### P-331 🟡 M18.12 recalculateRankings 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:28-54, 784-843`
+
+**问题**: recalculateRankings 未调用 logAudit 写入审计日志。
+
+### P-332 🟡 M18.12 勋章 CRUD 缺 PATCH/DELETE
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:543-579`
+
+**问题**: 勋章 CRUD 不完整——只有 GET（列表）和 POST（创建），缺少 PATCH（更新）和 DELETE（停用）。标准要求"勋章 CRUD"。无法停用或修改已有徽章。
+
+### P-333 🔴 M18.13 rejectCommunityApplication reason 可选
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:976-985`, `admin.service.ts:1844-1877`
+
+**问题**: rejectCommunityApplication 的 reason 为可选（body: { reason?: string }，service 参数 reason?: string，落库 reason ?? null）。标准明确要求"reject 需 reason"。对比同模块 rejectVerification/rejectClaim/rejectServiceProvider 均要求 reason 必填，此处不一致。
+
+### P-334 🔴 M18.14 举报 4 种操作无 communityId 校验
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:698-732`, `admin.service.ts:1035-1195`
+
+**问题**: dismissReport/takedownReport/warnReport/banReport 四个操作均未校验 report.communityId 与 admin 的 communityId 归属。controller 未传 @CurrentCommunityId()，service 直接按 reportId 查询后操作。committee_admin 只要知道 reportId 即可跨社区操作其他社区的举报。对比 getReports 正确过滤了 communityId。
+
+### P-335 🟡 M18.14 takedownReport 未通知内容所有者
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:1046-1081`
+
+**问题**: takedownReport 下架内容后未通知内容所有者。对比 warnReport 和 banReport 均发送了通知，takedownReport 隐藏了内容但内容创建者不知情，用户体验不一致。
+
+### P-336 🟡 M18.16 updateShareTemplate 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:935-943`
+
+**问题**: updateShareTemplate 未调用 logAudit 写入审计日志。分享模板影响全站分享行为，修改应可追溯。
+
+### P-337 🟡 M18.16 分享模板 CRUD 缺 POST/DELETE
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:617-627`
+
+**问题**: 分享模板 CRUD 不完整——只有 GET（列表）和 PATCH（更新），缺少 POST（创建）和 DELETE。无法新增或删除分享模板，只能修改已存在的模板。
+
+### P-338 🔴 M18.17 createSocialGroup communityId 从 body 传入
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:644-680`, `admin.service.ts:959-997`
+
+**问题**: createSocialGroup 的 communityId 从 body 传入，committee_admin 可为任意社区创建社群。
+
+### P-339 🔴 M18.17 updateSocialGroup 无 communityId 校验
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:644-680`, `admin.service.ts:959-997`
+
+**问题**: updateSocialGroup 完全无 communityId 归属校验，任何 admin 可修改任意社群。对比 getSocialGroups 正确按 communityId 过滤。
+
+### P-340 🔴 M18.17 deleteSocialGroup 无 communityId 校验
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:644-680`, `admin.service.ts:959-997`
+
+**问题**: deleteSocialGroup 完全无 communityId 归属校验，任何 admin 可删除任意社群。
+
+### P-341 🟡 M18.17 createSocialGroup 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:959-991`
+
+**问题**: createSocialGroup 未调用 logAudit 写入审计日志。仅 deleteSocialGroup 有审计日志。
+
+### P-342 🟡 M18.17 updateSocialGroup 缺审计日志
+
+**位置**: `apps/api/src/modules/admin/admin.service.ts:959-991`
+
+**问题**: updateSocialGroup 未调用 logAudit 写入审计日志。
+
+### P-343 🔴 M18.19 内容长度限制完全未生效
+
+**位置**: `apps/api/src/modules/admin/admin.controller.ts:380-526, 287-352`
+
+**问题**: 内容长度限制完全未生效。根因：controller 中 @Body() 使用 inline TypeScript interface（如 body: { title: string; subtitle?: string; ... }）而非 DTO class。NestJS ValidationPipe 仅对 class-validator 装饰器修饰的 class 生效，interface 在运行时被擦除为 Object，ValidationPipe 跳过校验。受影响端点：createBanner/updateBanner (title/subtitle ≤30)、createServiceProvider/updateServiceProvider (name ≤30, description ≤500)、createVote/updateVote (title ≤50, description ≤500, options ≤30)、createAnnouncement/updateAnnouncement (title ≤50, content ≤2000)。仅有的两个 DTO class（UpdateSettingsDto, UpdateShareTemplateDto）也均未设置 @MaxLength。
+
+### P-344 🟡 M19.1 前端无路由级角色保护
+
+**位置**: `apps/admin/src/components/AuthGuard.tsx:13-24`
+
+**问题**: AuthGuard 只检查 token 是否存在，不检查角色。committee_admin 可通过手动输入 URL 直接访问 /market、/verifications 等 platform_admin 专属页面，页面不会阻止渲染。虽然菜单不显示，但缺乏路由级角色保护。
+
+### P-345 🟢 M19.1 登录页不重定向已登录用户
+
+**位置**: `apps/admin/src/app/login/page.tsx`
+
+**问题**: 登录页不检查是否已登录。已登录用户访问 /login 不会自动跳转 /dashboard，需手动导航。
+
+### P-346 🟢 M19.1 role 默认值导致菜单闪烁
+
+**位置**: `apps/admin/src/components/Layout.tsx:106`
+
+**问题**: role 默认值为 'platform_admin'（`adminUser?.role || 'platform_admin'`）。hydrate 完成前，committee_admin 会短暂看到全部菜单项，造成视觉闪烁。
+
+### P-347 🟢 M19.2 统计卡片点击整页刷新
+
+**位置**: `apps/admin/src/app/dashboard/page.tsx:72`
+
+**问题**: 统计卡片点击跳转使用 window.location.assign(s.href) 而非 Next.js router.push，导致整页刷新，体验较差。
+
+### P-348 🟡 M19.3 status='all' 可能导致空列表
+
+**位置**: `apps/admin/src/app/reviews/page.tsx:210`
+
+**问题**: 状态筛选选择"全部"时，status 被设为字符串 'all' 传给后端。后端如果直接用 status='all' 做 Prisma WHERE 查询，会返回空列表而非全部记录。需确认后端是否对 'all' 做了特殊处理。
+
+### P-349 🟡 M19.4 事件筛选参数后端不处理
+
+**位置**: `apps/admin/src/app/events/page.tsx:59-61` vs `apps/api/src/modules/admin/admin.controller.ts:148-160`
+
+**问题**: 前端传了 type 和 keyword 筛选参数，但后端控制器 getEvents 的 query 类型只声明 { status?: string }。后端 service 可能不处理 type 和 keyword，导致事件类型筛选和关键词搜索不生效。
+
+### P-350 🟡 M19.6 闲置分类筛选参数后端不处理
+
+**位置**: `apps/admin/src/app/market/page.tsx:41-43` vs `apps/api/src/modules/admin/admin.controller.ts:736-748`
+
+**问题**: 前端传了 category 筛选参数，但后端控制器 getMarketItems 只声明 @Query('status') status?: string，不接收 category。分类筛选不生效。
+
+### P-351 🟢 M19.7 拒绝认证原因为空无提示
+
+**位置**: `apps/admin/src/app/verifications/page.tsx:167`
+
+**问题**: 拒绝认证时，onOk 用 if (rejectReason) 判断非空才提交。如果用户不输入原因直接点确定，没有任何操作也没有提示，用户会困惑为何没反应。
+
+### P-352 🔴 M19.9 公告管理页无菜单入口
+
+**位置**: `apps/admin/src/components/Layout.tsx:30-98`
+
+**问题**: 公告管理页面 /committee/announcements 存在且有完整 CRUD，但 Layout.tsx 的 allMenuItems 中没有公告管理的菜单入口。用户无法从侧边栏导航到公告管理页面，只能手动输入 URL。M19.9 要求"业委会管理页 Tab 切换: 成员CRUD+认领审核; 公告CRUD"，公告应作为 Tab 或有独立菜单入口。
+
+### P-353 🟢 M19.9 公告无删除功能
+
+**位置**: `apps/admin/src/app/committee/announcements/page.tsx`
+
+**问题**: 公告只有创建和更新（含发布/隐藏/置顶），无删除功能。后端控制器也无 DELETE 公告接口。如果"CRUD"中的 Delete 通过"隐藏"实现则可接受，但严格来说缺少删除操作。
+
+### P-354 🟢 M19.9 认领拒绝原因为空无提示
+
+**位置**: `apps/admin/src/app/committee/page.tsx:228`
+
+**问题**: 认领拒绝时，onOk 用 if (rejectReason) 判断非空才提交。不输入原因直接点确定无任何提示。
+
+### P-355 🟡 M19.10 isAnonymous 表单控件类型不匹配
+
+**位置**: `apps/admin/src/app/votes/page.tsx:188-190`
+
+**问题**: isAnonymous 字段使用了 valuePropName="checked" 但子组件是 Select。Select 使用 value prop 而非 checked prop 接收值，导致 Select 无法显示选中状态，UI 体验混乱。应移除 valuePropName="checked" 或改用 Switch 组件。
+
+### P-356 🟡 M19.10 投票选项 state 取消后不重置
+
+**位置**: `apps/admin/src/app/votes/page.tsx:34`
+
+**问题**: 新增投票的选项 options state 在组件级别管理。如果用户打开弹窗、填写选项后取消关闭（非提交成功），options 不会被重置。下次打开弹窗时仍显示上次的选项内容。
+
+### P-357 🔴 M19.12 创建服务商表单缺 communityId
+
+**位置**: `apps/admin/src/app/service-providers/page.tsx:137-162` vs `apps/api/src/modules/admin/admin.controller.ts:461-479`
+
+**问题**: 后端创建服务商接口 body 要求 communityId: string（必填），但前端创建表单没有 communityId 输入框。此页面为 platform_admin 专属，platform_admin 可能未绑定具体小区，@CurrentCommunityId() 不提供值。创建请求会因缺少 communityId 而被后端拒绝。（与 P-326 同一根因，前端+后端两个层面）
+
+### P-358 🟡 M19.13 重算榜单后不刷新列表
+
+**位置**: `apps/admin/src/app/rankings/page.tsx:43-47`
+
+**问题**: recalculateMutation 的 onSuccess 只显示 message.success，没有调用 queryClient.invalidateQueries。重算榜单后贡献记录列表不会自动刷新，用户需要手动刷新页面才能看到最新数据。
+
+### P-359 🟡 M19.16 分享模板状态用 Input 而非 Select
+
+**位置**: `apps/admin/src/app/share/page.tsx:110-112`
+
+**问题**: 分享模板的状态字段使用 Input 组件，用户可输入任意文本。应使用 Select 组件限制为 active/inactive 等有效状态值，避免输入无效状态导致数据异常。
+
+### P-360 🔴 M19.17 创建社群表单缺 communityId
+
+**位置**: `apps/admin/src/app/social-groups/page.tsx:96-115` vs `apps/api/src/modules/admin/admin.controller.ts:644-658`
+
+**问题**: 后端创建社群接口 body 要求 communityId: string（必填），但前端创建表单没有 communityId 输入框。创建请求会因缺少 communityId 而失败。（与 P-338 同一根因，前端+后端两个层面）
+
+### P-361 🟡 M19.17 删除社群无确认弹窗
+
+**位置**: `apps/admin/src/app/social-groups/page.tsx:70`
+
+**问题**: 删除社群按钮直接调用 deleteMutation.mutate(record.id)，没有二次确认弹窗（Modal.confirm）。用户可能误删社群数据且无法恢复。
+
+### P-362 🟡 M19.18 defaultReviewPolicy 用 Input 而非 Select
+
+**位置**: `apps/admin/src/app/settings/page.tsx:89-91`
+
+**问题**: defaultReviewPolicy 字段使用 Input 组件，placeholder 为 "auto / manual"。应使用 Select 组件限制为 "auto" 或 "manual" 两个选项，避免用户输入无效值。
+
+**Admin层小结**:
+
+- M18.1 ✅(1🟢) | M18.2 1🔴 | M18.3 1🔴+3🟡+1🟢 | M18.4 2🔴+1🟡 | M18.5 1🔴+2🟡 | M18.6 2🟡 | M18.7 1🟡 | M18.8 3🟡 | M18.9 2🟡
+- M18.10 2🔴+2🟡 | M18.11 2🔴+2🟡 | M18.12 4🟡 | M18.13 1🔴 | M18.14 1🔴+1🟡 | M18.15 ✅ | M18.16 2🟡 | M18.17 3🔴+2🟡 | M18.18 ✅ | M18.19 1🔴
+- M19.1 1🟡+2🟢 | M19.2 1🟢 | M19.3 1🟡 | M19.4 1🟡 | M19.5 ✅ | M19.6 1🟡 | M19.7 1🟢 | M19.8 ✅ | M19.9 1🔴+2🟢 | M19.10 2🟡 | M19.11 ✅ | M19.12 1🔴 | M19.13 1🟡 | M19.14 ✅ | M19.15 ✅ | M19.16 1🟡 | M19.17 1🔴+1🟡 | M19.18 1🟡 | M19.19 ✅
+- 18🔴 + 37🟡 + 8🟢 = 63 个问题
+- **最严重**: P-302/P-307/P-308 (内容审核/认证审核跨小区数据泄露)、P-321/P-325 (Banner/服务商管理未限制 platform_admin)、P-334 (举报跨小区操作)、P-338/P-339/P-340 (社群 CRUD 无 communityId 校验)、P-343 (内容长度限制系统性失效)
+- **系统性问题**: AdminGuard 只做通用 admin 身份校验不区分路由所需角色；审计日志 create/update 普遍遗漏；inline interface 导致 ValidationPipe 形同虚设
+
+---
+
 ## 汇总
 
-| 严重度      | 数量    | 编号                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ----------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔴 阻塞发布 | 57      | P-01, P-06, P-22, P-24, P-41, P-42, P-43, P-46, P-55, P-69, P-72, P-88, P-89, P-99, P-100, P-143, P-144, P-145, P-148, P-164, P-169, P-177, P-186, P-191, P-216, P-218, P-222, P-223, P-224, P-225, P-235, P-236, P-237, P-238, P-243, P-244, P-245, P-246, P-247, P-251, P-252, P-253, P-265, P-273, P-274, P-275, P-277, P-278, P-279, P-280, P-281, P-283, P-284, P-287, P-289, P-295, P-296                                                                                                                                                                                                                                                                                                                                                                  |
-| 🟡 建议修   | 167     | P-02~P-05, P-07~P-10, P-16~P-21, P-23, P-25, P-36~P-38, P-44, P-45, P-47~P-49, P-56, P-58, P-61, P-63, P-67, P-68, P-71, P-73, P-74, P-78, P-79, P-80~P-84, P-90~P-94, P-101~P-107, P-109~P-114, P-116~P-123, P-126~P-127, P-129~P-136, P-138~P-140, P-146~P-147, P-149, P-151~P-153, P-155~P-156, P-158~P-162, P-165~P-166, P-168, P-170~P-176, P-179~P-185, P-187~P-189, P-192~P-193, P-196~P-198, P-200~P-201, P-203, P-204, P-205, P-207, P-209, P-211, P-214, P-215, P-219, P-220, P-221, P-226, P-227, P-228, P-229, P-230, P-231, P-232, P-239, P-240, P-241, P-242, P-248, P-249, P-254, P-255, P-256, P-257, P-258, P-259, P-260, P-261, P-262, P-263, P-264, P-266, P-267, P-270, P-271, P-272, P-276, P-282, P-285, P-288, P-290, P-292, P-293, P-297 |
-| 🟢 可延后   | 75      | P-11~P-15, P-26~P-35, P-39, P-40, P-50~P-54, P-57, P-59, P-60, P-62, P-64~P-66, P-70, P-75~P-77, P-85~P-87, P-95~P-98, P-108, P-115, P-124~P-125, P-128, P-137, P-141~P-142, P-150, P-154, P-157, P-163, P-167, P-178, P-190, P-194~P-195, P-199, P-202, P-206, P-208, P-210, P-212, P-213, P-217, P-233, P-234, P-250, P-268, P-269, P-286, P-291, P-294, P-298, P-299                                                                                                                                                                                                                                                                                                                                                                                          |
-| **合计**    | **299** |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 严重度      | 数量    | 编号                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ----------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔴 阻塞发布 | 75      | P-01, P-06, P-22, P-24, P-41, P-42, P-43, P-46, P-55, P-69, P-72, P-88, P-89, P-99, P-100, P-143, P-144, P-145, P-148, P-164, P-169, P-177, P-186, P-191, P-216, P-218, P-222, P-223, P-224, P-225, P-235, P-236, P-237, P-238, P-243, P-244, P-245, P-246, P-247, P-251, P-252, P-253, P-265, P-273, P-274, P-275, P-277, P-278, P-279, P-280, P-281, P-283, P-284, P-287, P-289, P-295, P-296, P-301, P-302, P-307, P-308, P-310, P-321, P-322, P-325, P-326, P-333, P-334, P-338, P-339, P-340, P-343, P-352, P-357, P-360                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 🟡 建议修   | 204     | P-02~P-05, P-07~P-10, P-16~P-21, P-23, P-25, P-36~P-38, P-44, P-45, P-47~P-49, P-56, P-58, P-61, P-63, P-67, P-68, P-71, P-73, P-74, P-78, P-79, P-80~P-84, P-90~P-94, P-101~P-107, P-109~P-114, P-116~P-123, P-126~P-127, P-129~P-136, P-138~P-140, P-146~P-147, P-149, P-151~P-153, P-155~P-156, P-158~P-162, P-165~P-166, P-168, P-170~P-176, P-179~P-185, P-187~P-189, P-192~P-193, P-196~P-198, P-200~P-201, P-203, P-204, P-205, P-207, P-209, P-211, P-214, P-215, P-219, P-220, P-221, P-226, P-227, P-228, P-229, P-230, P-231, P-232, P-239, P-240, P-241, P-242, P-248, P-249, P-254, P-255, P-256, P-257, P-258, P-259, P-260, P-261, P-262, P-263, P-264, P-266, P-267, P-270, P-271, P-272, P-276, P-282, P-285, P-288, P-290, P-292, P-293, P-297, P-303, P-304, P-305, P-309, P-311, P-312, P-313, P-314, P-315, P-316, P-317, P-318, P-319, P-320, P-323, P-324, P-327, P-328, P-329, P-330, P-331, P-332, P-335, P-336, P-337, P-341, P-342, P-344, P-348, P-349, P-350, P-355, P-356, P-358, P-359, P-361, P-362 |
+| 🟢 可延后   | 83      | P-11~P-15, P-26~P-35, P-39, P-40, P-50~P-54, P-57, P-59, P-60, P-62, P-64~P-66, P-70, P-75~P-77, P-85~P-87, P-95~P-98, P-108, P-115, P-124~P-125, P-128, P-137, P-141~P-142, P-150, P-154, P-157, P-163, P-167, P-178, P-190, P-194~P-195, P-199, P-202, P-206, P-208, P-210, P-212, P-213, P-217, P-233, P-234, P-250, P-268, P-269, P-286, P-291, P-294, P-298, P-299, P-300, P-306, P-345, P-346, P-347, P-351, P-353, P-354                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **合计**    | **362** |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
