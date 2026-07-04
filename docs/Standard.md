@@ -604,14 +604,14 @@
 | 项       | 标准                                                                                                                                                                                                                                                                                                                                                                     |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 量化指标 | 四套激励体系各自独立计算: 互助 (help_request 帮手1朵/创建者0朵, public_welfare 各5朵, lost_found 帮手2朵/创建者0朵) + 议事 (创建者1朵 feedback) + 议题 (创建者1朵 topic) + 小区创建 (申请人 founder+score=10, 助力人 seed+score=5, 均0朵); 写入 contribution_records (UNIQUE userId+sourceType+sourceId+action 防重复); ⚠️ 代码 help_free/help_paid 未统一为 1 朵 (P-61) |
-| 通过证据 | events.spec.ts 完成用例 PASS + contribution_records 表查询 (验证 flowerCount)                                                                                                                                                                                                                                                                                            |
+| 通过证据 | events.spec.ts P-273/P-274 PASS: public_welfare 创建者 5 朵 + feedback 创建者 1 朵; topics.spec.ts P-245 PASS: topic 创建者 1 朵; contribution_records 表查询验证 flowerCount                                                                                                                                                                                            |
 
 ### M10.6 勋章规则
 
-| 项       | 标准                                                                                                                                                         |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 量化指标 | 四类勋章: 互助类 (helper_1/5/20, flower_10/50) + 议事类 (feedback_5/20) + 议题类 (topic_1/5) + 特殊类 (first_owner_top30/founder/seed); 自动检查并颁发; 幂等 |
-| 通过证据 | user-interactions.spec.ts PASS + user_badges 表查询                                                                                                          |
+| 项       | 标准                                                                                                                                                            |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 量化指标 | 四类勋章: 互助类 (helper_1/5/20, flower_10/50) + 议事类 (feedback_5/20) + 议题类 (topic_1/5) + 特殊类 (first_owner_top30/founder/seed); 自动检查并颁发; 幂等    |
+| 通过证据 | rankings.spec.ts P-277/P-278 PASS: feedback_5 + topic_1 + helper_1 勋章颁发验证; checkAndAwardBadges 按 action 类型计数; seed.ts 补全 9 个 Standard badge codes |
 
 ### M10.7 排行重算
 
@@ -647,10 +647,10 @@
 
 ### M11.4 通知类型
 
-| 项       | 标准                                                                                                                                                |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 量化指标 | 9 种 NotificationType: review_result, event_response, completion, badge, feedback, vote, announcement, topic_closed, system; 每种类型在对应场景触发 |
-| 通过证据 | notifications.spec.ts PASS + notifications 表 type 字段查询                                                                                         |
+| 项       | 标准                                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 量化指标 | 9 种 NotificationType: review_result, event_response, completion, badge, feedback, vote, announcement, topic_closed, system; 每种类型在对应场景触发    |
+| 通过证据 | events.spec.ts P-283 PASS: feedback 事件完成触发 type=feedback 通知; votes.spec.ts P-284 PASS: 投票成功触发 type=vote 通知; notifications.spec.ts PASS |
 
 ---
 
