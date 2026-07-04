@@ -78,8 +78,11 @@ describe('Feature: 事件系统', () => {
       where: { userId: { in: [userId, userId2] } },
     });
     await prisma.report.deleteMany({ where: { reporterId: { in: [userId, userId2] } } });
+    await prisma.userBadge.deleteMany({ where: { userId: { in: [userId, userId2] } } });
     await prisma.contributionRecord.deleteMany({ where: { userId: { in: [userId, userId2] } } });
     await prisma.rankingSnapshot.deleteMany({ where: { userId: { in: [userId, userId2] } } });
+    await prisma.topic.deleteMany({ where: { communityId } });
+    await prisma.aiReviewLog.deleteMany({ where: { targetId: { in: [] } } });
     await prisma.event.deleteMany({ where: { communityId } });
     await prisma.communityMember.deleteMany({ where: { communityId } });
     await prisma.community.deleteMany({ where: { id: communityId } });

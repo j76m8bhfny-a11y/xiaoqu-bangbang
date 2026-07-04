@@ -303,7 +303,7 @@ describe('P-277+P-278+P-279: 勋章规则', () => {
   });
 
   it('helper_1 勋章应在 1 次 help 贡献后颁发 (回归)', async () => {
-    // 创建 1 条 help_free 贡献记录
+    // 创建 1 条 help_free 帮手贡献记录（reason='完成事件' 标识帮手）
     const cr = await prisma.contributionRecord.create({
       data: {
         userId,
@@ -313,7 +313,7 @@ describe('P-277+P-278+P-279: 勋章规则', () => {
         action: 'help_free',
         score: 3,
         flowerCount: 3,
-        reason: '互助',
+        reason: '完成事件: help_request',
         occurredAt: new Date(),
       },
     });
@@ -334,5 +334,54 @@ describe('P-277+P-278+P-279: 勋章规则', () => {
 
     const helperBadge = userBadges.find((ub) => ub.badge.code === 'helper_1');
     expect(helperBadge).toBeTruthy();
+  });
+
+  it('public_welfare 创建者不应获得 helper_1 徽章 (P1 徽章计数膨胀修复)', async () => {
+    // 清除之前测试残留的帮手贡献记录（reason='完成事件'）
+    await prisma.contributionRecord.deleteMany({
+      where: {
+        userId,
+        communityId,
+        reason: { startsWith: '完成事件' },
+      },
+    });
+
+    // 创建 1 条 public_welfare 创建者贡献记录（reason='发起事件'）
+    const cr = await prisma.contributionRecord.create({
+      data: {
+        userId,
+        communityId,
+        sourceType: 'event',
+        sourceId: crypto.randomUUID(),
+        action: 'public_welfare',
+        score: 5,
+        flowerCount: 5,
+        reason: '发起事件: public_welfare',
+        occurredAt: new Date(),
+      },
+    });
+    crIds.push(cr.id);
+
+    // 先删除已有 helper_1 徽章（上一个测试可能已颁发）
+    await prisma.userBadge.deleteMany({
+      where: { userId, communityId, badge: { code: 'helper_1' } },
+    });
+
+    // 触发勋章检查
+    await (rankingsService as any).checkAndAwardBadges(
+      userId,
+      communityId,
+      'event',
+      crypto.randomUUID(),
+    );
+
+    const userBadges = await prisma.userBadge.findMany({
+      where: { userId, communityId },
+      include: { badge: { select: { code: true } } },
+    });
+
+    // 创建者不是帮手，不应获得 helper_1 徽章
+    const helperBadge = userBadges.find((ub) => ub.badge.code === 'helper_1');
+    expect(helperBadge).toBeUndefined();
   });
 });

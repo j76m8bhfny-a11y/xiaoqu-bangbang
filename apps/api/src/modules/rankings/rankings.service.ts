@@ -236,10 +236,12 @@ export class RankingsService {
     const baseWhere = { userId, communityId, status: 'valid' as const };
 
     const [helpCount, feedbackCount, topicCount, flowerResult] = await Promise.all([
+      // helper 徽章只算帮手贡献 (reason='完成事件')，不算创建者贡献 (reason='发起事件')
       this.prisma.contributionRecord.count({
         where: {
           ...baseWhere,
           action: { in: ['help_free', 'help_paid', 'public_welfare', 'lost_found'] },
+          reason: { startsWith: '完成事件' },
         },
       }),
       this.prisma.contributionRecord.count({
