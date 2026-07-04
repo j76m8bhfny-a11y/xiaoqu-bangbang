@@ -991,9 +991,9 @@ export class AdminController {
   async rejectCommunityApplication(
     @Param('id') id: string,
     @CurrentUser('userId') adminUserId: string,
-    @Body() body: { reason?: string },
+    @Body() body: { reason: string },
   ) {
-    const data = await this.adminService.rejectCommunityApplication(id, adminUserId, body?.reason);
+    const data = await this.adminService.rejectCommunityApplication(id, adminUserId, body.reason);
     return { code: 0, message: 'ok', data };
   }
 }

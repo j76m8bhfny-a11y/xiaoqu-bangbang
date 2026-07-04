@@ -1907,7 +1907,7 @@ export class AdminService {
     return { id: applicationId, status: 'approved', communityId: result.communityId };
   }
 
-  async rejectCommunityApplication(applicationId: string, adminUserId: string, reason?: string) {
+  async rejectCommunityApplication(applicationId: string, adminUserId: string, reason: string) {
     const app = await this.prisma.communityApplication.findUnique({ where: { id: applicationId } });
     if (!app) throw new NotFoundException('申请不存在');
     if (app.status !== 'pending') throw new ForbiddenException('该申请已处理');
@@ -1923,7 +1923,7 @@ export class AdminService {
       where: { id: applicationId },
       data: {
         status: 'rejected',
-        rejectReason: reason ?? null,
+        rejectReason: reason,
         reviewedAt: new Date(),
         reviewedBy: adminUserId,
       },
