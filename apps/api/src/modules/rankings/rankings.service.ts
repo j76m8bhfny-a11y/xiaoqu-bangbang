@@ -86,13 +86,17 @@ export class RankingsService {
       });
     }
 
+    // P-283: 议事事件创建者收到 type='feedback' 通知，其他事件 type='completion'
+    const isFeedbackEvent = event.type === 'public_feedback' || event.type === 'discussion';
     await this.prisma.notification.create({
       data: {
         userId: event.creatorId,
         communityId: event.communityId,
-        type: 'completion',
+        type: isFeedbackEvent ? 'feedback' : 'completion',
         title: '事件已完成',
-        content: '您发布的事件已确认完成，感谢您使用互帮互助！',
+        content: isFeedbackEvent
+          ? '您发起的议事已确认完成，感谢参与社区建设！'
+          : '您发布的事件已确认完成，感谢您使用互帮互助！',
         targetType: 'event',
         targetId: event.id,
       },

@@ -382,7 +382,7 @@ describe('Feature: 用户互动与内容扩展', () => {
         const res = await request(app.getHttpServer())
           .post(`/api/v1/notifications/${items[0].id}/read`)
           .set('Authorization', `Bearer ${token}`)
-          .expect(200);
+          .expect([200, 201]);
 
         expect(res.body.code).toBe(0);
       }

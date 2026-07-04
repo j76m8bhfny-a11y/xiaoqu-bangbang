@@ -132,6 +132,19 @@ export class VotesService {
       },
     });
 
+    // P-284: 投票后发送 type='vote' 通知
+    await this.prisma.notification.create({
+      data: {
+        userId,
+        communityId: vote.communityId,
+        type: 'vote',
+        title: '投票成功',
+        content: `您已成功参与「${vote.title}」投票`,
+        targetType: 'vote',
+        targetId: voteId,
+      },
+    });
+
     return { id: record.id, votedAt: record.votedAt };
   }
 

@@ -446,4 +446,61 @@ describe('Feature: 事件系统', () => {
       expect(creatorCr?.flowerCount).toBe(1);
     });
   });
+
+  // P-283: feedback 通知类型触发点 — 议事事件完成时创建者收到 type='feedback' 通知
+  describe('P-283: feedback 通知类型触发', () => {
+    let feedbackEventId: string;
+
+    afterAll(async () => {
+      if (feedbackEventId) {
+        await prisma.contributionRecord.deleteMany({
+          where: { sourceType: 'event', sourceId: feedbackEventId },
+        });
+        await prisma.notification.deleteMany({
+          where: { targetType: 'event', targetId: feedbackEventId },
+        });
+        await prisma.eventCompletionConfirmation.deleteMany({
+          where: { eventId: feedbackEventId },
+        });
+        await prisma.event.delete({ where: { id: feedbackEventId } });
+      }
+    });
+
+    it('public_feedback 完成后创建者收到 type=feedback 通知', async () => {
+      const event = await prisma.event.create({
+        data: {
+          communityId,
+          creatorId: userId,
+          type: 'public_feedback',
+          title: 'P-283 议事通知测试',
+          description: '楼道照明问题',
+          status: 'in_progress',
+          selectedHelperId: userId2,
+          rewardType: 'free',
+        },
+      });
+      feedbackEventId = event.id;
+
+      // 双方确认完成
+      await request(app.getHttpServer())
+        .post(`/api/v1/events/${feedbackEventId}/complete/confirm`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({});
+      await request(app.getHttpServer())
+        .post(`/api/v1/events/${feedbackEventId}/complete/confirm`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send({});
+
+      // 验证创建者收到 type='feedback' 通知
+      const feedbackNotification = await prisma.notification.findFirst({
+        where: {
+          userId,
+          type: 'feedback',
+          targetType: 'event',
+          targetId: feedbackEventId,
+        },
+      });
+      expect(feedbackNotification).toBeTruthy();
+    });
+  });
 });

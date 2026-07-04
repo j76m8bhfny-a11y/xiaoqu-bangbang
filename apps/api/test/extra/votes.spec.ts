@@ -94,6 +94,7 @@ describe('Feature: 投票系统（全量）', () => {
       await prisma.voteOption.deleteMany({ where: { voteId: publishedVoteId } });
       await prisma.vote.delete({ where: { id: publishedVoteId } });
     }
+    await prisma.notification.deleteMany({ where: { userId: { in: [userId, adminUserId] } } });
     await prisma.committeeMember.deleteMany({ where: { communityId } });
     await prisma.communityMember.deleteMany({ where: { communityId } });
     await prisma.community.delete({ where: { id: communityId } });
@@ -471,6 +472,68 @@ describe('Feature: 投票系统（全量）', () => {
       expect(res.status).toBe(200);
       expect(res.body.code).toBe(0);
       expect(res.body.data).toHaveProperty('options');
+    });
+  });
+
+  // P-284: vote 通知类型触发点 — 用户投票后收到 type='vote' 通知
+  describe('P-284: vote 通知类型触发', () => {
+    let voteId: string;
+    let optionId: string;
+
+    beforeAll(async () => {
+      // 确保用户已认证
+      await prisma.communityMember.update({
+        where: { userId_communityId: { userId, communityId } },
+        data: { verifyStatus: 'verified' },
+      });
+
+      const now = new Date();
+      const vote = await prisma.vote.create({
+        data: {
+          communityId,
+          title: 'P-284 投票通知测试',
+          description: '测试 vote 通知类型触发',
+          voteType: 'single',
+          startAt: now,
+          endAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+          status: 'published',
+          createdBy: adminUserId,
+        },
+      });
+      voteId = vote.id;
+
+      const option = await prisma.voteOption.create({
+        data: { voteId, content: '选项A', sortOrder: 0 },
+      });
+      optionId = option.id;
+    });
+
+    afterAll(async () => {
+      await prisma.notification.deleteMany({
+        where: { userId, targetType: 'vote', targetId: voteId },
+      });
+      await prisma.voteRecord.deleteMany({ where: { voteId } });
+      await prisma.voteOption.deleteMany({ where: { voteId } });
+      await prisma.vote.delete({ where: { id: voteId } });
+    });
+
+    it('POST /votes/:id/records - 投票后应收到 type=vote 通知', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/votes/${voteId}/records`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ selectedOptionIds: [optionId] });
+
+      expect(res.status).toBe(201);
+
+      const voteNotification = await prisma.notification.findFirst({
+        where: {
+          userId,
+          type: 'vote',
+          targetType: 'vote',
+          targetId: voteId,
+        },
+      });
+      expect(voteNotification).toBeTruthy();
     });
   });
 });
