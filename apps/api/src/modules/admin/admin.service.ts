@@ -2017,6 +2017,22 @@ export class AdminService {
         },
       });
 
+      // P-265: 申请人发 community_founding 贡献记录 (score=10)
+      await tx.contributionRecord.create({
+        data: {
+          userId: app.applicantId,
+          communityId,
+          sourceType: 'community_application',
+          sourceId: applicationId,
+          action: 'community_founding',
+          score: 10,
+          flowerCount: 0,
+          reason: '发起小区开通',
+          status: 'valid',
+          occurredAt: new Date(),
+        },
+      });
+
       // 8. 更新申请状态
       await tx.communityApplication.update({
         where: { id: applicationId },

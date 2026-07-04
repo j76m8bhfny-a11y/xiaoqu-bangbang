@@ -1161,4 +1161,56 @@ describe('Feature: 管理后台（全量）', () => {
       expect(data.disabledReason).toBeNull();
     });
   });
+
+  describe('Scenario: P-265 申请人 community_founding 贡献记录', () => {
+    let applicationId: string;
+    let approvedCommunityId: string;
+
+    afterAll(async () => {
+      if (approvedCommunityId) {
+        await prisma.contributionRecord.deleteMany({ where: { communityId: approvedCommunityId } });
+        await prisma.userBadge.deleteMany({ where: { communityId: approvedCommunityId } });
+        await prisma.communityMember.deleteMany({ where: { communityId: approvedCommunityId } });
+        await prisma.notification.deleteMany({ where: { communityId: approvedCommunityId } });
+        await prisma.communityApplication.deleteMany({ where: { approvedCommunityId } });
+        await prisma.community.delete({ where: { id: approvedCommunityId } }).catch(() => {});
+      }
+      if (applicationId) {
+        await prisma.communityApplication.deleteMany({ where: { id: applicationId } });
+      }
+    });
+
+    it('审批通过后申请人应有 community_founding 贡献记录 (score=10)', async () => {
+      const application = await prisma.communityApplication.create({
+        data: {
+          applicantId: userId,
+          name: 'P265测试小区',
+          city: '南京',
+          district: '鼓楼区',
+          address: 'P265路1号',
+          materialType: 'property_cert',
+          materialUrl: 'https://example.com/p265.jpg',
+        },
+      });
+      applicationId = application.id;
+
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/community-applications/${applicationId}/approve`)
+        .set('Authorization', `Bearer ${platformAdminToken}`)
+        .expect(201);
+
+      approvedCommunityId = res.body.data.communityId;
+
+      const cr = await prisma.contributionRecord.findFirst({
+        where: {
+          userId,
+          communityId: approvedCommunityId,
+          action: 'community_founding',
+        },
+      });
+      expect(cr).toBeTruthy();
+      expect(cr.score).toBe(10);
+      expect(cr.reason).toBe('发起小区开通');
+    });
+  });
 });
