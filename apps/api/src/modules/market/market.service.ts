@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, ForbiddenException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+  Inject,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiReviewService } from '../ai-review/ai-review.service';
 import { CreateMarketItemDto } from './dto/create-market-item.dto';
@@ -332,6 +338,10 @@ export class MarketService {
       });
       if (!parent) {
         throw new NotFoundException('父评论不存在');
+      }
+      // P-237: 嵌套最多 2 层
+      if (parent.parentId) {
+        throw new BadRequestException('评论嵌套最多 2 层');
       }
     }
 

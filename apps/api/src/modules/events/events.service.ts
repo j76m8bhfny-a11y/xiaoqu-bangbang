@@ -609,6 +609,10 @@ export class EventsService {
       if (!parent) {
         throw new NotFoundException('父评论不存在');
       }
+      // P-224: 嵌套最多 2 层，禁止对子评论再回复
+      if (parent.parentId) {
+        throw new BadRequestException('评论嵌套最多 2 层');
+      }
     }
 
     // Run AI review on comment
