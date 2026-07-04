@@ -862,22 +862,43 @@ export class AdminService {
 
   // === Rankings & Badges ===
   async recalculateRankings(communityId: string) {
-    const contributions = await this.prisma.contributionRecord.findMany({
-      where: { communityId, status: 'valid' },
-      select: { userId: true, score: true, flowerCount: true },
-    });
+    const now = new Date();
+    const periodKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    const userMap = new Map<string, { score: number; flowerCount: number; helpCount: number }>();
-    for (const c of contributions) {
-      const existing = userMap.get(c.userId) ?? { score: 0, flowerCount: 0, helpCount: 0 };
-      existing.score += c.score;
-      existing.flowerCount += c.flowerCount;
-      existing.helpCount += 1;
-      userMap.set(c.userId, existing);
-    }
+    // P-22/P-72: 月榜需按 occurredAt 过滤当月，总榜不限
+    const [totalContributions, monthlyContributions] = await Promise.all([
+      this.prisma.contributionRecord.findMany({
+        where: { communityId, status: 'valid' },
+        select: { userId: true, score: true, flowerCount: true },
+      }),
+      this.prisma.contributionRecord.findMany({
+        where: {
+          communityId,
+          status: 'valid',
+          occurredAt: { gte: monthStart, lt: nextMonthStart },
+        },
+        select: { userId: true, score: true, flowerCount: true },
+      }),
+    ]);
 
-    const sorted = [...userMap.entries()].sort((a, b) => b[1].score - a[1].score);
-    const periodKey = new Date().toISOString().slice(0, 7);
+    const buildSorted = (
+      contributions: { userId: string; score: number; flowerCount: number }[],
+    ) => {
+      const userMap = new Map<string, { score: number; flowerCount: number; helpCount: number }>();
+      for (const c of contributions) {
+        const existing = userMap.get(c.userId) ?? { score: 0, flowerCount: 0, helpCount: 0 };
+        existing.score += c.score;
+        existing.flowerCount += c.flowerCount;
+        existing.helpCount += 1;
+        userMap.set(c.userId, existing);
+      }
+      return [...userMap.entries()].sort((a, b) => b[1].score - a[1].score);
+    };
+
+    const totalSorted = buildSorted(totalContributions);
+    const monthlySorted = buildSorted(monthlyContributions);
 
     // Delete existing snapshots and recreate
     await this.prisma.rankingSnapshot.deleteMany({ where: { communityId, periodType: 'total' } });
@@ -885,8 +906,8 @@ export class AdminService {
       where: { communityId, periodType: 'month', periodKey },
     });
 
-    for (let i = 0; i < sorted.length; i++) {
-      const [userId, data] = sorted[i];
+    for (let i = 0; i < totalSorted.length; i++) {
+      const [userId, data] = totalSorted[i];
       await this.prisma.rankingSnapshot.create({
         data: {
           communityId,
@@ -902,8 +923,8 @@ export class AdminService {
       });
     }
 
-    for (let i = 0; i < sorted.length; i++) {
-      const [userId, data] = sorted[i];
+    for (let i = 0; i < monthlySorted.length; i++) {
+      const [userId, data] = monthlySorted[i];
       await this.prisma.rankingSnapshot.create({
         data: {
           communityId,
@@ -919,7 +940,7 @@ export class AdminService {
       });
     }
 
-    return { recalculated: sorted.length, periodKey };
+    return { recalculated: totalSorted.length, periodKey };
   }
 
   // === Announcements ===

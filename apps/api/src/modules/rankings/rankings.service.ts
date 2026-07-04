@@ -125,11 +125,41 @@ export class RankingsService {
 
     // Define badge rules: code -> min flowers/contributions
     const badgeRules = [
-      { code: 'helper_1', minContributions: 1, minFlowers: 0, name: '初来乍到', description: '完成第一次互助' },
-      { code: 'helper_5', minContributions: 5, minFlowers: 0, name: '热心邻居', description: '完成5次互助' },
-      { code: 'helper_20', minContributions: 20, minFlowers: 0, name: '互助达人', description: '完成20次互助' },
-      { code: 'flower_10', minContributions: 0, minFlowers: 10, name: '花开满园', description: '累计获得10朵小红花' },
-      { code: 'flower_50', minContributions: 0, minFlowers: 50, name: '花团锦簇', description: '累计获得50朵小红花' },
+      {
+        code: 'helper_1',
+        minContributions: 1,
+        minFlowers: 0,
+        name: '初来乍到',
+        description: '完成第一次互助',
+      },
+      {
+        code: 'helper_5',
+        minContributions: 5,
+        minFlowers: 0,
+        name: '热心邻居',
+        description: '完成5次互助',
+      },
+      {
+        code: 'helper_20',
+        minContributions: 20,
+        minFlowers: 0,
+        name: '互助达人',
+        description: '完成20次互助',
+      },
+      {
+        code: 'flower_10',
+        minContributions: 0,
+        minFlowers: 10,
+        name: '花开满园',
+        description: '累计获得10朵小红花',
+      },
+      {
+        code: 'flower_50',
+        minContributions: 0,
+        minFlowers: 50,
+        name: '花团锦簇',
+        description: '累计获得50朵小红花',
+      },
     ];
 
     for (const rule of badgeRules) {
@@ -174,17 +204,31 @@ export class RankingsService {
   }
 
   private async recalculateRankings(communityId: string) {
-    // Get current month key
+    // Get current month key and bounds
     const now = new Date();
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    // Aggregate scores per user for this community
-    const userScores = await this.prisma.contributionRecord.groupBy({
-      by: ['userId'],
-      where: { communityId, status: 'valid' },
-      _sum: { flowerCount: true, score: true },
-      _count: { id: true },
-    });
+    // Aggregate scores: monthly (with occurredAt filter) and total (no filter)
+    const [totalScores, monthlyScores] = await Promise.all([
+      this.prisma.contributionRecord.groupBy({
+        by: ['userId'],
+        where: { communityId, status: 'valid' },
+        _sum: { flowerCount: true, score: true },
+        _count: { id: true },
+      }),
+      this.prisma.contributionRecord.groupBy({
+        by: ['userId'],
+        where: {
+          communityId,
+          status: 'valid',
+          occurredAt: { gte: monthStart, lt: nextMonthStart },
+        },
+        _sum: { flowerCount: true, score: true },
+        _count: { id: true },
+      }),
+    ]);
 
     // Also count badges per user
     const userBadgeCounts = await this.prisma.userBadge.groupBy({
@@ -193,12 +237,10 @@ export class RankingsService {
       _count: { id: true },
     });
 
-    const badgeCountMap = new Map(
-      userBadgeCounts.map((ub) => [ub.userId, ub._count.id]),
-    );
+    const badgeCountMap = new Map(userBadgeCounts.map((ub) => [ub.userId, ub._count.id]));
 
     // Calculate and upsert monthly ranking snapshots
-    const monthlyEntries = userScores
+    const monthlyEntries = monthlyScores
       .sort((a, b) => (b._sum.score ?? 0) - (a._sum.score ?? 0))
       .map((entry, index) => ({
         communityId,
@@ -222,7 +264,7 @@ export class RankingsService {
     }
 
     // Calculate and upsert total ranking snapshots
-    const totalEntries = userScores
+    const totalEntries = totalScores
       .sort((a, b) => (b._sum.score ?? 0) - (a._sum.score ?? 0))
       .map((entry, index) => ({
         communityId,
@@ -245,7 +287,11 @@ export class RankingsService {
     }
   }
 
-  async list(communityId: string, query?: { periodType?: string; periodKey?: string }, pagination?: { skip: number; take: number }) {
+  async list(
+    communityId: string,
+    query?: { periodType?: string; periodKey?: string },
+    pagination?: { skip: number; take: number },
+  ) {
     const where: any = { communityId };
     if (query?.periodType) where.periodType = query.periodType;
     if (query?.periodKey) where.periodKey = query.periodKey;
