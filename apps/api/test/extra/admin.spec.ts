@@ -1114,4 +1114,36 @@ describe('Feature: 管理后台（全量）', () => {
       expect(res.status).toBe(403);
     });
   });
+
+  describe('P-148: 分享卡片配置字段对齐', () => {
+    it('GET /share/card-config 返回 title/path（非 shareTitle/sharePath）', async () => {
+      // 创建 share template
+      await prisma.shareTemplate.upsert({
+        where: { targetType: 'event' },
+        update: { titleTemplate: '{title} by {creator}', status: 'active' },
+        create: {
+          targetType: 'event',
+          titleTemplate: '{title} by {creator}',
+          defaultImageUrl: 'https://example.com/share.png',
+          status: 'active',
+        },
+      });
+
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/share/card-config')
+        .query({ targetType: 'event', targetId: '00000000-0000-0000-0000-000000000000' })
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.code).toBe(0);
+      const data = res.body.data;
+      // P-148: 应有 title/path（非 shareTitle/sharePath）
+      expect(data.title).toBeDefined();
+      expect(data.path).toBeDefined();
+      expect(data.shareTitle).toBeUndefined();
+      expect(data.sharePath).toBeUndefined();
+      // P-149: disabledReason 应为 null（非 undefined）
+      expect(data.disabledReason).toBeNull();
+    });
+  });
 });

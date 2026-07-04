@@ -30,7 +30,10 @@ export class ShareService {
       if (event) {
         if (event.status === 'pending_review' || event.status === 'rejected') {
           canShare = false;
-          disabledReason = event.status === 'pending_review' ? '内容正在审核中，暂不可分享' : '内容未通过审核，不可分享';
+          disabledReason =
+            event.status === 'pending_review'
+              ? '内容正在审核中，暂不可分享'
+              : '内容未通过审核，不可分享';
         }
         if (event.visibility === 'admin_only') {
           canShare = false;
@@ -47,7 +50,10 @@ export class ShareService {
       if (item) {
         if (item.status === 'pending_review' || item.status === 'rejected') {
           canShare = false;
-          disabledReason = item.status === 'pending_review' ? '商品正在审核中，暂不可分享' : '商品未通过审核，不可分享';
+          disabledReason =
+            item.status === 'pending_review'
+              ? '商品正在审核中，暂不可分享'
+              : '商品未通过审核，不可分享';
         }
         shareTitle = shareTitle.replace('{title}', item.title);
       }
@@ -80,23 +86,26 @@ export class ShareService {
     return {
       targetType,
       targetId,
-      shareTitle,
+      title: shareTitle,
       imageUrl: template.defaultImageUrl,
-      sharePath,
+      path: sharePath,
       canShare,
-      disabledReason,
+      disabledReason: disabledReason ?? null,
       shareToken,
     };
   }
 
-  async logShare(userId: string, dto: {
-    targetType: string;
-    targetId: string;
-    channel: string;
-    shareToken?: string;
-    scene?: string;
-    communityId?: string;
-  }) {
+  async logShare(
+    userId: string,
+    dto: {
+      targetType: string;
+      targetId: string;
+      channel: string;
+      shareToken?: string;
+      scene?: string;
+      communityId?: string;
+    },
+  ) {
     if (dto.communityId) {
       try {
         const card = await this.getCardConfig(dto.targetType, dto.targetId, dto.communityId);
