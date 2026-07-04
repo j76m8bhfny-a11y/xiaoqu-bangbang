@@ -97,10 +97,14 @@ export class TopicsService {
     if (!data.title || !data.title.trim()) {
       throw new BadRequestException('议题标题不能为空');
     }
+    const title = data.title.trim();
+    if (title.length > 30) {
+      throw new BadRequestException('议题标题不能超过 30 字');
+    }
     const topic = await this.prisma.topic.create({
       data: {
         communityId,
-        title: data.title.trim(),
+        title,
         description: data.description,
         createdBy: userId,
         aiReviewStatus: 'pass',

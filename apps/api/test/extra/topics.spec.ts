@@ -349,4 +349,34 @@ describe('Feature: 议事榜', () => {
       expect(items.every((s: any) => s.similarity < 0.3)).toBe(true);
     });
   });
+
+  // P-246: 议题标题长度校验（≤30 字）
+  describe('P-246: 议题标题长度校验', () => {
+    afterAll(async () => {
+      await prisma.topic.deleteMany({
+        where: { title: { startsWith: 'P-246' } },
+      });
+    });
+
+    it('POST /topics 31 字标题应返回 400', async () => {
+      const longTitle = 'P-246'.padEnd(31, '字');
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ title: longTitle, description: '超长测试' });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('POST /topics 30 字标题应返回 201', async () => {
+      const okTitle = 'P-246'.padEnd(30, '字');
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ title: okTitle, description: '边界测试' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.title).toBe(okTitle);
+    });
+  });
 });
