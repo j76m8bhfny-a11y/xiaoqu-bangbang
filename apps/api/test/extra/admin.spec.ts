@@ -170,7 +170,22 @@ describe('Feature: 管理后台（全量）', () => {
         .expect(200);
 
       expect(res.body.code).toBe(0);
-      expect(res.body.data).toBeDefined();
+      const data = res.body.data;
+      expect(data).toBeDefined();
+      // P-164: 验证字段名对齐 AdminDashboardDto
+      expect(typeof data.pendingReviews).toBe('number');
+      expect(typeof data.pendingVerifications).toBe('number');
+      expect(typeof data.pendingClaims).toBe('number');
+      expect(typeof data.highRiskFeedback).toBe('number');
+      expect(typeof data.pendingReports).toBe('number');
+      expect(typeof data.totalUsers).toBe('number');
+      expect(typeof data.totalEvents).toBe('number');
+      expect(typeof data.totalCommunities).toBe('number');
+      expect(typeof data.todayMutualHelp).toBe('number');
+      expect(Array.isArray(data.todoItems)).toBe(true);
+      // 不应有旧字段名
+      expect(data.eventCount).toBeUndefined();
+      expect(data.userCount).toBeUndefined();
     });
 
     it('GET /admin/dashboard - 普通用户应403', async () => {

@@ -67,24 +67,81 @@ export class AdminService {
   }
 
   async getDashboard(communityId: string) {
-    const [eventCount, marketCount, userCount, pendingEventReviews, pendingMarketReviews] =
-      await Promise.all([
-        this.prisma.event.count({ where: { communityId, deletedAt: null } }),
-        this.prisma.marketItem.count({ where: { communityId, deletedAt: null } }),
-        this.prisma.communityMember.count({ where: { communityId } }),
-        // P-301: 按 communityId 过滤待审核数，不再跨小区统计 aiReviewLog
-        this.prisma.event.count({
-          where: { communityId, aiReviewStatus: 'manual_review', deletedAt: null },
-        }),
-        this.prisma.marketItem.count({
-          where: { communityId, aiReviewStatus: 'manual_review', deletedAt: null },
-        }),
-      ]);
-    return {
-      eventCount,
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [
+      totalEvents,
       marketCount,
-      userCount,
-      pendingReviews: pendingEventReviews + pendingMarketReviews,
+      totalUsers,
+      pendingEventReviews,
+      pendingMarketReviews,
+      pendingVerifications,
+      pendingReports,
+      totalCommunities,
+      todayMutualHelp,
+    ] = await Promise.all([
+      this.prisma.event.count({ where: { communityId, deletedAt: null } }),
+      this.prisma.marketItem.count({ where: { communityId, deletedAt: null } }),
+      this.prisma.communityMember.count({ where: { communityId } }),
+      this.prisma.event.count({
+        where: { communityId, aiReviewStatus: 'manual_review', deletedAt: null },
+      }),
+      this.prisma.marketItem.count({
+        where: { communityId, aiReviewStatus: 'manual_review', deletedAt: null },
+      }),
+      this.prisma.communityMember.count({
+        where: { communityId, verifyStatus: 'pending' },
+      }),
+      this.prisma.report.count({
+        where: { communityId, status: 'pending' },
+      }),
+      this.prisma.community.count(),
+      this.prisma.event.count({
+        where: { communityId, createdAt: { gte: today }, deletedAt: null },
+      }),
+    ]);
+
+    const pendingReviews = pendingEventReviews + pendingMarketReviews;
+
+    // Build todoItems from pending items
+    const todoItems: { type: string; id: string; summary: string; createdAt: string }[] = [];
+    if (pendingReviews > 0) {
+      todoItems.push({
+        type: 'review',
+        id: 'pending-reviews',
+        summary: `${pendingReviews} 条内容待审核`,
+        createdAt: new Date().toISOString(),
+      });
+    }
+    if (pendingVerifications > 0) {
+      todoItems.push({
+        type: 'verification',
+        id: 'pending-verifications',
+        summary: `${pendingVerifications} 位用户待认证`,
+        createdAt: new Date().toISOString(),
+      });
+    }
+    if (pendingReports > 0) {
+      todoItems.push({
+        type: 'report',
+        id: 'pending-reports',
+        summary: `${pendingReports} 条举报待处理`,
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    return {
+      pendingReviews,
+      pendingVerifications,
+      pendingClaims: 0,
+      highRiskFeedback: 0,
+      pendingReports,
+      totalUsers,
+      totalEvents,
+      totalCommunities,
+      todayMutualHelp,
+      todoItems,
     };
   }
 
