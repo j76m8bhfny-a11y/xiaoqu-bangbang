@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  ConflictException,
   Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -95,7 +96,7 @@ export class VotesService {
       where: { voteId_userId: { voteId, userId } },
     });
     if (existingRecord) {
-      throw new BadRequestException('您已投过票');
+      throw new ConflictException('您已投过票');
     }
 
     // 所有投票始终要求认证用户参与

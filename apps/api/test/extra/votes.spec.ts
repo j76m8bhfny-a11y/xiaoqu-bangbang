@@ -353,4 +353,67 @@ describe('Feature: 投票系统（全量）', () => {
       expect(res.status).toBe(403);
     });
   });
+
+  // P-252: 重复投票应返回 409 而非 400
+  describe('P-252: 重复投票返回 409', () => {
+    let voteId: string;
+    let optionId: string;
+
+    beforeAll(async () => {
+      // 认证用户以通过投票校验
+      await prisma.communityMember.update({
+        where: { userId_communityId: { userId, communityId } },
+        data: { verifyStatus: 'verified' },
+      });
+
+      const now = new Date();
+      const vote = await prisma.vote.create({
+        data: {
+          communityId,
+          title: 'P-252 重复投票测试',
+          description: '测试重复投票返回 409',
+          voteType: 'single',
+          startAt: now,
+          endAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+          status: 'published',
+          createdBy: adminUserId,
+        },
+      });
+      voteId = vote.id;
+
+      const option = await prisma.voteOption.create({
+        data: { voteId, content: '选项A', sortOrder: 0 },
+      });
+      optionId = option.id;
+
+      // 先投一次票
+      await request(app.getHttpServer())
+        .post(`/api/v1/votes/${voteId}/records`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ selectedOptionIds: [optionId] });
+    });
+
+    afterAll(async () => {
+      await prisma.communityMember.update({
+        where: { userId_communityId: { userId, communityId } },
+        data: { verifyStatus: 'unverified' },
+      });
+      try {
+        await prisma.voteRecord.deleteMany({ where: { voteId } });
+        await prisma.voteOption.deleteMany({ where: { voteId } });
+        await prisma.vote.delete({ where: { id: voteId } });
+      } catch {
+        // 忽略清理错误
+      }
+    });
+
+    it('POST /votes/:id/records - 重复投票应返回 409', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/votes/${voteId}/records`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ selectedOptionIds: [optionId] });
+
+      expect(res.status).toBe(409);
+    });
+  });
 });

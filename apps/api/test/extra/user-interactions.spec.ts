@@ -238,8 +238,8 @@ describe('Feature: 用户互动与内容扩展', () => {
         .post(`/api/v1/votes/${voteId}/records`)
         .set('Authorization', `Bearer ${token}`)
         .send({ selectedOptionIds: [voteOptionId] })
-        // 后端目前对重复投票返回 400 ("already voted")，保留 200/201/403 作为其它策略兜底。
-        .expect([200, 201, 400, 403]);
+        // P-252: 重复投票现在返回 409 Conflict
+        .expect([200, 201, 400, 403, 409]);
 
       if (res.status === 200 || res.status === 201) {
         expect(res.body.code).toBe(0);
