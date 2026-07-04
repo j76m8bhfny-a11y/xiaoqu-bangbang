@@ -242,8 +242,8 @@ export class AdminService {
     return this.prisma.verification.count({ where });
   }
 
-  async getVerificationDetail(id: string) {
-    return this.prisma.verification.findUnique({
+  async getVerificationDetail(id: string, communityId: string) {
+    const v = await this.prisma.verification.findUnique({
       where: { id },
       select: {
         id: true,
@@ -261,11 +261,13 @@ export class AdminService {
         user: { select: { id: true, nickname: true } },
       },
     });
+    if (!v || v.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    return v;
   }
 
-  async approveVerification(adminId: string, id: string) {
+  async approveVerification(adminId: string, id: string, communityId: string) {
     const v = await this.prisma.verification.findUnique({ where: { id } });
-    if (!v) throw new NotFoundException();
+    if (!v || v.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.verification.update({
       where: { id },
       data: { status: 'approved', reviewedAt: new Date() },
@@ -295,9 +297,9 @@ export class AdminService {
     return { id, status: 'approved' };
   }
 
-  async rejectVerification(adminId: string, id: string, reason: string) {
+  async rejectVerification(adminId: string, id: string, communityId: string, reason: string) {
     const v = await this.prisma.verification.findUnique({ where: { id } });
-    if (!v) throw new NotFoundException();
+    if (!v || v.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.verification.update({
       where: { id },
       data: { status: 'rejected', rejectReason: reason, reviewedAt: new Date() },

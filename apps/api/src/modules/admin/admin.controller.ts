@@ -122,14 +122,18 @@ export class AdminController {
   }
 
   @Get('verifications/:id')
-  async getVerificationDetail(@Param('id') id: string) {
-    const data = await this.adminService.getVerificationDetail(id);
+  async getVerificationDetail(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
+    const data = await this.adminService.getVerificationDetail(id, communityId);
     return { code: 0, message: 'ok', data };
   }
 
   @Post('verifications/:id/approve')
-  async approveVerification(@Param('id') id: string, @CurrentUser('userId') userId: string) {
-    const data = await this.adminService.approveVerification(userId, id);
+  async approveVerification(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.approveVerification(userId, id, communityId);
     return { code: 0, message: 'ok', data };
   }
 
@@ -137,9 +141,10 @@ export class AdminController {
   async rejectVerification(
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
     @Body() body: { reason: string },
   ) {
-    const data = await this.adminService.rejectVerification(userId, id, body.reason);
+    const data = await this.adminService.rejectVerification(userId, id, communityId, body.reason);
     return { code: 0, message: 'ok', data };
   }
 

@@ -27,7 +27,9 @@ describe('Feature: 认证审核', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    );
     await app.init();
 
     prisma = app.get(PrismaService);
@@ -143,7 +145,13 @@ describe('Feature: 认证审核', () => {
     it('未登录应返回401/403', async () => {
       const res = await request(app.getHttpServer())
         .post('/api/v1/verifications')
-        .send({ communityId, materialType: 'property_cert', fileUrl: 'https://x.com/a.jpg', consentAccepted: true, consentVersion: 'v1.0' })
+        .send({
+          communityId,
+          materialType: 'property_cert',
+          fileUrl: 'https://x.com/a.jpg',
+          consentAccepted: true,
+          consentVersion: 'v1.0',
+        })
         .expect([401, 403]);
 
       expect([401, 403]).toContain(res.status);
@@ -203,6 +211,64 @@ describe('Feature: 认证审核', () => {
         expect(res.body.code).toBe(0);
         expect(res.body.data).toHaveProperty('status');
       }
+    });
+  });
+
+  // P-307/P-308: committee_admin 不能跨小区查看/审核认证
+  describe('跨小区认证审核隔离', () => {
+    let communityBId: string;
+    let verificationBId: string;
+
+    afterAll(async () => {
+      try {
+        if (verificationBId) await prisma.verification.delete({ where: { id: verificationBId } });
+        if (communityBId) await prisma.community.delete({ where: { id: communityBId } });
+      } catch {
+        // 忽略清理错误
+      }
+    });
+
+    it('committee_admin 不能查看其他小区的认证详情', async () => {
+      // 创建第二个小区
+      const communityB = await prisma.community.create({
+        data: { name: '隔离测试小区B', city: '南京', district: '鼓楼区', address: '隔离路2号' },
+      });
+      communityBId = communityB.id;
+
+      // 在小区B创建认证记录（含敏感 OCR/AI 结果）
+      const verificationB = await prisma.verification.create({
+        data: {
+          userId,
+          communityId: communityBId,
+          materialType: 'property_cert',
+          maskedFileUrl: 'https://example.com/masked.jpg',
+          originalFileUrl: 'https://example.com/original.jpg',
+          ocrResultJson: { name: '张三', idNumber: '320***1234' },
+          aiResultJson: { score: 0.95, labels: ['property_cert'] },
+          consentSnapshot: { consentAccepted: true, consentVersion: 'v1.0' },
+          status: 'pending',
+        },
+      });
+      verificationBId = verificationB.id;
+
+      // committee_admin（属于小区A）尝试查看小区B的认证详情
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/admin/verifications/${verificationBId}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // 应返回 403（无权操作该资源），而非 200 泄露敏感数据
+      expect(res.status).toBe(403);
+    });
+
+    it('committee_admin 不能审核其他小区的认证', async () => {
+      if (!verificationBId) return;
+
+      // 尝试通过其他小区的认证
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/verifications/${verificationBId}/approve`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(403);
     });
   });
 });
