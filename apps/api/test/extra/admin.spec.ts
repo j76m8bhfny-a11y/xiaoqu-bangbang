@@ -305,9 +305,20 @@ describe('Feature: 管理后台（全量）', () => {
       expect(res.body.code).toBe(0);
       expect(res.body.data.status).toBe('offline');
     });
-  });
 
-  // ===== 居委管理 =====
+    // P-343: 内容长度限制
+    it('POST /admin/banners - 标题超30字应400', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/admin/banners')
+        .set('Authorization', `Bearer ${platformAdminToken}`)
+        .send({
+          communityId,
+          title: '一'.repeat(31),
+          imageUrl: 'https://example.com/banner.jpg',
+        })
+        .expect(400);
+    });
+  });
   describe('【管理】居委成员管理', () => {
     it('GET /admin/committee/members - 获取居委列表', async () => {
       const res = await request(app.getHttpServer())

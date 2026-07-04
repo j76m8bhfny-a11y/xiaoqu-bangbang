@@ -1,4 +1,10 @@
-import { Injectable, Inject, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { maybeAwardFirstOwnerBadge } from '../verifications/verifications.service';
@@ -10,6 +16,13 @@ export class AdminService {
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(NotificationsService) private notificationsService: NotificationsService,
   ) {}
+
+  // P-343: 内容长度校验（inline interface 导致 ValidationPipe 不生效，在 service 层补齐）
+  private assertMaxLength(field: string, value: string | undefined | null, max: number) {
+    if (value && value.length > max) {
+      throw new BadRequestException(`${field}不能超过${max}字`);
+    }
+  }
 
   async login(username: string, password: string) {
     const admin = await this.prisma.adminUser.findFirst({
@@ -596,6 +609,11 @@ export class AdminService {
       options: string[];
     },
   ) {
+    this.assertMaxLength('标题', dto.title, 50);
+    this.assertMaxLength('描述', dto.description, 500);
+    if (dto.options && dto.options.length > 30) {
+      throw new BadRequestException('选项不能超过30个');
+    }
     return this.prisma.vote.create({
       data: {
         communityId,
@@ -622,6 +640,8 @@ export class AdminService {
     dto: Partial<{ title: string; description: string; endAt: string }>,
     communityId: string,
   ) {
+    this.assertMaxLength('标题', dto.title, 50);
+    this.assertMaxLength('描述', dto.description, 500);
     const vote = await this.prisma.vote.findUnique({
       where: { id },
       select: { communityId: true },
@@ -705,6 +725,8 @@ export class AdminService {
     startAt?: string;
     endAt?: string;
   }) {
+    this.assertMaxLength('标题', dto.title, 30);
+    this.assertMaxLength('副标题', dto.subtitle, 30);
     return this.prisma.banner.create({
       data: {
         communityId: dto.communityId,
@@ -727,6 +749,8 @@ export class AdminService {
     id: string,
     dto: Partial<{ title: string; subtitle: string; imageUrl: string; sortOrder: number }>,
   ) {
+    this.assertMaxLength('标题', dto.title, 30);
+    this.assertMaxLength('副标题', dto.subtitle, 30);
     const banner = await this.prisma.banner.findUnique({ where: { id } });
     if (!banner) throw new ForbiddenException('无权操作该资源');
     return this.prisma.banner.update({ where: { id }, data: dto });
@@ -776,6 +800,8 @@ export class AdminService {
       sortOrder?: number;
     },
   ) {
+    this.assertMaxLength('名称', dto.name, 30);
+    this.assertMaxLength('描述', dto.description, 500);
     return this.prisma.serviceProvider.create({
       data: {
         communityId,
@@ -797,6 +823,8 @@ export class AdminService {
     id: string,
     dto: Partial<{ name: string; category: string; description: string; sortOrder: number }>,
   ) {
+    this.assertMaxLength('名称', dto.name, 30);
+    this.assertMaxLength('描述', dto.description, 500);
     const provider = await this.prisma.serviceProvider.findUnique({ where: { id } });
     if (!provider) throw new ForbiddenException('无权操作该资源');
     return this.prisma.serviceProvider.update({ where: { id }, data: dto });
@@ -913,6 +941,8 @@ export class AdminService {
     adminId: string,
     dto: { title: string; content: string; images?: string[] },
   ) {
+    this.assertMaxLength('标题', dto.title, 50);
+    this.assertMaxLength('内容', dto.content, 2000);
     return this.prisma.committeeAnnouncement.create({
       data: {
         communityId,
@@ -930,6 +960,8 @@ export class AdminService {
     dto: Partial<{ title: string; content: string; isPinned: boolean; status: string }>,
     communityId: string,
   ) {
+    this.assertMaxLength('标题', dto.title, 50);
+    this.assertMaxLength('内容', dto.content, 2000);
     const announcement = await this.prisma.committeeAnnouncement.findUnique({
       where: { id },
       select: { communityId: true },
