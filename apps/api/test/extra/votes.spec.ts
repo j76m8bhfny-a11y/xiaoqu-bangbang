@@ -416,4 +416,61 @@ describe('Feature: 投票系统（全量）', () => {
       expect(res.status).toBe(409);
     });
   });
+
+  // P-253: admin_only 投票结果管理员应能查看
+  describe('P-253: admin_only 结果管理员可见', () => {
+    let adminOnlyVoteId: string;
+    let adminOnlyOptionId: string;
+
+    beforeAll(async () => {
+      const now = new Date();
+      const vote = await prisma.vote.create({
+        data: {
+          communityId,
+          title: 'P-253 admin_only 投票',
+          description: '测试 admin_only 结果可见性',
+          voteType: 'single',
+          startAt: now,
+          endAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+          status: 'published',
+          resultVisibility: 'admin_only',
+          createdBy: adminUserId,
+        },
+      });
+      adminOnlyVoteId = vote.id;
+
+      const option = await prisma.voteOption.create({
+        data: { voteId: adminOnlyVoteId, content: '选项A', sortOrder: 0 },
+      });
+      adminOnlyOptionId = option.id;
+    });
+
+    afterAll(async () => {
+      try {
+        await prisma.voteRecord.deleteMany({ where: { voteId: adminOnlyVoteId } });
+        await prisma.voteOption.deleteMany({ where: { voteId: adminOnlyVoteId } });
+        await prisma.vote.delete({ where: { id: adminOnlyVoteId } });
+      } catch {
+        // 忽略清理错误
+      }
+    });
+
+    it('GET /votes/:id/results - 普通用户查看 admin_only 结果应返回 403', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/votes/${adminOnlyVoteId}/results`)
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(403);
+    });
+
+    it('GET /votes/:id/results - 管理员查看 admin_only 结果应返回 200', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/votes/${adminOnlyVoteId}/results`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.code).toBe(0);
+      expect(res.body.data).toHaveProperty('options');
+    });
+  });
 });

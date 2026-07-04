@@ -146,7 +146,19 @@ export class VotesService {
 
     // 检查结果可见性
     if (vote.resultVisibility === 'admin_only') {
-      throw new ForbiddenException('投票结果仅管理员可见');
+      const admin = await this.prisma.adminUser.findFirst({
+        where: {
+          userId,
+          status: 'active',
+          OR: [
+            { role: 'platform_admin' },
+            { role: 'committee_admin', communityId: vote.communityId },
+          ],
+        },
+      });
+      if (!admin) {
+        throw new ForbiddenException('投票结果仅管理员可见');
+      }
     }
 
     if (vote.resultVisibility === 'after_vote') {
