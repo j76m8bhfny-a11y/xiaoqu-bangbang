@@ -350,4 +350,100 @@ describe('Feature: 事件系统', () => {
       expect(res.status).toBe(409);
     });
   });
+
+  // P-273: public_welfare 创建者应得 5 朵花（Standard M10.5: 各5朵）
+  // P-274: public_feedback 创建者应得 1 朵花（Standard M10.5: 议事创建者1朵）
+  describe('P-273+P-274: 事件创建者积分', () => {
+    let welfareEventId: string;
+    let feedbackEventId: string;
+
+    afterAll(async () => {
+      const eventIds = [welfareEventId, feedbackEventId].filter(Boolean);
+      if (eventIds.length > 0) {
+        await prisma.contributionRecord.deleteMany({
+          where: { sourceType: 'event', sourceId: { in: eventIds } },
+        });
+        await prisma.notification.deleteMany({
+          where: { targetType: 'event', targetId: { in: eventIds } },
+        });
+        await prisma.eventCompletionConfirmation.deleteMany({
+          where: { eventId: { in: eventIds } },
+        });
+        await prisma.event.deleteMany({ where: { id: { in: eventIds } } });
+      }
+    });
+
+    it('public_welfare 完成后创建者和帮手各得 5 朵花 (P-273)', async () => {
+      const event = await prisma.event.create({
+        data: {
+          communityId,
+          creatorId: userId,
+          type: 'public_welfare',
+          title: 'P-273 公益活动',
+          description: '社区清洁',
+          status: 'in_progress',
+          selectedHelperId: userId2,
+          rewardType: 'free',
+        },
+      });
+      welfareEventId = event.id;
+
+      // 双方确认完成
+      await request(app.getHttpServer())
+        .post(`/api/v1/events/${welfareEventId}/complete/confirm`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({});
+      await request(app.getHttpServer())
+        .post(`/api/v1/events/${welfareEventId}/complete/confirm`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send({});
+
+      // 验证创建者得 5 朵花
+      const creatorCr = await prisma.contributionRecord.findFirst({
+        where: { sourceType: 'event', sourceId: welfareEventId, userId },
+      });
+      expect(creatorCr).toBeTruthy();
+      expect(creatorCr?.flowerCount).toBe(5);
+
+      // 验证帮手得 5 朵花
+      const helperCr = await prisma.contributionRecord.findFirst({
+        where: { sourceType: 'event', sourceId: welfareEventId, userId: userId2 },
+      });
+      expect(helperCr).toBeTruthy();
+      expect(helperCr?.flowerCount).toBe(5);
+    });
+
+    it('public_feedback 完成后创建者得 1 朵花 (P-274)', async () => {
+      const event = await prisma.event.create({
+        data: {
+          communityId,
+          creatorId: userId,
+          type: 'public_feedback',
+          title: 'P-274 议事反馈',
+          description: '楼道灯问题',
+          status: 'in_progress',
+          selectedHelperId: userId2,
+          rewardType: 'free',
+        },
+      });
+      feedbackEventId = event.id;
+
+      // 双方确认完成
+      await request(app.getHttpServer())
+        .post(`/api/v1/events/${feedbackEventId}/complete/confirm`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({});
+      await request(app.getHttpServer())
+        .post(`/api/v1/events/${feedbackEventId}/complete/confirm`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send({});
+
+      // 验证创建者得 1 朵花
+      const creatorCr = await prisma.contributionRecord.findFirst({
+        where: { sourceType: 'event', sourceId: feedbackEventId, userId },
+      });
+      expect(creatorCr).toBeTruthy();
+      expect(creatorCr?.flowerCount).toBe(1);
+    });
+  });
 });

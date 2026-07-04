@@ -631,6 +631,7 @@ describe('Feature: 议事榜', () => {
         where: { sourceType: 'topic', sourceId: topicId },
       });
       expect(cr).toBeTruthy();
+      expect(cr?.action).toBe('topic'); // P-275: topic 积分 action
       expect(cr?.flowerCount).toBe(1);
       expect(cr?.userId).toBe(userIdA);
     });

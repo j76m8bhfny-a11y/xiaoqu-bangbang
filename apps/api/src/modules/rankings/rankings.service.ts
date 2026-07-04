@@ -7,10 +7,11 @@ export class RankingsService {
 
   /**
    * Handle full contribution flow after event completion:
-   * 1. Create contribution record with flowers for the helper
-   * 2. Check and award badges
-   * 3. Recalculate rankings
-   * 4. Create notifications for both parties
+   * 1. Create contribution record with flowers for helper (if exists)
+   * 2. Create contribution record with flowers for creator (public_welfare: 5, feedback: 1)
+   * 3. Check and award badges
+   * 4. Recalculate rankings
+   * 5. Create notifications
    */
   async handleEventCompletion(event: {
     id: string;
@@ -21,46 +22,69 @@ export class RankingsService {
     rewardType: string;
   }) {
     const helperId = event.selectedHelperId;
-    if (!helperId) return;
-
-    // 1. Determine contribution action and flower count
     const action = this.getEventAction(event.type, event.rewardType);
     const flowerCount = this.getFlowerCount(action);
 
-    // Create contribution record for helper
-    await this.prisma.contributionRecord.create({
-      data: {
-        userId: helperId,
-        communityId: event.communityId,
-        sourceType: 'event',
-        sourceId: event.id,
-        action,
-        score: flowerCount,
-        flowerCount,
-        reason: `完成事件: ${event.type}`,
-        occurredAt: new Date(),
-      },
-    });
+    // 1. Helper contribution record (if helper exists)
+    if (helperId) {
+      await this.prisma.contributionRecord.create({
+        data: {
+          userId: helperId,
+          communityId: event.communityId,
+          sourceType: 'event',
+          sourceId: event.id,
+          action,
+          score: flowerCount,
+          flowerCount,
+          reason: `完成事件: ${event.type}`,
+          occurredAt: new Date(),
+        },
+      });
+    }
 
-    // 2. Check and award badges for both creator and helper
-    await this.checkAndAwardBadges(helperId, event.communityId, 'event', event.id);
-    await this.checkAndAwardBadges(event.creatorId, event.communityId, 'event', event.id);
+    // 2. Creator contribution record (Standard M10.5: public_welfare 各5朵, 议事 创建者1朵)
+    const creatorFlowers = this.getCreatorFlowerCount(event.type);
+    if (creatorFlowers > 0) {
+      await this.prisma.contributionRecord.create({
+        data: {
+          userId: event.creatorId,
+          communityId: event.communityId,
+          sourceType: 'event',
+          sourceId: event.id,
+          action,
+          score: creatorFlowers,
+          flowerCount: creatorFlowers,
+          reason: `发起事件: ${event.type}`,
+          occurredAt: new Date(),
+        },
+      });
+    }
 
-    // 3. Recalculate rankings for this community
+    // 3. Check and award badges
+    if (helperId) {
+      await this.checkAndAwardBadges(helperId, event.communityId, 'event', event.id);
+    }
+    if (creatorFlowers > 0) {
+      await this.checkAndAwardBadges(event.creatorId, event.communityId, 'event', event.id);
+    }
+
+    // 4. Recalculate rankings for this community
     await this.recalculateRankings(event.communityId);
 
-    // 4. Create notifications for both parties
-    await this.prisma.notification.create({
-      data: {
-        userId: helperId,
-        communityId: event.communityId,
-        type: 'completion',
-        title: '事件已完成',
-        content: '您参与的事件已确认完成，获得小红花奖励！',
-        targetType: 'event',
-        targetId: event.id,
-      },
-    });
+    // 5. Create notifications
+    if (helperId) {
+      await this.prisma.notification.create({
+        data: {
+          userId: helperId,
+          communityId: event.communityId,
+          type: 'completion',
+          title: '事件已完成',
+          content: '您参与的事件已确认完成，获得小红花奖励！',
+          targetType: 'event',
+          targetId: event.id,
+        },
+      });
+    }
 
     await this.prisma.notification.create({
       data: {
@@ -144,6 +168,21 @@ export class RankingsService {
       feedback: 1,
     };
     return flowerMap[action] ?? 1;
+  }
+
+  /**
+   * Standard M10.5: public_welfare 各5朵, 议事(public_feedback/discussion) 创建者1朵
+   */
+  private getCreatorFlowerCount(eventType: string): number {
+    switch (eventType) {
+      case 'public_welfare':
+        return 5;
+      case 'public_feedback':
+      case 'discussion':
+        return 1;
+      default:
+        return 0;
+    }
   }
 
   private async checkAndAwardBadges(
