@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
   Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -367,14 +368,22 @@ export class EventsService {
       throw new BadRequestException('该事件当前无法响应');
     }
 
-    const application = await this.prisma.eventApplication.create({
-      data: {
-        eventId,
-        userId,
-        actionType: dto.actionType,
-        message: dto.message ?? null,
-      },
-    });
+    let application;
+    try {
+      application = await this.prisma.eventApplication.create({
+        data: {
+          eventId,
+          userId,
+          actionType: dto.actionType,
+          message: dto.message ?? null,
+        },
+      });
+    } catch (e: any) {
+      if (e?.code === 'P2002') {
+        throw new ConflictException('您已响应过该事件');
+      }
+      throw e;
+    }
 
     // Update event status to in_progress if it was open
     if (event.status === 'open') {

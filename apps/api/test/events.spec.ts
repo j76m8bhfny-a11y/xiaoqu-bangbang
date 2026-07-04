@@ -306,4 +306,48 @@ describe('Feature: 事件系统', () => {
       expect(res.status).toBe(400);
     });
   });
+
+  // P-222: 重复响应（同 actionType）应返回 409 而非 500
+  describe('P-222: 重复响应返回 409', () => {
+    let eventId: string;
+
+    beforeAll(async () => {
+      const event = await prisma.event.create({
+        data: {
+          communityId,
+          creatorId: userId,
+          type: 'help_request',
+          title: 'P-222 测试事件',
+          description: '测试重复响应',
+          status: 'open',
+          rewardType: 'free',
+        },
+      });
+      eventId = event.id;
+    });
+
+    afterAll(async () => {
+      await prisma.eventApplication.deleteMany({ where: { eventId } });
+      await prisma.notification.deleteMany({ where: { targetType: 'event', targetId: eventId } });
+      await prisma.event.delete({ where: { id: eventId } });
+    });
+
+    it('POST /events/:id/applications 首次响应应返回 201', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/events/${eventId}/applications`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send({ actionType: 'help', message: '我可以帮忙' });
+
+      expect(res.status).toBe(201);
+    });
+
+    it('POST /events/:id/applications 重复响应应返回 409', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/events/${eventId}/applications`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send({ actionType: 'help', message: '再次帮忙' });
+
+      expect(res.status).toBe(409);
+    });
+  });
 });
