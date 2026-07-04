@@ -774,6 +774,7 @@ export interface TopicDto {
   closedAt?: string;
   createdBy: string;
   createdAt: string;
+  aiReviewStatus: string;
   latestEventPreview?: { title: string; firstImage?: string };
 }
 

@@ -88,7 +88,7 @@ export class TopicsService {
     return { items, total };
   }
 
-  async findById(id: string, communityId: string) {
+  async findById(id: string, communityId: string, viewerUserId?: string) {
     const topic = await this.prisma.topic.findUnique({
       where: { id },
       include: {
@@ -104,7 +104,7 @@ export class TopicsService {
     if (!topic || topic.communityId !== communityId) {
       throw new NotFoundException('议题不存在');
     }
-    return this.toDetailDto(topic);
+    return this.toDetailDto(topic, viewerUserId);
   }
 
   async create(userId: string, communityId: string, data: { title: string; description?: string }) {
@@ -114,6 +114,9 @@ export class TopicsService {
     const title = data.title.trim();
     if (title.length > 30) {
       throw new BadRequestException('议题标题不能超过 30 字');
+    }
+    if (data.description && data.description.length > 500) {
+      throw new BadRequestException('议题描述不能超过 500 字');
     }
 
     // AI 审核：与 events/market 一致，用 tempId 记录日志再回填
@@ -150,7 +153,7 @@ export class TopicsService {
     });
 
     // 审核通过发 1 朵小红花（Standard M6.2）
-    await this.rankingsService.handleTopicCreation({
+    await this.rankingsService.handleTopicApproved({
       id: topic.id,
       communityId: topic.communityId,
       createdBy: topic.createdBy,
@@ -560,21 +563,26 @@ export class TopicsService {
     };
   }
 
-  private toDetailDto(topic: any) {
+  private toDetailDto(topic: any, viewerUserId?: string) {
     return {
       ...this.toDto(topic),
-      events: (topic.events ?? []).map((e: any) => ({
-        id: e.id,
-        title: e.title,
-        description: e.description,
-        images: e.images ?? [],
-        aiComment: e.aiComment ?? undefined,
-        likeCount: e.likeCount,
-        commentCount: e.commentCount,
-        createdAt: e.createdAt.toISOString(),
-        creator: e.creator,
-        isAnonymous: e.isAnonymous,
-      })),
+      events: (topic.events ?? []).map((e: any) => {
+        // R1: 匿名事件非本人查看时脱敏 creator
+        const isOwner = !!viewerUserId && e.creatorId === viewerUserId;
+        const creator = e.isAnonymous && !isOwner ? null : e.creator;
+        return {
+          id: e.id,
+          title: e.title,
+          description: e.description ?? '',
+          images: e.images ?? [],
+          aiComment: e.aiComment ?? undefined,
+          likeCount: e.likeCount,
+          commentCount: e.commentCount,
+          createdAt: e.createdAt.toISOString(),
+          creator,
+          isAnonymous: e.isAnonymous,
+        };
+      }),
     };
   }
 

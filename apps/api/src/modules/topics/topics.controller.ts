@@ -78,8 +78,12 @@ export class TopicsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
-    const topic = await this.topicsService.findById(id, communityId);
+  async findOne(
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+    @CurrentUser('userId') viewerUserId?: string,
+  ) {
+    const topic = await this.topicsService.findById(id, communityId, viewerUserId);
     return { code: 0, message: 'ok', data: topic };
   }
 

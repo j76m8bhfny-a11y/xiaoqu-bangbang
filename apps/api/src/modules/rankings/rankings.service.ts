@@ -78,7 +78,7 @@ export class RankingsService {
   /**
    * 议题审核通过发 1 朵小红花（Standard M6.2）
    */
-  async handleTopicCreation(topic: {
+  async handleTopicApproved(topic: {
     id: string;
     communityId: string;
     createdBy: string;
@@ -108,7 +108,7 @@ export class RankingsService {
       data: {
         userId: topic.createdBy,
         communityId: topic.communityId,
-        type: 'completion',
+        type: 'review_result',
         title: '议题审核通过',
         content: '您创建的议题已审核通过，获得 1 朵小红花！',
         targetType: 'topic',

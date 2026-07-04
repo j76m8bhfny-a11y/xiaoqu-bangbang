@@ -378,6 +378,26 @@ describe('Feature: 议事榜', () => {
       expect(res.status).toBe(201);
       expect(res.body.data.title).toBe(okTitle);
     });
+
+    it('POST /topics description 超过 500 字应返回 400', async () => {
+      const longDesc = 'x'.repeat(501);
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ title: 'P-248 描述超长', description: longDesc });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('POST /topics description 500 字应返回 201', async () => {
+      const okDesc = 'x'.repeat(500);
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ title: 'P-248 描述边界', description: okDesc });
+
+      expect(res.status).toBe(201);
+    });
   });
 
   // P-247: findById 应返回 events 数组
@@ -425,6 +445,66 @@ describe('Feature: 议事榜', () => {
       expect(res.body.code).toBe(0);
       expect(Array.isArray(res.body.data.events)).toBe(true);
       expect(res.body.data.events.some((e: any) => e.id === eventId)).toBe(true);
+    });
+  });
+
+  // R1: 议题详情中的匿名事件需脱敏（Map.md R1）
+  describe('R1: 议题详情匿名事件脱敏', () => {
+    let r1TopicId: string;
+    let anonEventId: string;
+
+    beforeAll(async () => {
+      const topic = await prisma.topic.create({
+        data: {
+          communityId,
+          title: 'R1 匿名事件议题',
+          description: '测试脱敏',
+          createdBy: userIdA,
+          aiReviewStatus: 'pass',
+        },
+      });
+      r1TopicId = topic.id;
+
+      const event = await prisma.event.create({
+        data: {
+          communityId,
+          creatorId: userIdA,
+          type: 'public_feedback',
+          title: 'R1 匿名事件',
+          description: '匿名发布',
+          status: 'open',
+          topicId: r1TopicId,
+          isAnonymous: true,
+        },
+      });
+      anonEventId = event.id;
+    });
+
+    afterAll(async () => {
+      await prisma.event.deleteMany({ where: { topicId: r1TopicId } });
+      await prisma.topic.delete({ where: { id: r1TopicId } });
+    });
+
+    it('GET /topics/:id 本人查看应保留匿名事件 creator', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/topics/${r1TopicId}`)
+        .set('Authorization', `Bearer ${tokenA}`);
+
+      expect(res.status).toBe(200);
+      const ev = res.body.data.events.find((e: any) => e.id === anonEventId);
+      expect(ev).toBeDefined();
+      expect(ev.creator).not.toBeNull();
+    });
+
+    it('GET /topics/:id 非本人查看应将匿名事件 creator 脱敏为 null', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/topics/${r1TopicId}`)
+        .set('Authorization', `Bearer ${tokenB}`);
+
+      expect(res.status).toBe(200);
+      const ev = res.body.data.events.find((e: any) => e.id === anonEventId);
+      expect(ev).toBeDefined();
+      expect(ev.creator).toBeNull();
     });
   });
 
