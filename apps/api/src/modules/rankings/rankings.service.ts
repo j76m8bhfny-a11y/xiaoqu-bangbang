@@ -75,6 +75,48 @@ export class RankingsService {
     });
   }
 
+  /**
+   * 议题审核通过发 1 朵小红花（Standard M6.2）
+   */
+  async handleTopicCreation(topic: {
+    id: string;
+    communityId: string;
+    createdBy: string;
+    aiReviewStatus: string;
+  }) {
+    if (topic.aiReviewStatus !== 'pass') return;
+
+    const flowerCount = 1;
+    await this.prisma.contributionRecord.create({
+      data: {
+        userId: topic.createdBy,
+        communityId: topic.communityId,
+        sourceType: 'topic',
+        sourceId: topic.id,
+        action: 'topic',
+        score: flowerCount,
+        flowerCount,
+        reason: '议题审核通过',
+        occurredAt: new Date(),
+      },
+    });
+
+    await this.checkAndAwardBadges(topic.createdBy, topic.communityId, 'topic', topic.id);
+    await this.recalculateRankings(topic.communityId);
+
+    await this.prisma.notification.create({
+      data: {
+        userId: topic.createdBy,
+        communityId: topic.communityId,
+        type: 'completion',
+        title: '议题审核通过',
+        content: '您创建的议题已审核通过，获得 1 朵小红花！',
+        targetType: 'topic',
+        targetId: topic.id,
+      },
+    });
+  }
+
   private getEventAction(eventType: string, rewardType: string): string {
     switch (eventType) {
       case 'help_request':

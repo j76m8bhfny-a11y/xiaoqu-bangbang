@@ -522,4 +522,53 @@ describe('Feature: 议事榜', () => {
       if (res.body.data.id) createdIds.push(res.body.data.id);
     });
   });
+
+  // P-245: 议题审核通过发 1 朵小红花
+  describe('P-245: 议题审核通过发花', () => {
+    const topicIds: string[] = [];
+
+    afterAll(async () => {
+      await prisma.contributionRecord.deleteMany({
+        where: { sourceType: 'topic', sourceId: { in: topicIds } },
+      });
+      await prisma.notification.deleteMany({
+        where: { targetType: 'topic', targetId: { in: topicIds } },
+      });
+      await prisma.topic.deleteMany({ where: { id: { in: topicIds } } });
+    });
+
+    it('POST /topics 审核通过应发 1 朵小红花', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ title: 'P-245 议题', description: '社区绿化建议' });
+
+      expect(res.status).toBe(201);
+      const topicId = res.body.data.id;
+      topicIds.push(topicId);
+
+      const cr = await prisma.contributionRecord.findFirst({
+        where: { sourceType: 'topic', sourceId: topicId },
+      });
+      expect(cr).toBeTruthy();
+      expect(cr?.flowerCount).toBe(1);
+      expect(cr?.userId).toBe(userIdA);
+    });
+
+    it('POST /topics 审核拒绝不应发花', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ title: '这是色情内容', description: '违规' });
+
+      expect(res.status).toBe(201);
+      const topicId = res.body.data.id;
+      topicIds.push(topicId);
+
+      const cr = await prisma.contributionRecord.findFirst({
+        where: { sourceType: 'topic', sourceId: topicId },
+      });
+      expect(cr).toBeNull();
+    });
+  });
 });

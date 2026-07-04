@@ -9,6 +9,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AiReviewService } from '../ai-review/ai-review.service';
+import { RankingsService } from '../rankings/rankings.service';
 
 interface TopicListQuery {
   status?: string;
@@ -38,6 +39,7 @@ export class TopicsService {
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(NotificationsService) private notificationsService: NotificationsService,
     @Inject(AiReviewService) private aiReviewService: AiReviewService,
+    @Inject(RankingsService) private rankingsService: RankingsService,
   ) {}
 
   // ===== 议题 CRUD =====
@@ -145,6 +147,14 @@ export class TopicsService {
     await this.prisma.aiReviewLog.updateMany({
       where: { targetType: 'topic', targetId: tempId },
       data: { targetId: topic.id },
+    });
+
+    // 审核通过发 1 朵小红花（Standard M6.2）
+    await this.rankingsService.handleTopicCreation({
+      id: topic.id,
+      communityId: topic.communityId,
+      createdBy: topic.createdBy,
+      aiReviewStatus,
     });
 
     return this.toDto(topic);
