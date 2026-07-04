@@ -840,4 +840,145 @@ describe('Feature: 管理后台（全量）', () => {
       expect(src).toBeNull();
     });
   });
+
+  // P-310/P-334/P-338/P-339/P-340: 跨小区操作隔离
+  describe('【安全】跨小区操作隔离', () => {
+    let communityBId: string;
+    let eventBId: string;
+    let reportBId: string;
+    let socialGroupBId: string;
+
+    beforeAll(async () => {
+      const communityB = await prisma.community.create({
+        data: { name: '隔离测试小区C', city: '南京', district: '鼓楼区', address: '隔离路3号' },
+      });
+      communityBId = communityB.id;
+
+      // 在小区B创建事件（用于 P-310 feedback-log 测试）
+      const eventB = await prisma.event.create({
+        data: {
+          communityId: communityBId,
+          creatorId: adminUserId,
+          title: '小区B事件',
+          description: '跨小区隔离测试',
+          type: 'help_request',
+          status: 'active',
+        },
+      });
+      eventBId = eventB.id;
+
+      // 在小区B创建举报记录（用于 P-334 测试）
+      const reportB = await prisma.report.create({
+        data: {
+          reporterId: adminUserId,
+          targetType: 'event',
+          targetId: eventBId,
+          communityId: communityBId,
+          reason: 'ad_spam',
+          description: '测试跨小区举报',
+          status: 'pending',
+        },
+      });
+      reportBId = reportB.id;
+
+      // 在小区B创建社群（用于 P-339/P-340 测试）
+      const groupB = await prisma.communitySocialGroup.create({
+        data: {
+          communityId: communityBId,
+          title: '小区B社群',
+          qrImageUrl: 'https://example.com/qr.png',
+        },
+      });
+      socialGroupBId = groupB.id;
+    });
+
+    afterAll(async () => {
+      try {
+        await prisma.feedbackProcessLog.deleteMany({ where: { eventId: eventBId } });
+        await prisma.report.deleteMany({ where: { communityId: communityBId } });
+        await prisma.communitySocialGroup.deleteMany({ where: { communityId: communityBId } });
+        await prisma.event.deleteMany({ where: { communityId: communityBId } });
+        await prisma.community.delete({ where: { id: communityBId } });
+      } catch {
+        // 忽略清理错误
+      }
+    });
+
+    // P-310: committee_admin 不能给其他小区的事件添加处理记录
+    it('POST /admin/events/:id/feedback-logs - 不能给其他小区事件添加处理记录', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/events/${eventBId}/feedback-logs`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ status: 'processing', content: '跨小区测试' });
+      expect(res.status).toBe(403);
+    });
+
+    // P-334: committee_admin 不能处理其他小区的举报
+    it('POST /admin/reports/:id/dismiss - 不能驳回其他小区的举报', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/reports/${reportBId}/dismiss`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('POST /admin/reports/:id/takedown - 不能下架其他小区的举报目标', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/reports/${reportBId}/takedown`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ reason: '违规内容' });
+      expect(res.status).toBe(403);
+    });
+
+    it('POST /admin/reports/:id/warn - 不能警告其他小区的被举报用户', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/reports/${reportBId}/warn`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ reason: '警告原因' });
+      expect(res.status).toBe(403);
+    });
+
+    it('POST /admin/reports/:id/ban - 不能封禁其他小区的被举报用户', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/reports/${reportBId}/ban`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ reason: '封禁原因' });
+      expect(res.status).toBe(403);
+    });
+
+    // P-338: createSocialGroup 应使用 @CurrentCommunityId，忽略 body.communityId
+    it('POST /admin/community-social-groups - 应使用当前小区，忽略 body.communityId', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/admin/community-social-groups')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          communityId: communityBId, // 尝试在 body 中指定其他小区
+          title: '渗透测试社群',
+          qrImageUrl: 'https://example.com/qr.png',
+        })
+        .expect(201);
+
+      // 创建的社群应属于 admin 的小区（communityId），而非 communityBId
+      expect(res.body.data.communityId).toBe(communityId);
+
+      // 清理
+      await prisma.communitySocialGroup.delete({ where: { id: res.body.data.id } });
+    });
+
+    // P-339: committee_admin 不能更新其他小区的社群
+    it('PATCH /admin/community-social-groups/:id - 不能更新其他小区的社群', async () => {
+      const res = await request(app.getHttpServer())
+        .patch(`/api/v1/admin/community-social-groups/${socialGroupBId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ title: '篡改后的标题' });
+      expect(res.status).toBe(403);
+    });
+
+    // P-340: committee_admin 不能删除其他小区的社群
+    it('DELETE /admin/community-social-groups/:id - 不能删除其他小区的社群', async () => {
+      const res = await request(app.getHttpServer())
+        .delete(`/api/v1/admin/community-social-groups/${socialGroupBId}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(403);
+    });
+  });
 });

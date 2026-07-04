@@ -391,15 +391,20 @@ export class AdminService {
   async addFeedbackLog(
     adminId: string,
     eventId: string,
+    communityId: string,
     dto: { status: string; content: string; images?: string[]; visibleToPublic?: boolean },
   ) {
-    // Resolve communityId from event
-    const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+    // P-310: 校验 event 属于当前 admin 的小区
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      select: { communityId: true },
+    });
+    if (!event || event.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     return this.prisma.feedbackProcessLog.create({
       data: {
         eventId,
         operatorId: adminId,
-        communityId: event?.communityId ?? null,
+        communityId: event.communityId,
         status: dto.status,
         content: dto.content,
         images: dto.images ?? [],
@@ -970,17 +975,19 @@ export class AdminService {
     return this.prisma.communitySocialGroup.count({ where: { communityId } });
   }
 
-  async createSocialGroup(dto: {
-    communityId: string;
-    title: string;
-    description?: string;
-    qrImageUrl: string;
-    visibleTo?: string;
-    sortOrder?: number;
-  }) {
+  async createSocialGroup(
+    communityId: string,
+    dto: {
+      title: string;
+      description?: string;
+      qrImageUrl: string;
+      visibleTo?: string;
+      sortOrder?: number;
+    },
+  ) {
     return this.prisma.communitySocialGroup.create({
       data: {
-        communityId: dto.communityId,
+        communityId,
         title: dto.title,
         description: dto.description,
         qrImageUrl: dto.qrImageUrl,
@@ -993,6 +1000,7 @@ export class AdminService {
 
   async updateSocialGroup(
     id: string,
+    communityId: string,
     dto: Partial<{
       title: string;
       description: string;
@@ -1001,10 +1009,22 @@ export class AdminService {
       sortOrder: number;
     }>,
   ) {
+    // P-339: 校验社群属于当前 admin 的小区
+    const group = await this.prisma.communitySocialGroup.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!group || group.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     return this.prisma.communitySocialGroup.update({ where: { id }, data: dto });
   }
 
-  async deleteSocialGroup(adminId: string, id: string) {
+  async deleteSocialGroup(adminId: string, id: string, communityId: string) {
+    // P-340: 校验社群属于当前 admin 的小区
+    const group = await this.prisma.communitySocialGroup.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!group || group.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.communitySocialGroup.delete({ where: { id } });
     await this.logAudit(adminId, 'delete_social_group', 'community_social_group', id);
     return { id };
@@ -1046,9 +1066,10 @@ export class AdminService {
     return this.prisma.report.count({ where });
   }
 
-  async dismissReport(adminId: string, reportId: string) {
+  async dismissReport(adminId: string, reportId: string, communityId: string) {
     const report = await this.prisma.report.findUnique({ where: { id: reportId } });
-    if (!report) throw new NotFoundException('举报记录不存在');
+    if (!report || report.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     const updated = await this.prisma.report.update({
       where: { id: reportId },
       data: { status: 'dismissed', handledBy: adminId, handledAt: new Date() },
@@ -1057,9 +1078,10 @@ export class AdminService {
     return updated;
   }
 
-  async takedownReport(adminId: string, reportId: string, reason?: string) {
+  async takedownReport(adminId: string, reportId: string, communityId: string, reason?: string) {
     const report = await this.prisma.report.findUnique({ where: { id: reportId } });
-    if (!report) throw new NotFoundException('举报记录不存在');
+    if (!report || report.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     // Hide the target content
     if (report.targetType === 'event') {
       await this.prisma.event.update({
@@ -1094,9 +1116,10 @@ export class AdminService {
     return updated;
   }
 
-  async warnReport(adminId: string, reportId: string, reason?: string) {
+  async warnReport(adminId: string, reportId: string, communityId: string, reason?: string) {
     const report = await this.prisma.report.findUnique({ where: { id: reportId } });
-    if (!report) throw new NotFoundException('举报记录不存在');
+    if (!report || report.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     const updated = await this.prisma.report.update({
       where: { id: reportId },
       data: { status: 'warned', handledBy: adminId, handledAt: new Date() },
@@ -1104,7 +1127,6 @@ export class AdminService {
     // Notify the reported user about the warning
     // Determine the reported user based on target type
     let reportedUserId: string | null = null;
-    let communityId: string | null = report.communityId;
     if (report.targetType === 'event') {
       const event = await this.prisma.event.findUnique({
         where: { id: report.targetId },
@@ -1114,10 +1136,9 @@ export class AdminService {
     } else if (report.targetType === 'market_item') {
       const item = await this.prisma.marketItem.findUnique({
         where: { id: report.targetId },
-        select: { sellerId: true, communityId: true },
+        select: { sellerId: true },
       });
       reportedUserId = item?.sellerId ?? null;
-      communityId = item?.communityId ?? communityId;
     } else if (report.targetType === 'event_comment') {
       const comment = await this.prisma.eventComment.findUnique({
         where: { id: report.targetId },
@@ -1133,7 +1154,7 @@ export class AdminService {
     } else if (report.targetType === 'user') {
       reportedUserId = report.targetId;
     }
-    if (reportedUserId && communityId) {
+    if (reportedUserId) {
       await this.notificationsService.create({
         userId: reportedUserId,
         communityId,
@@ -1148,26 +1169,24 @@ export class AdminService {
     return updated;
   }
 
-  async banReport(adminId: string, reportId: string, reason?: string) {
+  async banReport(adminId: string, reportId: string, communityId: string, reason?: string) {
     const report = await this.prisma.report.findUnique({ where: { id: reportId } });
-    if (!report) throw new NotFoundException('举报记录不存在');
+    if (!report || report.communityId !== communityId)
+      throw new ForbiddenException('无权操作该资源');
     // Determine the reported user
     let reportedUserId: string | null = null;
-    let communityId: string | null = report.communityId;
     if (report.targetType === 'event') {
       const event = await this.prisma.event.findUnique({
         where: { id: report.targetId },
-        select: { creatorId: true, communityId: true },
+        select: { creatorId: true },
       });
       reportedUserId = event?.creatorId ?? null;
-      communityId = event?.communityId ?? communityId;
     } else if (report.targetType === 'market_item') {
       const item = await this.prisma.marketItem.findUnique({
         where: { id: report.targetId },
-        select: { sellerId: true, communityId: true },
+        select: { sellerId: true },
       });
       reportedUserId = item?.sellerId ?? null;
-      communityId = item?.communityId ?? communityId;
     } else if (report.targetType === 'event_comment') {
       const comment = await this.prisma.eventComment.findUnique({
         where: { id: report.targetId },
@@ -1184,7 +1203,7 @@ export class AdminService {
       reportedUserId = report.targetId;
     }
     // Update user status in community_members to banned
-    if (reportedUserId && communityId) {
+    if (reportedUserId) {
       await this.prisma.communityMember.updateMany({
         where: { userId: reportedUserId, communityId },
         data: { role: 'banned' },

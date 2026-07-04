@@ -188,9 +188,10 @@ export class AdminController {
   async addFeedbackLog(
     @Param('id') eventId: string,
     @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
     @Body() body: { status: string; content: string; images?: string[]; visibleToPublic?: boolean },
   ) {
-    const data = await this.adminService.addFeedbackLog(userId, eventId, body);
+    const data = await this.adminService.addFeedbackLog(userId, eventId, communityId, body);
     return { code: 0, message: 'ok', data };
   }
 
@@ -648,9 +649,9 @@ export class AdminController {
 
   @Post('community-social-groups')
   async createSocialGroup(
+    @CurrentCommunityId() communityId: string,
     @Body()
     body: {
-      communityId: string;
       title: string;
       description?: string;
       qrImageUrl: string;
@@ -658,13 +659,14 @@ export class AdminController {
       sortOrder?: number;
     },
   ) {
-    const data = await this.adminService.createSocialGroup(body);
+    const data = await this.adminService.createSocialGroup(communityId, body);
     return { code: 0, message: 'ok', data };
   }
 
   @Patch('community-social-groups/:id')
   async updateSocialGroup(
     @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
     @Body()
     body: Partial<{
       title: string;
@@ -674,13 +676,17 @@ export class AdminController {
       sortOrder: number;
     }>,
   ) {
-    const data = await this.adminService.updateSocialGroup(id, body);
+    const data = await this.adminService.updateSocialGroup(id, communityId, body);
     return { code: 0, message: 'ok', data };
   }
 
   @Delete('community-social-groups/:id')
-  async deleteSocialGroup(@Param('id') id: string, @CurrentUser('userId') userId: string) {
-    const data = await this.adminService.deleteSocialGroup(userId, id);
+  async deleteSocialGroup(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.deleteSocialGroup(userId, id, communityId);
     return { code: 0, message: 'ok', data };
   }
 
@@ -701,8 +707,12 @@ export class AdminController {
   }
 
   @Post('reports/:id/dismiss')
-  async dismissReport(@Param('id') id: string, @CurrentUser('userId') userId: string) {
-    const data = await this.adminService.dismissReport(userId, id);
+  async dismissReport(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.dismissReport(userId, id, communityId);
     return { code: 0, message: 'ok', data };
   }
 
@@ -710,9 +720,10 @@ export class AdminController {
   async takedownReport(
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
     @Body() body?: { reason?: string },
   ) {
-    const data = await this.adminService.takedownReport(userId, id, body?.reason);
+    const data = await this.adminService.takedownReport(userId, id, communityId, body?.reason);
     return { code: 0, message: 'ok', data };
   }
 
@@ -720,9 +731,10 @@ export class AdminController {
   async warnReport(
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
     @Body() body?: { reason?: string },
   ) {
-    const data = await this.adminService.warnReport(userId, id, body?.reason);
+    const data = await this.adminService.warnReport(userId, id, communityId, body?.reason);
     return { code: 0, message: 'ok', data };
   }
 
@@ -730,9 +742,10 @@ export class AdminController {
   async banReport(
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
     @Body() body?: { reason?: string },
   ) {
-    const data = await this.adminService.banReport(userId, id, body?.reason);
+    const data = await this.adminService.banReport(userId, id, communityId, body?.reason);
     return { code: 0, message: 'ok', data };
   }
 
