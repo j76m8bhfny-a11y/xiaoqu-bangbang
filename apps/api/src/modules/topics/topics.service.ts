@@ -86,11 +86,20 @@ export class TopicsService {
   async findById(id: string, communityId: string) {
     const topic = await this.prisma.topic.findUnique({
       where: { id },
+      include: {
+        events: {
+          where: { deletedAt: null },
+          orderBy: { createdAt: 'desc' },
+          include: {
+            creator: { select: { id: true, nickname: true, avatarUrl: true } },
+          },
+        },
+      },
     });
     if (!topic || topic.communityId !== communityId) {
       throw new NotFoundException('议题不存在');
     }
-    return this.toDto(topic);
+    return this.toDetailDto(topic);
   }
 
   async create(userId: string, communityId: string, data: { title: string; description?: string }) {
@@ -509,6 +518,24 @@ export class TopicsService {
       latestEventPreview: latestEvent
         ? { title: latestEvent.title, firstImage: (latestEvent.images as any)?.[0] }
         : undefined,
+    };
+  }
+
+  private toDetailDto(topic: any) {
+    return {
+      ...this.toDto(topic),
+      events: (topic.events ?? []).map((e: any) => ({
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        images: e.images ?? [],
+        aiComment: e.aiComment ?? undefined,
+        likeCount: e.likeCount,
+        commentCount: e.commentCount,
+        createdAt: e.createdAt.toISOString(),
+        creator: e.creator,
+        isAnonymous: e.isAnonymous,
+      })),
     };
   }
 

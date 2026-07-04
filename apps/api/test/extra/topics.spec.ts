@@ -379,4 +379,52 @@ describe('Feature: 议事榜', () => {
       expect(res.body.data.title).toBe(okTitle);
     });
   });
+
+  // P-247: findById 应返回 events 数组
+  describe('P-247: 议题详情包含 events 数组', () => {
+    let topicWithEventId: string;
+    let eventId: string;
+
+    beforeAll(async () => {
+      const topic = await prisma.topic.create({
+        data: {
+          communityId,
+          title: 'P-247 议题带事件',
+          description: '测试详情返回 events',
+          createdBy: userIdA,
+          aiReviewStatus: 'pass',
+        },
+      });
+      topicWithEventId = topic.id;
+
+      const event = await prisma.event.create({
+        data: {
+          communityId,
+          creatorId: userIdA,
+          type: 'public_feedback',
+          title: 'P-247 关联事件',
+          description: '事件描述',
+          status: 'open',
+          topicId: topicWithEventId,
+        },
+      });
+      eventId = event.id;
+    });
+
+    afterAll(async () => {
+      await prisma.event.deleteMany({ where: { topicId: topicWithEventId } });
+      await prisma.topic.delete({ where: { id: topicWithEventId } });
+    });
+
+    it('GET /topics/:id 应返回 events 数组且包含关联事件', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/topics/${topicWithEventId}`)
+        .set('Authorization', `Bearer ${tokenA}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.code).toBe(0);
+      expect(Array.isArray(res.body.data.events)).toBe(true);
+      expect(res.body.data.events.some((e: any) => e.id === eventId)).toBe(true);
+    });
+  });
 });
