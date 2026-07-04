@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
   Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -442,18 +443,26 @@ export class MarketService {
       aiReviewStatus = 'manual_review';
     }
 
-    const review = await this.prisma.marketReview.create({
-      data: {
-        itemId,
-        reviewerId,
-        revieweeId: dto.revieweeId,
-        rating: dto.rating,
-        tags: dto.tags ?? undefined,
-        content: dto.content ?? null,
-        status: reviewStatus,
-        aiReviewStatus,
-      },
-    });
+    let review;
+    try {
+      review = await this.prisma.marketReview.create({
+        data: {
+          itemId,
+          reviewerId,
+          revieweeId: dto.revieweeId,
+          rating: dto.rating,
+          tags: dto.tags ?? undefined,
+          content: dto.content ?? null,
+          status: reviewStatus,
+          aiReviewStatus,
+        },
+      });
+    } catch (e: any) {
+      if (e?.code === 'P2002') {
+        throw new ConflictException('您已评价过该交易');
+      }
+      throw e;
+    }
 
     return review;
   }

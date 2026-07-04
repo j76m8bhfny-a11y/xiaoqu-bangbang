@@ -14,6 +14,8 @@ describe('Feature: 闲置模块', () => {
   let prisma: PrismaService;
   let token: string;
   let userId: string;
+  let token2: string;
+  let userId2: string;
   let communityId: string;
 
   beforeAll(async () => {
@@ -51,15 +53,32 @@ describe('Feature: 闲置模块', () => {
       where: { userId_communityId: { userId, communityId } },
       data: { verifyStatus: 'verified' },
     });
+
+    // 第二个用户：作为 reviewer 评价 userId
+    const res2 = await request(app.getHttpServer())
+      .post('/api/v1/auth/wechat-login')
+      .send({ code: 'market-test-user-2' });
+    token2 = res2.body.data.token;
+    userId2 = res2.body.data.user.id;
+
+    await request(app.getHttpServer())
+      .post('/api/v1/communities/select')
+      .set('Authorization', `Bearer ${token2}`)
+      .send({ communityId });
+
+    await prisma.communityMember.update({
+      where: { userId_communityId: { userId: userId2, communityId } },
+      data: { verifyStatus: 'verified' },
+    });
   });
 
   afterAll(async () => {
-    await prisma.marketReview.deleteMany({ where: { reviewerId: userId } });
-    await prisma.marketComment.deleteMany({ where: { userId } });
+    await prisma.marketReview.deleteMany({ where: { reviewerId: { in: [userId, userId2] } } });
+    await prisma.marketComment.deleteMany({ where: { userId: { in: [userId, userId2] } } });
     await prisma.marketItem.deleteMany({ where: { communityId } });
     await prisma.communityMember.deleteMany({ where: { communityId } });
     await prisma.community.deleteMany({ where: { id: communityId } });
-    await prisma.user.deleteMany({ where: { id: userId } });
+    await prisma.user.deleteMany({ where: { id: { in: [userId, userId2] } } });
     await app.close();
   });
 
@@ -115,6 +134,50 @@ describe('Feature: 闲置模块', () => {
 
       expect(res.body.code).toBe(0);
       expect(res.body.data).toHaveProperty('id');
+    });
+  });
+
+  // P-238: 重复评价（同 reviewer+reviewee+item）应返回 409 而非 500
+  describe('P-238: 重复评价返回 409', () => {
+    let itemId: string;
+
+    beforeAll(async () => {
+      const item = await prisma.marketItem.create({
+        data: {
+          communityId,
+          sellerId: userId,
+          category: 'free',
+          title: 'P-238 评价测试闲置',
+          description: '测试重复评价',
+          tradeType: 'free',
+          conditionLevel: 'good',
+          status: 'active',
+        },
+      });
+      itemId = item.id;
+    });
+
+    afterAll(async () => {
+      await prisma.marketReview.deleteMany({ where: { itemId } });
+      await prisma.marketItem.delete({ where: { id: itemId } });
+    });
+
+    it('POST /market/items/:id/reviews 首次评价应返回 201', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/market/items/${itemId}/reviews`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send({ revieweeId: userId, rating: 5, content: '很好的交易' });
+
+      expect(res.status).toBe(201);
+    });
+
+    it('POST /market/items/:id/reviews 重复评价应返回 409', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/market/items/${itemId}/reviews`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send({ revieweeId: userId, rating: 4, content: '再次评价' });
+
+      expect(res.status).toBe(409);
     });
   });
 });
