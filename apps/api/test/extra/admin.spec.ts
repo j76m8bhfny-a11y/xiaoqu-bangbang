@@ -847,6 +847,8 @@ describe('Feature: 管理后台（全量）', () => {
     let eventBId: string;
     let reportBId: string;
     let socialGroupBId: string;
+    let reviewEventBId: string;
+    let reviewBId: string;
 
     beforeAll(async () => {
       const communityB = await prisma.community.create({
@@ -866,6 +868,30 @@ describe('Feature: 管理后台（全量）', () => {
         },
       });
       eventBId = eventB.id;
+
+      // 在小区B创建待审核事件 + AI审核日志（用于 P-302 内容审核跨小区测试）
+      const reviewEventB = await prisma.event.create({
+        data: {
+          communityId: communityBId,
+          creatorId: adminUserId,
+          title: '小区B待审核事件',
+          description: '内容审核跨小区测试',
+          type: 'help_request',
+          aiReviewStatus: 'manual_review',
+          status: 'pending_review',
+        },
+      });
+      reviewEventBId = reviewEventB.id;
+
+      const reviewB = await prisma.aiReviewLog.create({
+        data: {
+          targetType: 'event',
+          targetId: reviewEventBId,
+          inputSummary: { title: '小区B待审核事件' },
+          result: 'manual_review',
+        },
+      });
+      reviewBId = reviewB.id;
 
       // 在小区B创建举报记录（用于 P-334 测试）
       const reportB = await prisma.report.create({
@@ -894,6 +920,7 @@ describe('Feature: 管理后台（全量）', () => {
 
     afterAll(async () => {
       try {
+        await prisma.aiReviewLog.deleteMany({ where: { targetId: reviewEventBId } });
         await prisma.feedbackProcessLog.deleteMany({ where: { eventId: eventBId } });
         await prisma.report.deleteMany({ where: { communityId: communityBId } });
         await prisma.communitySocialGroup.deleteMany({ where: { communityId: communityBId } });
@@ -978,6 +1005,33 @@ describe('Feature: 管理后台（全量）', () => {
       const res = await request(app.getHttpServer())
         .delete(`/api/v1/admin/community-social-groups/${socialGroupBId}`)
         .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(403);
+    });
+
+    // P-302: committee_admin 不能查看/审核其他小区的内容审核记录
+    it('GET /admin/reviews - 不包含其他小区的审核记录', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/admin/reviews')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      // 审核列表不应包含小区B的审核记录
+      const reviewIds = (res.body.data.items as any[]).map((r) => r.id);
+      expect(reviewIds).not.toContain(reviewBId);
+    });
+
+    it('POST /admin/reviews/:id/approve - 不能通过其他小区的内容审核', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/reviews/${reviewBId}/approve`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('POST /admin/reviews/:id/reject - 不能驳回其他小区的内容审核', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/admin/reviews/${reviewBId}/reject`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ reason: '跨小区测试' });
       expect(res.status).toBe(403);
     });
   });

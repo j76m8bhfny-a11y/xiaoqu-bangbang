@@ -71,21 +71,26 @@ export class AdminController {
   // === Content Review ===
   @Get('reviews')
   async getReviews(
+    @CurrentCommunityId() communityId: string,
     @Query() query: { targetType?: string; status?: string },
     @Query('page') page?: number,
     @Query('pageSize') pageSize?: number,
   ) {
     const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
     const [items, total] = await Promise.all([
-      this.adminService.getReviews(query, { skip, take }),
-      this.adminService.countReviews(query),
+      this.adminService.getReviews(communityId, query, { skip, take }),
+      this.adminService.countReviews(communityId, query),
     ]);
     return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
   }
 
   @Post('reviews/:id/approve')
-  async approveReview(@Param('id') id: string, @CurrentUser('userId') userId: string) {
-    const data = await this.adminService.approveReview(userId, id);
+  async approveReview(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.approveReview(userId, id, communityId);
     return { code: 0, message: 'ok', data };
   }
 
@@ -93,15 +98,20 @@ export class AdminController {
   async rejectReview(
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
     @Body() body: { reason?: string },
   ) {
-    const data = await this.adminService.rejectReview(userId, id, body.reason);
+    const data = await this.adminService.rejectReview(userId, id, communityId, body.reason);
     return { code: 0, message: 'ok', data };
   }
 
   @Post('reviews/:id/manual-visible-admin-only')
-  async manualVisibleAdminOnly(@Param('id') id: string, @CurrentUser('userId') userId: string) {
-    const data = await this.adminService.manualVisibleAdminOnly(userId, id);
+  async manualVisibleAdminOnly(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.manualVisibleAdminOnly(userId, id, communityId);
     return { code: 0, message: 'ok', data };
   }
 

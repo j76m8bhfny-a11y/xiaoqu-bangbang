@@ -79,16 +79,29 @@ export class AdminService {
   // 策略：AI 通过即放行（不进人工复审队列）。本接口默认只列出 result='manual_review' 的记录。
   // 如需查看历史 pass/reject，前端显式传 query.status='pass'/'reject'/'all'。
   async getReviews(
+    communityId: string,
     query?: { targetType?: string; status?: string },
     pagination?: { skip: number; take: number },
   ) {
-    const where: any = {};
+    const result = query?.status && query.status !== 'all' ? query.status : 'manual_review';
+
+    // P-302: aiReviewLog 无 communityId 字段，需通过目标表过滤
+    const [events, items] = await Promise.all([
+      this.prisma.event.findMany({
+        where: { communityId, aiReviewStatus: result },
+        select: { id: true },
+      }),
+      this.prisma.marketItem.findMany({
+        where: { communityId, aiReviewStatus: result },
+        select: { id: true },
+      }),
+    ]);
+    const targetIds = [...events.map((e) => e.id), ...items.map((i) => i.id)];
+    if (targetIds.length === 0) return [];
+
+    const where: any = { targetId: { in: targetIds }, result };
     if (query?.targetType) where.targetType = query.targetType;
-    if (query?.status && query.status !== 'all') {
-      where.result = query.status;
-    } else if (!query?.status) {
-      where.result = 'manual_review';
-    }
+
     const args: any = { where, orderBy: { createdAt: 'desc' } };
     if (pagination) {
       args.skip = pagination.skip;
@@ -99,20 +112,32 @@ export class AdminService {
     return this.prisma.aiReviewLog.findMany(args);
   }
 
-  async countReviews(query?: { targetType?: string; status?: string }) {
-    const where: any = {};
+  async countReviews(communityId: string, query?: { targetType?: string; status?: string }) {
+    const result = query?.status && query.status !== 'all' ? query.status : 'manual_review';
+
+    const [events, items] = await Promise.all([
+      this.prisma.event.findMany({
+        where: { communityId, aiReviewStatus: result },
+        select: { id: true },
+      }),
+      this.prisma.marketItem.findMany({
+        where: { communityId, aiReviewStatus: result },
+        select: { id: true },
+      }),
+    ]);
+    const targetIds = [...events.map((e) => e.id), ...items.map((i) => i.id)];
+    if (targetIds.length === 0) return 0;
+
+    const where: any = { targetId: { in: targetIds }, result };
     if (query?.targetType) where.targetType = query.targetType;
-    if (query?.status && query.status !== 'all') {
-      where.result = query.status;
-    } else if (!query?.status) {
-      where.result = 'manual_review';
-    }
+
     return this.prisma.aiReviewLog.count({ where });
   }
 
-  async approveReview(adminId: string, reviewId: string) {
+  async approveReview(adminId: string, reviewId: string, communityId: string) {
     const review = await this.prisma.aiReviewLog.findUnique({ where: { id: reviewId } });
     if (!review) throw new NotFoundException();
+    await this.assertReviewInCommunity(review, communityId);
     await this.prisma.aiReviewLog.update({
       where: { id: reviewId },
       data: { result: 'pass' },
@@ -152,9 +177,10 @@ export class AdminService {
     return { id: reviewId, result: 'pass' };
   }
 
-  async rejectReview(adminId: string, reviewId: string, reason?: string) {
+  async rejectReview(adminId: string, reviewId: string, communityId: string, reason?: string) {
     const review = await this.prisma.aiReviewLog.findUnique({ where: { id: reviewId } });
     if (!review) throw new NotFoundException();
+    await this.assertReviewInCommunity(review, communityId);
     await this.prisma.aiReviewLog.update({
       where: { id: reviewId },
       data: { result: 'reject' },
@@ -192,9 +218,10 @@ export class AdminService {
     return { id: reviewId, result: 'reject' };
   }
 
-  async manualVisibleAdminOnly(adminId: string, reviewId: string) {
+  async manualVisibleAdminOnly(adminId: string, reviewId: string, communityId: string) {
     const review = await this.prisma.aiReviewLog.findUnique({ where: { id: reviewId } });
     if (!review) throw new NotFoundException();
+    await this.assertReviewInCommunity(review, communityId);
 
     // Set target content visibility to admin_only
     if (review.targetType === 'event') {
@@ -221,6 +248,40 @@ export class AdminService {
 
     await this.logAudit(adminId, 'manual_visible_admin_only', review.targetType, review.targetId);
     return { id: reviewId, visibility: 'admin_only' };
+  }
+
+  // P-302: 校验审核记录的目标内容属于当前 admin 的小区
+  private async assertReviewInCommunity(
+    review: { targetType: string; targetId: string },
+    communityId: string,
+  ) {
+    let targetCommunityId: string | null = null;
+    if (review.targetType === 'event') {
+      const event = await this.prisma.event.findUnique({
+        where: { id: review.targetId },
+        select: { communityId: true },
+      });
+      targetCommunityId = event?.communityId ?? null;
+    } else if (review.targetType === 'market_item') {
+      const item = await this.prisma.marketItem.findUnique({
+        where: { id: review.targetId },
+        select: { communityId: true },
+      });
+      targetCommunityId = item?.communityId ?? null;
+    } else if (review.targetType === 'event_comment') {
+      const comment = await this.prisma.eventComment.findUnique({
+        where: { id: review.targetId },
+        select: { event: { select: { communityId: true } } },
+      });
+      targetCommunityId = comment?.event.communityId ?? null;
+    } else if (review.targetType === 'market_comment') {
+      const comment = await this.prisma.marketComment.findUnique({
+        where: { id: review.targetId },
+        select: { item: { select: { communityId: true } } },
+      });
+      targetCommunityId = comment?.item.communityId ?? null;
+    }
+    if (targetCommunityId !== communityId) throw new ForbiddenException('无权操作该资源');
   }
 
   // === Verification Review ===
