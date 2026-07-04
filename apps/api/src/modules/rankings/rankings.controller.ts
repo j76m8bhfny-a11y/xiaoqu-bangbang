@@ -20,10 +20,16 @@ export class RankingsController {
     @Query('pageSize') pageSize?: number,
   ) {
     const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
-    const [items, total] = await Promise.all([
+    const [rawItems, total] = await Promise.all([
       this.rankingsService.list(communityId, query, { skip, take }),
       this.rankingsService.count(communityId, query),
     ]);
+    // P-143: flatten user object to top-level nickname/avatarUrl
+    const items = rawItems.map(({ user, ...rest }) => ({
+      ...rest,
+      nickname: user?.nickname ?? '',
+      avatarUrl: user?.avatarUrl ?? null,
+    }));
     return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
   }
 
