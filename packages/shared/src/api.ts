@@ -300,13 +300,10 @@ export interface RankingItemDto {
   userId: string;
   nickname: string;
   avatarUrl: string | null;
-  isVerified?: boolean;
   score: number;
   flowerCount: number;
   helpCount: number;
   badgeCount: number;
-  thanksCount?: number;
-  latestAction?: string | null;
 }
 
 export interface MyRankingDto {
