@@ -450,6 +450,10 @@ export class MarketService {
         status: commentStatus,
         aiReviewStatus,
       },
+      // P-113: 返回 user 关系，前端需要渲染评论者信息
+      include: {
+        user: { select: { id: true, nickname: true, avatarUrl: true } },
+      },
     });
 
     return comment;

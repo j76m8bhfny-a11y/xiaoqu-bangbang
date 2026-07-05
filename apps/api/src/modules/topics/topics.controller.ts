@@ -145,8 +145,9 @@ export class TopicsController {
     @Query('pageSize') pageSize?: number,
   ) {
     const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
-    const items = await this.topicsService.getTimeline(id, communityId, { skip, take });
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps } };
+    // P-120: 补全 total 字段以支持分页契约
+    const { items, total } = await this.topicsService.getTimeline(id, communityId, { skip, take });
+    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
   }
 
   @Get(':id/comments')

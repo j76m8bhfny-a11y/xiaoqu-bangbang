@@ -437,6 +437,12 @@ export class AdminService {
       creatorId = comment.userId;
     }
 
+    // P-305: 更新 aiReviewLog result，避免重复出现在待审核列表
+    await this.prisma.aiReviewLog.update({
+      where: { id: reviewId },
+      data: { result: 'manual_handled' },
+    });
+
     // P-303: 通知内容创建者已由管理员人工审核
     if (creatorId) {
       await this.notificationsService.create({

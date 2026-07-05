@@ -402,30 +402,35 @@ export class TopicsService {
     const topic = await this.prisma.topic.findUnique({ where: { id: topicId } });
     if (!topic || topic.communityId !== communityId) throw new NotFoundException('议题不存在');
 
-    const events = await this.prisma.event.findMany({
-      // P-25: 时间线显示所有非 rejected 事件（含 in_progress/completed 等）
-      where: { topicId, deletedAt: null, status: { notIn: ['rejected'] } },
-      orderBy: { createdAt: 'desc' },
-      skip: pagination.skip,
-      take: pagination.take,
-      include: {
-        creator: { select: { id: true, nickname: true, avatarUrl: true } },
-        topicComments: {
-          where: { parentId: null, status: 'visible' },
-          orderBy: [{ likeCount: 'desc' }, { createdAt: 'desc' }],
-          include: {
-            user: { select: { id: true, nickname: true, avatarUrl: true } },
-            replies: {
-              where: { status: 'visible' },
-              orderBy: { createdAt: 'asc' },
-              include: { user: { select: { id: true, nickname: true, avatarUrl: true } } },
+    // P-25: 时间线显示所有非 rejected 事件（含 in_progress/completed 等）
+    const where: any = { topicId, deletedAt: null, status: { notIn: ['rejected'] } };
+
+    const [events, total] = await Promise.all([
+      this.prisma.event.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: pagination.skip,
+        take: pagination.take,
+        include: {
+          creator: { select: { id: true, nickname: true, avatarUrl: true } },
+          topicComments: {
+            where: { parentId: null, status: 'visible' },
+            orderBy: [{ likeCount: 'desc' }, { createdAt: 'desc' }],
+            include: {
+              user: { select: { id: true, nickname: true, avatarUrl: true } },
+              replies: {
+                where: { status: 'visible' },
+                orderBy: { createdAt: 'asc' },
+                include: { user: { select: { id: true, nickname: true, avatarUrl: true } } },
+              },
             },
           },
         },
-      },
-    });
+      }),
+      this.prisma.event.count({ where }),
+    ]);
 
-    return events.map((e) => ({
+    const items = events.map((e) => ({
       type: 'event' as const,
       data: {
         id: e.id,
@@ -447,6 +452,9 @@ export class TopicsService {
         comments: e.topicComments.map((c) => this.toCommentDto(c)),
       },
     }));
+
+    // P-120: 返回 total 以支持分页契约
+    return { items, total };
   }
 
   // ===== AI 推荐议题（mock 实现）=====

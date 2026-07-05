@@ -274,12 +274,15 @@ export interface MarketItemDto {
   category: MarketCategory;
   title: string;
   description: string;
-  images: string[];
+  // P-112: images 可选，后端 DTO 为可选并有 ?? [] 兜底
+  images?: string[];
   price: number | null;
   tradeType: TradeType;
   conditionLevel: ConditionLevel;
   contactText: string | null;
   status: MarketItemStatus;
+  // P-111: 后端 list/findOne 均返回 aiReviewStatus
+  aiReviewStatus: string;
   soldAt: string | null;
   createdAt: string;
   updatedAt: string;
