@@ -567,6 +567,14 @@
     padding: 2px 12px;
     border-radius: $radius-pill;
     background: $color-bg-green;
+
+    &--done {
+      background: #f0f0f0;
+
+      .event-detail__participant-action-text {
+        color: $color-text-secondary;
+      }
+    }
   }
 
   &__participant-action-text {

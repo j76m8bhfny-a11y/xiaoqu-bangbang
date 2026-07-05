@@ -128,6 +128,12 @@ export class EventsService {
           },
           orderBy: { createdAt: 'desc' },
         },
+        participants: {
+          include: {
+            user: { select: { id: true, nickname: true, avatarUrl: true } },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
         _count: {
           select: {
             comments: { where: { deletedAt: null, status: 'visible' } },
@@ -692,6 +698,169 @@ export class EventsService {
     }
 
     return { confirmed: role, waitingFor: role === 'creator' ? 'helper' : 'creator' };
+  }
+
+  // Batch 6: 多帮手选择（public_welfare/lost_found）
+  async selectParticipant(
+    creatorId: string,
+    eventId: string,
+    applicationId: string,
+    communityId: string,
+  ) {
+    const event = await this.prisma.event.findFirst({
+      where: { id: eventId, deletedAt: null },
+    });
+
+    if (!event) {
+      throw new NotFoundException('事件不存在');
+    }
+    if (event.communityId !== communityId) {
+      throw new ForbiddenException('无权操作该事件');
+    }
+    if (event.creatorId !== creatorId) {
+      throw new ForbiddenException('只有创建者可以选择参与者');
+    }
+    if (event.type !== 'public_welfare' && event.type !== 'lost_found') {
+      throw new BadRequestException('该事件类型不支持多帮手选择');
+    }
+    if (event.status === 'completed' || event.status === 'closed') {
+      throw new BadRequestException('事件已结束');
+    }
+
+    const application = await this.prisma.eventApplication.findFirst({
+      where: { id: applicationId, eventId, deletedAt: null },
+    });
+
+    if (!application) {
+      throw new NotFoundException('申请不存在');
+    }
+
+    // 检查容量限制
+    const existingCount = await this.prisma.eventParticipant.count({
+      where: { eventId },
+    });
+    const capacity = event.capacity ?? 1;
+    if (existingCount >= capacity) {
+      throw new BadRequestException(`参与者已达上限 (${capacity})`);
+    }
+
+    // 检查是否已是参与者
+    const existing = await this.prisma.eventParticipant.findUnique({
+      where: { eventId_userId: { eventId, userId: application.userId } },
+    });
+    if (existing) {
+      throw new ConflictException('该用户已是参与者');
+    }
+
+    // 创建参与者记录 + 更新申请状态
+    const participant = await this.prisma.eventParticipant.create({
+      data: {
+        eventId,
+        userId: application.userId,
+        applicationId,
+      },
+    });
+
+    await this.prisma.eventApplication.update({
+      where: { id: applicationId },
+      data: { status: 'selected' },
+    });
+
+    // 首次选择参与者时更新事件状态
+    if (event.status === 'open' || event.status === 'in_progress') {
+      await this.prisma.event.update({
+        where: { id: eventId },
+        data: { status: 'processing' },
+      });
+    }
+
+    // 通知被选中的参与者
+    await this.notificationsService.create({
+      userId: application.userId,
+      communityId: event.communityId,
+      type: 'event_response',
+      title: '您被选为参与者',
+      content: `您已被选为事件「${event.title}」的参与者`,
+      targetType: 'event',
+      targetId: eventId,
+    });
+
+    return participant;
+  }
+
+  // Batch 6: 逐个确认参与者完成（发花）
+  async confirmParticipant(
+    creatorId: string,
+    eventId: string,
+    participantId: string,
+    communityId: string,
+  ) {
+    const event = await this.prisma.event.findFirst({
+      where: { id: eventId, deletedAt: null },
+    });
+
+    if (!event) {
+      throw new NotFoundException('事件不存在');
+    }
+    if (event.communityId !== communityId) {
+      throw new ForbiddenException('无权操作该事件');
+    }
+    if (event.creatorId !== creatorId) {
+      throw new ForbiddenException('只有创建者可以确认参与者');
+    }
+
+    const participant = await this.prisma.eventParticipant.findFirst({
+      where: { id: participantId, eventId },
+    });
+
+    if (!participant) {
+      throw new NotFoundException('参与者不存在');
+    }
+    if (participant.status === 'confirmed') {
+      throw new BadRequestException('该参与者已确认');
+    }
+
+    // 标记参与者已确认
+    const updated = await this.prisma.eventParticipant.update({
+      where: { id: participantId },
+      data: { status: 'confirmed', confirmedAt: new Date() },
+    });
+
+    // 立即发放花朵给该帮手
+    await this.rankingsService.handleHelperCompletion(
+      {
+        id: event.id,
+        communityId: event.communityId,
+        type: event.type,
+        rewardType: event.rewardType,
+      },
+      participant.userId,
+    );
+
+    // 检查是否所有参与者都已确认
+    const pending = await this.prisma.eventParticipant.count({
+      where: { eventId, status: 'selected' },
+    });
+
+    if (pending === 0) {
+      // 全部确认 → 事件完成
+      await this.prisma.event.update({
+        where: { id: eventId },
+        data: { status: 'completed', completedAt: new Date() },
+      });
+
+      // 创建者完成: 花朵 + 榜单 + 通知（selectedHelperId 为 null，跳过 helper 部分）
+      await this.rankingsService.handleEventCompletion({
+        id: event.id,
+        communityId: event.communityId,
+        creatorId: event.creatorId,
+        selectedHelperId: null,
+        type: event.type,
+        rewardType: event.rewardType,
+      });
+    }
+
+    return updated;
   }
 
   async addComment(

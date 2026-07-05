@@ -170,6 +170,42 @@ export class EventsController {
     return { code: 0, message: 'ok', data: result };
   }
 
+  // Batch 6: 多帮手选择（public_welfare/lost_found）
+  @Post(':id/participants')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
+  async selectParticipant(
+    @CurrentUser('userId') userId: string,
+    @Param('id') eventId: string,
+    @CurrentCommunityId() communityId: string,
+    @Body() dto: { applicationId: string },
+  ) {
+    const participant = await this.eventsService.selectParticipant(
+      userId,
+      eventId,
+      dto.applicationId,
+      communityId,
+    );
+    return { code: 0, message: 'ok', data: participant };
+  }
+
+  // Batch 6: 逐个确认参与者完成
+  @Post(':id/participants/:participantId/confirm')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
+  async confirmParticipant(
+    @CurrentUser('userId') userId: string,
+    @Param('id') eventId: string,
+    @Param('participantId') participantId: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const result = await this.eventsService.confirmParticipant(
+      userId,
+      eventId,
+      participantId,
+      communityId,
+    );
+    return { code: 0, message: 'ok', data: result };
+  }
+
   @Post(':id/rate')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async rateHelper(

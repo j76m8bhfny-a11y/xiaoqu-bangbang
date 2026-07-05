@@ -201,6 +201,8 @@ export interface EventDto {
   aiReviewStatus: AiReviewStatus;
   selectedHelperId: string | null;
   selectedHelper?: { id: string; nickname: string; avatarUrl: string | null };
+  capacity?: number | null;
+  participants?: EventParticipantDto[];
   completedAt: string | null;
   viewCount: number;
   likeCount: number;
@@ -215,6 +217,17 @@ export interface EventDto {
   };
   createdAt: string;
   updatedAt: string;
+}
+
+export interface EventParticipantDto {
+  id: string;
+  eventId: string;
+  userId: string;
+  applicationId: string;
+  status: string;
+  confirmedAt?: string | null;
+  createdAt: string;
+  user?: { id: string; nickname: string; avatarUrl: string | null };
 }
 
 export interface EventListQuery {

@@ -8,6 +8,7 @@ import type {
   PaginatedData,
   EventRateDto,
   EventRateRequest,
+  EventParticipantDto,
 } from '@xiaoqu-bangbang/shared';
 
 interface CommentDto {
@@ -75,6 +76,12 @@ export const eventService = {
 
   rateEvent: (eventId: string, data: EventRateRequest) =>
     http.post<EventRateDto>(`/events/${eventId}/rate`, data),
+
+  selectParticipant: (eventId: string, applicationId: string) =>
+    http.post<EventParticipantDto>(`/events/${eventId}/participants`, { applicationId }),
+
+  confirmParticipant: (eventId: string, participantId: string) =>
+    http.post<EventParticipantDto>(`/events/${eventId}/participants/${participantId}/confirm`),
 
   // ponytail: 没有 GET /events/:id/ratings 端点，评价列表 UI 暂缺。
   //           升级路径：后端补 GET 端点后，在此加 getEventRatings 方法。

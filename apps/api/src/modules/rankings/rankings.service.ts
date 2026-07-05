@@ -17,38 +17,78 @@ export class RankingsService {
     type: string;
     rewardType: string;
   }) {
-    const helperId = event.selectedHelperId;
-    const action = this.getEventAction(event.type, event.rewardType);
-    const flowerCount = this.getFlowerCount(action);
-
-    // 1. Helper contribution record (if helper exists)
-    if (helperId) {
-      // P-276: 使用 upsert 防止重复记录
-      await this.prisma.contributionRecord.upsert({
-        where: {
-          userId_sourceType_sourceId_action: {
-            userId: helperId,
-            sourceType: 'event',
-            sourceId: event.id,
-            action,
-          },
-        },
-        update: {},
-        create: {
-          userId: helperId,
-          communityId: event.communityId,
-          sourceType: 'event',
-          sourceId: event.id,
-          action,
-          score: flowerCount,
-          flowerCount,
-          reason: `完成事件: ${event.type}`,
-          occurredAt: new Date(),
-        },
-      });
+    // 1. Helper contribution (单帮手场景，多帮手由 confirmParticipant 逐个调用 handleHelperCompletion)
+    if (event.selectedHelperId) {
+      await this.handleHelperCompletion(event, event.selectedHelperId);
     }
 
     // 2. Creator contribution record (Standard M10.5 + P-16: 按类型区分)
+    await this.handleCreatorCompletion(event);
+  }
+
+  /**
+   * 单个帮手完成: 花朵 + 徽章 + 通知（多帮手逐个调用）
+   */
+  async handleHelperCompletion(
+    event: { id: string; communityId: string; type: string; rewardType: string },
+    helperId: string,
+  ) {
+    const action = this.getEventAction(event.type, event.rewardType);
+    const flowerCount = this.getFlowerCount(action);
+
+    // P-276: 使用 upsert 防止重复记录
+    await this.prisma.contributionRecord.upsert({
+      where: {
+        userId_sourceType_sourceId_action: {
+          userId: helperId,
+          sourceType: 'event',
+          sourceId: event.id,
+          action,
+        },
+      },
+      update: {},
+      create: {
+        userId: helperId,
+        communityId: event.communityId,
+        sourceType: 'event',
+        sourceId: event.id,
+        action,
+        score: flowerCount,
+        flowerCount,
+        reason: `完成事件: ${event.type}`,
+        occurredAt: new Date(),
+      },
+    });
+
+    // Badge check
+    await this.checkAndAwardBadges(helperId, event.communityId, 'event', event.id);
+
+    // Helper notification
+    await this.prisma.notification.create({
+      data: {
+        userId: helperId,
+        communityId: event.communityId,
+        type: 'completion',
+        title: '事件已完成',
+        content: '您参与的事件已确认完成，获得小红花奖励！',
+        targetType: 'event',
+        targetId: event.id,
+      },
+    });
+  }
+
+  /**
+   * 创建者完成: 花朵 + 徽章 + 重算榜单 + 创建者通知
+   */
+  private async handleCreatorCompletion(event: {
+    id: string;
+    communityId: string;
+    creatorId: string;
+    type: string;
+    rewardType: string;
+  }) {
+    const action = this.getEventAction(event.type, event.rewardType);
+
     // P-16: 即使 flowerCount=0 也创建贡献记录，确保创建者参与徽章统计
     const creatorFlowers = this.getCreatorFlowerCount(event.type);
     // P-276: 使用 upsert 防止重复记录
@@ -75,32 +115,15 @@ export class RankingsService {
       },
     });
 
-    // 3. Check and award badges
-    if (helperId) {
-      await this.checkAndAwardBadges(helperId, event.communityId, 'event', event.id);
-    }
+    // Badge check for creator
     if (creatorFlowers > 0) {
       await this.checkAndAwardBadges(event.creatorId, event.communityId, 'event', event.id);
     }
 
-    // 4. Recalculate rankings for this community
+    // Recalculate rankings
     await this.recalculateRankings(event.communityId);
 
-    // 5. Create notifications (互助类完成 → type='completion')
-    if (helperId) {
-      await this.prisma.notification.create({
-        data: {
-          userId: helperId,
-          communityId: event.communityId,
-          type: 'completion',
-          title: '事件已完成',
-          content: '您参与的事件已确认完成，获得小红花奖励！',
-          targetType: 'event',
-          targetId: event.id,
-        },
-      });
-    }
-
+    // Creator notification
     await this.prisma.notification.create({
       data: {
         userId: event.creatorId,

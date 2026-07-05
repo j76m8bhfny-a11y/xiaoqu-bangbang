@@ -246,6 +246,42 @@ export default function EventDetail() {
     [id, submitting, refresh],
   );
 
+  const handleSelectParticipant = useCallback(
+    async (applicationId: string) => {
+      if (!id || submitting) return;
+      setSubmitting(true);
+      try {
+        await eventService.selectParticipant(id, applicationId);
+        Taro.showToast({ title: '已选择参与者', icon: 'success' });
+        refresh();
+      } catch (e: any) {
+        const msg = e?.message ?? '操作失败';
+        Taro.showToast({ title: msg, icon: 'none' });
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [id, submitting, refresh],
+  );
+
+  const handleConfirmParticipant = useCallback(
+    async (participantId: string) => {
+      if (!id || submitting) return;
+      setSubmitting(true);
+      try {
+        await eventService.confirmParticipant(id, participantId);
+        Taro.showToast({ title: '已确认完成', icon: 'success' });
+        refresh();
+      } catch (e: any) {
+        const msg = e?.message ?? '操作失败';
+        Taro.showToast({ title: msg, icon: 'none' });
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [id, submitting, refresh],
+  );
+
   const handleRequestCompletion = useCallback(async () => {
     if (!id || submitting) return;
     setSubmitting(true);
@@ -352,7 +388,10 @@ export default function EventDetail() {
     event.status === EventStatus.REJECTED ||
     event.status === EventStatus.PENDING_REVIEW;
   const isHelperType = event.type === EventType.HELP_REQUEST;
+  const isMultiHelperType =
+    event.type === EventType.PUBLIC_WELFARE || event.type === EventType.LOST_FOUND;
   const isPublicFeedback = event.type === EventType.PUBLIC_FEEDBACK;
+  const participants = event.participants ?? [];
 
   return (
     <View className="event-detail">
@@ -506,11 +545,20 @@ export default function EventDetail() {
                     <Text className="event-detail__participant-select-text">选择</Text>
                   </View>
                 )}
-                {isHelperType && app.status === ApplicationStatus.SELECTED && (
-                  <View className="event-detail__participant-selected-tag">
-                    <Text className="event-detail__participant-selected-text">已选择</Text>
+                {isMultiHelperType && isCreator && app.status === ApplicationStatus.PENDING && (
+                  <View
+                    className="event-detail__participant-select-btn"
+                    onClick={() => handleSelectParticipant(app.id)}
+                  >
+                    <Text className="event-detail__participant-select-text">选择参与</Text>
                   </View>
                 )}
+                {(isHelperType || isMultiHelperType) &&
+                  app.status === ApplicationStatus.SELECTED && (
+                    <View className="event-detail__participant-selected-tag">
+                      <Text className="event-detail__participant-selected-text">已选择</Text>
+                    </View>
+                  )}
               </View>
             ))}
             {isHelperType &&
@@ -523,6 +571,60 @@ export default function EventDetail() {
                   <Text className="event-detail__select-helper-text">选择帮助者</Text>
                 </View>
               )}
+          </View>
+        )}
+
+        {/* Multi-helper participants section */}
+        {isMultiHelperType && participants.length > 0 && (
+          <View className="event-detail__participants">
+            <Text className="event-detail__participants-header">
+              参与者 ({participants.length}
+              {event.capacity ? `/${event.capacity}` : ''})
+            </Text>
+            {participants.map((p) => (
+              <View key={p.id} className="event-detail__participant">
+                <View className="event-detail__participant-avatar">
+                  {p.user?.avatarUrl ? (
+                    <Image
+                      className="event-detail__participant-avatar-img"
+                      src={p.user.avatarUrl}
+                      mode="aspectFill"
+                    />
+                  ) : (
+                    <Text className="event-detail__participant-avatar-emoji">
+                      {(p.user?.nickname ?? '?').slice(0, 1)}
+                    </Text>
+                  )}
+                </View>
+                <View className="event-detail__participant-body">
+                  <View className="event-detail__participant-top">
+                    <Text className="event-detail__participant-nickname">
+                      {p.user?.nickname ?? '邻居'}
+                    </Text>
+                    <View
+                      className={`event-detail__participant-action-tag ${p.status === 'confirmed' ? 'event-detail__participant-action-tag--done' : ''}`}
+                    >
+                      <Text className="event-detail__participant-action-text">
+                        {p.status === 'confirmed' ? '已完成' : '待确认'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                {isCreator &&
+                  p.status !== 'confirmed' &&
+                  (event.status === EventStatus.PROCESSING ||
+                    event.status === EventStatus.IN_PROGRESS) && (
+                    <View
+                      className="event-detail__participant-select-btn"
+                      onClick={() => handleConfirmParticipant(p.id)}
+                    >
+                      <Text className="event-detail__participant-select-text">
+                        {submitting ? '...' : '确认完成'}
+                      </Text>
+                    </View>
+                  )}
+              </View>
+            ))}
           </View>
         )}
 
@@ -628,7 +730,9 @@ export default function EventDetail() {
 
         <View className="event-detail__lifecycle">
           {/* 状态推进主按钮：确认完成 / 申请完成 / 送花感谢 */}
+          {/* ponytail: 多帮手类型(public_welfare/lost_found) 走逐个确认流程，不显示全局确认/申请按钮 */}
           {isCreator &&
+            !isMultiHelperType &&
             (event.status === EventStatus.IN_PROGRESS ||
               event.status === EventStatus.PROCESSING) && (
               <View
@@ -641,6 +745,7 @@ export default function EventDetail() {
               </View>
             )}
           {user &&
+            !isMultiHelperType &&
             event.selectedHelperId === user.id &&
             (event.status === EventStatus.IN_PROGRESS ||
               event.status === EventStatus.PROCESSING) && (
