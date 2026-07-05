@@ -387,6 +387,124 @@
     color: $color-text-secondary;
   }
 
+  // 已有评价列表
+  &__ratings-list {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    margin-top: $spacing-sm;
+  }
+
+  &__ratings-list-header {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__rating-item {
+    padding: $spacing-sm 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__rating-item-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+
+  &__rating-item-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__rating-item-avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  &__rating-item-avatar-emoji {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__rating-item-meta {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__rating-item-nickname {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+  }
+
+  &__rating-item-role {
+    display: block;
+    font-size: 20px;
+    color: $color-text-secondary;
+  }
+
+  &__rating-item-stars {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  &__rating-item-star {
+    font-size: 20px;
+    color: #ddd;
+
+    &--active {
+      color: #ffc107;
+    }
+  }
+
+  &__rating-item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-top: $spacing-xs;
+  }
+
+  &__rating-item-tag {
+    font-size: 20px;
+    padding: 2px 10px;
+    border-radius: $radius-pill;
+    background: $color-bg-green;
+    color: $color-text-secondary;
+  }
+
+  &__rating-item-content {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text;
+    line-height: 1.6;
+    margin-top: $spacing-xs;
+    word-break: break-word;
+  }
+
+  &__rating-item-time {
+    display: block;
+    font-size: 20px;
+    color: $color-text-secondary;
+    margin-top: $spacing-xs;
+  }
+
   // 创建者管理区：编辑 / 关闭 并排次要按钮
   &__manage-row {
     display: flex;

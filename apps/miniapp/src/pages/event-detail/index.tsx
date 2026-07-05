@@ -7,7 +7,12 @@ import { eventService, shareService, reportService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import BottomSheet from '@/components/bottom-sheet';
-import type { EventDto, EventApplicationDto, MatchedSkillDto } from '@xiaoqu-bangbang/shared';
+import type {
+  EventDto,
+  EventApplicationDto,
+  MatchedSkillDto,
+  EventRateDto,
+} from '@xiaoqu-bangbang/shared';
 import {
   EventType,
   ActionType,
@@ -130,6 +135,14 @@ export default function EventDetail() {
     { enabled: !!id && event?.type === EventType.HELP_REQUEST },
   );
   const matchedSkills = matchedSkillsData?.items ?? [];
+
+  // 评价列表
+  const { data: ratingsData } = useRequest<{ items: EventRateDto[] }>(
+    () => eventService.getEventRatings(id!),
+    [id],
+    { enabled: !!id && event?.status === EventStatus.COMPLETED },
+  );
+  const ratings = ratingsData?.items ?? [];
 
   // Share config
   const { data: shareConfig } = useRequest(
@@ -888,6 +901,69 @@ export default function EventDetail() {
                 </View>
               </View>
             ))}
+
+          {/* 已有评价列表 */}
+          {event.status === EventStatus.COMPLETED && ratings.length > 0 && (
+            <View className="event-detail__ratings-list">
+              <Text className="event-detail__ratings-list-header">⭐ 评价 ({ratings.length})</Text>
+              {ratings.map((r) => (
+                <View key={r.id} className="event-detail__rating-item">
+                  <View className="event-detail__rating-item-header">
+                    <View className="event-detail__rating-item-avatar">
+                      {r.user?.avatarUrl ? (
+                        <Image
+                          className="event-detail__rating-item-avatar-img"
+                          src={r.user.avatarUrl}
+                          mode="aspectFill"
+                        />
+                      ) : (
+                        <Text className="event-detail__rating-item-avatar-emoji">
+                          {(r.user?.nickname ?? '?').slice(0, 1)}
+                        </Text>
+                      )}
+                    </View>
+                    <View className="event-detail__rating-item-meta">
+                      <Text className="event-detail__rating-item-nickname">
+                        {r.user?.nickname ?? '邻居'}
+                      </Text>
+                      <Text className="event-detail__rating-item-role">
+                        {r.role === 'creator' ? '发起者评价' : '帮手评价'}
+                      </Text>
+                    </View>
+                    <View className="event-detail__rating-item-stars">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Text
+                          key={n}
+                          className={
+                            n <= r.rating
+                              ? 'event-detail__rating-item-star event-detail__rating-item-star--active'
+                              : 'event-detail__rating-item-star'
+                          }
+                        >
+                          {'\u2605'}
+                        </Text>
+                      ))}
+                    </View>
+                  </View>
+                  {r.tags && r.tags.length > 0 && (
+                    <View className="event-detail__rating-item-tags">
+                      {r.tags.map((tag) => (
+                        <Text key={tag} className="event-detail__rating-item-tag">
+                          {tag}
+                        </Text>
+                      ))}
+                    </View>
+                  )}
+                  {r.content && (
+                    <Text className="event-detail__rating-item-content">{r.content}</Text>
+                  )}
+                  <Text className="event-detail__rating-item-time">
+                    {formatRelativeTime(r.createdAt)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           {/* 创建者管理区：编辑（仅 open）/ 关闭（open~processing） */}
           {isCreator &&

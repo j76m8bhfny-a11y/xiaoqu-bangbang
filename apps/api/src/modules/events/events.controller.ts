@@ -227,6 +227,13 @@ export class EventsController {
     return { code: 0, message: 'ok', data: result };
   }
 
+  @Get(':id/ratings')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  async getRatings(@Param('id') eventId: string, @CurrentCommunityId() communityId: string) {
+    const items = await this.eventsService.getRatings(eventId, communityId);
+    return { code: 0, message: 'ok', data: { items } };
+  }
+
   @Get(':id/feedback-logs')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async getFeedbackLogs(@Param('id') eventId: string, @CurrentCommunityId() communityId: string) {

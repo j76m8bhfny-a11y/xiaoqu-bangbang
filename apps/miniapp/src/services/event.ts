@@ -88,6 +88,6 @@ export const eventService = {
   getMatchedSkills: (eventId: string) =>
     http.get<{ items: MatchedSkillDto[] }>(`/events/${eventId}/matched-skills`),
 
-  // ponytail: 没有 GET /events/:id/ratings 端点，评价列表 UI 暂缺。
-  //           升级路径：后端补 GET 端点后，在此加 getEventRatings 方法。
+  getEventRatings: (eventId: string) =>
+    http.get<{ items: EventRateDto[] }>(`/events/${eventId}/ratings`),
 };

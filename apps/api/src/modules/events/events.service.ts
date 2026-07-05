@@ -1303,6 +1303,46 @@ export class EventsService {
     return { ...rest, targetUserId: dto.targetUserId, content: ratingContent, tags: ratingTags };
   }
 
+  async getRatings(eventId: string, communityId: string) {
+    const event = await this.prisma.event.findFirst({
+      where: { id: eventId, deletedAt: null },
+    });
+
+    if (!event) {
+      throw new NotFoundException('事件不存在');
+    }
+    if (event.communityId !== communityId) {
+      throw new ForbiddenException('无权访问该事件');
+    }
+
+    const confirmations = await this.prisma.eventCompletionConfirmation.findMany({
+      where: {
+        eventId,
+        rating: { not: null },
+      },
+      include: {
+        user: { select: { id: true, nickname: true, avatarUrl: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // 推断 targetUserId:
+    // role=creator → target = event.selectedHelperId（单帮手）或 null（多帮手整体评价）
+    // role=helper/participant → target = event.creatorId
+    return confirmations.map((c) => ({
+      id: c.id,
+      eventId: c.eventId,
+      userId: c.userId,
+      targetUserId: c.role === 'creator' ? (event.selectedHelperId ?? '') : event.creatorId,
+      rating: c.rating!,
+      tags: (c.ratingTags as string[] | undefined) ?? undefined,
+      content: c.ratingContent ?? undefined,
+      createdAt: c.createdAt.toISOString(),
+      user: c.user,
+      role: c.role,
+    }));
+  }
+
   async getFeedbackLogs(eventId: string, communityId: string) {
     const event = await this.prisma.event.findFirst({
       where: { id: eventId, deletedAt: null },

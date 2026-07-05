@@ -488,6 +488,8 @@ export interface EventRateDto {
   tags?: string[];
   content?: string;
   createdAt: string;
+  user?: { id: string; nickname: string; avatarUrl: string | null };
+  role?: string;
 }
 
 export interface EventRateRequest {
