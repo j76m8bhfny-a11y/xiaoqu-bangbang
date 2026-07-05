@@ -411,6 +411,8 @@ export class AdminService {
   async approveVerification(adminId: string, id: string, communityId: string) {
     const v = await this.prisma.verification.findUnique({ where: { id } });
     if (!v || v.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    // P-309: 已处理的认证不可重复操作
+    if (v.status !== 'pending_review') throw new BadRequestException('该认证申请已处理');
     await this.prisma.verification.update({
       where: { id },
       data: { status: 'approved', reviewedAt: new Date() },
@@ -443,6 +445,8 @@ export class AdminService {
   async rejectVerification(adminId: string, id: string, communityId: string, reason: string) {
     const v = await this.prisma.verification.findUnique({ where: { id } });
     if (!v || v.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    // P-309: 已处理的认证不可重复操作
+    if (v.status !== 'pending_review') throw new BadRequestException('该认证申请已处理');
     await this.prisma.verification.update({
       where: { id },
       data: { status: 'rejected', rejectReason: reason, reviewedAt: new Date() },
@@ -610,6 +614,8 @@ export class AdminService {
     const claim = await this.prisma.committeeMemberClaim.findUnique({ where: { id: claimId } });
     if (!claim) throw new NotFoundException();
     if (claim.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    // P-318: 已处理的认领不可重复操作
+    if (claim.status !== 'pending') throw new BadRequestException('该认领申请已处理');
     await this.prisma.committeeMemberClaim.update({
       where: { id: claimId },
       data: { status: 'approved', reviewedBy: adminId },
@@ -625,9 +631,11 @@ export class AdminService {
   async rejectClaim(adminId: string, claimId: string, reason: string, communityId: string) {
     const claim = await this.prisma.committeeMemberClaim.findUnique({
       where: { id: claimId },
-      select: { communityId: true },
+      select: { communityId: true, status: true },
     });
     if (!claim || claim.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    // P-318: 已处理的认领不可重复操作
+    if (claim.status !== 'pending') throw new BadRequestException('该认领申请已处理');
     await this.prisma.committeeMemberClaim.update({
       where: { id: claimId },
       data: { status: 'rejected', rejectReason: reason, reviewedBy: adminId },

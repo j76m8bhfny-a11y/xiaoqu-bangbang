@@ -143,9 +143,10 @@ describe('Feature: 事件系统', () => {
 
     it('should create an application to respond to event', async () => {
       if (!eventId) return;
+      // P-68: 创建者不能响应自己的事件，用第二个用户响应
       const res = await request(app.getHttpServer())
         .post(`/api/v1/events/${eventId}/applications`)
-        .set('Authorization', `Bearer ${token}`)
+        .set('Authorization', `Bearer ${token2}`)
         .send({ actionType: 'help', message: '我可以帮忙！' })
         .expect(201);
 

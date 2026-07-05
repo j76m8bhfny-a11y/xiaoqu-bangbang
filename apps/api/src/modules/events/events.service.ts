@@ -395,6 +395,10 @@ export class EventsService {
     if (event.status !== 'open' && event.status !== 'in_progress') {
       throw new BadRequestException('该事件当前无法响应');
     }
+    // P-68: 创建者不能响应自己的事件
+    if (event.creatorId === userId) {
+      throw new BadRequestException('不能响应自己发布的事件');
+    }
 
     let application;
     try {

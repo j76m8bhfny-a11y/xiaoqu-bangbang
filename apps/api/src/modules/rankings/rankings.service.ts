@@ -427,14 +427,15 @@ export class RankingsService {
         badgeCount: badgeCountMap.get(entry.userId) ?? 0,
       }));
 
-    // Delete existing monthly snapshots and recreate
-    await this.prisma.rankingSnapshot.deleteMany({
-      where: { communityId, periodType: 'month', periodKey: monthKey },
-    });
-
-    if (monthlyEntries.length > 0) {
-      await this.prisma.rankingSnapshot.createMany({ data: monthlyEntries });
-    }
+    // P-23: 用事务包裹 deleteMany + createMany，防止中间出错数据丢失
+    await this.prisma.$transaction([
+      this.prisma.rankingSnapshot.deleteMany({
+        where: { communityId, periodType: 'month', periodKey: monthKey },
+      }),
+      ...(monthlyEntries.length > 0
+        ? [this.prisma.rankingSnapshot.createMany({ data: monthlyEntries })]
+        : []),
+    ]);
 
     // Calculate and upsert total ranking snapshots
     const totalEntries = totalScores
@@ -451,13 +452,14 @@ export class RankingsService {
         badgeCount: badgeCountMap.get(entry.userId) ?? 0,
       }));
 
-    await this.prisma.rankingSnapshot.deleteMany({
-      where: { communityId, periodType: 'total', periodKey: 'total' },
-    });
-
-    if (totalEntries.length > 0) {
-      await this.prisma.rankingSnapshot.createMany({ data: totalEntries });
-    }
+    await this.prisma.$transaction([
+      this.prisma.rankingSnapshot.deleteMany({
+        where: { communityId, periodType: 'total', periodKey: 'total' },
+      }),
+      ...(totalEntries.length > 0
+        ? [this.prisma.rankingSnapshot.createMany({ data: totalEntries })]
+        : []),
+    ]);
   }
 
   async list(
