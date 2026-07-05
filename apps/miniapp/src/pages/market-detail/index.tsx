@@ -3,7 +3,7 @@ import Taro, { useShareAppMessage } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { useRequest } from '@/hooks';
 import { marketService, shareService, reportService } from '@/services';
-import type { MarketCommentDto } from '@/services/market';
+import type { MarketCommentDto, MarketReviewWithUser } from '@/services/market';
 import { useAuthStore } from '@/store';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
@@ -38,6 +38,14 @@ export default function MarketDetail() {
     items: MarketCommentDto[];
   }>(() => marketService.getComments(id), [id], { enabled: !!id });
   const comments = commentsData?.items ?? [];
+
+  // 已售商品的评价列表
+  const { data: reviewsData } = useRequest<{ items: MarketReviewWithUser[] }>(
+    () => marketService.getReviews(id),
+    [id],
+    { enabled: !!id && item?.status === MarketItemStatus.SOLD },
+  );
+  const reviews = reviewsData?.items ?? [];
 
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -308,6 +316,41 @@ export default function MarketDetail() {
           ))
         )}
       </View>
+
+      {/* 交易评价：仅已售商品显示 */}
+      {/* ponytail: 评价输入表单暂缺——MarketItem 无 buyerId 字段（Batch 5.1 补），
+          无法确定评价对象。表单将在 markSold 选买家后补全。 */}
+      {isSold && reviews.length > 0 && (
+        <View className="market-detail__reviews">
+          <Text className="market-detail__reviews-title">交易评价</Text>
+          {reviews.map((r) => (
+            <View key={r.id} className="market-detail__review-item">
+              <View className="market-detail__review-header">
+                <Text className="market-detail__review-reviewer">
+                  {r.reviewer?.nickname ?? '邻居'}
+                </Text>
+                <Text className="market-detail__review-stars">
+                  {'\u2605'.repeat(r.rating)}
+                  {'\u2606'.repeat(5 - r.rating)}
+                </Text>
+              </View>
+              {r.tags && r.tags.length > 0 && (
+                <View className="market-detail__review-tags">
+                  {r.tags.map((tag, i) => (
+                    <Text key={i} className="market-detail__review-tag">
+                      {tag}
+                    </Text>
+                  ))}
+                </View>
+              )}
+              {r.content && <Text className="market-detail__review-content">{r.content}</Text>}
+              <Text className="market-detail__review-date">
+                {new Date(r.createdAt).toLocaleDateString()}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <View className="market-detail__bottom-spacer" />
 

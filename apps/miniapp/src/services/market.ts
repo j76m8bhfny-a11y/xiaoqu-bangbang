@@ -3,6 +3,7 @@ import type {
   MarketItemDto,
   CreateMarketItemRequest,
   PaginatedData,
+  MarketReviewDto,
 } from '@xiaoqu-bangbang/shared';
 
 export interface MarketCommentDto {
@@ -14,6 +15,13 @@ export interface MarketCommentDto {
   status: string;
   createdAt: string;
   user: { id: string; nickname: string; avatarUrl: string };
+}
+
+// 后端 getReviews 返回额外嵌套用户信息，超出 shared MarketReviewDto
+export interface MarketReviewWithUser extends MarketReviewDto {
+  updatedAt: string;
+  reviewer: { id: string; nickname: string; avatarUrl: string | null };
+  reviewee: { id: string; nickname: string; avatarUrl: string | null };
 }
 
 export const marketService = {
@@ -46,4 +54,12 @@ export const marketService = {
 
   addComment: (id: string, data: { content: string; parentId?: string }) =>
     http.post<MarketCommentDto>(`/market/items/${id}/comments`, data),
+
+  addReview: (
+    id: string,
+    data: { revieweeId: string; rating: number; tags?: string[]; content?: string },
+  ) => http.post<MarketReviewDto>(`/market/items/${id}/reviews`, data),
+
+  getReviews: (id: string) =>
+    http.get<{ items: MarketReviewWithUser[] }>(`/market/items/${id}/reviews`),
 };

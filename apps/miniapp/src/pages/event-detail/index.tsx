@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import Taro, { useShareAppMessage } from '@tarojs/taro';
-import { View, Text, ScrollView, Swiper, SwiperItem, Image } from '@tarojs/components';
+import { View, Text, ScrollView, Swiper, SwiperItem, Image, Input } from '@tarojs/components';
 import { useRequest, usePaginatedList } from '@/hooks';
 import { useAuthStore } from '@/store';
 import { eventService, shareService, reportService } from '@/services';
@@ -69,6 +69,8 @@ const FEEDBACK_STATUS_CONFIG: Record<string, { label: string; color: string; bgC
   closed: { label: '已关闭', color: '#999', bgColor: '#F5F5F5' },
 };
 
+const RATING_TAGS = ['响应及时', '沟通顺畅', '靠谱', '有耐心', '态度友好'];
+
 function formatRelativeTime(isoString: string): string {
   const now = Date.now();
   const then = new Date(isoString).getTime();
@@ -98,6 +100,13 @@ export default function EventDetail() {
   const [favorited, setFavorited] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [helperSheetVisible, setHelperSheetVisible] = useState(false);
+
+  // 评价表单状态
+  const [ratingStars, setRatingStars] = useState(0);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [ratingContent, setRatingContent] = useState('');
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
 
   // Applications / participants
   const { data: applicationsData } = useRequest<{ items: EventApplicationDto[] }>(
@@ -276,6 +285,37 @@ export default function EventDetail() {
     }
   }, [id, submitting, refresh]);
 
+  const handleRateHelper = useCallback(async () => {
+    if (!id || !event || ratingSubmitting) return;
+    const isCreator = !!user?.id && user.id === event.creatorId;
+    const targetUserId = isCreator ? event.selectedHelperId : event.creatorId;
+    if (!targetUserId || ratingStars < 1) {
+      Taro.showToast({ title: '请选择星级', icon: 'none' });
+      return;
+    }
+    setRatingSubmitting(true);
+    try {
+      await eventService.rateEvent(id, {
+        targetUserId,
+        rating: ratingStars,
+        tags: selectedTags.length > 0 ? selectedTags : undefined,
+        content: ratingContent.trim() || undefined,
+      });
+      Taro.showToast({ title: '评价成功', icon: 'success' });
+      setHasRated(true);
+    } catch (e: any) {
+      const msg = e?.message ?? '';
+      if (msg.includes('已评价过')) {
+        setHasRated(true);
+        Taro.showToast({ title: '已评价过', icon: 'none' });
+      } else {
+        Taro.showToast({ title: msg || '评价失败', icon: 'none' });
+      }
+    } finally {
+      setRatingSubmitting(false);
+    }
+  }, [id, event, user, ratingStars, selectedTags, ratingContent, ratingSubmitting]);
+
   const handleReport = useCallback(async () => {
     if (!id) return;
     try {
@@ -305,6 +345,8 @@ export default function EventDetail() {
   const typeConfig = EVENT_TYPE_CONFIG[event.type] ?? EVENT_TYPE_CONFIG.discussion;
   const statusLabel = EVENT_STATUS_LABELS[event.status] ?? event.status;
   const isCreator = !!user?.id && user.id === event.creatorId;
+  const isHelper = !!user?.id && !!event.selectedHelperId && user.id === event.selectedHelperId;
+  const rateTargetUserId = isCreator ? event.selectedHelperId : isHelper ? event.creatorId : null;
   const interactionDisabled =
     event.status === EventStatus.CLOSED || event.status === EventStatus.REJECTED;
   const isHelperType = event.type === EventType.HELP_REQUEST;
@@ -619,6 +661,71 @@ export default function EventDetail() {
               </Text>
             </View>
           )}
+
+          {/* 评价对方：COMPLETED + 参与者 + 有评价目标 + 未评价 */}
+          {event.status === EventStatus.COMPLETED &&
+            (isCreator || isHelper) &&
+            rateTargetUserId &&
+            (hasRated ? (
+              <View className="event-detail__rated-hint">
+                <Text className="event-detail__rated-hint-text">✓ 已完成评价</Text>
+              </View>
+            ) : (
+              <View className="event-detail__rating">
+                <Text className="event-detail__rating-title">
+                  ⭐ 评价{isCreator ? '帮手' : '发起者'}
+                </Text>
+                <View className="event-detail__rating-stars">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Text
+                      key={n}
+                      className={
+                        n <= ratingStars
+                          ? 'event-detail__rating-star event-detail__rating-star--active'
+                          : 'event-detail__rating-star'
+                      }
+                      onClick={() => setRatingStars(n)}
+                    >
+                      {'\u2605'}
+                    </Text>
+                  ))}
+                </View>
+                <View className="event-detail__rating-tags">
+                  {RATING_TAGS.map((tag) => (
+                    <Text
+                      key={tag}
+                      className={
+                        selectedTags.includes(tag)
+                          ? 'event-detail__rating-tag event-detail__rating-tag--active'
+                          : 'event-detail__rating-tag'
+                      }
+                      onClick={() =>
+                        setSelectedTags((prev) =>
+                          prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+                        )
+                      }
+                    >
+                      {tag}
+                    </Text>
+                  ))}
+                </View>
+                <Input
+                  className="event-detail__rating-input"
+                  placeholder="说点什么（可选）"
+                  value={ratingContent}
+                  onInput={(e) => setRatingContent(e.detail.value)}
+                  maxlength={200}
+                />
+                <View
+                  className="event-detail__lifecycle-btn event-detail__lifecycle-btn--rate"
+                  onClick={handleRateHelper}
+                >
+                  <Text className="event-detail__lifecycle-btn-text">
+                    {ratingSubmitting ? '提交中...' : '提交评价'}
+                  </Text>
+                </View>
+              </View>
+            ))}
 
           {/* 创建者管理区：编辑（仅 open）/ 关闭（open~processing） */}
           {isCreator &&

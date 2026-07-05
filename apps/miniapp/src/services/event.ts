@@ -6,6 +6,7 @@ import type {
   EventApplicationDto,
   CreateApplicationRequest,
   PaginatedData,
+  EventRateDto,
 } from '@xiaoqu-bangbang/shared';
 
 interface CommentDto {
@@ -70,4 +71,12 @@ export const eventService = {
 
   getFeedbackLogs: (eventId: string) =>
     http.get<FeedbackLogDto[]>(`/events/${eventId}/feedback-logs`),
+
+  rateEvent: (
+    eventId: string,
+    data: { targetUserId: string; rating: number; tags?: string[]; content?: string },
+  ) => http.post<EventRateDto>(`/events/${eventId}/rate`, data),
+
+  // ponytail: 没有 GET /events/:id/ratings 端点，评价列表 UI 暂缺。
+  //           升级路径：后端补 GET 端点后，在此加 getEventRatings 方法。
 };

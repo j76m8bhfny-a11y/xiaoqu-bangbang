@@ -369,4 +369,74 @@
   &__btn--edit &__btn-text {
     color: $color-text-secondary;
   }
+
+  // 交易评价
+  &__reviews {
+    padding: $spacing-md;
+    background: #fff;
+  }
+
+  &__reviews-title {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__review-item {
+    padding: $spacing-sm 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__review-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  &__review-reviewer {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+
+  &__review-stars {
+    font-size: $font-size-sm;
+    color: #ffc107;
+    letter-spacing: 1px;
+  }
+
+  &__review-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  &__review-tag {
+    font-size: $font-size-xs;
+    padding: 2px 8px;
+    border-radius: $radius-pill;
+    background: $color-bg-green;
+    color: $color-text-secondary;
+  }
+
+  &__review-content {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+
+  &__review-date {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
 }

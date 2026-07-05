@@ -312,6 +312,81 @@
     border: 2px solid #ff6b6b;
   }
 
+  &__lifecycle-btn--rate {
+    background: $color-primary;
+    margin-top: $spacing-sm;
+  }
+
+  // 评价区域
+  &__rating {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    margin-top: $spacing-sm;
+  }
+
+  &__rating-title {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__rating-stars {
+    display: flex;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__rating-star {
+    font-size: 28px;
+    color: #ddd;
+
+    &--active {
+      color: #ffc107;
+    }
+  }
+
+  &__rating-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__rating-tag {
+    font-size: $font-size-xs;
+    padding: 4px 12px;
+    border-radius: $radius-pill;
+    background: $color-bg-green;
+    color: $color-text-secondary;
+
+    &--active {
+      background: $color-primary;
+      color: #fff;
+    }
+  }
+
+  &__rating-input {
+    width: 100%;
+    font-size: $font-size-sm;
+    padding: $spacing-sm;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__rated-hint {
+    text-align: center;
+    padding: $spacing-sm;
+  }
+
+  &__rated-hint-text {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
   // 创建者管理区：编辑 / 关闭 并排次要按钮
   &__manage-row {
     display: flex;
