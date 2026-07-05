@@ -305,6 +305,8 @@ export default function EventDetail() {
   const typeConfig = EVENT_TYPE_CONFIG[event.type] ?? EVENT_TYPE_CONFIG.discussion;
   const statusLabel = EVENT_STATUS_LABELS[event.status] ?? event.status;
   const isCreator = !!user?.id && user.id === event.creatorId;
+  const interactionDisabled =
+    event.status === EventStatus.CLOSED || event.status === EventStatus.REJECTED;
   const isHelperType = event.type === EventType.HELP_REQUEST;
   const isPublicFeedback = event.type === EventType.PUBLIC_FEEDBACK;
 
@@ -582,19 +584,22 @@ export default function EventDetail() {
 
         <View className="event-detail__lifecycle">
           {/* 状态推进主按钮：确认完成 / 申请完成 / 送花感谢 */}
-          {isCreator && event.status === EventStatus.IN_PROGRESS && (
-            <View
-              className="event-detail__lifecycle-btn event-detail__lifecycle-btn--confirm"
-              onClick={handleConfirmCompletion}
-            >
-              <Text className="event-detail__lifecycle-btn-text">
-                {submitting ? '提交中...' : '确认完成'}
-              </Text>
-            </View>
-          )}
+          {isCreator &&
+            (event.status === EventStatus.IN_PROGRESS ||
+              event.status === EventStatus.PROCESSING) && (
+              <View
+                className="event-detail__lifecycle-btn event-detail__lifecycle-btn--confirm"
+                onClick={handleConfirmCompletion}
+              >
+                <Text className="event-detail__lifecycle-btn-text">
+                  {submitting ? '提交中...' : '确认完成'}
+                </Text>
+              </View>
+            )}
           {user &&
             event.selectedHelperId === user.id &&
-            event.status === EventStatus.IN_PROGRESS && (
+            (event.status === EventStatus.IN_PROGRESS ||
+              event.status === EventStatus.PROCESSING) && (
               <View
                 className="event-detail__lifecycle-btn event-detail__lifecycle-btn--request"
                 onClick={handleRequestCompletion}
@@ -604,7 +609,7 @@ export default function EventDetail() {
                 </Text>
               </View>
             )}
-          {event.status === EventStatus.COMPLETED && (
+          {isCreator && event.status === EventStatus.COMPLETED && (
             <View
               className="event-detail__lifecycle-btn event-detail__lifecycle-btn--thanks"
               onClick={handleThanks}
@@ -615,28 +620,36 @@ export default function EventDetail() {
             </View>
           )}
 
-          {/* 创建者管理区：编辑 / 关闭 并排（仅本人、进行中可见） */}
+          {/* 创建者管理区：编辑（仅 open）/ 关闭（open~processing） */}
           {isCreator &&
-            (event.status === EventStatus.OPEN || event.status === EventStatus.IN_PROGRESS) && (
+            (event.status === EventStatus.OPEN ||
+              event.status === EventStatus.IN_PROGRESS ||
+              event.status === EventStatus.PROCESSING) && (
               <View className="event-detail__manage-row">
-                <View
-                  className="event-detail__manage-btn"
-                  onClick={() => Taro.navigateTo({ url: `/pages/event-edit/index?id=${event.id}` })}
-                >
-                  <Text className="event-detail__manage-btn-text">✏️ 编辑</Text>
-                </View>
+                {event.status === EventStatus.OPEN && (
+                  <View
+                    className="event-detail__manage-btn"
+                    onClick={() =>
+                      Taro.navigateTo({ url: `/pages/event-edit/index?id=${event.id}` })
+                    }
+                  >
+                    <Text className="event-detail__manage-btn-text">✏️ 编辑</Text>
+                  </View>
+                )}
                 <View className="event-detail__manage-btn" onClick={handleClose}>
                   <Text className="event-detail__manage-btn-text">🔒 关闭事件</Text>
                 </View>
               </View>
             )}
 
-          {/* 举报：仅非本人可见，弱化为小号文字避免误点 */}
-          {!isCreator && (
-            <View className="event-detail__report-link" onClick={handleReport}>
-              <Text className="event-detail__report-link-text">🚫 举报该事件</Text>
-            </View>
-          )}
+          {/* 举报：非创建者可见，pending_review/rejected 除外 */}
+          {!isCreator &&
+            event.status !== EventStatus.PENDING_REVIEW &&
+            event.status !== EventStatus.REJECTED && (
+              <View className="event-detail__report-link" onClick={handleReport}>
+                <Text className="event-detail__report-link-text">🚫 举报该事件</Text>
+              </View>
+            )}
         </View>
 
         <View className="event-detail__bottom-spacer" />
@@ -685,16 +698,16 @@ export default function EventDetail() {
 
       <View className="event-detail__action-bar">
         <View
-          className={`event-detail__action-btn event-detail__action-btn--like ${liked ? 'event-detail__action-btn--active' : ''}`}
-          onClick={handleLike}
+          className={`event-detail__action-btn event-detail__action-btn--like ${liked ? 'event-detail__action-btn--active' : ''} ${interactionDisabled ? 'event-detail__action-btn--disabled' : ''}`}
+          onClick={interactionDisabled ? undefined : handleLike}
         >
           <Text className="event-detail__action-btn-icon">{liked ? '❤️' : '🤍'}</Text>
           <Text className="event-detail__action-btn-label">赞</Text>
         </View>
 
         <View
-          className="event-detail__action-btn event-detail__action-btn--comment"
-          onClick={handleComment}
+          className={`event-detail__action-btn event-detail__action-btn--comment ${interactionDisabled ? 'event-detail__action-btn--disabled' : ''}`}
+          onClick={interactionDisabled ? undefined : handleComment}
         >
           <Text className="event-detail__action-btn-icon">💬</Text>
           <Text className="event-detail__action-btn-label">评论</Text>
@@ -714,8 +727,8 @@ export default function EventDetail() {
           )}
 
         <View
-          className={`event-detail__action-btn event-detail__action-btn--fav ${favorited ? 'event-detail__action-btn--active' : ''}`}
-          onClick={handleFavorite}
+          className={`event-detail__action-btn event-detail__action-btn--fav ${favorited ? 'event-detail__action-btn--active' : ''} ${interactionDisabled ? 'event-detail__action-btn--disabled' : ''}`}
+          onClick={interactionDisabled ? undefined : handleFavorite}
         >
           <Text className="event-detail__action-btn-icon">{favorited ? '⭐' : '☆'}</Text>
           <Text className="event-detail__action-btn-label">收藏</Text>
