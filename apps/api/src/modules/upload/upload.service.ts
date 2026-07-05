@@ -6,7 +6,6 @@ import * as crypto from 'crypto';
 import { Request } from 'express';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 
 @Injectable()
@@ -31,9 +30,7 @@ export class UploadService {
           cb(null, name);
         },
       }),
-      limits: {
-        fileSize: MAX_FILE_SIZE,
-      },
+      // P-290: 移除 Multer fileSize 限制，改为 controller 手动检查（避免 413）
       fileFilter: (
         _req: Request,
         file: Express.Multer.File,

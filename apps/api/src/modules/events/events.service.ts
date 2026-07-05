@@ -898,7 +898,7 @@ export class EventsService {
     dto: { targetType: string; targetId: string; reason: string; description?: string },
   ) {
     // Resolve communityId from the target
-    let communityId: string;
+    let communityId: string | null;
     if (dto.targetType === 'event' || dto.targetType === 'event_comment') {
       let eventId = dto.targetId;
       if (dto.targetType === 'event_comment') {
@@ -919,6 +919,13 @@ export class EventsService {
       const item = await this.prisma.marketItem.findUnique({ where: { id: itemId } });
       if (!item) throw new NotFoundException('举报目标不存在');
       communityId = item.communityId;
+    } else if (dto.targetType === 'user') {
+      // P-293: user 类型举报，使用举报者当前小区作为 communityId
+      const reporter = await this.prisma.user.findUnique({
+        where: { id: reporterId },
+        select: { currentCommunityId: true },
+      });
+      communityId = reporter?.currentCommunityId ?? null;
     } else {
       throw new BadRequestException('不支持的举报目标类型');
     }

@@ -26,6 +26,11 @@ export class UploadController {
     if (!file) {
       throw new BadRequestException('请选择要上传的文件');
     }
+    // P-290: 手动检查文件大小（返回 400 而非 Multer 的 413）
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      throw new BadRequestException('文件大小超过限制（5MB）');
+    }
 
     const url = this.uploadService.getFileUrl(file.filename);
     return { code: 0, message: 'ok', data: { url } };

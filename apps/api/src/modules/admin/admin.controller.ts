@@ -611,7 +611,7 @@ export class AdminController {
   // === Audit Logs ===
   @Get('audit-logs')
   async getAuditLogs(
-    @Query() query: { operatorId?: string; targetType?: string },
+    @Query() query: { operatorId?: string; targetType?: string; targetId?: string },
     @Query('page') page?: number,
     @Query('pageSize') pageSize?: number,
   ) {

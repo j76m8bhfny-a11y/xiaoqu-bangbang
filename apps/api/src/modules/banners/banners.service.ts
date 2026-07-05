@@ -32,7 +32,7 @@ export class BannersService {
       where.communityId = null;
     }
 
-    return this.prisma.banner.findMany({
+    const banners = await this.prisma.banner.findMany({
       where,
       orderBy: { sortOrder: 'asc' },
       select: {
@@ -49,6 +49,14 @@ export class BannersService {
         startAt: true,
         endAt: true,
       },
+    });
+
+    // P-288: 小区专属 banner 排在全局 banner 之前，各自按 sortOrder 排序
+    return banners.sort((a, b) => {
+      const aHasCommunity = a.communityId ? 0 : 1;
+      const bHasCommunity = b.communityId ? 0 : 1;
+      if (aHasCommunity !== bHasCommunity) return aHasCommunity - bHasCommunity;
+      return a.sortOrder - b.sortOrder;
     });
   }
 }

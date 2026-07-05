@@ -162,7 +162,8 @@ export class AdminService {
     query?: { targetType?: string; status?: string },
     pagination?: { skip: number; take: number },
   ) {
-    const result = query?.status && query.status !== 'all' ? query.status : 'manual_review';
+    // P-348: 'all' 显示全部状态，不传默认 manual_review
+    const result = query?.status === 'all' ? undefined : (query?.status ?? 'manual_review');
 
     // P-302: aiReviewLog 无 communityId 字段，需通过目标表过滤
     const [events, items] = await Promise.all([
@@ -192,7 +193,7 @@ export class AdminService {
   }
 
   async countReviews(communityId: string, query?: { targetType?: string; status?: string }) {
-    const result = query?.status && query.status !== 'all' ? query.status : 'manual_review';
+    const result = query?.status === 'all' ? undefined : (query?.status ?? 'manual_review');
 
     const [events, items] = await Promise.all([
       this.prisma.event.findMany({
@@ -1288,24 +1289,6 @@ export class AdminService {
       },
     });
     await this.logAudit(adminId, 'create_announcement', 'announcement', result.id, dto);
-    // P-82: 通知小区所有成员
-    const members = await this.prisma.communityMember.findMany({
-      where: { communityId, deletedAt: null },
-      select: { userId: true },
-    });
-    if (members.length > 0) {
-      await this.prisma.notification.createMany({
-        data: members.map((m) => ({
-          userId: m.userId,
-          communityId,
-          type: 'announcement',
-          title: '小区公告',
-          content: dto.title,
-          targetType: 'announcement',
-          targetId: result.id,
-        })),
-      });
-    }
     return result;
   }
 
@@ -1319,23 +1302,57 @@ export class AdminService {
     this.assertMaxLength('内容', dto.content, 2000);
     const announcement = await this.prisma.committeeAnnouncement.findUnique({
       where: { id },
-      select: { communityId: true },
+      select: { communityId: true, status: true },
     });
     if (!announcement || announcement.communityId !== communityId)
       throw new ForbiddenException('无权操作该资源');
-    const result = await this.prisma.committeeAnnouncement.update({ where: { id }, data: dto });
+
+    // P-262: 首次发布时设置 publishedAt
+    const updateData: any = { ...dto };
+    if (dto.status === 'published' && announcement.status !== 'published') {
+      updateData.publishedAt = new Date();
+    }
+
+    const result = await this.prisma.committeeAnnouncement.update({
+      where: { id },
+      data: updateData,
+    });
     await this.logAudit(adminId, 'update_announcement', 'announcement', id, dto);
+
+    // P-82: 公告首次发布时通知小区全体成员
+    if (dto.status === 'published' && announcement.status !== 'published') {
+      const members = await this.prisma.communityMember.findMany({
+        where: { communityId, deletedAt: null },
+        select: { userId: true },
+      });
+      if (members.length > 0) {
+        await this.prisma.notification.createMany({
+          data: members.map((m) => ({
+            userId: m.userId,
+            communityId,
+            type: 'announcement',
+            title: '小区公告',
+            content: result.title,
+            targetType: 'announcement',
+            targetId: id,
+          })),
+        });
+      }
+    }
+
     return result;
   }
 
   // === Audit Logs ===
   async getAuditLogs(
-    query?: { operatorId?: string; targetType?: string },
+    query?: { operatorId?: string; targetType?: string; targetId?: string },
     pagination?: { skip: number; take: number },
   ) {
     const where: any = {};
     if (query?.operatorId) where.operatorId = query.operatorId;
     if (query?.targetType) where.targetType = query.targetType;
+    // P-297: 支持按 targetId 查询
+    if (query?.targetId) where.targetId = query.targetId;
     return this.prisma.auditLog.findMany({
       where,
       orderBy: { createdAt: 'desc' },
