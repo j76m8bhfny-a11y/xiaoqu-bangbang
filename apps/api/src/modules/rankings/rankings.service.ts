@@ -421,7 +421,7 @@ export class RankingsService {
     }
   }
 
-  private async recalculateRankings(communityId: string) {
+  async recalculateRankings(communityId: string) {
     // Get current month key and bounds
     const now = new Date();
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
