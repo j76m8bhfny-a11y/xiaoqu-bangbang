@@ -247,11 +247,11 @@ export default function EventDetail() {
   );
 
   const handleSelectParticipant = useCallback(
-    async (applicationId: string) => {
+    async (data: { applicationId: string }) => {
       if (!id || submitting) return;
       setSubmitting(true);
       try {
-        await eventService.selectParticipant(id, applicationId);
+        await eventService.selectParticipant(id, data);
         Taro.showToast({ title: '已选择参与者', icon: 'success' });
         refresh();
       } catch (e: any) {
@@ -548,7 +548,7 @@ export default function EventDetail() {
                 {isMultiHelperType && isCreator && app.status === ApplicationStatus.PENDING && (
                   <View
                     className="event-detail__participant-select-btn"
-                    onClick={() => handleSelectParticipant(app.id)}
+                    onClick={() => handleSelectParticipant({ applicationId: app.id })}
                   >
                     <Text className="event-detail__participant-select-text">选择参与</Text>
                   </View>

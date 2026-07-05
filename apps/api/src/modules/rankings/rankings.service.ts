@@ -64,13 +64,14 @@ export class RankingsService {
     await this.checkAndAwardBadges(helperId, event.communityId, 'event', event.id);
 
     // Helper notification
+    // ponytail: 多帮手场景下事件可能仍在 processing，用中性措辞避免误导
     await this.prisma.notification.create({
       data: {
         userId: helperId,
         communityId: event.communityId,
         type: 'completion',
-        title: '事件已完成',
-        content: '您参与的事件已确认完成，获得小红花奖励！',
+        title: '获得小红花奖励',
+        content: '您的参与已确认完成，获得小红花奖励！',
         targetType: 'event',
         targetId: event.id,
       },

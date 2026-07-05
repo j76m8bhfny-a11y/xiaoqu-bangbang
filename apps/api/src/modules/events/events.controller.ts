@@ -18,6 +18,7 @@ import { ReportDto } from './dto/report.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
 import { VerifiedMemberGuard } from '../../common/guards/verified-member.guard';
+import type { SelectParticipantRequest } from '@xiaoqu-bangbang/shared';
 import { CurrentCommunityId } from '../../common/decorators/current-community.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { getPaginationParams, paginate } from '../../common/helpers/pagination';
@@ -177,7 +178,7 @@ export class EventsController {
     @CurrentUser('userId') userId: string,
     @Param('id') eventId: string,
     @CurrentCommunityId() communityId: string,
-    @Body() dto: { applicationId: string },
+    @Body() dto: SelectParticipantRequest,
   ) {
     const participant = await this.eventsService.selectParticipant(
       userId,

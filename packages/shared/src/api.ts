@@ -496,6 +496,10 @@ export interface EventRateRequest {
   content?: string;
 }
 
+export interface SelectParticipantRequest {
+  applicationId: string;
+}
+
 export interface MarketReviewDto {
   id: string;
   itemId: string;

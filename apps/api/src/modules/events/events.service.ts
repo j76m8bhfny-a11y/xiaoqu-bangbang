@@ -735,13 +735,19 @@ export class EventsService {
       throw new NotFoundException('申请不存在');
     }
 
-    // 检查容量限制
-    const existingCount = await this.prisma.eventParticipant.count({
-      where: { eventId },
-    });
-    const capacity = event.capacity ?? 1;
-    if (existingCount >= capacity) {
-      throw new BadRequestException(`参与者已达上限 (${capacity})`);
+    // 申请必须处于 pending 状态才可被选择
+    if (application.status !== 'pending') {
+      throw new BadRequestException('该申请已被处理');
+    }
+
+    // 检查容量限制 (ponytail: capacity 为 null 时不限制，多帮手事件默认无上限)
+    if (event.capacity != null) {
+      const existingCount = await this.prisma.eventParticipant.count({
+        where: { eventId },
+      });
+      if (existingCount >= event.capacity) {
+        throw new BadRequestException(`参与者已达上限 (${event.capacity})`);
+      }
     }
 
     // 检查是否已是参与者

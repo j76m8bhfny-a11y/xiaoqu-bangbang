@@ -9,6 +9,7 @@ import type {
   EventRateDto,
   EventRateRequest,
   EventParticipantDto,
+  SelectParticipantRequest,
 } from '@xiaoqu-bangbang/shared';
 
 interface CommentDto {
@@ -77,8 +78,8 @@ export const eventService = {
   rateEvent: (eventId: string, data: EventRateRequest) =>
     http.post<EventRateDto>(`/events/${eventId}/rate`, data),
 
-  selectParticipant: (eventId: string, applicationId: string) =>
-    http.post<EventParticipantDto>(`/events/${eventId}/participants`, { applicationId }),
+  selectParticipant: (eventId: string, data: SelectParticipantRequest) =>
+    http.post<EventParticipantDto>(`/events/${eventId}/participants`, data),
 
   confirmParticipant: (eventId: string, participantId: string) =>
     http.post<EventParticipantDto>(`/events/${eventId}/participants/${participantId}/confirm`),
