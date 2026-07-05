@@ -162,7 +162,7 @@ export class AdminController {
   @Get('events')
   async getEvents(
     @CurrentCommunityId() communityId: string,
-    @Query() query: { status?: string },
+    @Query() query: { status?: string; type?: string; keyword?: string },
     @Query('page') page?: number,
     @Query('pageSize') pageSize?: number,
   ) {
@@ -763,13 +763,14 @@ export class AdminController {
   async getMarketItems(
     @CurrentCommunityId() communityId: string,
     @Query('status') status?: string,
+    @Query('category') category?: string,
     @Query('page') page?: number,
     @Query('pageSize') pageSize?: number,
   ) {
     const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
     const [items, total] = await Promise.all([
-      this.adminService.getMarketItems(communityId, status, { skip, take }),
-      this.adminService.countMarketItems(communityId, status),
+      this.adminService.getMarketItems(communityId, status, category, { skip, take }),
+      this.adminService.countMarketItems(communityId, status, category),
     ]);
     return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
   }

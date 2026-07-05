@@ -468,11 +468,19 @@ export class AdminService {
   // === Event Management ===
   async getEvents(
     communityId: string,
-    query?: { status?: string },
+    query?: { status?: string; type?: string; keyword?: string },
     pagination?: { skip: number; take: number },
   ) {
     const where: any = { communityId, deletedAt: null };
     if (query?.status) where.status = query.status;
+    // P-349: 补全 type/keyword 筛选
+    if (query?.type) where.type = query.type;
+    if (query?.keyword) {
+      where.OR = [
+        { title: { contains: query.keyword, mode: 'insensitive' } },
+        { description: { contains: query.keyword, mode: 'insensitive' } },
+      ];
+    }
     const args: any = {
       where,
       orderBy: { createdAt: 'desc' },
@@ -495,9 +503,19 @@ export class AdminService {
     return this.prisma.event.findMany(args);
   }
 
-  async countEvents(communityId: string, query?: { status?: string }) {
+  async countEvents(
+    communityId: string,
+    query?: { status?: string; type?: string; keyword?: string },
+  ) {
     const where: any = { communityId, deletedAt: null };
     if (query?.status) where.status = query.status;
+    if (query?.type) where.type = query.type;
+    if (query?.keyword) {
+      where.OR = [
+        { title: { contains: query.keyword, mode: 'insensitive' } },
+        { description: { contains: query.keyword, mode: 'insensitive' } },
+      ];
+    }
     return this.prisma.event.count({ where });
   }
 
@@ -1423,10 +1441,13 @@ export class AdminService {
   async getMarketItems(
     communityId: string,
     status?: string,
+    category?: string,
     pagination?: { skip: number; take: number },
   ) {
     const where: any = { communityId, deletedAt: null };
     if (status) where.status = status;
+    // P-350: 补全 category 筛选
+    if (category) where.category = category;
     return this.prisma.marketItem.findMany({
       where,
       orderBy: { createdAt: 'desc' },
@@ -1446,9 +1467,10 @@ export class AdminService {
     });
   }
 
-  async countMarketItems(communityId: string, status?: string) {
+  async countMarketItems(communityId: string, status?: string, category?: string) {
     const where: any = { communityId, deletedAt: null };
     if (status) where.status = status;
+    if (category) where.category = category;
     return this.prisma.marketItem.count({ where });
   }
 
