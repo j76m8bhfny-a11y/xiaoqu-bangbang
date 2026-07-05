@@ -382,6 +382,25 @@ export class EventsService {
       updateData.aiReviewResult = aiResult as any;
     }
 
+    // P-20: 图片变化也要审核
+    if (dto.images !== undefined && dto.images.length > 0) {
+      for (const imageUrl of dto.images) {
+        const imageResult = await this.aiReviewService.reviewImage(imageUrl, 'event', id, {
+          imageUrl,
+        });
+        if (imageResult.result === 'reject') {
+          updateData.status = 'rejected';
+          updateData.aiReviewStatus = 'reject';
+          updateData.aiReviewResult = imageResult as any;
+          break;
+        }
+        if (imageResult.result === 'manual_review' && updateData.status !== 'rejected') {
+          updateData.status = 'pending_review';
+          updateData.aiReviewStatus = 'manual_review';
+        }
+      }
+    }
+
     const updated = await this.prisma.event.update({
       where: { id },
       data: updateData,

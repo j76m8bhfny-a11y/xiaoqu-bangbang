@@ -512,6 +512,11 @@ export class MarketService {
       throw new ForbiddenException('无权操作该商品');
     }
 
+    // P-07: 只能对已售商品评价
+    if (item.status !== 'sold') {
+      throw new BadRequestException('只能对已售出商品进行评价');
+    }
+
     // AI 审核评价内容
     const textToReview = dto.content ?? '';
     const aiResult = textToReview

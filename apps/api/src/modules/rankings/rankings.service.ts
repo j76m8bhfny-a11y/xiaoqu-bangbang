@@ -48,33 +48,32 @@ export class RankingsService {
       });
     }
 
-    // 2. Creator contribution record (Standard M10.5: public_welfare 创建者 5 朵)
+    // 2. Creator contribution record (Standard M10.5 + P-16: 按类型区分)
+    // P-16: 即使 flowerCount=0 也创建贡献记录，确保创建者参与徽章统计
     const creatorFlowers = this.getCreatorFlowerCount(event.type);
-    if (creatorFlowers > 0) {
-      // P-276: 使用 upsert 防止重复记录
-      await this.prisma.contributionRecord.upsert({
-        where: {
-          userId_sourceType_sourceId_action: {
-            userId: event.creatorId,
-            sourceType: 'event',
-            sourceId: event.id,
-            action,
-          },
-        },
-        update: {},
-        create: {
+    // P-276: 使用 upsert 防止重复记录
+    await this.prisma.contributionRecord.upsert({
+      where: {
+        userId_sourceType_sourceId_action: {
           userId: event.creatorId,
-          communityId: event.communityId,
           sourceType: 'event',
           sourceId: event.id,
           action,
-          score: creatorFlowers,
-          flowerCount: creatorFlowers,
-          reason: `发起事件: ${event.type}`,
-          occurredAt: new Date(),
         },
-      });
-    }
+      },
+      update: {},
+      create: {
+        userId: event.creatorId,
+        communityId: event.communityId,
+        sourceType: 'event',
+        sourceId: event.id,
+        action,
+        score: creatorFlowers,
+        flowerCount: creatorFlowers,
+        reason: `发起事件: ${event.type}`,
+        occurredAt: new Date(),
+      },
+    });
 
     // 3. Check and award badges
     if (helperId) {
@@ -261,7 +260,11 @@ export class RankingsService {
     switch (eventType) {
       case 'public_welfare':
         return 5;
+      case 'help_offer':
+        // P-16: help_offer 创建者就是帮手，发花
+        return 1;
       default:
+        // help_request/lost_found: 只记贡献，不发花
         return 0;
     }
   }

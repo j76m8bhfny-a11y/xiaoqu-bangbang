@@ -1988,9 +1988,18 @@ export class AdminService {
   async reopenTopic(adminId: string, id: string, communityId: string) {
     const topic = await this.prisma.topic.findUnique({ where: { id } });
     if (!topic || topic.communityId !== communityId) throw new NotFoundException('议题不存在');
+    // P-81: reopen 时清除旧评分
+    await this.prisma.topicRating.deleteMany({ where: { topicId: id } });
     const updated = await this.prisma.topic.update({
       where: { id },
-      data: { status: 'open', closedAt: null, closedBy: null, closedSummary: null },
+      data: {
+        status: 'open',
+        closedAt: null,
+        closedBy: null,
+        closedSummary: null,
+        ratingSum: 0,
+        ratingCount: 0,
+      },
     });
     await this.logAudit(adminId, 'reopen_topic', 'topic', id);
     return updated;

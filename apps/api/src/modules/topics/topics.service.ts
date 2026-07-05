@@ -403,7 +403,8 @@ export class TopicsService {
     if (!topic || topic.communityId !== communityId) throw new NotFoundException('议题不存在');
 
     const events = await this.prisma.event.findMany({
-      where: { topicId, deletedAt: null, status: { in: ['open', 'pending_review'] } },
+      // P-25: 时间线显示所有非 rejected 事件（含 in_progress/completed 等）
+      where: { topicId, deletedAt: null, status: { notIn: ['rejected'] } },
       orderBy: { createdAt: 'desc' },
       skip: pagination.skip,
       take: pagination.take,

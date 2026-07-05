@@ -151,7 +151,9 @@ describe('Feature: 闲置模块', () => {
           description: '测试重复评价',
           tradeType: 'free',
           conditionLevel: 'good',
-          status: 'active',
+          // P-07: 只能对已售商品评价
+          status: 'sold',
+          soldAt: new Date(),
         },
       });
       itemId = item.id;
