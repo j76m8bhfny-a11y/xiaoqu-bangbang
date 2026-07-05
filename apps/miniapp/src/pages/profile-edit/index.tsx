@@ -5,6 +5,7 @@ import { authService, http, userService } from '@/services';
 import { useRequest } from '@/hooks';
 import { useAuthStore } from '@/store';
 import type { UserSkillDto } from '@xiaoqu-bangbang/shared';
+import ImagePicker from '@/components/image-picker';
 import './index.scss';
 
 export default function ProfileEdit() {
@@ -29,12 +30,14 @@ export default function ProfileEdit() {
   const [editingSkillId, setEditingSkillId] = useState<string | null>(null);
   const [skillTitle, setSkillTitle] = useState('');
   const [skillDesc, setSkillDesc] = useState('');
+  const [skillImages, setSkillImages] = useState<string[]>([]);
   const [skillSubmitting, setSkillSubmitting] = useState(false);
 
   const handleAddSkill = useCallback(() => {
     setEditingSkillId(null);
     setSkillTitle('');
     setSkillDesc('');
+    setSkillImages([]);
     setSkillFormVisible(true);
   }, []);
 
@@ -42,6 +45,7 @@ export default function ProfileEdit() {
     setEditingSkillId(skill.id);
     setSkillTitle(skill.title);
     setSkillDesc(skill.description ?? '');
+    setSkillImages(skill.images ?? []);
     setSkillFormVisible(true);
   }, []);
 
@@ -67,7 +71,11 @@ export default function ProfileEdit() {
     }
     setSkillSubmitting(true);
     try {
-      const data = { title: skillTitle.trim(), description: skillDesc.trim() || undefined };
+      const data = {
+        title: skillTitle.trim(),
+        description: skillDesc.trim() || undefined,
+        images: skillImages.length > 0 ? skillImages : undefined,
+      };
       if (editingSkillId) {
         await userService.updateSkill(editingSkillId, data);
       } else {
@@ -81,7 +89,7 @@ export default function ProfileEdit() {
     } finally {
       setSkillSubmitting(false);
     }
-  }, [skillTitle, skillDesc, editingSkillId, refreshSkills]);
+  }, [skillTitle, skillDesc, skillImages, editingSkillId, refreshSkills]);
 
   if (!user) {
     Taro.redirectTo({ url: '/pages/login/index' });
@@ -192,9 +200,7 @@ export default function ProfileEdit() {
         </View>
       </View>
 
-      {/* 技能管理
-         ponytail: 技能图片上传暂未实现，后端 UserSkill.images 字段已就绪。
-         升级路径：在 skill-form 中添加 Image 上传组件，复用 http.upload。 */}
+      {/* 技能管理 */}
       <View className="profile-edit__skills">
         <View className="profile-edit__skills-header">
           <Text className="profile-edit__skills-title">我能帮忙</Text>
@@ -222,6 +228,7 @@ export default function ProfileEdit() {
               maxlength={500}
               autoHeight
             />
+            <ImagePicker images={skillImages} maxCount={6} onChange={setSkillImages} />
             <View className="profile-edit__skill-form-actions">
               <Text
                 className="profile-edit__skill-form-btn profile-edit__skill-form-btn--cancel"
@@ -249,6 +256,19 @@ export default function ProfileEdit() {
               <Text className="profile-edit__skill-title">{skill.title}</Text>
               {skill.description && (
                 <Text className="profile-edit__skill-desc">{skill.description}</Text>
+              )}
+              {skill.images && skill.images.length > 0 && (
+                <View className="profile-edit__skill-images">
+                  {skill.images.map((img, idx) => (
+                    <Image
+                      key={idx}
+                      className="profile-edit__skill-image"
+                      src={img}
+                      mode="aspectFill"
+                      onClick={() => Taro.previewImage({ urls: skill.images, current: img })}
+                    />
+                  ))}
+                </View>
               )}
             </View>
             <View className="profile-edit__skill-actions">

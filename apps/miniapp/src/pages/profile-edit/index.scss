@@ -199,6 +199,19 @@
     line-height: 1.4;
   }
 
+  &__skill-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-top: $spacing-xs;
+  }
+
+  &__skill-image {
+    width: 120px;
+    height: 120px;
+    border-radius: $radius-sm;
+  }
+
   &__skill-actions {
     display: flex;
     gap: $spacing-sm;
