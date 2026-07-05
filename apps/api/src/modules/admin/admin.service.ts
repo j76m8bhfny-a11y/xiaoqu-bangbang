@@ -381,25 +381,47 @@ export class AdminService {
     await this.assertReviewInCommunity(review, communityId);
 
     // Set target content visibility to admin_only
+    let creatorId: string | null = null;
     if (review.targetType === 'event') {
-      await this.prisma.event.update({
+      const event = await this.prisma.event.update({
         where: { id: review.targetId },
         data: { visibility: 'admin_only' },
+        select: { creatorId: true },
       });
+      creatorId = event.creatorId;
     } else if (review.targetType === 'market_item') {
-      await this.prisma.marketItem.update({
+      const item = await this.prisma.marketItem.update({
         where: { id: review.targetId },
         data: { status: 'pending_review' },
+        select: { sellerId: true },
       });
+      creatorId = item.sellerId;
     } else if (review.targetType === 'event_comment') {
-      await this.prisma.eventComment.update({
+      const comment = await this.prisma.eventComment.update({
         where: { id: review.targetId },
         data: { status: 'hidden' },
+        select: { userId: true },
       });
+      creatorId = comment.userId;
     } else if (review.targetType === 'market_comment') {
-      await this.prisma.marketComment.update({
+      const comment = await this.prisma.marketComment.update({
         where: { id: review.targetId },
         data: { status: 'hidden' },
+        select: { userId: true },
+      });
+      creatorId = comment.userId;
+    }
+
+    // P-303: 通知内容创建者已由管理员人工审核
+    if (creatorId) {
+      await this.notificationsService.create({
+        userId: creatorId,
+        communityId,
+        type: 'system',
+        title: '内容审核结果',
+        content: '您的内容已由管理员人工审核',
+        targetType: review.targetType,
+        targetId: review.targetId,
       });
     }
 
@@ -738,13 +760,23 @@ export class AdminService {
       data: { claimedUserId: claim.userId, claimStatus: 'claimed' },
     });
     await this.logAudit(adminId, 'approve_claim', 'committee_member_claim', claimId);
+    // P-317: 通知申请人认领申请已通过
+    await this.notificationsService.create({
+      userId: claim.userId,
+      communityId: claim.communityId,
+      type: 'system',
+      title: '认领申请已通过',
+      content: '您的业委会成员认领申请已通过',
+      targetType: 'committee_member_claim',
+      targetId: claimId,
+    });
     return { id: claimId, status: 'approved' };
   }
 
   async rejectClaim(adminId: string, claimId: string, reason: string, communityId: string) {
     const claim = await this.prisma.committeeMemberClaim.findUnique({
       where: { id: claimId },
-      select: { communityId: true, status: true },
+      select: { communityId: true, status: true, userId: true },
     });
     if (!claim || claim.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     // P-318: 已处理的认领不可重复操作
@@ -754,6 +786,16 @@ export class AdminService {
       data: { status: 'rejected', rejectReason: reason, reviewedBy: adminId },
     });
     await this.logAudit(adminId, 'reject_claim', 'committee_member_claim', claimId);
+    // P-317: 通知申请人认领申请被驳回
+    await this.notificationsService.create({
+      userId: claim.userId,
+      communityId: claim.communityId,
+      type: 'system',
+      title: '认领申请被驳回',
+      content: `您的业委会成员认领申请被驳回${reason ? `，原因：${reason}` : ''}`,
+      targetType: 'committee_member_claim',
+      targetId: claimId,
+    });
     return { id: claimId, status: 'rejected' };
   }
 
@@ -1246,6 +1288,24 @@ export class AdminService {
       },
     });
     await this.logAudit(adminId, 'create_announcement', 'announcement', result.id, dto);
+    // P-82: 通知小区所有成员
+    const members = await this.prisma.communityMember.findMany({
+      where: { communityId, deletedAt: null },
+      select: { userId: true },
+    });
+    if (members.length > 0) {
+      await this.prisma.notification.createMany({
+        data: members.map((m) => ({
+          userId: m.userId,
+          communityId,
+          type: 'announcement',
+          title: '小区公告',
+          content: dto.title,
+          targetType: 'announcement',
+          targetId: result.id,
+        })),
+      });
+    }
     return result;
   }
 
@@ -1966,6 +2026,16 @@ export class AdminService {
       this.prisma.topic.delete({ where: { id: sourceTopicId } }),
     ]);
     await this.logAudit(adminId, 'merge_topics', 'topic', sourceTopicId, { targetTopicId });
+    // P-314: 通知源议题创建者议题已合并
+    await this.notificationsService.create({
+      userId: source.createdBy,
+      communityId: source.communityId,
+      type: 'system',
+      title: '议题已合并',
+      content: `您的议题「${source.title}」已合并到「${target.title}」`,
+      targetType: 'topic',
+      targetId: targetTopicId,
+    });
     return { sourceTopicId, targetTopicId };
   }
 
@@ -2377,6 +2447,16 @@ export class AdminService {
         reviewedAt: new Date(),
         reviewedBy: adminUserId,
       },
+    });
+
+    // P-266: 通知申请人申请被驳回
+    await this.notificationsService.create({
+      userId: app.applicantId,
+      type: 'system',
+      title: '小区申请被驳回',
+      content: `您的小区申请已被驳回${reason ? `，原因：${reason}` : ''}`,
+      targetType: 'community_application',
+      targetId: applicationId,
     });
 
     await this.logAudit(
