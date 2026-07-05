@@ -1037,7 +1037,7 @@ model CommunityApplication {
   materialType        String    @map("material_type") // property_cert/rent_contract/access_card/other
   materialUrl         String    @map("material_url")
   doorPhotoUrl        String?   @map("door_photo_url")
-  status              String    @default("pending") // pending/approved/rejected
+  status              String    @default("pending") // pending/approving/approved/rejected
   rejectReason        String?   @map("reject_reason")
   approvedCommunityId String?   @map("approved_community_id") @db.Uuid
   supportCount        Int       @default(0) @map("support_count")

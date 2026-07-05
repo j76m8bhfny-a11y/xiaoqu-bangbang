@@ -48,7 +48,8 @@ export class VotesService {
 
   async findOne(id: string, communityId: string) {
     const vote = await this.prisma.vote.findFirst({
-      where: { id, communityId, deletedAt: null },
+      // P-254: 过滤 draft 状态，仅 published/closed 可访问
+      where: { id, communityId, status: { not: 'draft' }, deletedAt: null },
       include: {
         options: {
           orderBy: { sortOrder: 'asc' },
@@ -70,6 +71,9 @@ export class VotesService {
     communityId: string,
     selectedOptionIds: string[],
   ) {
+    // P-257: 去重，避免重复 ID 绕过数量校验
+    const uniqueOptionIds = [...new Set(selectedOptionIds)];
+
     // P-24: 校验投票属于当前用户的小区
     const vote = await this.prisma.vote.findFirst({
       where: { id: voteId, communityId, deletedAt: null },
@@ -108,29 +112,38 @@ export class VotesService {
     }
 
     // 检查选项数量限制
-    if (vote.voteType === 'single' && selectedOptionIds.length !== 1) {
+    if (vote.voteType === 'single' && uniqueOptionIds.length !== 1) {
       throw new BadRequestException('单选投票只能选择一个选项');
     }
-    if (vote.maxChoices && selectedOptionIds.length > vote.maxChoices) {
+    if (vote.maxChoices && uniqueOptionIds.length > vote.maxChoices) {
       throw new BadRequestException(`最多选择 ${vote.maxChoices} 个选项`);
     }
 
     // 验证选项属于该投票
     const validOptions = await this.prisma.voteOption.findMany({
-      where: { voteId, id: { in: selectedOptionIds } },
+      where: { voteId, id: { in: uniqueOptionIds } },
     });
-    if (validOptions.length !== selectedOptionIds.length) {
+    if (validOptions.length !== uniqueOptionIds.length) {
       throw new BadRequestException('包含无效的投票选项');
     }
 
-    const record = await this.prisma.voteRecord.create({
-      data: {
-        voteId,
-        userId,
-        communityId: vote.communityId,
-        selectedOptionIds: selectedOptionIds as any,
-      },
-    });
+    // P-255: 并发竞态兜底——P2002 抛 409 而非 500
+    let record;
+    try {
+      record = await this.prisma.voteRecord.create({
+        data: {
+          voteId,
+          userId,
+          communityId: vote.communityId,
+          selectedOptionIds: uniqueOptionIds as any,
+        },
+      });
+    } catch (e: any) {
+      if (e?.code === 'P2002') {
+        throw new ConflictException('您已投过票');
+      }
+      throw e;
+    }
 
     // P-284: 投票后发送 type='vote' 通知
     await this.prisma.notification.create({
@@ -150,7 +163,8 @@ export class VotesService {
 
   async getResults(voteId: string, userId: string, communityId: string) {
     const vote = await this.prisma.vote.findFirst({
-      where: { id: voteId, communityId, deletedAt: null },
+      // P-258: 过滤 draft 状态，仅 published/closed 可查看结果
+      where: { id: voteId, communityId, status: { not: 'draft' }, deletedAt: null },
     });
 
     if (!vote) {

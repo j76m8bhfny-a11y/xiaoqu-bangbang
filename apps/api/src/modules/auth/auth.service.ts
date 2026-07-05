@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -58,7 +58,8 @@ export class AuthService {
       },
     });
 
-    if (!user) return null;
+    // P-204: 用户不存在时抛 401 而非返回 null，避免前端拿到 data:null 歧义
+    if (!user) throw new UnauthorizedException('用户不存在');
 
     const currentCommunity = user.currentCommunity;
     const currentMember = user.currentCommunityId
@@ -218,7 +219,13 @@ export class AuthService {
         where: { userId, communityId },
       }),
       this.prisma.event.count({
-        where: { creatorId: userId, communityId, status: 'open', deletedAt: null },
+        // P-207: 活跃事件应含 open/in_progress/processing 三种状态
+        where: {
+          creatorId: userId,
+          communityId,
+          status: { in: ['open', 'in_progress', 'processing'] },
+          deletedAt: null,
+        },
       }),
       this.prisma.marketItem.count({
         where: { sellerId: userId, communityId, status: 'on_sale', deletedAt: null },

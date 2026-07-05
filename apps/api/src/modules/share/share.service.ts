@@ -113,8 +113,8 @@ export class ShareService {
           throw new ForbiddenException(card.disabledReason || '当前内容不可分享');
         }
       } catch (err) {
-        if (err instanceof ForbiddenException) throw err;
-        // If template missing or content not found, allow logging but skip strict check
+        // P-285: 模板缺失或内容不存在时不应静默记录分享日志
+        if (err instanceof ForbiddenException || err instanceof NotFoundException) throw err;
       }
     }
 

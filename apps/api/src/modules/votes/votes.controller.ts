@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards, Inject } from '@nestjs/common';
 import { VotesService } from './votes.service';
+import { SubmitVoteDto } from './dto/submit-vote.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -38,13 +39,13 @@ export class VotesController {
     @CurrentUser('userId') userId: string,
     @Param('id') voteId: string,
     @CurrentCommunityId() communityId: string,
-    @Body() body: { selectedOptionIds: string[] },
+    @Body() dto: SubmitVoteDto,
   ) {
     const data = await this.votesService.submitVote(
       userId,
       voteId,
       communityId,
-      body.selectedOptionIds,
+      dto.selectedOptionIds,
     );
     return { code: 0, message: 'ok', data };
   }
