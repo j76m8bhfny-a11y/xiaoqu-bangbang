@@ -4,6 +4,7 @@ import type {
   CreateMarketItemRequest,
   PaginatedData,
   MarketReviewDto,
+  MarketInterestDto,
 } from '@xiaoqu-bangbang/shared';
 
 export interface MarketCommentDto {
@@ -35,9 +36,16 @@ export const marketService = {
   update: (id: string, data: Partial<CreateMarketItemRequest>) =>
     http.patch<MarketItemDto>(`/market/items/${id}`, data),
 
-  markSold: (id: string) => http.post<MarketItemDto>(`/market/items/${id}/sold`),
+  markSold: (id: string, buyerId?: string) =>
+    http.post<MarketItemDto>(`/market/items/${id}/sold`, buyerId ? { buyerId } : undefined),
 
   closeItem: (id: string) => http.post<MarketItemDto>(`/market/items/${id}/close`),
+
+  addInterest: (id: string, message?: string) =>
+    http.post<MarketInterestDto>(`/market/items/${id}/interest`, message ? { message } : undefined),
+
+  getInterests: (id: string) =>
+    http.get<{ items: MarketInterestDto[] }>(`/market/items/${id}/interests`),
 
   toggleLike: (id: string) =>
     http.post<{ liked: boolean; likeCount: number }>(`/market/items/${id}/like`),

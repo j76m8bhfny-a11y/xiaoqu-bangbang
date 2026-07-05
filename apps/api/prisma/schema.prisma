@@ -43,6 +43,8 @@ model User {
   completionConfirmations EventCompletionConfirmation[]
   notifications           Notification[]
   marketItems             MarketItem[]                  @relation("MarketSeller")
+  boughtItems             MarketItem[]                  @relation("MarketBuyer")
+  marketInterests         MarketInterest[]
   marketReviews           MarketReview[]                @relation("MarketReviewReviewer")
   marketReviewsReceived   MarketReview[]                @relation("MarketReviewReviewee")
   contributions           ContributionRecord[]
@@ -421,20 +423,40 @@ model MarketItem {
   likeCount      Int       @default(0) @map("like_count")
   aiReviewStatus String    @default("pending") @map("ai_review_status") // pending/pass/reject/manual_review
   aiReviewResult Json?     @map("ai_review_result")
+  buyerId        String?   @map("buyer_id") @db.Uuid
   soldAt         DateTime? @map("sold_at")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
   deletedAt      DateTime? @map("deleted_at")
 
-  community Community       @relation(fields: [communityId], references: [id])
-  seller    User            @relation("MarketSeller", fields: [sellerId], references: [id])
+  community Community         @relation(fields: [communityId], references: [id])
+  seller    User              @relation("MarketSeller", fields: [sellerId], references: [id])
+  buyer     User?             @relation("MarketBuyer", fields: [buyerId], references: [id])
   comments  MarketComment[]
   reviews   MarketReview[]
   likes     MarketLike[]
+  interests MarketInterest[]
 
   @@index([communityId, category, status, createdAt])
   @@index([sellerId])
+  @@index([buyerId])
   @@map("market_items")
+}
+
+model MarketInterest {
+  id        String   @id @default(uuid()) @db.Uuid
+  itemId    String   @map("item_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  message   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  item MarketItem @relation(fields: [itemId], references: [id])
+  user User       @relation(fields: [userId], references: [id])
+
+  @@unique([itemId, userId])
+  @@index([itemId])
+  @@map("market_interests")
 }
 
 model MarketLike {

@@ -13,6 +13,7 @@ import { MarketService } from './market.service';
 import { CreateMarketItemDto } from './dto/create-market-item.dto';
 import { AddMarketCommentDto } from './dto/add-comment.dto';
 import { AddMarketReviewDto } from './dto/add-review.dto';
+import { MarkSoldDto, AddInterestDto } from './dto/mark-sold.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
 import { VerifiedMemberGuard } from '../../common/guards/verified-member.guard';
@@ -80,9 +81,35 @@ export class MarketController {
     @CurrentUser('userId') userId: string,
     @Param('id') id: string,
     @CurrentCommunityId() communityId: string,
+    @Body() dto?: MarkSoldDto,
   ) {
-    const item = await this.marketService.markSold(userId, id, communityId);
+    const item = await this.marketService.markSold(userId, id, communityId, dto?.buyerId);
     return { code: 0, message: 'ok', data: item };
+  }
+
+  // 记录意向（幂等）
+  @Post('items/:id/interest')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
+  async addInterest(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+    @Body() dto?: AddInterestDto,
+  ) {
+    const interest = await this.marketService.addInterest(userId, id, communityId, dto?.message);
+    return { code: 0, message: 'ok', data: interest };
+  }
+
+  // 卖家查看意向列表
+  @Get('items/:id/interests')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  async getInterests(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const items = await this.marketService.getInterests(userId, id, communityId);
+    return { code: 0, message: 'ok', data: { items } };
   }
 
   // P-58: 卖家自行下架商品

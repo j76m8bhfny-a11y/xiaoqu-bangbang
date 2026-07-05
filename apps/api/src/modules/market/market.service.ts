@@ -118,6 +118,7 @@ export class MarketService {
         aiReviewStatus: true,
         aiReviewResult: true,
         likeCount: true,
+        buyerId: true,
         soldAt: true,
         createdAt: true,
         updatedAt: true,
@@ -325,7 +326,7 @@ export class MarketService {
     return updated;
   }
 
-  async markSold(userId: string, id: string, communityId: string) {
+  async markSold(userId: string, id: string, communityId: string, buyerId?: string) {
     const item = await this.prisma.marketItem.findFirst({
       where: { id, deletedAt: null },
     });
@@ -350,15 +351,97 @@ export class MarketService {
       throw new BadRequestException('商品已下架');
     }
 
+    // 买家不能是卖家自己
+    if (buyerId && buyerId === userId) {
+      throw new BadRequestException('买家不能是卖家自己');
+    }
+
     const updated = await this.prisma.marketItem.update({
       where: { id },
       data: {
         status: 'sold',
         soldAt: new Date(),
+        ...(buyerId ? { buyerId } : {}),
       },
     });
 
     return updated;
+  }
+
+  // 记录意向（幂等：已存在则返回已有记录）
+  async addInterest(userId: string, itemId: string, communityId: string, message?: string) {
+    const item = await this.prisma.marketItem.findFirst({
+      where: { id: itemId, deletedAt: null },
+    });
+
+    if (!item) {
+      throw new NotFoundException('商品不存在');
+    }
+
+    if (item.communityId !== communityId) {
+      throw new ForbiddenException('无权操作该商品');
+    }
+
+    if (item.sellerId === userId) {
+      throw new BadRequestException('不能对自己发布的商品表达意向');
+    }
+
+    // 幂等：已有未删除意向则直接返回
+    const existing = await this.prisma.marketInterest.findUnique({
+      where: { itemId_userId: { itemId, userId } },
+    });
+
+    if (existing && !existing.deletedAt) {
+      return existing;
+    }
+
+    // 软删除的意向恢复
+    if (existing?.deletedAt) {
+      return this.prisma.marketInterest.update({
+        where: { id: existing.id },
+        data: { deletedAt: null, message: message ?? null },
+      });
+    }
+
+    return this.prisma.marketInterest.create({
+      data: { itemId, userId, message: message ?? null },
+    });
+  }
+
+  // 卖家查看意向列表
+  async getInterests(userId: string, itemId: string, communityId: string) {
+    const item = await this.prisma.marketItem.findFirst({
+      where: { id: itemId, deletedAt: null },
+    });
+
+    if (!item) {
+      throw new NotFoundException('商品不存在');
+    }
+
+    if (item.communityId !== communityId) {
+      throw new ForbiddenException('无权操作该商品');
+    }
+
+    if (item.sellerId !== userId) {
+      throw new ForbiddenException('只有卖家可以查看意向列表');
+    }
+
+    const interests = await this.prisma.marketInterest.findMany({
+      where: { itemId, deletedAt: null },
+      select: {
+        id: true,
+        itemId: true,
+        userId: true,
+        message: true,
+        createdAt: true,
+        user: {
+          select: { id: true, nickname: true, avatarUrl: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return interests;
   }
 
   // P-58: 卖家自行下架商品（区别于管理员 hide）
@@ -519,6 +602,21 @@ export class MarketService {
     // P-07: 只能对已售商品评价
     if (item.status !== 'sold') {
       throw new BadRequestException('只能对已售出商品进行评价');
+    }
+
+    // P-07: 评价者必须是该次交易的买家或卖家
+    if (!item.buyerId) {
+      throw new BadRequestException('该商品未关联买家，无法评价');
+    }
+    const isSeller = reviewerId === item.sellerId;
+    const isBuyer = reviewerId === item.buyerId;
+    if (!isSeller && !isBuyer) {
+      throw new ForbiddenException('只有买卖双方可评价');
+    }
+    // 评价对象必须是另一方
+    const expectedRevieweeId = isSeller ? item.buyerId : item.sellerId;
+    if (dto.revieweeId !== expectedRevieweeId) {
+      throw new BadRequestException('评价对象不正确');
     }
 
     // AI 审核评价内容

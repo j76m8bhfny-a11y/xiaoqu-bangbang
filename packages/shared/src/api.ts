@@ -283,9 +283,23 @@ export interface MarketItemDto {
   status: MarketItemStatus;
   // P-111: 后端 list/findOne 均返回 aiReviewStatus
   aiReviewStatus: string;
+  buyerId?: string | null;
   soldAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface MarketInterestDto {
+  id: string;
+  itemId: string;
+  userId: string;
+  message?: string | null;
+  createdAt: string;
+  user?: { id: string; nickname: string; avatarUrl: string | null };
+}
+
+export interface MarkSoldRequest {
+  buyerId?: string;
 }
 
 // ===== 榜单 =====

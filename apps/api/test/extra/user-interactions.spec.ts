@@ -327,7 +327,7 @@ describe('Feature: 用户互动与内容扩展', () => {
       // 给当前商品设置已售出状态
       await prisma.marketItem.update({
         where: { id: marketItemId },
-        data: { status: 'sold', soldAt: new Date() },
+        data: { status: 'sold', soldAt: new Date(), buyerId: sellerId },
       });
 
       const res = await request(app.getHttpServer())
@@ -348,7 +348,7 @@ describe('Feature: 用户互动与内容扩展', () => {
       // 恢复商品状态
       await prisma.marketItem.update({
         where: { id: marketItemId },
-        data: { status: 'on_sale', soldAt: null },
+        data: { status: 'on_sale', soldAt: null, buyerId: null },
       });
 
       // 清理卖家数据：先删关联表，再删 community_members，最后删 user

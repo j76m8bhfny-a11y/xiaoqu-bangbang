@@ -1,4 +1,4 @@
-import { View, Text, Swiper, SwiperItem, Image } from '@tarojs/components';
+import { View, Text, Swiper, SwiperItem, Image, Input } from '@tarojs/components';
 import Taro, { useShareAppMessage } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { useRequest } from '@/hooks';
@@ -18,6 +18,8 @@ const TRADE_TYPE_LABELS: Record<string, { label: string; color: string; bgColor:
   [TradeType.FREE]: { label: '免费', color: '#5b9e6f', bgColor: '#eaf4ec' },
   [TradeType.EXCHANGE]: { label: '交换', color: '#e0a458', bgColor: '#fbf0dd' },
 };
+
+const REVIEW_TAGS = ['沟通顺畅', '描述相符', '发货迅速', '物超所值', '态度友好'];
 
 export default function MarketDetail() {
   const params = Taro.getCurrentInstance().router?.params;
@@ -41,7 +43,7 @@ export default function MarketDetail() {
   const comments = commentsData?.items ?? [];
 
   // 已售商品的评价列表
-  const { data: reviewsData } = useRequest<{ items: MarketReviewDto[] }>(
+  const { data: reviewsData, refresh: refreshReviews } = useRequest<{ items: MarketReviewDto[] }>(
     () => marketService.getReviews(id),
     [id],
     { enabled: !!id && item?.status === MarketItemStatus.SOLD },
@@ -51,6 +53,10 @@ export default function MarketDetail() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [liking, setLiking] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewTags, setReviewTags] = useState<string[]>([]);
+  const [reviewContent, setReviewContent] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   useEffect(() => {
     if (item) {
@@ -134,6 +140,10 @@ export default function MarketDetail() {
 
   const isSold = item.status === MarketItemStatus.SOLD;
   const isSeller = user?.id === item.sellerId;
+  const isBuyer = !!user?.id && !!item.buyerId && user.id === item.buyerId;
+  const canReview = isSold && !!item.buyerId && (isSeller || isBuyer);
+  const revieweeId = isSeller ? item.buyerId! : item.sellerId;
+  const hasReviewed = reviews.some((r) => r.reviewerId === user?.id);
   const condConfig = CONDITION_LABELS[item.conditionLevel] || { label: '未知', color: '#999' };
   const tradeConfig = TRADE_TYPE_LABELS[item.tradeType] || {
     label: '出售',
@@ -142,28 +152,56 @@ export default function MarketDetail() {
   };
   const catConfig = MARKET_CATEGORY_CONFIG[item.category];
 
-  const handleWant = () => {
+  const handleWant = async () => {
     if (isSold) return;
+    try {
+      await marketService.addInterest(id);
+    } catch {
+      // 意向记录失败不影响查看联系方式
+    }
     const text = item.contactText || '请联系卖家';
     Taro.showToast({ title: text, icon: 'none', duration: 3000 });
   };
 
-  const handleMarkSold = () => {
-    Taro.showModal({
-      title: '确认',
-      content: '确定要标记为已售出吗？',
-      success: async (res) => {
-        if (res.confirm) {
-          try {
-            await marketService.markSold(id);
-            Taro.showToast({ title: '已标记为售出', icon: 'success' });
-            refresh();
-          } catch (e: any) {
-            Taro.showToast({ title: e.message || '操作失败', icon: 'none' });
+  const handleMarkSold = async () => {
+    let interests: { userId: string; user?: { nickname?: string } }[] = [];
+    try {
+      const res = await marketService.getInterests(id);
+      interests = res.items ?? [];
+    } catch {
+      // 拉取意向失败时回退到无买家模式
+    }
+
+    if (interests.length === 0) {
+      Taro.showModal({
+        title: '确认',
+        content: '确定要标记为已售出吗？',
+        success: async (res) => {
+          if (res.confirm) {
+            try {
+              await marketService.markSold(id);
+              Taro.showToast({ title: '已标记为售出', icon: 'success' });
+              refresh();
+            } catch (e: any) {
+              Taro.showToast({ title: e.message || '操作失败', icon: 'none' });
+            }
           }
-        }
-      },
-    });
+        },
+      });
+      return;
+    }
+
+    try {
+      const itemList = [...interests.map((i) => i.user?.nickname ?? '邻居'), '不指定买家'];
+      const res = await Taro.showActionSheet({ itemList });
+      const buyerId = res.tapIndex < interests.length ? interests[res.tapIndex].userId : undefined;
+      await marketService.markSold(id, buyerId);
+      Taro.showToast({ title: '已标记为售出', icon: 'success' });
+      refresh();
+    } catch (e: any) {
+      if (e?.errMsg?.includes('cancel')) return;
+      Taro.showToast({ title: e.message || '操作失败', icon: 'none' });
+    }
   };
 
   const handleClose = () => {
@@ -198,6 +236,32 @@ export default function MarketDetail() {
       Taro.showToast({ title: '举报成功', icon: 'success' });
     } catch {
       // cancelled or failed
+    }
+  };
+
+  const handleAddReview = async () => {
+    if (reviewRating === 0) {
+      Taro.showToast({ title: '请先选择评分', icon: 'none' });
+      return;
+    }
+    if (reviewSubmitting) return;
+    setReviewSubmitting(true);
+    try {
+      await marketService.addReview(id, {
+        revieweeId,
+        rating: reviewRating,
+        tags: reviewTags.length > 0 ? reviewTags : undefined,
+        content: reviewContent.trim() || undefined,
+      });
+      Taro.showToast({ title: '评价成功', icon: 'success' });
+      setReviewRating(0);
+      setReviewTags([]);
+      setReviewContent('');
+      refreshReviews();
+    } catch (e: any) {
+      Taro.showToast({ title: e.message || '评价失败', icon: 'none' });
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -319,8 +383,58 @@ export default function MarketDetail() {
       </View>
 
       {/* 交易评价：仅已售商品显示 */}
-      {/* ponytail: 评价输入表单暂缺——MarketItem 无 buyerId 字段（Batch 5.1 补），
-          无法确定评价对象。表单将在 markSold 选买家后补全。 */}
+      {canReview && !hasReviewed && (
+        <View className="market-detail__review-form">
+          <Text className="market-detail__review-form-title">
+            {isSeller ? '评价买家' : '评价卖家'}
+          </Text>
+          <View className="market-detail__review-form-stars">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Text
+                key={star}
+                className="market-detail__review-form-star"
+                onClick={() => setReviewRating(star)}
+              >
+                {star <= reviewRating ? '\u2605' : '\u2606'}
+              </Text>
+            ))}
+          </View>
+          <View className="market-detail__review-form-tags">
+            {REVIEW_TAGS.map((tag) => (
+              <Text
+                key={tag}
+                className={`market-detail__review-form-tag ${
+                  reviewTags.includes(tag) ? 'market-detail__review-form-tag--active' : ''
+                }`}
+                onClick={() => {
+                  setReviewTags((prev) =>
+                    prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+                  );
+                }}
+              >
+                {tag}
+              </Text>
+            ))}
+          </View>
+          <Input
+            className="market-detail__review-form-input"
+            placeholder="说点什么（可选）"
+            value={reviewContent}
+            onInput={(e) => setReviewContent(e.detail.value)}
+            maxlength={200}
+          />
+          <View
+            className={`market-detail__review-form-submit ${
+              reviewSubmitting ? 'market-detail__review-form-submit--disabled' : ''
+            }`}
+            onClick={handleAddReview}
+          >
+            <Text className="market-detail__review-form-submit-text">
+              {reviewSubmitting ? '提交中...' : '提交评价'}
+            </Text>
+          </View>
+        </View>
+      )}
       {isSold && reviews.length > 0 && (
         <View className="market-detail__reviews">
           <Text className="market-detail__reviews-title">交易评价</Text>

@@ -154,6 +154,7 @@ describe('Feature: 闲置模块', () => {
           // P-07: 只能对已售商品评价
           status: 'sold',
           soldAt: new Date(),
+          buyerId: userId2,
         },
       });
       itemId = item.id;
