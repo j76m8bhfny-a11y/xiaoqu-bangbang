@@ -1111,6 +1111,10 @@ export class EventsService {
       throw new BadRequestException('不能感谢自己');
     }
 
+    // 单帮手事件: toUserId 必须等于 selectedHelperId（防止感谢非帮手用户）
+    if (toUserId && event.selectedHelperId && toUserId !== event.selectedHelperId) {
+      throw new BadRequestException('感谢对象不是该事件的帮手');
+    }
     // 多帮手事件(selectedHelperId 为 null): 校验 toUserId 是该事件的 confirmed participant
     if (toUserId && !event.selectedHelperId) {
       const participant = await this.prisma.eventParticipant.findFirst({
@@ -1271,10 +1275,10 @@ export class EventsService {
     // Only creator or helper can rate
     const isCreator = event.creatorId === userId;
     const isHelper = event.selectedHelperId === userId;
-    // 多帮手事件: 检查 EventParticipant 表是否存在记录
+    // 多帮手事件: 检查 EventParticipant 表是否存在已确认记录
     if (!isCreator && !isHelper) {
       const participant = await this.prisma.eventParticipant.findFirst({
-        where: { eventId, userId },
+        where: { eventId, userId, status: 'confirmed' },
         select: { id: true },
       });
       if (!participant) {
@@ -1366,11 +1370,14 @@ export class EventsService {
     // 推断 targetUserId:
     // role=creator → target = event.selectedHelperId（单帮手）或 null（多帮手整体评价）
     // role=helper/participant → target = event.creatorId
+    // ponytail: 多帮手事件创建者评价 = 整体帮手体验，targetUserId 为 null（无单一目标）。
+    //           升级路径: 加 targetUserId 字段到 EventCompletionConfirmation + 改 unique 约束，
+    //           支持创建者对每个参与者分别评价。
     return confirmations.map((c) => ({
       id: c.id,
       eventId: c.eventId,
       userId: c.userId,
-      targetUserId: c.role === 'creator' ? (event.selectedHelperId ?? '') : event.creatorId,
+      targetUserId: c.role === 'creator' ? (event.selectedHelperId ?? null) : event.creatorId,
       rating: c.rating!,
       tags: (c.ratingTags as string[] | undefined) ?? undefined,
       content: c.ratingContent ?? undefined,

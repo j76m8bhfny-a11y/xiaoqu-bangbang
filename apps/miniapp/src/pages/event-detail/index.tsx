@@ -141,7 +141,7 @@ export default function EventDetail() {
   // 评价列表
   const { data: ratingsData } = useRequest<{ items: EventRateDto[] }>(
     () => eventService.getEventRatings(id!),
-    [id],
+    [id, event?.status],
     { enabled: !!id && event?.status === EventStatus.COMPLETED },
   );
   const ratings = ratingsData?.items ?? [];

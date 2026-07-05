@@ -483,7 +483,7 @@ export interface EventRateDto {
   id: string;
   eventId: string;
   userId: string;
-  targetUserId: string;
+  targetUserId: string | null;
   rating: number;
   tags?: string[];
   content?: string;
