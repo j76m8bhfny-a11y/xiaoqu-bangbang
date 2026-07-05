@@ -166,6 +166,17 @@ export default function Plaza() {
           </View>
         )}
 
+        {/* 社群入口 */}
+        <View
+          className="plaza__card plaza__social-entry"
+          onClick={() => Taro.navigateTo({ url: '/pages/social-groups/index' })}
+        >
+          <View className="plaza__card-header">
+            <Text className="plaza__card-title">👥 社群</Text>
+            <Text className="plaza__card-more">进入 ›</Text>
+          </View>
+        </View>
+
         {/* 议题区 */}
         <View className="plaza__topics-header">
           <View className="plaza__topic-tabs">

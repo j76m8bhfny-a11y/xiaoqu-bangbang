@@ -43,6 +43,7 @@ export default function TopicDetail() {
 
   const [tab, setTab] = useState<'events' | 'discuss'>('events');
   const [commentInput, setCommentInput] = useState('');
+  const [replyingTo, setReplyingTo] = useState<{ id: string; nickname: string } | null>(null);
   // 本地跟踪用户投票态（赞/反对），用于图标高亮 + 乐观更新
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
   // 事件点赞本地态：eventId -> liked
@@ -99,8 +100,12 @@ export default function TopicDetail() {
   const handleSendComment = async () => {
     if (!commentInput.trim() || !topic) return;
     try {
-      await topicService.createComment(topic.id, { content: commentInput.trim() });
+      await topicService.createComment(topic.id, {
+        content: commentInput.trim(),
+        parentId: replyingTo?.id,
+      });
       setCommentInput('');
+      setReplyingTo(null);
       refreshComments();
       refreshTopic();
     } catch (e: any) {
@@ -170,6 +175,51 @@ export default function TopicDetail() {
   const eventsTabCls = `topic-detail__tab${tab === 'events' ? ' topic-detail__tab--active' : ''}`;
   const discussTabCls = `topic-detail__tab${tab === 'discuss' ? ' topic-detail__tab--active' : ''}`;
   const statusCls = `topic-detail__status${isClosed ? ' topic-detail__status--closed' : ''}`;
+
+  const renderComment = (c: TopicCommentDto, isReply = false) => (
+    <View
+      key={c.id}
+      className={`topic-detail__discuss-item${isReply ? ' topic-detail__discuss-item--reply' : ''}`}
+    >
+      <View className="topic-detail__discuss-avatar">
+        {c.userAvatarUrl ? (
+          <Image
+            className="topic-detail__discuss-avatar-img"
+            src={c.userAvatarUrl}
+            mode="aspectFill"
+          />
+        ) : (
+          <Text className="topic-detail__discuss-avatar-text">
+            {c.userNickname?.slice(0, 1) || '邻'}
+          </Text>
+        )}
+      </View>
+      <View className="topic-detail__discuss-body">
+        <View className="topic-detail__discuss-author">{c.userNickname}</View>
+        <View className="topic-detail__discuss-content">{c.content}</View>
+        <View className="topic-detail__discuss-actions">
+          <View className="topic-detail__discuss-like" onClick={() => handleLikeComment(c.id)}>
+            <Text className="topic-detail__discuss-like-text">
+              {'\u{1f44d}'} {c.likeCount}
+            </Text>
+          </View>
+          {!isClosed && (
+            <View
+              className="topic-detail__discuss-reply"
+              onClick={() => setReplyingTo({ id: c.id, nickname: c.userNickname })}
+            >
+              <Text className="topic-detail__discuss-reply-text">回复</Text>
+            </View>
+          )}
+        </View>
+        {c.replies && c.replies.length > 0 && (
+          <View className="topic-detail__discuss-replies">
+            {c.replies.map((reply) => renderComment(reply, true))}
+          </View>
+        )}
+      </View>
+    </View>
+  );
 
   return (
     <View className="topic-detail">
@@ -352,35 +402,7 @@ export default function TopicDetail() {
               {!commentsLoading && !commentsError && topicComments.length === 0 && (
                 <EmptyState icon="💬" text="还没有讨论\n来说说你的看法吧" />
               )}
-              {topicComments.map((c) => (
-                <View key={c.id} className="topic-detail__discuss-item">
-                  <View className="topic-detail__discuss-avatar">
-                    {c.userAvatarUrl ? (
-                      <Image
-                        className="topic-detail__discuss-avatar-img"
-                        src={c.userAvatarUrl}
-                        mode="aspectFill"
-                      />
-                    ) : (
-                      <Text className="topic-detail__discuss-avatar-text">
-                        {c.userNickname?.slice(0, 1) || '邻'}
-                      </Text>
-                    )}
-                  </View>
-                  <View className="topic-detail__discuss-body">
-                    <View className="topic-detail__discuss-author">{c.userNickname}</View>
-                    <View className="topic-detail__discuss-content">{c.content}</View>
-                    <View
-                      className="topic-detail__discuss-like"
-                      onClick={() => handleLikeComment(c.id)}
-                    >
-                      <Text className="topic-detail__discuss-like-text">
-                        {'\u{1f44d}'} {c.likeCount}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              ))}
+              {topicComments.map((c) => renderComment(c))}
             </>
           )}
         </View>
@@ -396,9 +418,17 @@ export default function TopicDetail() {
       {/* 底部输入栏：仅议题讨论 Tab */}
       {tab === 'discuss' && !isClosed && (
         <View className="topic-detail__input-bar">
+          {replyingTo && (
+            <View className="topic-detail__reply-banner">
+              <Text className="topic-detail__reply-banner-text">回复 @{replyingTo.nickname}</Text>
+              <View className="topic-detail__reply-cancel" onClick={() => setReplyingTo(null)}>
+                <Text className="topic-detail__reply-cancel-text">取消</Text>
+              </View>
+            </View>
+          )}
           <Input
             className="topic-detail__input"
-            placeholder="发表你对本议题的看法…"
+            placeholder={replyingTo ? `回复 @${replyingTo.nickname}` : '发表你对本议题的看法…'}
             value={commentInput}
             onInput={(e) => setCommentInput(e.detail.value)}
           />

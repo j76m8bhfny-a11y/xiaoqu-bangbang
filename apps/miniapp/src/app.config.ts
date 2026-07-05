@@ -34,9 +34,7 @@ export default defineAppConfig({
     'pages/settings/index',
     'pages/service-providers/index',
     'pages/service-provider-detail/index',
-    // ponytail: social-groups 模块本期不做（已审计决议「不做」），保留源码用于后续迭代，
-    //          仅从注册页面列表移除，避免增加包体积/被入口意外触达。
-    // 'pages/social-groups/index',
+    'pages/social-groups/index',
     'pages/community-apply/index',
     'pages/community-application-detail/index',
     'pages/my-applications/index',

@@ -700,15 +700,18 @@ export default function EventDetail() {
           <Text className="event-detail__action-btn-label">评论</Text>
         </View>
 
-        <View
-          className="event-detail__action-btn event-detail__action-btn--cta"
-          style={{ backgroundColor: typeConfig.ctaColor }}
-          onClick={handleCta}
-        >
-          <Text className="event-detail__action-btn-cta-text">
-            {submitting ? '提交中...' : typeConfig.ctaText}
-          </Text>
-        </View>
+        {!isCreator &&
+          (event.status === EventStatus.OPEN || event.status === EventStatus.IN_PROGRESS) && (
+            <View
+              className="event-detail__action-btn event-detail__action-btn--cta"
+              style={{ backgroundColor: typeConfig.ctaColor }}
+              onClick={handleCta}
+            >
+              <Text className="event-detail__action-btn-cta-text">
+                {submitting ? '提交中...' : typeConfig.ctaText}
+              </Text>
+            </View>
+          )}
 
         <View
           className={`event-detail__action-btn event-detail__action-btn--fav ${favorited ? 'event-detail__action-btn--active' : ''}`}
