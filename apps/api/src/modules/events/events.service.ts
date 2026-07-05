@@ -811,18 +811,26 @@ export class EventsService {
     });
 
     if (existing) {
-      await this.prisma.eventLike.delete({ where: { id: existing.id } });
-      await this.prisma.event.update({
-        where: { id: eventId },
-        data: { likeCount: { decrement: 1 } },
-      });
+      // review fix: wrap delete + decrement in $transaction
+      await this.prisma.$transaction([
+        this.prisma.eventLike.delete({ where: { id: existing.id } }),
+        this.prisma.event.update({
+          where: { id: eventId },
+          data: { likeCount: { decrement: 1 } },
+        }),
+      ]);
       return { liked: false };
     }
 
     try {
-      await this.prisma.eventLike.create({
-        data: { eventId, userId },
-      });
+      // review fix: wrap create + increment in $transaction
+      await this.prisma.$transaction([
+        this.prisma.eventLike.create({ data: { eventId, userId } }),
+        this.prisma.event.update({
+          where: { id: eventId },
+          data: { likeCount: { increment: 1 } },
+        }),
+      ]);
     } catch (e: any) {
       // P-79: 并发竞态 — 已被点赞则转为取消
       if (e?.code === 'P2002') {
@@ -830,20 +838,18 @@ export class EventsService {
           where: { eventId_userId: { eventId, userId } },
         });
         if (existing) {
-          await this.prisma.eventLike.delete({ where: { id: existing.id } });
-          await this.prisma.event.update({
-            where: { id: eventId },
-            data: { likeCount: { decrement: 1 } },
-          });
+          await this.prisma.$transaction([
+            this.prisma.eventLike.delete({ where: { id: existing.id } }),
+            this.prisma.event.update({
+              where: { id: eventId },
+              data: { likeCount: { decrement: 1 } },
+            }),
+          ]);
           return { liked: false };
         }
       }
       throw e;
     }
-    await this.prisma.event.update({
-      where: { id: eventId },
-      data: { likeCount: { increment: 1 } },
-    });
     return { liked: true };
   }
 

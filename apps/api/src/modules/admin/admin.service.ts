@@ -1217,12 +1217,6 @@ export class AdminService {
     const totalSorted = buildSorted(totalContributions);
     const monthlySorted = buildSorted(monthlyContributions);
 
-    // Delete existing snapshots and recreate
-    await this.prisma.rankingSnapshot.deleteMany({ where: { communityId, periodType: 'total' } });
-    await this.prisma.rankingSnapshot.deleteMany({
-      where: { communityId, periodType: 'month', periodKey },
-    });
-
     // P-281: 查询所有相关用户的徽章数
     const allUserIds = [
       ...new Set([...totalSorted.map(([id]) => id), ...monthlySorted.map(([id]) => id)]),
@@ -1237,39 +1231,43 @@ export class AdminService {
         : [];
     const badgeCountMap = new Map(userBadgeCounts.map((ub) => [ub.userId, ub._count.id]));
 
-    for (let i = 0; i < totalSorted.length; i++) {
-      const [userId, data] = totalSorted[i];
-      await this.prisma.rankingSnapshot.create({
-        data: {
-          communityId,
-          periodType: 'total',
-          periodKey: 'total',
-          userId,
-          rankNo: i + 1,
-          score: data.score,
-          flowerCount: data.flowerCount,
-          helpCount: data.helpCount,
-          badgeCount: badgeCountMap.get(userId) ?? 0,
-        },
-      });
-    }
+    // Prepare snapshot data
+    const totalSnapshots = totalSorted.map(([userId, data], i) => ({
+      communityId,
+      periodType: 'total' as const,
+      periodKey: 'total',
+      userId,
+      rankNo: i + 1,
+      score: data.score,
+      flowerCount: data.flowerCount,
+      helpCount: data.helpCount,
+      badgeCount: badgeCountMap.get(userId) ?? 0,
+    }));
+    const monthlySnapshots = monthlySorted.map(([userId, data], i) => ({
+      communityId,
+      periodType: 'month' as const,
+      periodKey,
+      userId,
+      rankNo: i + 1,
+      score: data.score,
+      flowerCount: data.flowerCount,
+      helpCount: data.helpCount,
+      badgeCount: badgeCountMap.get(userId) ?? 0,
+    }));
 
-    for (let i = 0; i < monthlySorted.length; i++) {
-      const [userId, data] = monthlySorted[i];
-      await this.prisma.rankingSnapshot.create({
-        data: {
-          communityId,
-          periodType: 'month',
-          periodKey,
-          userId,
-          rankNo: i + 1,
-          score: data.score,
-          flowerCount: data.flowerCount,
-          helpCount: data.helpCount,
-          badgeCount: badgeCountMap.get(userId) ?? 0,
-        },
-      });
-    }
+    // Atomic delete + recreate in transaction (review fix: wrap deleteMany + createMany)
+    await this.prisma.$transaction([
+      this.prisma.rankingSnapshot.deleteMany({ where: { communityId, periodType: 'total' } }),
+      this.prisma.rankingSnapshot.deleteMany({
+        where: { communityId, periodType: 'month', periodKey },
+      }),
+      ...(totalSnapshots.length > 0
+        ? [this.prisma.rankingSnapshot.createMany({ data: totalSnapshots })]
+        : []),
+      ...(monthlySnapshots.length > 0
+        ? [this.prisma.rankingSnapshot.createMany({ data: monthlySnapshots })]
+        : []),
+    ]);
 
     await this.logAudit(adminId, 'recalculate_rankings', 'community', communityId, null);
     return { recalculated: totalSorted.length, periodKey };
@@ -1579,11 +1577,11 @@ export class AdminService {
       where: { id: reportId },
       data: { status: 'dismissed', handledBy: adminId, handledAt: new Date() },
     });
-    // P-38: 通知举报者处理结果
+    // P-38: 通知举报者处理结果 (P-10: 使用 feedback 类型)
     await this.notificationsService.create({
       userId: report.reporterId,
       communityId,
-      type: 'system',
+      type: 'feedback',
       title: '举报处理结果',
       content: '您的举报经审核未违规，已驳回处理',
       targetType: 'report',
@@ -1662,11 +1660,11 @@ export class AdminService {
         targetId: report.targetId,
       });
     }
-    // P-38: 通知举报者处理结果
+    // P-38: 通知举报者处理结果 (P-10: 使用 feedback 类型)
     await this.notificationsService.create({
       userId: report.reporterId,
       communityId,
-      type: 'system',
+      type: 'feedback',
       title: '举报处理结果',
       content: '您的举报已核实，相关内容已被下架处理',
       targetType: 'report',
@@ -1729,11 +1727,11 @@ export class AdminService {
         targetId: report.targetId,
       });
     }
-    // P-38: 通知举报者处理结果
+    // P-38: 通知举报者处理结果 (P-10: 使用 feedback 类型)
     await this.notificationsService.create({
       userId: report.reporterId,
       communityId,
-      type: 'system',
+      type: 'feedback',
       title: '举报处理结果',
       content: '您的举报已核实，相关用户已收到警告',
       targetType: 'report',
@@ -1797,11 +1795,11 @@ export class AdminService {
       where: { id: reportId },
       data: { status: 'banned', handledBy: adminId, handledAt: new Date() },
     });
-    // P-38: 通知举报者处理结果
+    // P-38: 通知举报者处理结果 (P-10: 使用 feedback 类型)
     await this.notificationsService.create({
       userId: report.reporterId,
       communityId,
-      type: 'system',
+      type: 'feedback',
       title: '举报处理结果',
       content: '您的举报已核实，相关用户已被封禁',
       targetType: 'report',

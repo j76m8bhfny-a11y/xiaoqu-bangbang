@@ -87,7 +87,7 @@ export class MarketController {
 
   // P-58: 卖家自行下架商品
   @Post('items/:id/close')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async closeBySeller(
     @CurrentUser('userId') userId: string,
     @Param('id') id: string,
