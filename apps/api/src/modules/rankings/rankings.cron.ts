@@ -15,7 +15,7 @@ export class RankingsCron {
   // 每月 1 号 0 点：重算所有小区的月榜和总榜
   @Cron('0 0 1 * *')
   async recalculateMonthlyRankings() {
-    // 只处理有 community_member 的小区
+    // 查询所有未删除小区（无 community_member 的小区重算为空操作，无害）
     const communities = await this.prisma.community.findMany({
       where: { deletedAt: null },
       select: { id: true, name: true },

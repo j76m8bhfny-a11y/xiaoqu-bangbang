@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { EventStatus } from '@xiaoqu-bangbang/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -16,12 +17,16 @@ export class EventsCron {
     // PRD: 活动仅指新响应(EventApplication 创建)和状态变更，评论/点赞不重置计时器。
     // ponytail: event.updatedAt 会被评论/点赞/toggleLike 更新，不可靠。
     //           改用 applications.createdAt 判断最后响应时间。
+    //           createdAt < 30天前 防止新建无响应事件被误关。
     //           edge case: processing 状态下选中帮手(更新 application status)不创建新 application，
-    //           可能漏关。升级路径: 加 lastActivityAt 字段精确追踪。
+    //           可能误关。升级路径: 加 lastActivityAt 字段精确追踪。
     const staleEvents = await this.prisma.event.findMany({
       where: {
-        status: { in: ['open', 'in_progress', 'processing'] },
+        status: {
+          in: [EventStatus.OPEN, EventStatus.IN_PROGRESS, EventStatus.PROCESSING],
+        },
         deletedAt: null,
+        createdAt: { lt: thirtyDaysAgo },
         applications: {
           none: {
             createdAt: { gt: thirtyDaysAgo },
@@ -38,7 +43,7 @@ export class EventsCron {
 
     await this.prisma.event.updateMany({
       where: { id: { in: staleEvents.map((e) => e.id) } },
-      data: { status: 'closed' },
+      data: { status: EventStatus.CLOSED },
     });
     this.logger.log(`自动关闭 ${staleEvents.length} 个过期事件`);
   }
