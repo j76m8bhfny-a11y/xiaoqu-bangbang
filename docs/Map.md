@@ -1,7 +1,7 @@
 # 小区帮榜棒 — 全局地图 (Map)
 
 > 锁版基线文档。本文件描述产品当前真实形态，作为 Spec.md 与 Standard.md 的上位索引。
-> 最后扫描日期: 2026-07-03 | 版本: v0.2.0 (对齐 PRD v0.7.0)
+> 最后扫描日期: 2026-07-05 | 版本: v0.2.0 (对齐 PRD v0.7.0)
 
 ---
 
@@ -19,7 +19,7 @@
 xiaoqu-bangbang-main/
 ├── apps/
 │   ├── api/          NestJS 后端 (19 模块, 3000 端口)
-│   ├── miniapp/      Taro 微信小程序 (32 注册页面)
+│   ├── miniapp/      Taro 微信小程序 (33 注册页面)
 │   └── admin/        Next.js 管理后台 (20 个 page.tsx, 含根重定向, 19 功能页)
 ├── packages/
 │   └── shared/       前后端共享契约 (api.ts 930行 + enums.ts)
@@ -44,19 +44,19 @@ xiaoqu-bangbang-main/
 
 ### 2.3 关键代码位置
 
-| 资源                       | 路径                                                                               |
-| -------------------------- | ---------------------------------------------------------------------------------- |
-| 共享契约 (DTO/枚举/错误码) | `packages/shared/src/{api.ts, enums.ts, index.ts}`                                 |
-| 数据库 Schema              | `apps/api/prisma/schema.prisma` (46 张表)                                          |
-| 后端模块                   | `apps/api/src/modules/*` (19 个模块)                                               |
-| 后端测试                   | `apps/api/test/*.spec.ts` (9 个) + `apps/api/test/extra/*.spec.ts` (7 个)          |
-| 小程序页面                 | `apps/miniapp/src/pages/*` (32 个注册页, 另有 2 个已注释保留: mine, social-groups) |
-| 小程序状态                 | `apps/miniapp/src/store/{auth,community,notification}.ts`                          |
-| 小程序服务层               | `apps/miniapp/src/services/*` (15 个 Service 文件)                                 |
-| 小程序契约适配             | `apps/miniapp/src/utils/mappers.ts` (DTO → 展示模型)                               |
-| Admin 页面                 | `apps/admin/src/app/*` (20 个 page.tsx, 含根重定向, 19 功能页)                     |
-| 迁移文件                   | `apps/api/prisma/migrations/` (4 次迁移)                                           |
-| 种子数据                   | `apps/api/prisma/seed*.ts` (3 份)                                                  |
+| 资源                       | 路径                                                                      |
+| -------------------------- | ------------------------------------------------------------------------- |
+| 共享契约 (DTO/枚举/错误码) | `packages/shared/src/{api.ts, enums.ts, index.ts}`                        |
+| 数据库 Schema              | `apps/api/prisma/schema.prisma` (49 张表)                                 |
+| 后端模块                   | `apps/api/src/modules/*` (19 个模块)                                      |
+| 后端测试                   | `apps/api/test/*.spec.ts` (9 个) + `apps/api/test/extra/*.spec.ts` (8 个) |
+| 小程序页面                 | `apps/miniapp/src/pages/*` (33 个注册页, 另有 1 个已注释保留: mine)       |
+| 小程序状态                 | `apps/miniapp/src/store/{auth,community,notification}.ts`                 |
+| 小程序服务层               | `apps/miniapp/src/services/*` (15 个 Service 文件)                        |
+| 小程序契约适配             | `apps/miniapp/src/utils/mappers.ts` (DTO → 展示模型)                      |
+| Admin 页面                 | `apps/admin/src/app/*` (20 个 page.tsx, 含根重定向, 19 功能页)            |
+| 迁移文件                   | `apps/api/prisma/migrations/` (8 次迁移)                                  |
+| 种子数据                   | `apps/api/prisma/seed*.ts` (3 份)                                         |
 
 ### 2.4 启动命令速查
 
@@ -195,7 +195,7 @@ xiaoqu-bangbang-main/
 | --- | ----------------------------------------------------------------------------------------------- | -------------- |
 | R16 | **不对接真实 AI/OCR** — 本期 `AiReviewService` 和 `OcrService` 保持 Mock 实现, 不接入真实服务商 | 锁版不加新依赖 |
 | R17 | **不引入支付** — 闲置交易仅线上联系, 不接入微信支付                                             | 锁版不加新功能 |
-| R18 | **不修改数据库迁移历史** — 4 次迁移已应用, 不可回改, 新改动只能加新迁移                         | 生产数据安全   |
+| R18 | **不修改数据库迁移历史** — 8 次迁移已应用, 不可回改, 新改动只能加新迁移                         | 生产数据安全   |
 | R19 | **CI/CD 暂不引入** — 本期无 `.github/workflows`, 测试靠本地 `pnpm test`                         | 锁版不加基建   |
 
 ### 4.5 基建注意事项
@@ -220,7 +220,7 @@ xiaoqu-bangbang-main/
         ┌────────────────┼────────────────┐
         ▼                ▼                ▼
    apps/api          apps/miniapp      apps/admin
-   (19 模块)          (32 页面)         (19 功能页)
+   (19 模块)          (33 页面)         (19 功能页)
         │                │                │
         ├─ auth          ├─ login         ├─ dashboard
         ├─ communities   ├─ community-*   ├─ reviews

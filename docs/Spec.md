@@ -2,7 +2,7 @@
 
 > 锁版基线文档。将产品拆解为相互独立的子模块任务树, 每个模块明确交付闭环。
 > 上位索引: Map.md | 验收标准: Standard.md
-> 最后扫描日期: 2026-07-03 | 版本: v0.2.0 (对齐 PRD v0.7.0)
+> 最后扫描日期: 2026-07-05 | 版本: v0.2.0 (对齐 PRD v0.7.0)
 
 ---
 
@@ -54,7 +54,7 @@
 
 - **M2.1** 小区列表: `GET /communities` (city/keyword 筛选, 仅 active)
 - **M2.2** 选择小区: `POST /communities/select` (首次自动创建 community_member, role=resident)
-- **M2.3** 社群入口: `GET /communities/current/social-groups` (按认证状态过滤可见性) ⚠️ 小程序端本期不做, 仅后端 API + Admin 可用
+- **M2.3** 社群入口: `GET /communities/current/social-groups` (按认证状态过滤可见性) ✅ 已实现 (batch 2, 小程序端已上线)
 - **M2.4** 隔离守卫: `CurrentCommunityGuard` + `@CurrentCommunityId()` + `@SkipCurrentCommunity()`
 
 ### 交付闭环
@@ -115,10 +115,10 @@
 - **M4.4** 编辑事件: `PATCH /events/:id` (内容变更重新 AI 审核, closed/completed 不可编辑)
 - **M4.5** 关闭事件: `POST /events/:id/close`
 - **M4.6** 响应事件: `POST /events/:id/applications` (事件 → in_progress, 通知创建者)
-- **M4.7** 选择帮手: `POST /events/:id/applications/:appId/select` (事件 → processing, 通知帮手) ⚠️ 多帮手流程 (public_welfare/lost_found) 代码未实现, 当前走单帮手 (P-80)
+- **M4.7** 选择帮手: `POST /events/:id/applications/:appId/select` (事件 → processing, 通知帮手) ✅ 多帮手流程已实现 (batch 6, commit 04688e3)
 - **M4.8** 完成请求: `POST /events/:id/complete/request` (创建/更新确认请求)
 - **M4.9** 完成确认: `POST /events/:id/complete/confirm` (双方确认 → completed → 触发积分/勋章/排行/通知)
-- **M4.10** 评价: `POST /events/:id/rate` (仅参与者, 仅已完成事件) ⚠️ PRD 本期简化为"送花感谢" (M4.13), 后端 rate 接口保留但小程序不调用, 结构化评价后续迭代 (P-41)
+- **M4.10** 评价: `POST /events/:id/rate` (仅参与者, 仅已完成事件) ✅ 已实现 (batch 3, commit 3c322b5 + ponytail 6e178b7)
 - **M4.11** 评论: `GET/POST /events/:id/comments` (AI 审核, 仅返回 visible, 嵌套最多 2 层)
 - **M4.12** 点赞: `POST /events/:id/like` (toggle)
 - **M4.13** 感谢: `POST /events/:id/thanks` (不可重复, 不可感谢自己)
@@ -126,7 +126,7 @@
 - **M4.15** 反馈日志: `GET /events/:id/feedback-logs` (公开处理记录, public_feedback 类型)
 - **M4.16** 议题推荐: `GET /events/topic-suggestions` (Jaccard 相似度)
 - **M4.17** 举报: `POST /reports` (8 种目标详见 M16.2, 6 种理由)
-- **M4.18** 详情页状态→按钮映射: 按事件状态显示/隐藏 CTA/编辑/关闭/确认/送花/举报按钮 (⚠️ 代码未实现 CTA 状态判断, P-74)
+- **M4.18** 详情页状态→按钮映射: 按事件状态显示/隐藏 CTA/编辑/关闭/确认/送花/举报按钮 (✅ 已实现 CTA 状态判断, batch 2, commit 0fba0d4)
 
 ### 交付闭环
 
@@ -152,8 +152,8 @@
 - **M5.2** 发布闲置: `POST /market/items` (AI 审核文本+图片, 任一图片 reject 则整商品 reject)
 - **M5.3** 闲置详情: `GET /market/items/:id` (含 isLiked)
 - **M5.4** 编辑闲置: `PATCH /market/items/:id` (仅卖家)
-- **M5.5** 标记已售: `POST /market/items/:id/sold` (仅卖家) ⚠️ 意向记录本期不实现, "我想要"仅显示联系方式, markSold 不选买家 (P-42)
-- **M5.5b** 卖家下架: `POST /market/items/:id/close` ⚠️ 代码未实现, 卖家无法自行关闭未售出商品, 仅管理员可隐藏 (P-58)
+- **M5.5** 标记已售: `POST /market/items/:id/sold` (仅卖家) ✅ 意向记录已实现 (batch 5, commit 62f3ec4), "我想要" + markSold 选买家
+- **M5.5b** 卖家下架: `POST /market/items/:id/close` ✅ 已实现 (batch 5), 卖家可自行关闭未售出商品
 - **M5.6** 评论: `GET/POST /market/items/:id/comments` (AI 审核, 嵌套最多 2 层)
 - **M5.7** 点赞: `POST /market/items/:id/like` (toggle, 返回 likeCount)
 - **M5.8** 评价: `GET/POST /market/items/:id/reviews` (AI 审核, UNIQUE 防重复)
@@ -292,7 +292,7 @@
 
 ### 任务树
 
-- **M10.1** 排行榜: `GET /rankings` (periodType=month/total, 分页, 月榜按 occurredAt 过滤当月 ⚠️ 代码未实现 P-72)
+- **M10.1** 排行榜: `GET /rankings` (periodType=month/total, 分页, 月榜按 occurredAt 过滤当月 ✅ 已实现, batch 4, commit 51423f4)
 - **M10.2** 我的排名: `GET /rankings/me`
 - **M10.3** 勋章列表: `GET /badges` (公开, 无需登录)
 - **M10.4** 我的勋章: `GET /me/badges` (含贡献记录)
@@ -301,7 +301,7 @@
   - **议事激励** (议事类事件通过审核时): 创建者 1 朵 (feedback)
   - **议题激励** (议题通过 AI 审核时): 创建者 1 朵 (topic)
   - **小区创建激励** (小区申请通过时): 申请人 community_founding (score=10) + founder 徽章; 助力人 community_founding (score=5) + seed 徽章
-  - ⚠️ 代码 help_free/help_paid 未统一为 1 朵 (P-61)
+  - ✅ help_free/help_paid 已统一为 1 朵 (batch 1, P-61 已修复)
 - **M10.6** 勋章规则 (自动颁发, 四类):
   - 互助类: `helper_1` (1次) / `helper_5` (5次) / `helper_20` (20次) / `flower_10` (10朵) / `flower_50` (50朵)
   - 议事类: `feedback_5` (5次有效反馈) / `feedback_20` (20次)
@@ -612,12 +612,12 @@
 ### 任务树
 
 - **M21.1** PostgreSQL: Docker 容器 (postgres:16-alpine, 宿主 5433 → 容器 5432)
-- **M21.2** Prisma 迁移: 4 次迁移 (init / indexes / topics / community_application)
+- **M21.2** Prisma 迁移: 8 次迁移 (init / add_indexes_and_community_ids / add_topics / add_community_application / remove_only_verified / add_market_interest / add_event_participants / add_user_skills)
 - **M21.3** 种子数据: `seed.ts` (主) + `seed-jinmao.ts` (金茂府) + `seed-topics.ts` (议题)
 - **M21.4** Husky: pre-commit (lint-staged) + commit-msg (commitlint)
 - **M21.5** ESLint: flat config (v9), base + 各包配置
 - **M21.6** Prettier: 统一格式 (singleQuote, trailingComma all, printWidth 100)
-- **M21.7** 环境变量: `.env.example` (DATABASE*URL/JWT_SECRET/JWT_EXPIRES_IN/WECHAT*_/STORAGE\__/AI_REVIEW_PROVIDER/OCR_PROVIDER 等)
+- **M21.7** 环境变量: `.env.example` (DATABASE*URL/JWT_SECRET/JWT_EXPIRES_IN/WECHAT*\_/STORAGE\_\_/AI_REVIEW_PROVIDER/OCR_PROVIDER 等)
 
 ### 交付闭环
 

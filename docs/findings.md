@@ -1,8 +1,9 @@
 # PRD 需求审查 — 问题清单
 
-> 生成时间: 2026-07-03
+> 生成时间: 2026-07-03 (基准扫描) | 最后更新: 2026-07-05
 > 审查方法: grill-me 逐项确认，对照 PRD + 代码 + 数据库 Schema
-> 当前阶段: 只做文档和方案，不改代码
+> 当前阶段: 开发完成 + 验收期（7 批次 22 任务 + ponytail 缺口处理已全部完成）
+> 注：批次 1-7 修复了约 30 个 P-问题，本清单中标记为 🔴/🟡 的部分实际已修复，详见各 P- 问题末尾的 commit 标注。汇总表已更新。
 
 ---
 
@@ -37,6 +38,8 @@ discussion → feedback → 1 朵  ✅
 ```
 
 **修复**: 在 `getEventAction()` 补 `case 'public_feedback': return 'feedback'` 和 `case 'discussion': return 'feedback'`。
+
+**[2026-07-05 已修复, commit 6e006b7]**
 
 ---
 
@@ -118,6 +121,8 @@ if (vote.onlyVerified) {
 
 **PRD**: §2.3 权限矩阵修正为"认证业主 ✓，普通居民 ✗"（去掉"部分"）。
 
+**[2026-07-05 已修复, commit 32f253e]**
+
 ---
 
 ## 三、闲置交易
@@ -133,6 +138,8 @@ if (vote.onlyVerified) {
 - revieweeId 由前端传入，可伪造
 
 **方案**: 限制为 sold 后买卖双方互评。
+
+**[2026-07-05 已修复, commit 3f1d1c9]**
 
 ---
 
@@ -244,6 +251,8 @@ if (vote.onlyVerified) {
 
 **修复**: 在 `handleEventCompletion` 中，按事件类型给创建者创建贡献记录（flower=0 或 flower=对应朵数）。
 
+**[2026-07-05 已修复, commit 3f1d1c9]**
+
 ---
 
 ### P-17 🟡 help_offer 类型跳过选帮手环节
@@ -289,6 +298,8 @@ if (vote.onlyVerified) {
 - 只允许编辑不触发审核的字段（如图片——但图片也要审核，见 P-20）
 - 或：有人响应后完全禁止编辑
 
+**[2026-07-05 已修复, commit 0d0ad5d]**
+
 ---
 
 ### P-20 🟡 事件编辑：图片变化也要审核
@@ -298,6 +309,8 @@ if (vote.onlyVerified) {
 **问题**: 代码只在 title/description 变化时触发 AI 审核，图片变化不审核。但闲置物品的图片都要审核，事件图片也应审核。
 
 **方案**: 编辑时检测 images 字段变化，触发图片 AI 审核。
+
+**[2026-07-05 已修复, commit 3f1d1c9]**
 
 ---
 
@@ -332,6 +345,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **修复**: 月榜查询条件加 `occurredAt: { gte: 月初, lt: 下月初 }`。
 
+**[2026-07-05 已修复, commit 4611336]**
+
 ---
 
 ### P-23 🟡 排行榜重算非事务 — 中间出错数据丢失
@@ -341,6 +356,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 **问题**: `recalculateRankings()` 用 `deleteMany` 删除旧快照 + `createMany` 创建新快照，两步不在事务里。如果中间出错，排行榜数据会丢失。
 
 **修复**: 用 `prisma.$transaction()` 包裹 deleteMany + createMany。
+
+**[2026-07-05 已修复, commit f06f32a]**
 
 ---
 
@@ -356,6 +373,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **修复**: `submitVote()` 加 communityId 参数，查询时加 `where: { id: voteId, communityId }`。
 
+**[2026-07-05 已修复, commit 514e455]**
+
 ---
 
 ## 九、议题与议事
@@ -367,6 +386,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 **问题**: 议题时间线查询条件 `status: { in: ['open', 'pending_review'] }`，in_progress/processing/completed 的事件不显示。事件有人响应后从时间线消失。
 
 **方案**: 确认时间线应该展示哪些状态的事件。如果展示全部（含完成），修改查询条件。
+
+**[2026-07-05 已修复, commit 3f1d1c9]**
 
 ---
 
@@ -509,6 +530,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - 处理举报后，给举报者发 `feedback` 类型通知（P-10 的具体落地）
 - 下架时，给内容创建者发 `system` 通知
 
+**[2026-07-05 已修复, commit f559f30]**
+
 ---
 
 ## 十二、Schema 注释
@@ -543,6 +566,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **影响**: 用户无法在小程序上对事件进行评价，PRD §4.4 场景2 第7步"双方互相评价"无法走通。
 
+**[2026-07-05 已修复, commit 3c322b5]**
+
 ---
 
 ### P-42 🔴 闲置评价功能断线 — 后端有接口，小程序没调用也没 UI
@@ -552,6 +577,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 **问题**: 后端有完整的闲置评价接口（`addReview()`/`getReviews()` 方法），但小程序端 `market.ts` 没有调用这两个接口，`market-detail` 页面也没有评价 UI。
 
 **影响**: 用户无法在小程序上对闲置交易进行评价。
+
+**[2026-07-05 已修复, commit 62f3ec4]**
 
 ---
 
@@ -583,6 +610,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - A. 后端返回改为匹配 shared 契约（后端改 select/flatten）
 - B. shared 契约改为匹配后端返回（嵌套结构）
 - C. mappers.ts 补全所有 DTO 的适配
+
+**[2026-07-05 已修复, commit 19c95b3]**
 
 ---
 
@@ -694,6 +723,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD 保留完整设计，本期走"无意向记录"兜底路径（直接标记已售、不产生评价），§8.1 标注"后续迭代实现"。
 
+**[2026-07-05 已修复, commit 62f3ec4]**
+
 ### P-56 🟡 举报入口不完整 — 议题/投票/评论无举报入口
 
 **位置**: `apps/miniapp/src/pages/topic-detail/`, `apps/miniapp/src/pages/vote-detail/`
@@ -710,6 +741,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD §4.4 简化——本期事件反馈机制为"送花感谢"（给小红花），不做结构化评价（rating+tags+content）。后端 rate 接口保留但标注"本期不调用"。§4.4 step 5 改为"送花感谢"，step 7 改为"帮手获得小红花 → 积分/勋章/排行更新"。§5.6 同步更新。P-41 降级为"已知缺口，后续迭代"。
 
+**[2026-07-05 已修复, commit 3c322b5]**
+
 ### P-58 🟡 闲置商品卖家无法自行下架/删除
 
 **位置**: `apps/api/src/modules/market/market.controller.ts`, `apps/miniapp/src/services/market.ts`
@@ -724,6 +757,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 影响：卖家改变主意或商品不再可用时，无法自行下架，只能标记已售或联系管理员。
 
 **方案**（用户确认）: 代码定稿后补 `POST /market/items/:id/close` 端点，让卖家能自行下架未售出商品。PRD §4.5 已更新生命周期说明，区分"卖家下架"和"管理员隐藏"。
+
+**[2026-07-05 已修复, commit 62f3ec4]**
 
 ### P-59 🟢 topic_closed 通知类型未在共享枚举中声明
 
@@ -751,6 +786,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: 统一为 1 朵，不区分免费/有偿。rewardType 保留用于展示和筛选，不影响小红花数量。代码定稿后需修改 `rankings.service.ts` 的 `getEventAction()` 逻辑。P-01 影响降低（help_free 从 3 朵降为 1 朵）。
 
+**[2026-07-05 已修复, commit 7c9d190]**
+
 ### P-62 🟢 议题赞踩"两个作用域"概念不清
 
 **问题**: §4.6 赞踩分 open/closed 两个作用域，概念复杂，大多数用户不理解。
@@ -762,6 +799,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 **问题**: §4.7 onlyVerified 字段是条件判断（admin 可关），但 PRD 说始终要求认证。还有 onlyVerifiedLocked 字段 PRD 未提及。P-07 已记录代码 bug。
 
 **方案**（用户确认）: 始终校验认证状态，代码定稿后移除 onlyVerified 条件判断和 onlyVerifiedLocked 字段，Admin 开关移除，小程序标签始终显示。P-07 随之解决。
+
+**[2026-07-05 已修复, commit 7c9d190]**
 
 ### P-64 🟢 "三套激励体系"计数错误
 
@@ -793,6 +832,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD §6.2 已补充输入长度限制表（事件标题≤50、描述≤500、图片≤9张、议题标题≤30、评论≤200 等）。代码定稿后在 DTO 中补 `@MaxLength` 装饰器。
 
+**[2026-07-05 已修复, commit b46b4ce]**
+
 ### P-68 🟡 创建者可响应自己的事件
 
 **位置**: `apps/api/src/modules/events/events.service.ts` respond 方法
@@ -800,6 +841,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 **问题**: 后端 respond 方法无"创建者不可响应自己事件"的检查，用户可自己帮自己。
 
 **方案**（用户确认）: PRD §4.4 业务规则已补充"创建者不可响应自己的事件（代码定稿后补检查）"。
+
+**[2026-07-05 已修复, commit f06f32a]**
 
 ### P-69 🔴 Admin 仪表盘三层契约断裂
 
@@ -814,6 +857,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 **后果**: Admin 仪表盘 9 张统计卡中有 5 张永远显示 0（前端用 `?? 0` 兜底），待办列表永远为空。
 
 **方案**（用户确认）: PRD §4.18 保持"9 项统计 + 待办列表"（与契约+前端一致，是设计真相）。后端 `getDashboard()` 需补齐缺失的 5 个统计字段（pendingVerifications/pendingClaims/highRiskFeedback/pendingReports/totalCommunities/todayMutualHelp）+ todoItems 数组，并修正字段名。代码定稿后修复，🔴 阻塞发布。
+
+**[2026-07-05 已修复, commit 7c9d190]**
 
 ### P-70 🟢 议题可重新开放但 PRD 未提及
 
@@ -841,6 +886,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD §4.9 已定义 occurredAt = 贡献记录时间（事件完成/审核通过时刻）。代码定稿后在 `recalculateRankings()` 的月榜查询中补 `where: { ..., occurredAt: { gte: monthStart, lt: nextMonthStart } }`。🔴 阻塞发布。
 
+**[2026-07-05 已修复, commit 51423f4]**
+
 ### P-73 🟡 通知点击跳转路由不完整 + market_item 拼写不匹配
 
 **位置**: `apps/miniapp/src/pages/notifications/index.tsx:83-88`, 后端多处 targetType
@@ -855,6 +902,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - 修正 `market` → `market_item`
 - 补充 topic→议题详情、badge→勋章墙、vote→投票详情等跳转逻辑
 
+**[2026-07-05 已修复, commit 7c9d190]**
+
 ### P-74 🟡 事件/闲置详情页状态→按钮映射未定义
 
 **位置**: `apps/miniapp/src/pages/event-detail/index.tsx:686-720` (CTA 始终显示), `handleCta:173`
@@ -862,6 +911,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 **问题**: 事件详情页底部 CTA 按钮（"我来帮"等）始终显示，不检查事件状态。`completed`/`closed`/`rejected` 状态下仍可点击"我来帮"，`handleCta` 也不检查状态直接调 respond。闲置详情页同理。
 
 **方案**（用户确认）: PRD §4.4 和 §4.5 各补充"状态→按钮可见性"映射表，明确每个状态下哪些按钮显示/隐藏。代码定稿后按映射表实现条件渲染。
+
+**[2026-07-05 已修复, commit 0fba0d4]**
 
 ### P-75 🟢 匿名事件管理员可见性未注明
 
@@ -895,6 +946,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD §4.4 已补充规则"open/in_progress/processing 状态超过 30 天无活动（无新响应、无状态变更），自动转 closed（不触发激励）"。§8.1 已记入缺口。代码定稿后加定时任务每日扫描。
 
+**[2026-07-05 已修复, commit 51423f4]**
+
 ### P-79 🟡 respond() 等方法未捕获唯一约束异常
 
 **位置**: `apps/api/src/modules/events/events.service.ts` (respond), `events.service.ts` (toggleLike), `apps/api/src/modules/market/market.service.ts` (toggleLike)
@@ -905,6 +958,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - `toggleLike()` (events/market): 有 findUnique 检查但存在 TOCTOU 竞态，并发时 UNIQUE 兜底但抛 500
 
 **方案**（用户确认）: 代码定稿后在三个方法中补 try-catch，将 Prisma 唯一约束异常转为 409 Conflict + 友好提示（如"您已响应过此事件"）。
+
+**[2026-07-05 已修复, commit d264c85]**
 
 ---
 
@@ -924,6 +979,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD 保留多帮手设计但标注"⚠️ 代码未实现"，当前走单帮手兜底。§4.9 补充激励时机说明：单帮手 completed 时触发，多帮手设计为逐个触发。§8.1 补充缺口行。
 
+**[2026-07-05 已修复, commit 04688e3]**
+
 ### P-81 🟡 议题 reopen 后旧评分未清除
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:1372-1380` (reopenTopic)
@@ -932,6 +989,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD §4.6 已补充"reopen 时清空已有评分（ratingSum/ratingCount 归零，删除 TopicRating 记录）"。代码定稿后修改 reopenTopic 方法。
 
+**[2026-07-05 已修复, commit 3f1d1c9]**
+
 ### P-82 🟡 announcement 通知标记"已实现"但业委会公告不发通知
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:1824` (announcement 仅用于小区开通), 业委会创建公告无通知
@@ -939,6 +998,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 **问题**: §4.10 原写 `announcement | 业委会公告 | ✅ 已实现`，但代码中 `type: 'announcement'` 只在小区申请通过时使用。业委会发布公告时不发通知。
 
 **方案**（用户确认）: PRD §4.10 已拆分：announcement 改为"小区开通通知"✅，另加"业委会公告通知 ⚠️ 待实现"。
+
+**[2026-07-05 已修复, commit 83d1b7b]**
 
 ### P-83 🟡 评论嵌套限制不统一
 
@@ -995,17 +1056,23 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: 后端 `POST /communities/select` 返回 `{ currentCommunityId, communityName }`，小程序 `communityService.select()` 类型标注为 `{ success: boolean }`，两结构无任何重叠字段。小程序端 `result.success` 为 `undefined`。
 - **建议**: 小程序返回类型改为 `{ currentCommunityId: string; communityName: string }`，或新增 `SelectCommunityResponse` DTO。
 
+**[2026-07-05 已修复, commit d2cd569]**
+
 ### P-89 🔴 [verifications] GET /me 响应包装不一致（对象 vs 数组）
 
 - **位置**: `apps/api/src/modules/verifications/verifications.controller.ts:22-25` vs `apps/miniapp/src/services/verification.ts:15-16`
 - **问题**: 后端返回 `{ code, message, data: { items } }`（data 是对象），小程序标注为 `VerificationDto[]`（期望直接数组）。经 `http.ts` 解包 `body.data` 后拿到 `{ items: [...] }` 而非 `[...]`，对结果调用 `.map()` 会运行时崩溃（对象不可迭代）。
 - **建议**: 小程序改为 `http.get<{ items: VerificationDto[] }>('/verifications/me')`。
 
+**[2026-07-05 已修复, commit d2cd569]**
+
 ### P-90 🟡 [auth] GET /me 返回缺 openid 字段
 
 - **位置**: `apps/api/src/modules/auth/auth.service.ts:67-77` vs `packages/shared/src/api.ts:91-102`
 - **问题**: `UserDto` 定义了 10 个字段（含 `openid: string`），但 `authService.getMe()` 只返回 9 个字段（无 `openid`）。小程序端 `user.openid` 为 `undefined`。
 - **建议**: `getMe()` 返回值补 `openid`，或将 `UserDto.openid` 改为可选。
+
+**[2026-07-05 已修复, commit d264c85]**
 
 ### P-91 🟡 [auth] PATCH /me 响应类型漂移
 
@@ -1018,6 +1085,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **位置**: `apps/miniapp/src/services/community.ts:4-11` vs `packages/shared/src/api.ts:137-144`
 - **问题**: 小程序本地定义 `SocialGroupDto` 的 `description`/`qrImageUrl`/`contactText` 为非空 `string`，shared 版本为 `string | null`。后端返回 `null` 时类型不匹配。
 - **建议**: 删除本地定义，从 `@xiaoqu-bangbang/shared` 导入。
+
+**[2026-07-05 已修复, commit d2cd569]**
 
 ### P-93 🟡 [verifications] 缺 SubmitVerificationResponse DTO
 
@@ -1061,11 +1130,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: 小程序 `sendThanks` 未传 `toUserId`，但 controller 通过 `@Body() body: { toUserId: string }` 强依赖。运行时 `body.toUserId` 为 `undefined`，Prisma 写入行为不可预测。
 - **建议**: 小程序调用时传 `{ toUserId: string }`。
 
+**[2026-07-05 已修复, commit fea8fa2]**
+
 ### P-100 🔴 [events] confirmCompletion 返回联合类型 miniapp 未覆盖
 
 - **位置**: 小程序 `apps/miniapp/src/services/event.ts:47-48` | 后端 `apps/api/src/modules/events/events.service.ts:513-577`
 - **问题**: miniapp 期望 `EventDto`，但后端在双方未全部确认时返回 `{ confirmed, waitingFor }`，仅双方都确认后才返回 `EventDto`。类型联合体与单一 `EventDto` 不匹配。
 - **建议**: miniapp 返回类型改为 `EventDto | { confirmed: string; waitingFor: string }`，或 shared 定义联合响应 DTO。
+
+**[2026-07-05 已修复, commit 0497fb0]**
 
 ### P-101 🟡 [events] requestCompletion 返回类型不匹配
 
@@ -1133,17 +1206,23 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: 后端 list/findOne 都返回 `aiReviewStatus`，shared DTO 未声明。
 - **建议**: shared 补 `aiReviewStatus: string`。
 
+**[2026-07-05 已修复, commit 06866a5]**
+
 ### P-112 🟡 [market] images 必填 vs 可选不一致
 
 - **位置**: shared `packages/shared/src/api.ts:261` | 后端 `apps/api/src/modules/market/dto/create-market-item.dto.ts:14-17`
 - **问题**: shared `images: string[]` 必填，后端 `images?: string[]` 可选（service 有 `?? []` 兜底）。
 - **建议**: 统一为可选。
 
+**[2026-07-05 已修复, commit 06866a5]**
+
 ### P-113 🟡 [market] addComment 返回缺 user 关系
 
 - **位置**: 小程序 `apps/miniapp/src/services/market.ts:45-46` | 后端 `apps/api/src/modules/market/market.service.ts:353-365`
 - **问题**: miniapp 期望返回含 `user: { id, nickname, avatarUrl }`，后端 `addComment` 直接返回 `prisma.marketComment.create(...)` 原始结果，未 include `user`。前端 `comment.user` 为 `undefined`。
 - **建议**: 后端 Prisma 查询加 `include: { user: { select: { id, nickname, avatarUrl } } }`。
+
+**[2026-07-05 已修复, commit 06866a5]**
 
 ### P-114 🟡 [market] getById 多传 communityId 被忽略
 
@@ -1186,6 +1265,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **位置**: 小程序 `apps/miniapp/src/services/topic.ts:33-34` | 后端 `apps/api/src/modules/topics/topics.controller.ts:136-146`
 - **问题**: miniapp 期望 `PaginatedData<TopicTimelineItem>`（含 total），controller 返回 `{ items, page, pageSize }`（缺 total）。分页组件无法计算总页数。
 - **建议**: controller 补 `total`，或 miniapp 改为非分页类型。
+
+**[2026-07-05 已修复, commit 06866a5]**
 
 ### P-121 🟡 [topics] likeComment/dislikeComment/unlikeComment 返回类型不匹配
 
@@ -1325,12 +1406,16 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `RankingItemDto` 定义扁平 `nickname`/`avatarUrl`，后端返回嵌套 `{ user: { id, nickname, avatarUrl } }`。小程序 `top3[1].nickname` 得 `undefined`，`nickname.slice(0, 1)` 崩溃。
 - **建议**: controller 层做 DTO 映射 flatten，或 shared 改嵌套结构。
 
+**[2026-07-05 已修复, commit ae883a1]**
+
 ### P-144 ✅ [rankings] isVerified/thanksCount/latestAction 缺失（P-43 子项，补行号）
 
 - **位置**: shared `packages/shared/src/api.ts:312-318` vs 后端 `apps/api/src/modules/rankings/rankings.service.ts:273-284`
 - **问题**: `RankingItemDto` 定义 `isVerified`/`thanksCount`/`latestAction`，后端从 `rankingSnapshot` 表查询，该表不含这 3 字段，运行时缺失。
 - **建议**: controller 层补充计算，或 DTO 移除。
 - **修复**: 3 字段均为 optional 且小程序未使用，从 DTO 移除使契约匹配实际返回。
+
+**[2026-07-05 已修复, commit cdebed9]**
 
 ### P-145 ✅ [rankings] getMyBadges 返回结构不匹配
 
@@ -1339,12 +1424,16 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **建议**: 后端改返回 `{ items: badges }`，或 miniapp 解构 `{ badges, contributions }`。
 - **修复**: controller 层 flatten userBadge → BadgeDto，`id` 用 `badge.id`（不是 `userBadge.id`），同时返回 `contributions`。
 
+**[2026-07-05 已修复, commit 44fbbbe]**
+
 ### P-146 ✅ [rankings] BadgeDto icon vs iconUrl
 
 - **位置**: 小程序 `apps/miniapp/src/services/ranking.ts:5-10` vs 后端 `apps/api/src/modules/rankings/rankings.service.ts:286-298`
 - **问题**: miniapp `BadgeDto` 有 `icon: string`，后端返回 `iconUrl: string | null`。徽章图标不显示。
 - **建议**: 统一字段名。
 - **修复**: controller 层 map `iconUrl` → `icon`，同时用于 `getBadges` 和 `getMyBadges`。
+
+**[2026-07-05 已修复, commit 44fbbbe]**
 
 ### P-147 🟡 [rankings] list communityId 参数被忽略
 
@@ -1358,11 +1447,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `ShareCardConfig` 定义 `title`/`path`，后端返回 `shareTitle`/`sharePath`。所有消费方（event-detail/market-detail/committee-announcement/vote-detail）用 `shareConfig.title`/`shareConfig.path` 得 `undefined`，分享功能完全失效。
 - **建议**: 后端改返回 `title`/`path`，或 shared 和所有消费方改 `shareTitle`/`sharePath`。
 
+**[2026-07-05 已修复, commit 5d2fe07]**
+
 ### P-149 🟡 [share] disabledReason undefined vs null
 
 - **位置**: shared `packages/shared/src/api.ts:420` vs 后端 `apps/api/src/modules/share/share.service.ts:80-89`
 - **问题**: `ShareCardConfig.disabledReason` 为 `string | null`，后端未赋值时为 `undefined`，JSON 中缺字段而非 `null`。
 - **建议**: 后端显式 `disabledReason: disabledReason ?? null`。
+
+**[2026-07-05 已修复, commit 5d2fe07]**
 
 ### P-150 🟢 [share] logShare 返回类型 unknown
 
@@ -1470,6 +1563,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `AdminDashboardDto` 定义 9 字段 + `todoItems`，service `getDashboard()` 只返回 4 字段（`eventCount`/`marketCount`/`userCount`/`pendingReviews`），且字段名不一致（`eventCount` vs `totalEvents`，`userCount` vs `totalUsers`）。前端用 `?? 0` 保护不崩，但 `pendingVerifications`/`totalCommunities`/`todayMutualHelp` 等 6 项永远显示 0。
 - **建议**: service 补齐所有 9 字段计算，字段名与 DTO 对齐，补 `todoItems` 数组。
 
+**[2026-07-05 已修复, commit 76eaadf]**
+
 ### P-165 🟡 [committee] POST /members 缺 termStart/termEnd
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:208-213` vs `packages/shared/src/api.ts:556-563`
@@ -1499,6 +1594,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **位置**: `apps/api/src/modules/admin/admin.service.ts:846-853` vs `packages/shared/src/api.ts:339-347`
 - **问题**: `getAnnouncements` 返回 raw Prisma 数据，发布者字段是 `publisherId`（UUID），shared `CommitteeAnnouncementDto` 定义 `publisherNickname: string`。service 未 join adminUser 表获取 nickname，**前端 `publisherNickname` 列为空**。
 - **建议**: service 加 `include` 或 join publisher 表获取 nickname。
+
+**[2026-07-05 已修复, commit 7a7b323]**
 
 ### P-170 🟡 [announcements] POST 缺 isPinned/status
 
@@ -1547,6 +1644,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:344-352` vs `packages/shared/src/api.ts:611-621`
 - **问题**: controller body `Partial<{ title, description, endAt }>` 只允许 3 字段，shared `UpdateVoteRequest` 定义了 `voteType`/`maxChoices`/`resultVisibility`/`isAnonymous`/`startAt`/`status` 等 9 字段。**前端无法修改投票类型、可见性、匿名设置等关键属性**。
 - **建议**: controller body 扩展为完整 `UpdateVoteRequest`。
+
+**[2026-07-05 已修复, commit 0d015a3]**
 
 ### P-178 🟢 [votes] PATCH /votes/:id 无审计日志
 
@@ -1602,11 +1701,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: controller body 类型**没有** `contactText` 字段，但 `CreateSocialGroupRequest` (shared/api.ts:687-694) 有，Prisma schema 有，前端表单有"联系方式"输入框。**前端发送的 `contactText` 被 controller 忽略，数据无法入库**。
 - **建议**: controller body 和 service dto 补 `contactText?: string`。
 
+**[2026-07-05 已修复, commit fde93de]**
+
 ### P-187 🟡 [social-groups] updateSocialGroup 缺 contactText/status
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:663-670` vs `packages/shared/src/api.ts:696-704`
 - **问题**: controller body 仅 `title, description, qrImageUrl, visibleTo, sortOrder`，缺 `contactText`/`status`。前端编辑表单有 `contactText` 但更新时被忽略。
 - **建议**: 补 `contactText?`/`status?`。
+
+**[2026-07-05 已修复, commit fde93de]**
 
 ### P-188 🟡 [social-groups] SocialGroupDto 缺 status/sortOrder
 
@@ -1631,6 +1734,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **位置**: 前端 `apps/admin/src/app/settings/page.tsx:45-53` vs 后端 `apps/api/src/modules/admin/dto/update-settings.dto.ts:6-30`
 - **问题**: 前端发送 `appName`/`defaultShareTitle`/`bannerDisplayCount` 等 camelCase 键，后端 DTO 定义 `app_name`/`default_share_title`/`banner_count` 等 snake_case 键。DTO 有 `[key: string]` 索引签名所以 camelCase 通过验证，但 `system_settings` 表以 camelCase 存储。其他模块按 snake_case 读取时找不到值。
 - **建议**: 统一为 camelCase（匹配 shared `UpdateSystemSettingsRequest`/`SystemSettingsDto`）。
+
+**[2026-07-05 已修复, commit ad9f878]**
 
 ### P-192 🟡 [settings] UpdateSettingsDto string vs number
 
@@ -1723,36 +1828,36 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ### auth 模块 (M1)
 
-| 编号  | 严重度 | 任务 | 位置                         | 描述                                                                                                                     |
-| ----- | ------ | ---- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| P-204 | 🟡     | M1.2 | auth.service.ts:60           | `getMe` 在用户不存在时返回 `null`，controller 直接包装为 `{code:0,data:null}`，前端拿到 `data:null` 不知是异常还是未登录 |
-| P-205 | 🟡     | M1.3 | users/dto/update-user.dto.ts | `UpdateUserDto` 的 `nickname`/`bio` 只有 `@IsString()` 无 `@MaxLength()`，PRD 要求 nickname ≤20、bio ≤200                |
-| P-206 | 🟢     | M1.3 | auth.service.ts:80-86        | `updateMe` 响应仅返回 `{id,nickname,avatarUrl,bio}`，缺 `status`/`currentCommunityId`，前端需二次调 getMe 刷新           |
-| P-207 | 🟡     | M1.4 | auth.service.ts:218-220      | `myActiveEventCount` 查询 `status:'open'` 仅计单状态，应含 `in_progress`/`processing`（活跃中事件）                      |
-| P-208 | 🟢     | M1.4 | auth.service.ts:180-188      | 未选小区时返回 `communityId:null` + 全部归零，前端需判空处理                                                             |
-| P-209 | 🟡     | M1.6 | Standard.md M1.6             | Standard 验收标准笔误: 写 "返回 40301"，实际 40301=Forbidden，40101=Unauthorized，退出登录应返回 40101（文档问题）       |
-| P-210 | 🟢     | M1.6 | auth.controller.ts           | `@Public()` 装饰器仅方法级支持，class 级别 `@Public()` 未实现（当前无此需求）                                            |
+| 编号  | 严重度 | 任务 | 位置                         | 描述                                                                                                                                                             |
+| ----- | ------ | ---- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P-204 | 🟡     | M1.2 | auth.service.ts:60           | `getMe` 在用户不存在时返回 `null`，controller 直接包装为 `{code:0,data:null}`，前端拿到 `data:null` 不知是异常还是未登录 **[2026-07-05 已修复, commit 2493f33]** |
+| P-205 | 🟡     | M1.3 | users/dto/update-user.dto.ts | `UpdateUserDto` 的 `nickname`/`bio` 只有 `@IsString()` 无 `@MaxLength()`，PRD 要求 nickname ≤20、bio ≤200 **[2026-07-05 已修复, commit 2493f33]**                |
+| P-206 | 🟢     | M1.3 | auth.service.ts:80-86        | `updateMe` 响应仅返回 `{id,nickname,avatarUrl,bio}`，缺 `status`/`currentCommunityId`，前端需二次调 getMe 刷新                                                   |
+| P-207 | 🟡     | M1.4 | auth.service.ts:218-220      | `myActiveEventCount` 查询 `status:'open'` 仅计单状态，应含 `in_progress`/`processing`（活跃中事件） **[2026-07-05 已修复, commit 2493f33]**                      |
+| P-208 | 🟢     | M1.4 | auth.service.ts:180-188      | 未选小区时返回 `communityId:null` + 全部归零，前端需判空处理                                                                                                     |
+| P-209 | 🟡     | M1.6 | Standard.md M1.6             | Standard 验收标准笔误: 写 "返回 40301"，实际 40301=Forbidden，40101=Unauthorized，退出登录应返回 40101（文档问题）                                               |
+| P-210 | 🟢     | M1.6 | auth.controller.ts           | `@Public()` 装饰器仅方法级支持，class 级别 `@Public()` 未实现（当前无此需求）                                                                                    |
 
 ### communities 模块 (M2)
 
-| 编号  | 严重度 | 任务 | 位置                         | 描述                                                                    |
-| ----- | ------ | ---- | ---------------------------- | ----------------------------------------------------------------------- |
-| P-211 | 🟡     | M2.2 | communities.service.ts:42-48 | `select` 先查 `communityMember` 再 `create`，两步非事务，并发可重复创建 |
-| P-212 | 🟢     | M2.3 | communities.controller.ts    | `getMemberVerifyStatus` 返回 null 时前端需兜底处理                      |
+| 编号  | 严重度 | 任务 | 位置                         | 描述                                                                                                            |
+| ----- | ------ | ---- | ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| P-211 | 🟡     | M2.2 | communities.service.ts:42-48 | `select` 先查 `communityMember` 再 `create`，两步非事务，并发可重复创建 **[2026-07-05 已修复, commit c9400e2]** |
+| P-212 | 🟢     | M2.3 | communities.controller.ts    | `getMemberVerifyStatus` 返回 null 时前端需兜底处理                                                              |
 
 ### verifications 模块 (M3)
 
-| 编号  | 严重度 | 任务      | 位置                                | 描述                                                                                                                                                                                                                                                                  |
-| ----- | ------ | --------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P-213 | 🟢     | M3.1      | verifications.service.ts:111        | schema default `status:'pending'` 不可达——代码始终显式设 `verificationStatus`，default 永远不生效                                                                                                                                                                     |
-| P-214 | 🟡     | M3.1      | verifications.service.ts            | 重复提交认证未限制——同一用户已有 pending 时再提交会覆盖，无幂等校验                                                                                                                                                                                                   |
-| P-215 | 🟡     | M3.3      | Standard.md M3.3                    | Standard 验收标准缺 0.5 阈值描述（OCR ≥0.5 判通过）和 rejected 分支说明（文档问题）                                                                                                                                                                                   |
-| P-216 | 🔴     | M3.6      | verifications.service.ts:115-119    | **[R5 红线违反]** `originalFileDeletedAt` 在所有状态下都被设置（approved/rejected/pending），违反 PRD——仅 approved 时应标记删除                                                                                                                                       |
-| P-217 | 🟢     | M3.6      | verifications.service.ts            | `originalFileDeletedAt` 仅标记时间，无定时任务物理删除原图文件                                                                                                                                                                                                        |
-| P-218 | 🔴     | M3.7      | votes.controller.ts:35-36           | **[R3 红线违反]** `submitVote` 缺 `VerifiedMemberGuard`，未认证用户可投票（与 P-06 交叉引用: P-06 是 service 层 onlyVerified 逻辑 bug，P-218 是 controller 层缺守卫，同一根因不同修复点）                                                                             |
-| P-219 | 🟡     | M3.7      | events.controller.ts                | 6 个写操作缺 `VerifiedMemberGuard`: `@Patch(':id')` / `@Post(':id/close')` / `@Post(':id/applications')` / `@Post(':id/applications/:applicationId/select')` / `@Post(':id/complete/request')` / `@Post(':id/complete/confirm')`。创建/评论/点赞/感谢/评分已有守卫 ✅ |
-| P-220 | 🟡     | M3.7      | committee.controller.ts:43-44,87-88 | `claimMembership` 和 `like` 缺 `VerifiedMemberGuard`，未认证用户可认领业委会成员/点赞公告                                                                                                                                                                             |
-| P-221 | 🟡     | M3.3/M3.5 | verifications.service.ts            | 双重徽章颁发逻辑冗余——认证通过和 first_owner_top30 两条路径分别颁发，逻辑重复，可合并                                                                                                                                                                                 |
+| 编号  | 严重度 | 任务      | 位置                                | 描述                                                                                                                                                                                                                                                                                                          |
+| ----- | ------ | --------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P-213 | 🟢     | M3.1      | verifications.service.ts:111        | schema default `status:'pending'` 不可达——代码始终显式设 `verificationStatus`，default 永远不生效                                                                                                                                                                                                             |
+| P-214 | 🟡     | M3.1      | verifications.service.ts            | 重复提交认证未限制——同一用户已有 pending 时再提交会覆盖，无幂等校验 **[2026-07-05 已修复, commit 0d0ad5d]**                                                                                                                                                                                                   |
+| P-215 | 🟡     | M3.3      | Standard.md M3.3                    | Standard 验收标准缺 0.5 阈值描述（OCR ≥0.5 判通过）和 rejected 分支说明（文档问题）                                                                                                                                                                                                                           |
+| P-216 | 🔴     | M3.6      | verifications.service.ts:115-119    | **[R5 红线违反]** `originalFileDeletedAt` 在所有状态下都被设置（approved/rejected/pending），违反 PRD——仅 approved 时应标记删除 **[2026-07-05 已修复, commit 521075e]**                                                                                                                                       |
+| P-217 | 🟢     | M3.6      | verifications.service.ts            | `originalFileDeletedAt` 仅标记时间，无定时任务物理删除原图文件                                                                                                                                                                                                                                                |
+| P-218 | 🔴     | M3.7      | votes.controller.ts:35-36           | **[R3 红线违反]** `submitVote` 缺 `VerifiedMemberGuard`，未认证用户可投票（与 P-06 交叉引用: P-06 是 service 层 onlyVerified 逻辑 bug，P-218 是 controller 层缺守卫，同一根因不同修复点） **[2026-07-05 已修复, commit 32f253e]**                                                                             |
+| P-219 | 🟡     | M3.7      | events.controller.ts                | 6 个写操作缺 `VerifiedMemberGuard`: `@Patch(':id')` / `@Post(':id/close')` / `@Post(':id/applications')` / `@Post(':id/applications/:applicationId/select')` / `@Post(':id/complete/request')` / `@Post(':id/complete/confirm')`。创建/评论/点赞/感谢/评分已有守卫 ✅ **[2026-07-05 已修复, commit d264c85]** |
+| P-220 | 🟡     | M3.7      | committee.controller.ts:43-44,87-88 | `claimMembership` 和 `like` 缺 `VerifiedMemberGuard`，未认证用户可认领业委会成员/点赞公告 **[2026-07-05 已修复, commit d264c85]**                                                                                                                                                                             |
+| P-221 | 🟡     | M3.3/M3.5 | verifications.service.ts            | 双重徽章颁发逻辑冗余——认证通过和 first_owner_top30 两条路径分别颁发，逻辑重复，可合并                                                                                                                                                                                                                         |
 
 **地基层小结**:
 
@@ -1771,83 +1876,83 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ### events 模块 (M4)
 
-| 编号  | 严重度 | 任务  | 位置                     | 描述                                                                                                                       |
-| ----- | ------ | ----- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| P-222 | ✅     | M4.6  | events.service.ts:370    | respond 重复响应未捕获 Prisma P2002，返回 500 而非 409。Standard 要求"重复返回 409"                                        |
-| P-223 | 🔴     | M4.9  | events.service.ts:513    | confirmCompletion 未检查 event.status，已 completed 事件可重复确认，**重复发放积分/勋章/通知** — 可被利用的积分刷取漏洞    |
-| P-224 | 🔴     | M4.11 | events.service.ts:597    | addComment 未检查嵌套层级，第 3 层不返回 400。Standard 要求"嵌套最多 2 层"                                                 |
-| P-225 | 🔴     | M4.16 | events.service.ts:246    | suggestTopics 未检查 ai_topic_suggest 系统开关，关闭时仍返回推荐（与 P-248/M6.9 同一代码，不同验收任务）                   |
-| P-226 | 🟡     | M4.4  | events.service.ts:264    | update 修改 type 时不重新校验 topicId 规则，可产生议事类无 topicId 或非议事类有 topicId 的不一致数据                       |
-| P-227 | 🟡     | M4.5  | events.service.ts:338    | close 只检查 closed 漏检 completed，已完成事件可被关闭（对比 update 正确检查两种状态）                                     |
-| P-228 | 🟡     | M4.7  | events.service.ts:420    | selectHelper 不检查已选帮手，重复选择不返回 409，可静默覆盖之前帮手                                                        |
-| P-229 | 🟡     | M4.10 | events.service.ts:838    | rateHelper 用 upsert 覆盖评价，重复评价不返回 409                                                                          |
-| P-230 | 🟡     | M4.11 | events.controller.ts:210 | getComments 无分页，缺少 page/pageSize/total，service 直接 findMany 返回全部                                               |
-| P-231 | 🟡     | M4.13 | events.service.ts:722    | 重复感谢返回 400 而非 409（应改用 ConflictException）                                                                      |
-| P-232 | 🟡     | M4.17 | report.dto.ts:11         | targetType 只有 5 种，缺 topic/topic_comment/vote（Standard 要求 8 种）。service report 方法也只处理 4 种 communityId 解析 |
-| P-233 | 🟢     | M4.3  | events.service.ts:149    | findOne 返回的 viewCount 是更新前旧值（少 1）                                                                              |
-| P-234 | 🟢     | M4.15 | events.service.ts:860    | getFeedbackLogs 未校验事件类型为 public_feedback                                                                           |
+| 编号  | 严重度 | 任务  | 位置                     | 描述                                                                                                                                                               |
+| ----- | ------ | ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| P-222 | ✅     | M4.6  | events.service.ts:370    | respond 重复响应未捕获 Prisma P2002，返回 500 而非 409。Standard 要求"重复返回 409" **[2026-07-05 已修复, commit 2dcf166]**                                        |
+| P-223 | 🔴     | M4.9  | events.service.ts:513    | confirmCompletion 未检查 event.status，已 completed 事件可重复确认，**重复发放积分/勋章/通知** — 可被利用的积分刷取漏洞 **[2026-07-05 已修复, commit 16edad6]**    |
+| P-224 | 🔴     | M4.11 | events.service.ts:597    | addComment 未检查嵌套层级，第 3 层不返回 400。Standard 要求"嵌套最多 2 层" **[2026-07-05 已修复, commit 3ae0a69]**                                                 |
+| P-225 | 🔴     | M4.16 | events.service.ts:246    | suggestTopics 未检查 ai_topic_suggest 系统开关，关闭时仍返回推荐（与 P-248/M6.9 同一代码，不同验收任务） **[2026-07-05 已修复, commit b872ffb]**                   |
+| P-226 | 🟡     | M4.4  | events.service.ts:264    | update 修改 type 时不重新校验 topicId 规则，可产生议事类无 topicId 或非议事类有 topicId 的不一致数据 **[2026-07-05 已修复, commit 0d0ad5d]**                       |
+| P-227 | 🟡     | M4.5  | events.service.ts:338    | close 只检查 closed 漏检 completed，已完成事件可被关闭（对比 update 正确检查两种状态） **[2026-07-05 已修复, commit 0d0ad5d]**                                     |
+| P-228 | 🟡     | M4.7  | events.service.ts:420    | selectHelper 不检查已选帮手，重复选择不返回 409，可静默覆盖之前帮手 **[2026-07-05 已修复, commit 0d0ad5d]**                                                        |
+| P-229 | 🟡     | M4.10 | events.service.ts:838    | rateHelper 用 upsert 覆盖评价，重复评价不返回 409 **[2026-07-05 已修复, commit 0d0ad5d]**                                                                          |
+| P-230 | 🟡     | M4.11 | events.controller.ts:210 | getComments 无分页，缺少 page/pageSize/total，service 直接 findMany 返回全部 **[2026-07-05 已修复, commit 91f29b6]**                                               |
+| P-231 | 🟡     | M4.13 | events.service.ts:722    | 重复感谢返回 400 而非 409（应改用 ConflictException） **[2026-07-05 已修复, commit 4641336]**                                                                      |
+| P-232 | 🟡     | M4.17 | report.dto.ts:11         | targetType 只有 5 种，缺 topic/topic_comment/vote（Standard 要求 8 种）。service report 方法也只处理 4 种 communityId 解析 **[2026-07-05 已修复, commit d1385b6]** |
+| P-233 | 🟢     | M4.3  | events.service.ts:149    | findOne 返回的 viewCount 是更新前旧值（少 1）                                                                                                                      |
+| P-234 | 🟢     | M4.15 | events.service.ts:860    | getFeedbackLogs 未校验事件类型为 public_feedback                                                                                                                   |
 
 ### market 模块 (M5)
 
-| 编号  | 严重度 | 任务 | 位置                    | 描述                                                                                                       |
-| ----- | ------ | ---- | ----------------------- | ---------------------------------------------------------------------------------------------------------- |
-| P-235 | ✅     | M5.4 | market.service.ts:249   | 编辑闲置缺 sold/closed 状态校验，已售/已下架商品仍可编辑（Standard 要求返回 400）                          |
-| P-236 | 🔴     | M5.6 | market.controller.ts:88 | GET 评论无分页，缺少 page/pageSize/total                                                                   |
-| P-237 | 🔴     | M5.6 | market.service.ts:329   | addComment 未检查嵌套层级，第 3 层不返回 400（同 P-224 events 评论问题）                                   |
-| P-238 | ✅     | M5.8 | market.service.ts:435   | addReview 未捕获 UNIQUE(itemId,reviewerId,revieweeId) 的 P2002，重复评价返回 500 而非 409                  |
-| P-239 | 🟡     | M5.2 | market.service.ts:185   | 图片 reject 早返回跳过 AI 审核日志 targetId 回填，日志与商品 id 脱钩                                       |
-| P-240 | 🟡     | M5.5 | market.service.ts:295   | 已售重复标记返回 403 而非 400（语义不符）                                                                  |
-| P-241 | 🟡     | M5.5 | market.service.ts:295   | 仅检查 sold 未检查 closed，已下架商品可被标记为已售                                                        |
-| P-242 | 🟡     | M5.7 | market.service.ts:149   | toggleLike 删除/创建+计数递减/递增非事务，likeCount 可能不一致（对比 topics.service.ts 已用 $transaction） |
+| 编号  | 严重度 | 任务 | 位置                    | 描述                                                                                                                                               |
+| ----- | ------ | ---- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P-235 | ✅     | M5.4 | market.service.ts:249   | 编辑闲置缺 sold/closed 状态校验，已售/已下架商品仍可编辑（Standard 要求返回 400） **[2026-07-05 已修复, commit bf30340]**                          |
+| P-236 | 🔴     | M5.6 | market.controller.ts:88 | GET 评论无分页，缺少 page/pageSize/total **[2026-07-05 已修复, commit ef3627e]**                                                                   |
+| P-237 | 🔴     | M5.6 | market.service.ts:329   | addComment 未检查嵌套层级，第 3 层不返回 400（同 P-224 events 评论问题） **[2026-07-05 已修复, commit 3ae0a69]**                                   |
+| P-238 | ✅     | M5.8 | market.service.ts:435   | addReview 未捕获 UNIQUE(itemId,reviewerId,revieweeId) 的 P2002，重复评价返回 500 而非 409 **[2026-07-05 已修复, commit 10dec8b]**                  |
+| P-239 | 🟡     | M5.2 | market.service.ts:185   | 图片 reject 早返回跳过 AI 审核日志 targetId 回填，日志与商品 id 脱钩 **[2026-07-05 已修复, commit 4641336]**                                       |
+| P-240 | 🟡     | M5.5 | market.service.ts:295   | 已售重复标记返回 403 而非 400（语义不符） **[2026-07-05 已修复, commit 0d0ad5d]**                                                                  |
+| P-241 | 🟡     | M5.5 | market.service.ts:295   | 仅检查 sold 未检查 closed，已下架商品可被标记为已售 **[2026-07-05 已修复, commit 0d0ad5d]**                                                        |
+| P-242 | 🟡     | M5.7 | market.service.ts:149   | toggleLike 删除/创建+计数递减/递增非事务，likeCount 可能不一致（对比 topics.service.ts 已用 $transaction） **[2026-07-05 已修复, commit c9400e2]** |
 
 ### topics 模块 (M6)
 
-| 编号  | 严重度 | 任务  | 位置                  | 描述                                                                                                              |
-| ----- | ------ | ----- | --------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| P-243 | ✅     | M6.1  | topics.service.ts:50  | 先 DB skip/take 分页(createdAt desc) 再内存按 score 重排，跨页排序错误：第 2 页高 score 议题永远不会出现在第 1 页 |
-| P-244 | ✅     | M6.2  | topics.service.ts:96  | 完全缺少 AI 审核，硬编码 `aiReviewStatus: 'pass'`（对比 events/market 均有 AI 审核调用）                          |
-| P-245 | ✅     | M6.2  | topics.service.ts:96  | 审核通过未发小红花，topics.module 未导入 RankingsModule（Standard 要求"审核通过发 1 朵花 topic"）                 |
-| P-246 | ✅     | M6.2  | topics.service.ts:96  | 缺少标题长度校验（≤30 字），超长标题仍可创建                                                                      |
-| P-247 | ✅     | M6.3  | topics.service.ts:86  | findById 未 include events 数组，TopicDetailDto 缺 events 字段（仅返回 latestEventPreview，不满足 Standard 要求） |
-| P-248 | ✅     | M6.2  | topics.service.ts:96  | description 长度未校验（≤500 字）                                                                                 |
-| P-249 | 🟡     | M6.10 | topics.service.ts:417 | scanMergeSuggestions 未检查 ai_topic_merge 系统开关                                                               |
-| P-250 | 🟢     | M6.5  | topics.service.ts:175 | findUnique 查重在 $transaction 外，竞态窗口（schema 有 UNIQUE 兜底但 P2002 未处理）                               |
+| 编号  | 严重度 | 任务  | 位置                  | 描述                                                                                                                                                      |
+| ----- | ------ | ----- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P-243 | ✅     | M6.1  | topics.service.ts:50  | 先 DB skip/take 分页(createdAt desc) 再内存按 score 重排，跨页排序错误：第 2 页高 score 议题永远不会出现在第 1 页 **[2026-07-05 已修复, commit 382db9c]** |
+| P-244 | ✅     | M6.2  | topics.service.ts:96  | 完全缺少 AI 审核，硬编码 `aiReviewStatus: 'pass'`（对比 events/market 均有 AI 审核调用） **[2026-07-05 已修复, commit 9b6c637]**                          |
+| P-245 | ✅     | M6.2  | topics.service.ts:96  | 审核通过未发小红花，topics.module 未导入 RankingsModule（Standard 要求"审核通过发 1 朵花 topic"） **[2026-07-05 已修复, commit fe5483f]**                 |
+| P-246 | ✅     | M6.2  | topics.service.ts:96  | 缺少标题长度校验（≤30 字），超长标题仍可创建 **[2026-07-05 已修复, commit 4a93d13]**                                                                      |
+| P-247 | ✅     | M6.3  | topics.service.ts:86  | findById 未 include events 数组，TopicDetailDto 缺 events 字段（仅返回 latestEventPreview，不满足 Standard 要求） **[2026-07-05 已修复, commit 1edd631]** |
+| P-248 | ✅     | M6.2  | topics.service.ts:96  | description 长度未校验（≤500 字） **[2026-07-05 已修复, commit 4734f45]**                                                                                 |
+| P-249 | 🟡     | M6.10 | topics.service.ts:417 | scanMergeSuggestions 未检查 ai_topic_merge 系统开关 **[2026-07-05 已修复, commit 4641336]**                                                               |
+| P-250 | 🟢     | M6.5  | topics.service.ts:175 | findUnique 查重在 $transaction 外，竞态窗口（schema 有 UNIQUE 兜底但 P2002 未处理）                                                                       |
 
 > 注: M6.9 (AI 议题推荐) 与 M4.16 (议题推荐) 是同一代码 `events.service.ts:suggestTopics`，已在 P-225 记录，不重复编号。
 
 ### votes 模块 (M7)
 
-| 编号  | 严重度 | 任务 | 位置                   | 描述                                                                                                                |
-| ----- | ------ | ---- | ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| P-251 | ✅     | M7.3 | votes.controller.ts:35 | submitVote 跨小区防护缺失，controller 未传 communityId，service 用 findUnique 无 communityId 过滤，可给其他小区投票 |
-| P-252 | ✅     | M7.3 | votes.service.ts:82    | 重复投票返回 400 而非 409（应改用 ConflictException）                                                               |
-| P-253 | ✅     | M7.4 | votes.service.ts:137   | admin_only 可见性对所有用户抛 ForbiddenException，包括管理员。Standard 要求"仅管理员可见"意味着管理员应能查看       |
-| P-254 | 🟡     | M7.2 | votes.service.ts:42    | findOne 未过滤 status，draft/closed 状态投票也能被访问                                                              |
-| P-255 | 🟡     | M7.3 | votes.service.ts:82    | 重复检查与创建非原子，竞态窗口（schema UNIQUE 兜底但 P2002 未处理返回 500）                                         |
-| P-256 | 🟡     | M7.3 | votes.controller.ts:40 | selectedOptionIds 用内联类型而非 DTO class，ValidationPipe 无法校验                                                 |
-| P-257 | 🟡     | M7.3 | votes.service.ts:99    | maxChoices=null 时无上限校验，且 selectedOptionIds 允许重复 ID                                                      |
-| P-258 | 🟡     | M7.4 | votes.service.ts:127   | getResults 未过滤 vote.status，draft 状态投票结果也可查询                                                           |
+| 编号  | 严重度 | 任务 | 位置                   | 描述                                                                                                                                                        |
+| ----- | ------ | ---- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P-251 | ✅     | M7.3 | votes.controller.ts:35 | submitVote 跨小区防护缺失，controller 未传 communityId，service 用 findUnique 无 communityId 过滤，可给其他小区投票 **[2026-07-05 已修复, commit 514e455]** |
+| P-252 | ✅     | M7.3 | votes.service.ts:82    | 重复投票返回 400 而非 409（应改用 ConflictException） **[2026-07-05 已修复, commit 5a97e06]**                                                               |
+| P-253 | ✅     | M7.4 | votes.service.ts:137   | admin_only 可见性对所有用户抛 ForbiddenException，包括管理员。Standard 要求"仅管理员可见"意味着管理员应能查看 **[2026-07-05 已修复, commit 92aab20]**       |
+| P-254 | 🟡     | M7.2 | votes.service.ts:42    | findOne 未过滤 status，draft/closed 状态投票也能被访问 **[2026-07-05 已修复, commit 2493f33]**                                                              |
+| P-255 | 🟡     | M7.3 | votes.service.ts:82    | 重复检查与创建非原子，竞态窗口（schema UNIQUE 兜底但 P2002 未处理返回 500） **[2026-07-05 已修复, commit 2493f33]**                                         |
+| P-256 | 🟡     | M7.3 | votes.controller.ts:40 | selectedOptionIds 用内联类型而非 DTO class，ValidationPipe 无法校验 **[2026-07-05 已修复, commit 2493f33]**                                                 |
+| P-257 | 🟡     | M7.3 | votes.service.ts:99    | maxChoices=null 时无上限校验，且 selectedOptionIds 允许重复 ID **[2026-07-05 已修复, commit 2493f33]**                                                      |
+| P-258 | 🟡     | M7.4 | votes.service.ts:127   | getResults 未过滤 vote.status，draft 状态投票结果也可查询 **[2026-07-05 已修复, commit 2493f33]**                                                           |
 
 ### committee 模块 (M8)
 
-| 编号  | 严重度 | 任务 | 位置                         | 描述                                                                                                                                  |
-| ----- | ------ | ---- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| P-259 | 🟡     | M8.2 | committee.service.ts:44      | 按 createdAt 排序而非 sortOrder（schema 缺 sortOrder 字段）                                                                           |
-| P-260 | 🟡     | M8.4 | committee/dto/claim.dto.ts:4 | statement 缺 @IsNotEmpty()，空字符串可通过校验（Standard 要求"statement 必填"）                                                       |
-| P-261 | 🟡     | M8.4 | committee.service.ts:98      | "该成员已被认领"和"您已提交过认领"返回 404 语义错误（资源存在只是状态不允许，应返回 409 或 400）                                      |
-| P-262 | 🟡     | M8.6 | admin.service.ts:859         | publishedAt 从未被设置——createAnnouncement 不设，updateAnnouncement 切换为 published 也不设。排序失效，M8.1 latestAnnouncement 不确定 |
-| P-263 | 🟡     | M8.8 | committee.service.ts:183     | toggleAnnouncementLike 未过滤 status，可对 draft/hidden 公告点赞                                                                      |
-| P-264 | 🟡     | M8.8 | committee.service.ts:182     | toggle 操作非事务，竞态窗口 + likeCount 可能不一致                                                                                    |
+| 编号  | 严重度 | 任务 | 位置                         | 描述                                                                                                                                                                          |
+| ----- | ------ | ---- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P-259 | 🟡     | M8.2 | committee.service.ts:44      | 按 createdAt 排序而非 sortOrder（schema 缺 sortOrder 字段）                                                                                                                   |
+| P-260 | 🟡     | M8.4 | committee/dto/claim.dto.ts:4 | statement 缺 @IsNotEmpty()，空字符串可通过校验（Standard 要求"statement 必填"） **[2026-07-05 已修复, commit 0d0ad5d]**                                                       |
+| P-261 | 🟡     | M8.4 | committee.service.ts:98      | "该成员已被认领"和"您已提交过认领"返回 404 语义错误（资源存在只是状态不允许，应返回 409 或 400） **[2026-07-05 已修复, commit 0d0ad5d]**                                      |
+| P-262 | 🟡     | M8.6 | admin.service.ts:859         | publishedAt 从未被设置——createAnnouncement 不设，updateAnnouncement 切换为 published 也不设。排序失效，M8.1 latestAnnouncement 不确定 **[2026-07-05 已修复, commit 7225e87]** |
+| P-263 | 🟡     | M8.8 | committee.service.ts:183     | toggleAnnouncementLike 未过滤 status，可对 draft/hidden 公告点赞 **[2026-07-05 已修复, commit 0d0ad5d]**                                                                      |
+| P-264 | 🟡     | M8.8 | committee.service.ts:182     | toggle 操作非事务，竞态窗口 + likeCount 可能不一致 **[2026-07-05 已修复, commit c9400e2]**                                                                                    |
 
 ### community-applications 模块 (M9)
 
-| 编号  | 严重度 | 任务   | 位置                                  | 描述                                                                                                                               |
-| ----- | ------ | ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| P-265 | 🔴     | M9补充 | admin.service.ts:1791                 | 申请人缺少 community_founding 贡献记录(score=10)。助力人有 score=5 贡献记录，但申请人只获 founder 徽章无贡献记录，影响排行榜和鲜花 |
-| P-266 | 🟡     | M9补充 | admin.service.ts:1844                 | 驳回申请未通知申请人（approve 有通知，reject 无通知，体验不一致）                                                                  |
-| P-267 | 🟡     | M9补充 | schema.prisma:1040                    | CommunityApplication.status 注释为 "pending/approved/rejected"，代码已用 'approving' 中间态，注释未同步                            |
-| P-268 | 🟢     | M9.1   | community-applications.service.ts:16  | pending 检查与 create 非事务，TOCTOU 竞态（无 DB 层唯一索引兜底）                                                                  |
-| P-269 | 🟢     | M9.6   | community-applications.service.ts:128 | 助力 status 检查在事务外，TOCTOU 竞态（审批低频，影响极小）                                                                        |
+| 编号  | 严重度 | 任务   | 位置                                  | 描述                                                                                                                                                                       |
+| ----- | ------ | ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P-265 | 🔴     | M9补充 | admin.service.ts:1791                 | 申请人缺少 community_founding 贡献记录(score=10)。助力人有 score=5 贡献记录，但申请人只获 founder 徽章无贡献记录，影响排行榜和鲜花 **[2026-07-05 已修复, commit a243bb4]** |
+| P-266 | 🟡     | M9补充 | admin.service.ts:1844                 | 驳回申请未通知申请人（approve 有通知，reject 无通知，体验不一致） **[2026-07-05 已修复, commit 83d1b7b]**                                                                  |
+| P-267 | 🟡     | M9补充 | schema.prisma:1040                    | CommunityApplication.status 注释为 "pending/approved/rejected"，代码已用 'approving' 中间态，注释未同步 **[2026-07-05 已修复, commit 2493f33]**                            |
+| P-268 | 🟢     | M9.1   | community-applications.service.ts:16  | pending 检查与 create 非事务，TOCTOU 竞态（无 DB 层唯一索引兜底）                                                                                                          |
+| P-269 | 🟢     | M9.6   | community-applications.service.ts:128 | 助力 status 检查在事务外，TOCTOU 竞态（审批低频，影响极小）                                                                                                                |
 
 **业务层小结**:
 
@@ -1866,47 +1971,47 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ### rankings 模块 (M10)
 
-| 编号  | 严重度 | 任务  | 位置                                            | 描述                                                                                                                    |
-| ----- | ------ | ----- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| P-270 | 🟡     | M10.1 | rankings.service.ts:248                         | list 未默认过滤 periodType，不传时返回 month 和 total 混合快照，排名无意义                                              |
-| P-271 | 🟡     | M10.2 | rankings.service.ts:273                         | getMyRanking 未上榜返回 null 而非 `{rankNo:null,score:0,...}`，前端需额外空值判断                                       |
-| P-272 | 🟡     | M10.3 | rankings.service.ts:286                         | getBadges 查询 `status:'active'`，应为 `status:{not:'deleted'}`，排除了 draft 等非 deleted 勋章                         |
-| P-273 | ✅     | M10.5 | rankings.service.ts:15-76                       | **public_welfare 创建者缺 5 朵花**。handleEventCompletion 只给 helper 创建贡献记录，创建者 0 条。Standard 要求"各 5 朵" |
-| P-274 | ✅     | M10.5 | rankings.service.ts                             | **feedback 议事积分未实现**。全局无 `action:'feedback'` 的 contributionRecord.create，议事事件创建者 1 朵花缺失         |
-| P-275 | ✅     | M10.5 | rankings.service.ts                             | **topic 议题积分未实现**。全局无 `action:'topic'` 的 contributionRecord.create，议题创建者 1 朵花缺失                   |
-| P-276 | 🟡     | M10.5 | rankings.service.ts:31-43                       | contributionRecord.create 而非 upsert，重试时 UNIQUE 约束抛 P2002 中断流程                                              |
-| P-277 | ✅     | M10.6 | rankings.service.ts:127                         | **feedback_5/20 勋章规则缺失**。badgeRules 数组只有 helper_1/5/20 和 flower_10/50，无议事勋章                           |
-| P-278 | ✅     | M10.6 | rankings.service.ts:127                         | **topic_1/5 勋章规则缺失**。badgeRules 无议题勋章定义                                                                   |
-| P-279 | ✅     | M10.6 | rankings.service.ts:46                          | checkAndAwardBadges 仅在 handleEventCompletion 中调用，feedback/topic 创建时未触发勋章检查                              |
-| P-280 | 🔴     | M10.7 | admin.service.ts:814 vs rankings.service.ts:230 | **total 榜 periodKey 不一致**：admin 用 'all'，rankings 用 'total'，交替执行后数据重复                                  |
-| P-281 | 🔴     | M10.7 | admin.service.ts:820,837                        | admin recalculateRankings badgeCount 硬编码 0，未查 userBadge 表，手动重算后排行榜徽章数被覆盖                          |
-| P-282 | 🟡     | M10.7 | admin.service.ts:800 vs rankings.service.ts:179 | month periodKey 生成方式不一致：admin 用 UTC `toISOString().slice(0,7)`，rankings 用本地 `getFullYear()/getMonth()`     |
+| 编号  | 严重度 | 任务  | 位置                                            | 描述                                                                                                                                                            |
+| ----- | ------ | ----- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P-270 | 🟡     | M10.1 | rankings.service.ts:248                         | list 未默认过滤 periodType，不传时返回 month 和 total 混合快照，排名无意义 **[2026-07-05 已修复, commit 0d0ad5d]**                                              |
+| P-271 | 🟡     | M10.2 | rankings.service.ts:273                         | getMyRanking 未上榜返回 null 而非 `{rankNo:null,score:0,...}`，前端需额外空值判断 **[2026-07-05 已修复, commit 91f29b6]**                                       |
+| P-272 | 🟡     | M10.3 | rankings.service.ts:286                         | getBadges 查询 `status:'active'`，应为 `status:{not:'deleted'}`，排除了 draft 等非 deleted 勋章 **[2026-07-05 已修复, commit 0d0ad5d]**                         |
+| P-273 | ✅     | M10.5 | rankings.service.ts:15-76                       | **public_welfare 创建者缺 5 朵花**。handleEventCompletion 只给 helper 创建贡献记录，创建者 0 条。Standard 要求"各 5 朵" **[2026-07-05 已修复, commit 62bbe78]** |
+| P-274 | ✅     | M10.5 | rankings.service.ts                             | **feedback 议事积分未实现**。全局无 `action:'feedback'` 的 contributionRecord.create，议事事件创建者 1 朵花缺失 **[2026-07-05 已修复, commit 62bbe78]**         |
+| P-275 | ✅     | M10.5 | rankings.service.ts                             | **topic 议题积分未实现**。全局无 `action:'topic'` 的 contributionRecord.create，议题创建者 1 朵花缺失 **[2026-07-05 已修复, commit 62bbe78]**                   |
+| P-276 | 🟡     | M10.5 | rankings.service.ts:31-43                       | contributionRecord.create 而非 upsert，重试时 UNIQUE 约束抛 P2002 中断流程 **[2026-07-05 已修复, commit c9400e2]**                                              |
+| P-277 | ✅     | M10.6 | rankings.service.ts:127                         | **feedback_5/20 勋章规则缺失**。badgeRules 数组只有 helper_1/5/20 和 flower_10/50，无议事勋章 **[2026-07-05 已修复, commit 06ab45c]**                           |
+| P-278 | ✅     | M10.6 | rankings.service.ts:127                         | **topic_1/5 勋章规则缺失**。badgeRules 无议题勋章定义 **[2026-07-05 已修复, commit 06ab45c]**                                                                   |
+| P-279 | ✅     | M10.6 | rankings.service.ts:46                          | checkAndAwardBadges 仅在 handleEventCompletion 中调用，feedback/topic 创建时未触发勋章检查 **[2026-07-05 已修复, commit 06ab45c]**                              |
+| P-280 | 🔴     | M10.7 | admin.service.ts:814 vs rankings.service.ts:230 | **total 榜 periodKey 不一致**：admin 用 'all'，rankings 用 'total'，交替执行后数据重复 **[2026-07-05 已修复, commit bd3e646]**                                  |
+| P-281 | 🔴     | M10.7 | admin.service.ts:820,837                        | admin recalculateRankings badgeCount 硬编码 0，未查 userBadge 表，手动重算后排行榜徽章数被覆盖 **[2026-07-05 已修复, commit bd3e646]**                          |
+| P-282 | 🟡     | M10.7 | admin.service.ts:800 vs rankings.service.ts:179 | month periodKey 生成方式不一致：admin 用 UTC `toISOString().slice(0,7)`，rankings 用本地 `getFullYear()/getMonth()`                                             |
 
 ### notifications 模块 (M11)
 
-| 编号  | 严重度 | 任务  | 位置 | 描述                                                                                                     |
-| ----- | ------ | ----- | ---- | -------------------------------------------------------------------------------------------------------- |
-| P-283 | ✅     | M11.4 | 全局 | **feedback 通知类型无触发点**。全局搜索 `type:'feedback'` 的 notification.create 无结果，9 种通知缺 1 种 |
-| P-284 | ✅     | M11.4 | 全局 | **vote 通知类型无触发点**。全局搜索 `type:'vote'` 的 notification.create 无结果，9 种通知缺 1 种         |
+| 编号  | 严重度 | 任务  | 位置 | 描述                                                                                                                                             |
+| ----- | ------ | ----- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| P-283 | ✅     | M11.4 | 全局 | **feedback 通知类型无触发点**。全局搜索 `type:'feedback'` 的 notification.create 无结果，9 种通知缺 1 种 **[2026-07-05 已修复, commit de78ddf]** |
+| P-284 | ✅     | M11.4 | 全局 | **vote 通知类型无触发点**。全局搜索 `type:'vote'` 的 notification.create 无结果，9 种通知缺 1 种 **[2026-07-05 已修复, commit de78ddf]**         |
 
 > M11.1 ✅ | M11.2 ✅ | M11.3 ✅ — 通知列表/标记已读/全部已读通过
 
 ### share 模块 (M12)
 
-| 编号  | 严重度 | 任务  | 位置                 | 描述                                                                  |
-| ----- | ------ | ----- | -------------------- | --------------------------------------------------------------------- |
-| P-285 | 🟡     | M12.2 | share.service.ts:100 | logShare canShare 检查异常被 catch 吞掉，不存在的内容仍可记录分享日志 |
-| P-286 | 🟢     | M12.1 | share.service.ts:78  | getCardConfig 每次生成新 shareToken，GET 请求生成的 token 不会被复用  |
+| 编号  | 严重度 | 任务  | 位置                 | 描述                                                                                                          |
+| ----- | ------ | ----- | -------------------- | ------------------------------------------------------------------------------------------------------------- |
+| P-285 | 🟡     | M12.2 | share.service.ts:100 | logShare canShare 检查异常被 catch 吞掉，不存在的内容仍可记录分享日志 **[2026-07-05 已修复, commit 2493f33]** |
+| P-286 | 🟢     | M12.1 | share.service.ts:78  | getCardConfig 每次生成新 shareToken，GET 请求生成的 token 不会被复用                                          |
 
 > M12.3 ✅ — 分享限制通过（审核中/rejected/admin_only 正确设 canShare=false）
 
 ### banners 模块 (M13)
 
-| 编号  | 严重度 | 任务  | 位置                    | 描述                                                                                |
-| ----- | ------ | ----- | ----------------------- | ----------------------------------------------------------------------------------- |
-| P-287 | 🔴     | M13.1 | banners.service.ts:11   | **缺 endAt 过期过滤**，已过期 banner 仍展示。只检查 startAt 未到，未检查 endAt 已过 |
-| P-288 | 🟡     | M13.2 | banners.service.ts:27   | 小区专属与全局 banner 混合排序，未各自独立排序                                      |
-| P-289 | 🔴     | M13.3 | banners.controller.ts:9 | **未接收 position 查询参数**，无法按 home_top/event_list/market_list 位置筛选       |
+| 编号  | 严重度 | 任务  | 位置                    | 描述                                                                                                                        |
+| ----- | ------ | ----- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| P-287 | 🔴     | M13.1 | banners.service.ts:11   | **缺 endAt 过期过滤**，已过期 banner 仍展示。只检查 startAt 未到，未检查 endAt 已过 **[2026-07-05 已修复, commit 2636fa1]** |
+| P-288 | 🟡     | M13.2 | banners.service.ts:27   | 小区专属与全局 banner 混合排序，未各自独立排序 **[2026-07-05 已修复, commit 7225e87]**                                      |
+| P-289 | 🔴     | M13.3 | banners.controller.ts:9 | **未接收 position 查询参数**，无法按 home_top/event_list/market_list 位置筛选 **[2026-07-05 已修复, commit 2636fa1]**       |
 
 ### service-providers 模块 (M14)
 
@@ -1914,32 +2019,32 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ### upload 模块 (M15)
 
-| 编号  | 严重度 | 任务  | 位置                | 描述                                                             |
-| ----- | ------ | ----- | ------------------- | ---------------------------------------------------------------- |
-| P-290 | 🟡     | M15.2 | upload.service.ts   | 文件超限返回 413 (PayloadTooLarge) 而非 Standard 要求的 400      |
-| P-291 | 🟢     | M15.3 | upload.service.ts:8 | 未创建 uploads/ 目录，全新部署时 multer destination ENOENT → 500 |
+| 编号  | 严重度 | 任务  | 位置                | 描述                                                                                                |
+| ----- | ------ | ----- | ------------------- | --------------------------------------------------------------------------------------------------- |
+| P-290 | 🟡     | M15.2 | upload.service.ts   | 文件超限返回 413 (PayloadTooLarge) 而非 Standard 要求的 400 **[2026-07-05 已修复, commit 7225e87]** |
+| P-291 | 🟢     | M15.3 | upload.service.ts:8 | 未创建 uploads/ 目录，全新部署时 multer destination ENOENT → 500                                    |
 
 > M15.1 ✅ | M15.4 ✅ | M15.5 ✅ — 上传/静态服务/跳过小区检查通过
 
 ### reports 模块 (M16)
 
-| 编号  | 严重度 | 任务  | 位置                  | 描述                                                                                |
-| ----- | ------ | ----- | --------------------- | ----------------------------------------------------------------------------------- |
-| P-292 | 🟡     | M16.2 | events.service.ts:764 | report 不验证 targetId 是否真实存在，不存在的目标 communityId 为 null，举报仍被创建 |
-| P-293 | 🟡     | M16.2 | events.service.ts:764 | user 类型举报 communityId 恒为 null，无法按社区维度筛选                             |
-| P-294 | 🟢     | M16.2 | events.service.ts:764 | 缺防重复举报检查和自举报检查（reporterId === targetId when targetType='user'）      |
+| 编号  | 严重度 | 任务  | 位置                  | 描述                                                                                                                        |
+| ----- | ------ | ----- | --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| P-292 | 🟡     | M16.2 | events.service.ts:764 | report 不验证 targetId 是否真实存在，不存在的目标 communityId 为 null，举报仍被创建 **[2026-07-05 已修复, commit 0d0ad5d]** |
+| P-293 | 🟡     | M16.2 | events.service.ts:764 | user 类型举报 communityId 恒为 null，无法按社区维度筛选 **[2026-07-05 已修复, commit 7225e87]**                             |
+| P-294 | 🟢     | M16.2 | events.service.ts:764 | 缺防重复举报检查和自举报检查（reporterId === targetId when targetType='user'）                                              |
 
 > M16.1 ✅ | M16.3 ✅ — 提交举报/举报理由通过
 
 ### ai-review/ocr 模块 (M17)
 
-| 编号  | 严重度 | 任务  | 位置                  | 描述                                                                                                                                                   |
-| ----- | ------ | ----- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| P-295 | 🔴     | M17.2 | events.service.ts:157 | **事件创建/编辑未调用 reviewImage**。只有 market 商品创建调用了 reviewImage，事件图片未经 AI 审核                                                      |
-| P-296 | 🔴     | M17.6 | 多处                  | **ai_content_review 开关未检查**。所有 reviewText/reviewImage 调用点均未读取开关，关闭后仍审核。（ai_topic_suggest 见 P-225，ai_topic_merge 见 P-249） |
-| P-297 | 🟡     | M17.5 | admin.service.ts:69   | 审核日志查询不支持按 targetId 查询，只支持按 targetType                                                                                                |
-| P-298 | 🟢     | M17.4 | ocr.service.ts:31     | 社区匹配增加 confidence<0.5 → rejected 分支，超出 Standard 定义（业务合理但需确认 PRD）                                                                |
-| P-299 | 🟢     | M17.2 | market.service.ts:249 | 市场商品编辑未调用 reviewImage（Standard 仅要求创建时调用）                                                                                            |
+| 编号  | 严重度 | 任务  | 位置                  | 描述                                                                                                                                                                                           |
+| ----- | ------ | ----- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P-295 | 🔴     | M17.2 | events.service.ts:157 | **事件创建/编辑未调用 reviewImage**。只有 market 商品创建调用了 reviewImage，事件图片未经 AI 审核 **[2026-07-05 已修复, commit b872ffb]**                                                      |
+| P-296 | 🔴     | M17.6 | 多处                  | **ai_content_review 开关未检查**。所有 reviewText/reviewImage 调用点均未读取开关，关闭后仍审核。（ai_topic_suggest 见 P-225，ai_topic_merge 见 P-249） **[2026-07-05 已修复, commit b872ffb]** |
+| P-297 | 🟡     | M17.5 | admin.service.ts:69   | 审核日志查询不支持按 targetId 查询，只支持按 targetType **[2026-07-05 已修复, commit 7225e87]**                                                                                                |
+| P-298 | 🟢     | M17.4 | ocr.service.ts:31     | 社区匹配增加 confidence<0.5 → rejected 分支，超出 Standard 定义（业务合理但需确认 PRD）                                                                                                        |
+| P-299 | 🟢     | M17.2 | market.service.ts:249 | 市场商品编辑未调用 reviewImage（Standard 仅要求创建时调用）                                                                                                                                    |
 
 > M17.1 ✅ | M17.3 ✅ — 文本审核/OCR 识别通过
 
@@ -1970,11 +2075,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: pendingReviews 查询 `aiReviewLog.count({ where: { result: 'manual_review' } })` 没有按 communityId 过滤。committee_admin 登录后能看到全平台所有小区的待审核数量，违反"committee_admin 只能管本小区"的权限边界。
 
+**[2026-07-05 已修复, commit 0ab40e0]**
+
 ### P-302 🔴 M18.3 内容审核跨小区操作
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:72-106`, `admin.service.ts:69-212`
 
 **问题**: getReviews/countReviews/approveReview/rejectReview/manualVisibleAdminOnly 均未接收 communityId 参数，也未校验 target 内容是否属于当前 admin 的小区。committee_admin 可以查看和审核所有小区的内容审核记录。controller 的 getReviews 也没有 @CurrentCommunityId() 参数。
+
+**[2026-07-05 已修复, commit 4ffb0b0]**
 
 ### P-303 🟡 M18.3 manualVisibleAdminOnly 未通知创建者
 
@@ -1982,17 +2091,23 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: PRD M18.3 要求"操作后通知创建者"，approve 和 reject 都发了通知，但 manual-visible-admin-only 操作后未通知创建者内容被设为仅管理员可见。
 
+**[2026-07-05 已修复, commit 83d1b7b]**
+
 ### P-304 🟡 M18.3 approve/reject 只处理 event 和 market_item
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:109-138, 150-178`
 
 **问题**: approveReview 和 rejectReview 只处理 targetType 为 'event' 和 'market_item' 两种情况，不处理 'event_comment' 和 'market_comment'。若有 comment 类型的 review 进入 approve/reject 流程，不会更新目标状态也不会通知，只更新了 aiReviewLog 的 result，导致目标 comment 状态不一致。
 
+**[2026-07-05 已修复, commit e404834]**
+
 ### P-305 🟡 M18.3 manualVisibleAdminOnly 未更新 aiReviewLog result
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:183-212`
 
 **问题**: manualVisibleAdminOnly 没有更新 aiReviewLog 的 result 字段。操作后记录仍为 'manual_review'，会一直出现在待审核列表中，导致管理员重复处理。应将 result 更新为 'manual_handled' 或类似值。
+
+**[2026-07-05 已修复, commit 06866a5]**
 
 ### P-306 🟢 M18.3 manualVisibleAdminOnly 状态处理不统一
 
@@ -2006,11 +2121,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: getVerificationDetail 没有校验 communityId。controller 没有传 @CurrentCommunityId()，service 直接按 id 查询返回。committee_admin 可以通过传入任意 verification id 查看其他小区的认证详情（含 OCR 结果、AI 结果、材料文件 URL 等敏感信息）。
 
+**[2026-07-05 已修复, commit 8d09a4b]**
+
 ### P-308 🔴 M18.4 approve/rejectVerification 无 communityId 校验
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:130-144`, `admin.service.ts:266-317`
 
 **问题**: approveVerification 和 rejectVerification 没有校验 verification 的 communityId 是否与当前 admin 一致。committee_admin 可以审核其他小区的认证申请，包括为其他小区用户设置 verified 状态和发放徽章。
+
+**[2026-07-05 已修复, commit 8d09a4b]**
 
 ### P-309 🟡 M18.4 认证审核无状态检查
 
@@ -2018,11 +2137,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: approveVerification 没有检查 verification.status 是否为 'pending'。若已 approved 的记录被再次 approve，会重复执行 upsert member、maybeAwardFirstOwnerBadge、发通知等操作。rejectVerification 同理。应在操作前校验 status === 'pending'。
 
+**[2026-07-05 已修复, commit f06f32a]**
+
 ### P-310 🔴 M18.5 addFeedbackLog 无 communityId 校验
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:182-190`, `admin.service.ts:377-395`
 
 **问题**: addFeedbackLog 没有校验 event 是否属于当前 admin 的小区。controller 没有传 communityId，service 通过 event 查询获取 communityId 但不校验。committee_admin 可以为任意小区的事件添加反馈记录。
+
+**[2026-07-05 已修复, commit 844538d]**
 
 ### P-311 🟡 M18.5 addFeedbackLog 缺审计日志
 
@@ -2030,11 +2153,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: addFeedbackLog 没有写审计日志。作为管理操作（添加处理反馈记录），应记录操作者、事件 ID、状态变更等信息到 audit_logs。其他管理操作如 hideEvent/restoreEvent 都写了审计日志。
 
+**[2026-07-05 已修复, commit c11cc11]**
+
 ### P-312 🟡 M18.5 addFeedbackLog event 不存在不抛错
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:383-388`
 
 **问题**: addFeedbackLog 中 `event?.communityId ?? null`，若 event 不存在（已被删除），communityId 为 null 但代码不会抛错，会继续创建一条 communityId 为 null 的反馈记录。应先检查 event 是否存在。
+
+**[2026-07-05 已修复, commit 4641336]**
 
 ### P-313 🟡 M18.6 rejectTopic 不更新 status 且不通知
 
@@ -2042,11 +2169,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: rejectTopic 只更新 `aiReviewStatus: 'reject'`，不更新 topic 的 `status` 字段。reject 后 topic.status 仍为 'open'，议题对用户仍可见可互动。应同时设置 status 为 'rejected' 或类似终态。此外 rejectTopic 没有通知议题创建者。
 
+**[2026-07-05 已修复, commit e404834]**
+
 ### P-314 🟡 M18.6 mergeTopics 未通知相关方
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:1426-1470`
 
 **问题**: mergeTopics 没有通知源议题和目标议题的创建者及参与者。源议题被删除后，其创建者和事件发布者不知道议题已被合并。应在合并后通知相关方告知内容已迁移到目标议题。
+
+**[2026-07-05 已修复, commit 83d1b7b]**
 
 ### P-315 🟡 M18.7 hideMarketItem 状态值与 PRD 不一致
 
@@ -2054,11 +2185,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: hideMarketItem 设置 `status: 'hidden'`，但 PRD M18.7 验收标准为 "hide(status→closed)"。代码与 PRD 状态值不一致。需确认 schema 中 market_item 的 status 枚举是否包含 'closed'。
 
+**[2026-07-05 已修复, commit 4641336]**
+
 ### P-316 🟡 M18.8 业委会成员/公告 create/update 缺审计日志
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:411-418, 420-432, 859-874, 876-888`
 
 **问题**: createCommitteeMember、updateCommitteeMember、createAnnouncement、updateAnnouncement 四个操作均没有写审计日志。deleteCommitteeMember 有写审计日志，但 create/update 遗漏。
+
+**[2026-07-05 已修复, commit c11cc11]**
 
 ### P-317 🟡 M18.8 approve/rejectClaim 未通知申请人
 
@@ -2066,11 +2201,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: approveClaim 和 rejectClaim 没有通知申请人。用户申请认领业委会成员身份后，审核结果应通知申请人。approveClaim 通过后申请人不知道已获得身份，rejectClaim 拒绝后不知道被拒绝及原因。
 
+**[2026-07-05 已修复, commit 83d1b7b]**
+
 ### P-318 🟡 M18.8 认领审核无状态检查
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:459-473`
 
 **问题**: approveClaim 没有检查 claim.status 是否为 'pending'。若已 approved 或 rejected 的 claim 被再次 approve，会重复设置 committeeMember 的 claimedUserId 和 claimStatus，可能覆盖其他人的认领。rejectClaim 同理。
+
+**[2026-07-05 已修复, commit f06f32a]**
 
 ### P-319 🟡 M18.9 create/updateVote 缺审计日志
 
@@ -2078,11 +2217,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: createVote 和 updateVote 没有写审计日志。publishVote 和 closeVote 有写审计日志，但创建和编辑投票这两个关键操作遗漏。
 
+**[2026-07-05 已修复, commit c11cc11]**
+
 ### P-320 🟡 M18.9 publish/closeVote 未通知小区成员
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:553-562, 564-573`
 
 **问题**: publishVote 和 closeVote 没有通知小区成员。投票发布后成员需要知道有新投票可参与，投票关闭后参与者需要知道结果已出。
+
+**[2026-07-05 已修复, commit e404834]**
 
 ### P-321 🔴 M18.10 Banner 管理未限制仅 platform_admin
 
@@ -2090,11 +2233,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: Banner 管理路由未限制仅 platform_admin。AdminGuard 允许 committee_admin 访问所有 admin 路由（只要 currentCommunityId 匹配），标准明确要求 Banner 管理"仅 platform_admin"。committee_admin 可以创建/修改/发布/下架 Banner。
 
+**[2026-07-05 已修复, commit b12a977]**
+
 ### P-322 🔴 M18.10 platform_admin 无法管理全平台 Banner
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:646-682`
 
 **问题**: updateBanner/publishBanner/offlineBanner 使用 banner.communityId !== communityId 做归属校验。对于全平台 Banner（communityId=null），platform_admin 的 currentCommunityId 不为 null，校验必然失败，导致 platform_admin 无法管理全平台 Banner。应当对 platform_admin 放开 communityId 限制。
+
+**[2026-07-05 已修复, commit b12a977]**
 
 ### P-323 🟡 M18.10 createBanner 缺审计日志
 
@@ -2102,11 +2249,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: createBanner 未调用 logAudit 写入审计日志。标准 M18.15 要求"所有 admin 写操作写入 audit_logs"。
 
+**[2026-07-05 已修复, commit c11cc11]**
+
 ### P-324 🟡 M18.10 updateBanner 缺审计日志
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:615-658`
 
 **问题**: updateBanner 未调用 logAudit 写入审计日志。
+
+**[2026-07-05 已修复, commit c11cc11]**
 
 ### P-325 🔴 M18.11 服务商管理未限制仅 platform_admin
 
@@ -2114,11 +2265,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: 服务商管理路由未限制仅 platform_admin，committee_admin 可访问全部服务商管理接口。标准明确要求"仅 platform_admin"。
 
+**[2026-07-05 已修复, commit b12a977]**
+
 ### P-326 🔴 M18.11 createServiceProvider communityId 从 body 传入
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:461-479`, `admin.service.ts:698-725`
 
 **问题**: createServiceProvider 的 communityId 从 body 传入（body.communityId: string），未与 @CurrentCommunityId() 做比对。committee_admin 可为任意社区创建服务商记录。
+
+**[2026-07-05 已修复, commit b12a977]**
 
 ### P-327 🟡 M18.11 createServiceProvider 缺审计日志
 
@@ -2126,11 +2281,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: createServiceProvider 未调用 logAudit 写入审计日志。
 
+**[2026-07-05 已修复, commit c11cc11]**
+
 ### P-328 🟡 M18.11 updateServiceProvider 缺审计日志
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:698-739`
 
 **问题**: updateServiceProvider 未调用 logAudit 写入审计日志。
+
+**[2026-07-05 已修复, commit c11cc11]**
 
 ### P-329 🟡 M18.12 createBadge 缺审计日志
 
@@ -2138,11 +2297,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: createBadge 未调用 logAudit 写入审计日志。
 
+**[2026-07-05 已修复, commit c11cc11]**
+
 ### P-330 🟡 M18.12 awardBadge 缺审计日志
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:28-54, 784-843`
 
 **问题**: awardBadge 未调用 logAudit 写入审计日志。手动颁发徽章是高风险操作，缺审计日志会导致无法追溯。
+
+**[2026-07-05 已修复, commit c11cc11]**
 
 ### P-331 🟡 M18.12 recalculateRankings 缺审计日志
 
@@ -2150,11 +2313,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: recalculateRankings 未调用 logAudit 写入审计日志。
 
+**[2026-07-05 已修复, commit c11cc11]**
+
 ### P-332 🟡 M18.12 勋章 CRUD 缺 PATCH/DELETE
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:543-579`
 
 **问题**: 勋章 CRUD 不完整——只有 GET（列表）和 POST（创建），缺少 PATCH（更新）和 DELETE（停用）。标准要求"勋章 CRUD"。无法停用或修改已有徽章。
+
+**[2026-07-05 已修复, commit c11cc11]**
 
 ### P-333 🔴 M18.13 rejectCommunityApplication reason 可选
 
@@ -2162,11 +2329,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: rejectCommunityApplication 的 reason 为可选（body: { reason?: string }，service 参数 reason?: string，落库 reason ?? null）。标准明确要求"reject 需 reason"。对比同模块 rejectVerification/rejectClaim/rejectServiceProvider 均要求 reason 必填，此处不一致。
 
+**[2026-07-05 已修复, commit 76acbd8]**
+
 ### P-334 🔴 M18.14 举报 4 种操作无 communityId 校验
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:698-732`, `admin.service.ts:1035-1195`
 
 **问题**: dismissReport/takedownReport/warnReport/banReport 四个操作均未校验 report.communityId 与 admin 的 communityId 归属。controller 未传 @CurrentCommunityId()，service 直接按 reportId 查询后操作。committee_admin 只要知道 reportId 即可跨社区操作其他社区的举报。对比 getReports 正确过滤了 communityId。
+
+**[2026-07-05 已修复, commit 844538d]**
 
 ### P-335 🟡 M18.14 takedownReport 未通知内容所有者
 
@@ -2174,11 +2345,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: takedownReport 下架内容后未通知内容所有者。对比 warnReport 和 banReport 均发送了通知，takedownReport 隐藏了内容但内容创建者不知情，用户体验不一致。
 
+**[2026-07-05 已修复, commit c11cc11]**
+
 ### P-336 🟡 M18.16 updateShareTemplate 缺审计日志
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:935-943`
 
 **问题**: updateShareTemplate 未调用 logAudit 写入审计日志。分享模板影响全站分享行为，修改应可追溯。
+
+**[2026-07-05 已修复, commit c11cc11]**
 
 ### P-337 🟡 M18.16 分享模板 CRUD 缺 POST/DELETE
 
@@ -2186,11 +2361,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: 分享模板 CRUD 不完整——只有 GET（列表）和 PATCH（更新），缺少 POST（创建）和 DELETE。无法新增或删除分享模板，只能修改已存在的模板。
 
+**[2026-07-05 已修复, commit c11cc11]**
+
 ### P-338 🔴 M18.17 createSocialGroup communityId 从 body 传入
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:644-680`, `admin.service.ts:959-997`
 
 **问题**: createSocialGroup 的 communityId 从 body 传入，committee_admin 可为任意社区创建社群。
+
+**[2026-07-05 已修复, commit 844538d]**
 
 ### P-339 🔴 M18.17 updateSocialGroup 无 communityId 校验
 
@@ -2198,11 +2377,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: updateSocialGroup 完全无 communityId 归属校验，任何 admin 可修改任意社群。对比 getSocialGroups 正确按 communityId 过滤。
 
+**[2026-07-05 已修复, commit 844538d]**
+
 ### P-340 🔴 M18.17 deleteSocialGroup 无 communityId 校验
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:644-680`, `admin.service.ts:959-997`
 
 **问题**: deleteSocialGroup 完全无 communityId 归属校验，任何 admin 可删除任意社群。
+
+**[2026-07-05 已修复, commit 844538d]**
 
 ### P-341 🟡 M18.17 createSocialGroup 缺审计日志
 
@@ -2210,11 +2393,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: createSocialGroup 未调用 logAudit 写入审计日志。仅 deleteSocialGroup 有审计日志。
 
+**[2026-07-05 已修复, commit c11cc11]**
+
 ### P-342 🟡 M18.17 updateSocialGroup 缺审计日志
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:959-991`
 
 **问题**: updateSocialGroup 未调用 logAudit 写入审计日志。
+
+**[2026-07-05 已修复, commit c11cc11]**
 
 ### P-343 🔴 M18.19 内容长度限制完全未生效
 
@@ -2222,11 +2409,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: 内容长度限制完全未生效。根因：controller 中 @Body() 使用 inline TypeScript interface（如 body: { title: string; subtitle?: string; ... }）而非 DTO class。NestJS ValidationPipe 仅对 class-validator 装饰器修饰的 class 生效，interface 在运行时被擦除为 Object，ValidationPipe 跳过校验。受影响端点：createBanner/updateBanner (title/subtitle ≤30)、createServiceProvider/updateServiceProvider (name ≤30, description ≤500)、createVote/updateVote (title ≤50, description ≤500, options ≤30)、createAnnouncement/updateAnnouncement (title ≤50, content ≤2000)。仅有的两个 DTO class（UpdateSettingsDto, UpdateShareTemplateDto）也均未设置 @MaxLength。
 
+**[2026-07-05 已修复, commit 7d918d9]**
+
 ### P-344 🟡 M19.1 前端无路由级角色保护
 
 **位置**: `apps/admin/src/components/AuthGuard.tsx:13-24`
 
 **问题**: AuthGuard 只检查 token 是否存在，不检查角色。committee_admin 可通过手动输入 URL 直接访问 /market、/verifications 等 platform_admin 专属页面，页面不会阻止渲染。虽然菜单不显示，但缺乏路由级角色保护。
+
+**[2026-07-05 已修复, commit f559f30]**
 
 ### P-345 🟢 M19.1 登录页不重定向已登录用户
 
@@ -2252,17 +2443,23 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: 状态筛选选择"全部"时，status 被设为字符串 'all' 传给后端。后端如果直接用 status='all' 做 Prisma WHERE 查询，会返回空列表而非全部记录。需确认后端是否对 'all' 做了特殊处理。
 
+**[2026-07-05 已修复, commit 7225e87]**
+
 ### P-349 🟡 M19.4 事件筛选参数后端不处理
 
 **位置**: `apps/admin/src/app/events/page.tsx:59-61` vs `apps/api/src/modules/admin/admin.controller.ts:148-160`
 
 **问题**: 前端传了 type 和 keyword 筛选参数，但后端控制器 getEvents 的 query 类型只声明 { status?: string }。后端 service 可能不处理 type 和 keyword，导致事件类型筛选和关键词搜索不生效。
 
+**[2026-07-05 已修复, commit 88a8725]**
+
 ### P-350 🟡 M19.6 闲置分类筛选参数后端不处理
 
 **位置**: `apps/admin/src/app/market/page.tsx:41-43` vs `apps/api/src/modules/admin/admin.controller.ts:736-748`
 
 **问题**: 前端传了 category 筛选参数，但后端控制器 getMarketItems 只声明 @Query('status') status?: string，不接收 category。分类筛选不生效。
+
+**[2026-07-05 已修复, commit 88a8725]**
 
 ### P-351 🟢 M19.7 拒绝认证原因为空无提示
 
@@ -2275,6 +2472,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 **位置**: `apps/admin/src/components/Layout.tsx:30-98`
 
 **问题**: 公告管理页面 /committee/announcements 存在且有完整 CRUD，但 Layout.tsx 的 allMenuItems 中没有公告管理的菜单入口。用户无法从侧边栏导航到公告管理页面，只能手动输入 URL。M19.9 要求"业委会管理页 Tab 切换: 成员CRUD+认领审核; 公告CRUD"，公告应作为 Tab 或有独立菜单入口。
+
+**[2026-07-05 已修复, commit fba40fe]**
 
 ### P-353 🟢 M19.9 公告无删除功能
 
@@ -2294,11 +2493,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: isAnonymous 字段使用了 valuePropName="checked" 但子组件是 Select。Select 使用 value prop 而非 checked prop 接收值，导致 Select 无法显示选中状态，UI 体验混乱。应移除 valuePropName="checked" 或改用 Switch 组件。
 
+**[2026-07-05 已修复, commit 6686a5b]**
+
 ### P-356 🟡 M19.10 投票选项 state 取消后不重置
 
 **位置**: `apps/admin/src/app/votes/page.tsx:34`
 
 **问题**: 新增投票的选项 options state 在组件级别管理。如果用户打开弹窗、填写选项后取消关闭（非提交成功），options 不会被重置。下次打开弹窗时仍显示上次的选项内容。
+
+**[2026-07-05 已修复, commit 6686a5b]**
 
 ### P-357 🔴 M19.12 创建服务商表单缺 communityId
 
@@ -2306,11 +2509,15 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: 后端创建服务商接口 body 要求 communityId: string（必填），但前端创建表单没有 communityId 输入框。此页面为 platform_admin 专属，platform_admin 可能未绑定具体小区，@CurrentCommunityId() 不提供值。创建请求会因缺少 communityId 而被后端拒绝。（与 P-326 同一根因，前端+后端两个层面）
 
+**[2026-07-05 已修复, commit fba40fe]**
+
 ### P-358 🟡 M19.13 重算榜单后不刷新列表
 
 **位置**: `apps/admin/src/app/rankings/page.tsx:43-47`
 
 **问题**: recalculateMutation 的 onSuccess 只显示 message.success，没有调用 queryClient.invalidateQueries。重算榜单后贡献记录列表不会自动刷新，用户需要手动刷新页面才能看到最新数据。
+
+**[2026-07-05 已修复, commit 6686a5b]**
 
 ### P-359 🟡 M19.16 分享模板状态用 Input 而非 Select
 
@@ -2318,17 +2525,23 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **问题**: 分享模板的状态字段使用 Input 组件，用户可输入任意文本。应使用 Select 组件限制为 active/inactive 等有效状态值，避免输入无效状态导致数据异常。
 
+**[2026-07-05 已修复, commit 6686a5b]**
+
 ### P-360 🔴 M19.17 创建社群表单缺 communityId
 
 **位置**: `apps/admin/src/app/social-groups/page.tsx:96-115` vs `apps/api/src/modules/admin/admin.controller.ts:644-658`
 
 **问题**: 后端创建社群接口 body 要求 communityId: string（必填），但前端创建表单没有 communityId 输入框。创建请求会因缺少 communityId 而失败。（与 P-338 同一根因，前端+后端两个层面）
 
+**[2026-07-05 已修复, commit fba40fe]**
+
 ### P-361 🟡 M19.17 删除社群无确认弹窗
 
 **位置**: `apps/admin/src/app/social-groups/page.tsx:70`
 
 **问题**: 删除社群按钮直接调用 deleteMutation.mutate(record.id)，没有二次确认弹窗（Modal.confirm）。用户可能误删社群数据且无法恢复。
+
+**[2026-07-05 已修复, commit 6686a5b]**
 
 ### P-362 🟡 M19.18 defaultReviewPolicy 用 Input 而非 Select
 
@@ -2344,6 +2557,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - 18🔴 + 37🟡 + 8🟢 = 63 个问题
 - **最严重**: P-302/P-307/P-308 (内容审核/认证审核跨小区数据泄露)、P-321/P-325 (Banner/服务商管理未限制 platform_admin)、P-334 (举报跨小区操作)、P-338/P-339/P-340 (社群 CRUD 无 communityId 校验)、P-343 (内容长度限制系统性失效)
 - **系统性问题**: AdminGuard 只做通用 admin 身份校验不区分路由所需角色；审计日志 create/update 普遍遗漏；inline interface 导致 ValidationPipe 形同虚设
+
+**[2026-07-05 已修复, commit 6686a5b]**
 
 ---
 

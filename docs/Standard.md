@@ -2,7 +2,7 @@
 
 > 锁版基线文档。为 Spec.md 中每个子任务制定量化验收标准与通过证据。
 > 上位索引: Map.md | 任务树: Spec.md
-> 最后扫描日期: 2026-07-03 | 版本: v0.2.0 (对齐 PRD v0.7.0)
+> 最后扫描日期: 2026-07-05 | 版本: v0.2.0 (对齐 PRD v0.7.0)
 
 ---
 
@@ -1164,7 +1164,7 @@
 
 | 项       | 标准                                                                                                               |
 | -------- | ------------------------------------------------------------------------------------------------------------------ |
-| 量化指标 | `docker compose up -d` 启动 PostgreSQL 16; 宿主机端口 5433; `pnpm db:migrate` 应用 4 次迁移无报错; 46 张表创建成功 |
+| 量化指标 | `docker compose up -d` 启动 PostgreSQL 16; 宿主机端口 5433; `pnpm db:migrate` 应用 8 次迁移无报错; 49 张表创建成功 |
 | 通过证据 | `docker ps` 输出 + `pnpm db:migrate` 输出 + `pnpm db:generate` 输出                                                |
 
 ### M21.2 种子数据
@@ -1176,10 +1176,10 @@
 
 ### M21.3 Prisma 迁移
 
-| 项       | 标准                                                                                                                                                                                            |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 量化指标 | 4 次迁移文件存在: 20260521122306_init, 20260620124730_add_indexes_and_community_ids, 20260623012516_add_topics, 20260624062446_add_community_application; `pnpm db:migrate:prod` 全部应用无报错 |
-| 通过证据 | `apps/api/prisma/migrations/` 目录列表 + `pnpm db:migrate:prod` 输出                                                                                                                            |
+| 项       | 标准                                                                                                                                                                                                                                                                                                                                            |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 量化指标 | 8 次迁移文件存在: 20260521122306_init, 20260620124730_add_indexes_and_community_ids, 20260623012516_add_topics, 20260624062446_add_community_application, 20260705000001_remove_only_verified, 20260705000002_add_market_interest, 20260705000003_add_event_participants, 20260705000004_add_user_skills; `pnpm db:migrate:prod` 全部应用无报错 |
+| 通过证据 | `apps/api/prisma/migrations/` 目录列表 + `pnpm db:migrate:prod` 输出                                                                                                                                                                                                                                                                            |
 
 ### M21.4 代码质量门禁
 
@@ -1220,7 +1220,7 @@
 | G1 后端测试全绿     | `pnpm test` 全部 spec PASS, 0 fail                                                                                                                                               | 测试输出截图 (16 个 spec 文件)                |
 | G2 三端构建成功     | `pnpm build:api` + `pnpm build:miniapp` + `pnpm build:admin` 均无 error                                                                                                          | 三次构建输出截图                              |
 | G3 Lint 通过        | `pnpm lint` 0 error                                                                                                                                                              | lint 输出截图                                 |
-| G4 数据库迁移       | `pnpm db:migrate:prod` 应用 4 次迁移无报错                                                                                                                                       | 迁移输出日志                                  |
+| G4 数据库迁移       | `pnpm db:migrate:prod` 应用 8 次迁移无报错                                                                                                                                       | 迁移输出日志                                  |
 | G5 临时登录框已删除 | `apps/miniapp/src/pages/login/index.tsx` 中 "用指定 code 登录" 代码块不存在                                                                                                      | grep 搜索结果 (0 匹配)                        |
 | G6 小区数据隔离     | community-isolation.spec.ts 全部 PASS + 手工跨小区访问返回空                                                                                                                     | spec 截图 + curl 验证                         |
 | G7 匿名脱敏         | 匿名事件非本人 creator=null                                                                                                                                                      | events.spec.ts 脱敏用例 PASS                  |
