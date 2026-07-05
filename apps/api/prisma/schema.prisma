@@ -210,7 +210,7 @@ model Event {
   id               String    @id @default(uuid()) @db.Uuid
   communityId      String    @map("community_id") @db.Uuid
   creatorId        String    @map("creator_id") @db.Uuid
-  type             String // help_request/help_offer/public_welfare/lost_found/public_feedback/discussion
+  type             String // help_request/public_welfare/lost_found/public_feedback/discussion (help_offer 已废弃，仅兼容历史数据)
   title            String
   description      String
   images           Json      @default("[]")
@@ -674,10 +674,6 @@ model Vote {
   description        String
   voteType           String    @map("vote_type") // single/multiple
   maxChoices         Int?      @map("max_choices")
-  // TODO: 字段语义可读性差（双布尔配合表达 4 状态），可考虑合并为 votingPolicy 枚举字段
-  //       'all_open' / 'all_locked' / 'verified_open' / 'verified_locked'
-  onlyVerified       Boolean   @default(true) @map("only_verified")
-  onlyVerifiedLocked Boolean   @default(true) @map("only_verified_locked")
   resultVisibility   String    @default("always") @map("result_visibility") // always/after_vote/after_end/admin_only
   isAnonymous        Boolean   @default(false) @map("is_anonymous")
   startAt            DateTime  @map("start_at")

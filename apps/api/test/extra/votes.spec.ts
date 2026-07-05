@@ -270,7 +270,6 @@ describe('Feature: 投票系统（全量）', () => {
           title: '小区B投票',
           description: '跨小区隔离测试',
           voteType: 'single',
-          onlyVerified: false, // 关闭认证限制以暴露跨小区漏洞
           startAt: now,
           endAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
           status: 'published',
@@ -307,7 +306,7 @@ describe('Feature: 投票系统（全量）', () => {
     });
   });
 
-  // P-06: 投票应始终要求认证 — 即使 onlyVerified=false，未认证用户也不能投
+  // P-06: 投票应始终要求认证
   describe('【安全】投票始终要求认证', () => {
     let unverifiedVoteId: string;
     let unverifiedOptionId: string;
@@ -317,10 +316,9 @@ describe('Feature: 投票系统（全量）', () => {
       const vote = await prisma.vote.create({
         data: {
           communityId,
-          title: 'onlyVerified=false 投票',
+          title: '投票认证测试',
           description: 'P-06 测试：未认证用户不应能投票',
           voteType: 'single',
-          onlyVerified: false,
           startAt: now,
           endAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
           status: 'published',
@@ -345,7 +343,7 @@ describe('Feature: 投票系统（全量）', () => {
       }
     });
 
-    it('POST /votes/:id/records - 未认证用户即使 onlyVerified=false 也应返回 403', async () => {
+    it('POST /votes/:id/records - 未认证用户应返回 403', async () => {
       const res = await request(app.getHttpServer())
         .post(`/api/v1/votes/${unverifiedVoteId}/records`)
         .set('Authorization', `Bearer ${userToken}`)

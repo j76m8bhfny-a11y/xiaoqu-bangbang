@@ -92,6 +92,8 @@ export default function Notifications() {
       market_comment: `/pages/market-detail/index?id=${targetId}`,
       topic: `/pages/topic-detail/index?id=${targetId}`,
       vote: `/pages/vote-detail/index?id=${targetId}`,
+      announcement: `/pages/committee-announcement/index?id=${targetId}`,
+      // badge 无跳转目标，点击仅标记已读
     };
 
     const url = routeMap[targetType];

@@ -227,6 +227,7 @@ export class RankingsService {
     switch (eventType) {
       case 'help_request':
         return rewardType === 'free' || rewardType === 'none' ? 'help_free' : 'help_paid';
+      // @deprecated help_offer 已废弃，仅兼容历史数据
       case 'help_offer':
         return 'help_free';
       case 'public_welfare':
@@ -260,6 +261,7 @@ export class RankingsService {
     switch (eventType) {
       case 'public_welfare':
         return 5;
+      // @deprecated help_offer 已废弃，仅兼容历史数据
       case 'help_offer':
         // P-16: help_offer 创建者就是帮手，发花
         return 1;

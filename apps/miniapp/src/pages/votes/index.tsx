@@ -25,11 +25,12 @@ function isVoteActive(endAt: string, status: VoteStatus): boolean {
 export default function Votes() {
   const communityId = useCommunityStore((s) => s.currentCommunityId);
 
-  const { data: votesData, loading, error, refresh } = useRequest(
-    () => voteService.list(),
-    [communityId],
-    { enabled: !!communityId },
-  );
+  const {
+    data: votesData,
+    loading,
+    error,
+    refresh,
+  } = useRequest(() => voteService.list(), [communityId], { enabled: !!communityId });
   const votes = votesData?.items;
 
   const handleVoteClick = (id: string) => {
@@ -37,7 +38,7 @@ export default function Votes() {
   };
 
   if (loading) {
-    return <Loading text='加载投票列表...' />;
+    return <Loading text="加载投票列表..." />;
   }
 
   if (error) {
@@ -45,49 +46,43 @@ export default function Votes() {
   }
 
   if (!votes || votes.length === 0) {
-    return <EmptyState icon='🗳️' text='暂无投票' />;
+    return <EmptyState icon="🗳️" text="暂无投票" />;
   }
 
   return (
-    <View className='votes'>
-      <View className='votes__header'>
-        <Text className='votes__header-title'>🗳️ 社区投票</Text>
-        <Text className='votes__header-sub'>参与投票，共建美好社区</Text>
+    <View className="votes">
+      <View className="votes__header">
+        <Text className="votes__header-title">🗳️ 社区投票</Text>
+        <Text className="votes__header-sub">参与投票，共建美好社区</Text>
       </View>
 
-      <ScrollView scrollY className='votes__list'>
+      <ScrollView scrollY className="votes__list">
         {votes.map((vote) => {
           const active = isVoteActive(vote.endAt, vote.status as VoteStatus);
           return (
-            <View
-              key={vote.id}
-              className='votes__card'
-              onClick={() => handleVoteClick(vote.id)}
-            >
-              <View className='votes__card-header'>
-                <Text className='votes__card-title'>{vote.title}</Text>
+            <View key={vote.id} className="votes__card" onClick={() => handleVoteClick(vote.id)}>
+              <View className="votes__card-header">
+                <Text className="votes__card-title">{vote.title}</Text>
               </View>
 
-              <View className='votes__card-tags'>
+              <View className="votes__card-tags">
                 <View className={`votes__tag votes__tag--type`}>
-                  <Text className='votes__tag-text'>
+                  <Text className="votes__tag-text">
                     {vote.voteType === VoteType.SINGLE ? '单选' : '多选'}
                   </Text>
                 </View>
-                <View className={`votes__tag ${active ? 'votes__tag--active' : 'votes__tag--ended'}`}>
-                  <Text className='votes__tag-text'>
-                    {active ? '进行中' : '已结束'}
-                  </Text>
+                <View
+                  className={`votes__tag ${active ? 'votes__tag--active' : 'votes__tag--ended'}`}
+                >
+                  <Text className="votes__tag-text">{active ? '进行中' : '已结束'}</Text>
                 </View>
-                {vote.onlyVerified && (
-                  <View className='votes__tag votes__tag--verified'>
-                    <Text className='votes__tag-text'>仅认证用户</Text>
-                  </View>
-                )}
+                <View className="votes__tag votes__tag--verified">
+                  <Text className="votes__tag-text">仅认证用户</Text>
+                </View>
               </View>
 
-              <View className='votes__card-time'>
-                <Text className='votes__card-time-text'>
+              <View className="votes__card-time">
+                <Text className="votes__card-time-text">
                   {formatDate(vote.startAt)} ~ {formatDate(vote.endAt)}
                 </Text>
               </View>
@@ -95,7 +90,7 @@ export default function Votes() {
           );
         })}
 
-        <View className='votes__bottom-spacer' />
+        <View className="votes__bottom-spacer" />
       </ScrollView>
     </View>
   );

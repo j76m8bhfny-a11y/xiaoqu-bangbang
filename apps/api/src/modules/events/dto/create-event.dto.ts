@@ -9,14 +9,7 @@ import {
 } from 'class-validator';
 
 export class CreateEventDto {
-  @IsEnum([
-    'help_request',
-    'help_offer',
-    'public_welfare',
-    'lost_found',
-    'public_feedback',
-    'discussion',
-  ])
+  @IsEnum(['help_request', 'public_welfare', 'lost_found', 'public_feedback', 'discussion'])
   type: string;
 
   @IsString()

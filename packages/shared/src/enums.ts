@@ -48,6 +48,7 @@ export enum VerificationStatus {
 /** 事件类型 */
 export enum EventType {
   HELP_REQUEST = 'help_request',
+  /** @deprecated help_offer 已废弃，前端不再允许创建，仅兼容历史数据 */
   HELP_OFFER = 'help_offer',
   PUBLIC_WELFARE = 'public_welfare',
   LOST_FOUND = 'lost_found',

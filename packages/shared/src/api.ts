@@ -354,7 +354,6 @@ export interface VoteDto {
   description: string;
   voteType: VoteType;
   maxChoices: number | null;
-  onlyVerified: boolean;
   resultVisibility: ResultVisibility;
   isAnonymous: boolean;
   startAt: string;

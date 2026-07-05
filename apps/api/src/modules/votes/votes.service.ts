@@ -23,7 +23,6 @@ export class VotesService {
         id: true,
         title: true,
         voteType: true,
-        onlyVerified: true,
         isAnonymous: true,
         startAt: true,
         endAt: true,

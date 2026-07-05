@@ -1,7 +1,7 @@
-import { View, Text, Input, Textarea } from '@tarojs/components';
+import { View, Text, Input, Textarea, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState } from 'react';
-import { authService } from '@/services';
+import { authService, http } from '@/services';
 import { useAuthStore } from '@/store';
 import './index.scss';
 
@@ -11,12 +11,35 @@ export default function ProfileEdit() {
 
   const [nickname, setNickname] = useState(user?.nickname ?? '');
   const [bio, setBio] = useState(user?.bio ?? '');
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? '');
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   if (!user) {
     Taro.redirectTo({ url: '/pages/login/index' });
     return null;
   }
+
+  const handleAvatarChange = async () => {
+    if (avatarUploading) return;
+    try {
+      const res = await Taro.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sizeType: ['compressed'],
+      });
+      const file = res.tempFiles[0];
+      if (!file) return;
+      setAvatarUploading(true);
+      const result = await http.upload(file.tempFilePath);
+      setAvatarUrl(result.url);
+    } catch (err: any) {
+      if (err?.errMsg?.includes('cancel')) return;
+      Taro.showToast({ title: '图片上传失败', icon: 'none' });
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!nickname.trim()) {
@@ -29,6 +52,7 @@ export default function ProfileEdit() {
       const result = await authService.updateMe({
         nickname: nickname.trim(),
         bio: bio.trim() || undefined,
+        avatarUrl: avatarUrl || undefined,
       });
       updateUser(result);
       Taro.showToast({ title: '保存成功', icon: 'success' });
@@ -46,32 +70,39 @@ export default function ProfileEdit() {
   const avatarEmoji = nickname.trim() ? nickname.trim()[0] : '?';
 
   return (
-    <View className='profile-edit'>
-      <View className='profile-edit__avatar-section'>
-        <View className='profile-edit__avatar'>
-          <Text className='profile-edit__avatar-text'>{avatarEmoji}</Text>
-        </View>
+    <View className="profile-edit">
+      <View className="profile-edit__avatar-section" onClick={handleAvatarChange}>
+        {avatarUrl ? (
+          <Image className="profile-edit__avatar" src={avatarUrl} mode="aspectFill" />
+        ) : (
+          <View className="profile-edit__avatar">
+            <Text className="profile-edit__avatar-text">{avatarEmoji}</Text>
+          </View>
+        )}
+        <Text className="profile-edit__avatar-hint">
+          {avatarUploading ? '上传中...' : '点击更换头像'}
+        </Text>
       </View>
 
-      <View className='profile-edit__form'>
-        <View className='profile-edit__field'>
-          <Text className='profile-edit__label'>昵称</Text>
+      <View className="profile-edit__form">
+        <View className="profile-edit__field">
+          <Text className="profile-edit__label">昵称</Text>
           <Input
-            className='profile-edit__input'
-            placeholder='请输入昵称'
-            placeholderClass='profile-edit__placeholder'
+            className="profile-edit__input"
+            placeholder="请输入昵称"
+            placeholderClass="profile-edit__placeholder"
             value={nickname}
             onInput={(e) => setNickname(e.detail.value)}
             maxlength={20}
           />
         </View>
 
-        <View className='profile-edit__field'>
-          <Text className='profile-edit__label'>个人简介</Text>
+        <View className="profile-edit__field">
+          <Text className="profile-edit__label">个人简介</Text>
           <Textarea
-            className='profile-edit__textarea'
-            placeholder='介绍一下自己吧...'
-            placeholderClass='profile-edit__placeholder'
+            className="profile-edit__textarea"
+            placeholder="介绍一下自己吧..."
+            placeholderClass="profile-edit__placeholder"
             value={bio}
             onInput={(e) => setBio(e.detail.value)}
             maxlength={200}
@@ -84,9 +115,7 @@ export default function ProfileEdit() {
         className={`profile-edit__submit ${submitting ? 'profile-edit__submit--disabled' : ''}`}
         onClick={submitting ? undefined : handleSubmit}
       >
-        <Text className='profile-edit__submit-text'>
-          {submitting ? '保存中...' : '保存'}
-        </Text>
+        <Text className="profile-edit__submit-text">{submitting ? '保存中...' : '保存'}</Text>
       </View>
     </View>
   );

@@ -348,7 +348,6 @@ export class AdminController {
       description?: string;
       voteType?: string;
       maxChoices?: number;
-      onlyVerified?: boolean;
       resultVisibility?: string;
       isAnonymous?: boolean;
       startAt?: string;

@@ -22,6 +22,7 @@ export const EVENT_TYPE_CONFIG: Record<
     ctaText: '我来帮',
     ctaColor: '#4A8C5E',
   },
+  // @deprecated help_offer 已废弃，仅兼容历史数据
   help_offer: {
     label: '我能帮忙',
     color: '#35704A', // 深草绿（供给）

@@ -270,9 +270,6 @@ export default function VotesPage() {
             <Form.Item name="isAnonymous" label="匿名投票" valuePropName="checked">
               <Switch />
             </Form.Item>
-            <Form.Item name="onlyVerified" label="仅认证用户" valuePropName="checked">
-              <Switch />
-            </Form.Item>
             <Form.Item name="startAt" label="开始时间" rules={[{ required: true }]}>
               <DatePicker showTime style={{ width: '100%' }} />
             </Form.Item>

@@ -36,6 +36,8 @@ export const marketService = {
 
   markSold: (id: string) => http.post<MarketItemDto>(`/market/items/${id}/sold`),
 
+  closeItem: (id: string) => http.post<MarketItemDto>(`/market/items/${id}/close`),
+
   toggleLike: (id: string) =>
     http.post<{ liked: boolean; likeCount: number }>(`/market/items/${id}/like`),
 

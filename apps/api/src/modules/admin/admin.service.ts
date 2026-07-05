@@ -113,6 +113,8 @@ export class AdminService {
       pendingReports,
       totalCommunities,
       todayMutualHelp,
+      pendingClaims,
+      highRiskFeedback,
     ] = await Promise.all([
       this.prisma.event.count({ where: { communityId, deletedAt: null } }),
       this.prisma.marketItem.count({ where: { communityId, deletedAt: null } }),
@@ -132,6 +134,15 @@ export class AdminService {
       this.prisma.community.count(),
       this.prisma.event.count({
         where: { communityId, createdAt: { gte: today }, deletedAt: null },
+      }),
+      this.prisma.committeeMemberClaim.count({
+        where: { communityId, status: 'pending', deletedAt: null },
+      }),
+      this.prisma.feedbackProcessLog.count({
+        where: {
+          communityId,
+          status: { notIn: ['closed', 'resolved'] },
+        },
       }),
     ]);
 
@@ -167,8 +178,8 @@ export class AdminService {
     return {
       pendingReviews,
       pendingVerifications,
-      pendingClaims: 0,
-      highRiskFeedback: 0,
+      pendingClaims,
+      highRiskFeedback,
       pendingReports,
       totalUsers,
       totalEvents,
@@ -853,7 +864,6 @@ export class AdminService {
       description?: string;
       voteType?: string;
       maxChoices?: number;
-      onlyVerified?: boolean;
       resultVisibility?: string;
       isAnonymous?: boolean;
       startAt?: string;
@@ -873,8 +883,6 @@ export class AdminService {
         description: dto.description ?? '',
         voteType: dto.voteType ?? 'single',
         maxChoices: dto.maxChoices ?? 1,
-        onlyVerified: dto.onlyVerified ?? true,
-        onlyVerifiedLocked: dto.onlyVerified ?? true,
         resultVisibility: dto.resultVisibility ?? 'after_vote',
         isAnonymous: dto.isAnonymous ?? false,
         startAt: dto.startAt ? new Date(dto.startAt) : new Date(),

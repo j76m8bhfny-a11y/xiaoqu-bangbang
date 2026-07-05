@@ -279,8 +279,6 @@ async function main() {
       description: v.description,
       voteType: v.voteType,
       maxChoices: v.maxChoices,
-      onlyVerified: true,
-      onlyVerifiedLocked: true,
       resultVisibility: 'always',
       isAnonymous: false,
       startAt: daysAgo(2),

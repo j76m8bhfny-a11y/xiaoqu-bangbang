@@ -157,6 +157,24 @@ export default function MarketDetail() {
     });
   };
 
+  const handleClose = () => {
+    Taro.showModal({
+      title: '确认',
+      content: '确定要下架此闲置吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            await marketService.closeItem(id);
+            Taro.showToast({ title: '已下架', icon: 'success' });
+            refresh();
+          } catch (e: any) {
+            Taro.showToast({ title: e.message || '操作失败', icon: 'none' });
+          }
+        }
+      },
+    });
+  };
+
   const handleReport = async () => {
     try {
       const res = await Taro.showActionSheet({
@@ -322,6 +340,9 @@ export default function MarketDetail() {
               onClick={handleMarkSold}
             >
               <Text className="market-detail__btn-text">标记已售</Text>
+            </View>
+            <View className="market-detail__btn market-detail__btn--close" onClick={handleClose}>
+              <Text className="market-detail__btn-text">下架</Text>
             </View>
           </>
         ) : (

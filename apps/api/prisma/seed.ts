@@ -592,8 +592,6 @@ async function seed() {
       description:
         '小区绿化改造即将启动，请各位业主投票选择改造方案。本次投票仅限已认证业主参与，每人限投一票。',
       voteType: 'single',
-      onlyVerified: true,
-      onlyVerifiedLocked: true,
       resultVisibility: 'always',
       isAnonymous: false,
       startAt: new Date('2026-05-20T00:00:00.000Z'),
@@ -634,8 +632,6 @@ async function seed() {
       description: '关于下一年度物业费调整，请业主选择可接受的方案。本次投票为多选，最多选2项。',
       voteType: 'multiple',
       maxChoices: 2,
-      onlyVerified: true,
-      onlyVerifiedLocked: true,
       resultVisibility: 'after_vote',
       isAnonymous: true,
       startAt: new Date('2026-05-22T00:00:00.000Z'),

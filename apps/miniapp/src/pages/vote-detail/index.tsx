@@ -177,11 +177,9 @@ export default function VoteDetail() {
             >
               <Text className="vote-detail__tag-text">{active ? '进行中' : '已结束'}</Text>
             </View>
-            {vote.onlyVerified && (
-              <View className="vote-detail__tag vote-detail__tag--verified">
-                <Text className="vote-detail__tag-text">仅认证用户</Text>
-              </View>
-            )}
+            <View className="vote-detail__tag vote-detail__tag--verified">
+              <Text className="vote-detail__tag-text">仅认证用户</Text>
+            </View>
             {voted && (
               <View className="vote-detail__tag vote-detail__tag--voted">
                 <Text className="vote-detail__tag-text">已投票</Text>
