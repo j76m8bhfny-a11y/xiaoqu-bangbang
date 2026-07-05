@@ -3,7 +3,8 @@ import Taro, { useShareAppMessage } from '@tarojs/taro';
 import { useState, useEffect } from 'react';
 import { useRequest } from '@/hooks';
 import { marketService, shareService, reportService } from '@/services';
-import type { MarketCommentDto, MarketReviewWithUser } from '@/services/market';
+import type { MarketCommentDto } from '@/services/market';
+import type { MarketReviewDto } from '@xiaoqu-bangbang/shared';
 import { useAuthStore } from '@/store';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
@@ -40,7 +41,7 @@ export default function MarketDetail() {
   const comments = commentsData?.items ?? [];
 
   // 已售商品的评价列表
-  const { data: reviewsData } = useRequest<{ items: MarketReviewWithUser[] }>(
+  const { data: reviewsData } = useRequest<{ items: MarketReviewDto[] }>(
     () => marketService.getReviews(id),
     [id],
     { enabled: !!id && item?.status === MarketItemStatus.SOLD },
@@ -207,7 +208,7 @@ export default function MarketDetail() {
 
   return (
     <View className="market-detail">
-      {item.images.length > 0 ? (
+      {(item.images ?? []).length > 0 ? (
         <Swiper
           className="market-detail__swiper"
           indicatorDots
@@ -215,7 +216,7 @@ export default function MarketDetail() {
           indicatorActiveColor="#fff"
           circular
         >
-          {item.images.map((src, idx) => (
+          {(item.images ?? []).map((src, idx) => (
             <SwiperItem key={idx}>
               <View className="market-detail__slide">
                 <Image className="market-detail__slide-img" src={src} mode="aspectFill" />

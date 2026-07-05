@@ -17,13 +17,6 @@ export interface MarketCommentDto {
   user: { id: string; nickname: string; avatarUrl: string };
 }
 
-// 后端 getReviews 返回额外嵌套用户信息，超出 shared MarketReviewDto
-export interface MarketReviewWithUser extends MarketReviewDto {
-  updatedAt: string;
-  reviewer: { id: string; nickname: string; avatarUrl: string | null };
-  reviewee: { id: string; nickname: string; avatarUrl: string | null };
-}
-
 export const marketService = {
   list: (params?: {
     communityId?: string;
@@ -60,6 +53,5 @@ export const marketService = {
     data: { revieweeId: string; rating: number; tags?: string[]; content?: string },
   ) => http.post<MarketReviewDto>(`/market/items/${id}/reviews`, data),
 
-  getReviews: (id: string) =>
-    http.get<{ items: MarketReviewWithUser[] }>(`/market/items/${id}/reviews`),
+  getReviews: (id: string) => http.get<{ items: MarketReviewDto[] }>(`/market/items/${id}/reviews`),
 };
