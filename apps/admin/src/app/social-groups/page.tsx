@@ -109,7 +109,19 @@ export default function SocialGroupsPage() {
           >
             编辑
           </Button>
-          <Button size="small" type="link" danger onClick={() => deleteMutation.mutate(record.id)}>
+          <Button
+            size="small"
+            type="link"
+            danger
+            onClick={() => {
+              Modal.confirm({
+                title: '确认删除',
+                content: '确定要删除该社群吗？删除后不可恢复。',
+                okType: 'danger',
+                onOk: () => deleteMutation.mutate(record.id),
+              });
+            }}
+          >
             删除
           </Button>
         </Space>

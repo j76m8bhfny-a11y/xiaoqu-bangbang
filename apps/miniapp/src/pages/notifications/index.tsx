@@ -80,10 +80,23 @@ export default function Notifications() {
       }
     }
 
-    if (item.targetType === 'event' && item.targetId) {
-      Taro.navigateTo({ url: `/pages/event-detail/index?id=${item.targetId}` });
-    } else if (item.targetType === 'market' && item.targetId) {
-      Taro.navigateTo({ url: `/pages/market-detail/index?id=${item.targetId}` });
+    const targetType = item.targetType;
+    const targetId = item.targetId;
+
+    if (!targetType || !targetId) return;
+
+    const routeMap: Record<string, string> = {
+      event: `/pages/event-detail/index?id=${targetId}`,
+      market_item: `/pages/market-detail/index?id=${targetId}`,
+      event_comment: `/pages/event-detail/index?id=${targetId}`,
+      market_comment: `/pages/market-detail/index?id=${targetId}`,
+      topic: `/pages/topic-detail/index?id=${targetId}`,
+      vote: `/pages/vote-detail/index?id=${targetId}`,
+    };
+
+    const url = routeMap[targetType];
+    if (url) {
+      Taro.navigateTo({ url });
     }
   };
 

@@ -2,14 +2,17 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Table, Card, Tabs, Tag, Space, Button, Modal, Form, Input, message,
-} from 'antd';
+import { Table, Card, Tabs, Tag, Space, Button, Modal, Form, Input, Select, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import AuthGuard from '@/components/AuthGuard';
 import AdminLayout from '@/components/Layout';
 import api from '@/lib/api';
-import type { ApiResponse, PaginatedData, ShareTemplateDto, ShareLogDto } from '@xiaoqu-bangbang/shared';
+import type {
+  ApiResponse,
+  PaginatedData,
+  ShareTemplateDto,
+  ShareLogDto,
+} from '@xiaoqu-bangbang/shared';
 
 export default function SharePage() {
   const queryClient = useQueryClient();
@@ -21,7 +24,8 @@ export default function SharePage() {
 
   const templatesQuery = useQuery({
     queryKey: ['admin', 'share-templates'],
-    queryFn: () => api.get<null, ApiResponse<{ items: ShareTemplateDto[] }>>('/admin/share-templates'),
+    queryFn: () =>
+      api.get<null, ApiResponse<{ items: ShareTemplateDto[] }>>('/admin/share-templates'),
   });
 
   const logsQuery = useQuery({
@@ -34,7 +38,11 @@ export default function SharePage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, ...values }: any) => api.patch(`/admin/share-templates/${id}`, values),
-    onSuccess: () => { message.success('模板已更新'); setEditModalOpen(false); queryClient.invalidateQueries({ queryKey: ['admin', 'share-templates'] }); },
+    onSuccess: () => {
+      message.success('模板已更新');
+      setEditModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'share-templates'] });
+    },
     onError: () => message.error('更新失败'),
   });
 
@@ -42,10 +50,27 @@ export default function SharePage() {
     { title: '目标类型', dataIndex: 'targetType', width: 120 },
     { title: '标题模板', dataIndex: 'titleTemplate', ellipsis: true, width: 200 },
     { title: '默认图片', dataIndex: 'defaultImageUrl', ellipsis: true, width: 200 },
-    { title: '状态', dataIndex: 'status', width: 80, render: (v: string) => <Tag color={v === 'active' ? 'green' : 'default'}>{v}</Tag> },
     {
-      title: '操作', width: 80, render: (_, record) => (
-        <Button size="small" type="link" onClick={() => { setEditingTemplate(record); editForm.setFieldsValue(record); setEditModalOpen(true); }}>编辑</Button>
+      title: '状态',
+      dataIndex: 'status',
+      width: 80,
+      render: (v: string) => <Tag color={v === 'active' ? 'green' : 'default'}>{v}</Tag>,
+    },
+    {
+      title: '操作',
+      width: 80,
+      render: (_, record) => (
+        <Button
+          size="small"
+          type="link"
+          onClick={() => {
+            setEditingTemplate(record);
+            editForm.setFieldsValue(record);
+            setEditModalOpen(true);
+          }}
+        >
+          编辑
+        </Button>
       ),
     },
   ];
@@ -70,7 +95,8 @@ export default function SharePage() {
                 label: '分享模板',
                 children: (
                   <Table
-                    rowKey="id" columns={templateColumns}
+                    rowKey="id"
+                    columns={templateColumns}
                     dataSource={templatesQuery.data?.data?.items ?? []}
                     loading={templatesQuery.isLoading}
                   />
@@ -81,13 +107,19 @@ export default function SharePage() {
                 label: '分享日志',
                 children: (
                   <Table
-                    rowKey="id" columns={logColumns}
+                    rowKey="id"
+                    columns={logColumns}
                     dataSource={logsQuery.data?.data?.items ?? []}
                     loading={logsQuery.isLoading}
                     pagination={{
-                      current: logPage, pageSize: logPageSize,
-                      total: logsQuery.data?.data?.total ?? 0, showSizeChanger: true,
-                      onChange: (p, ps) => { setLogPage(p); setLogPageSize(ps); },
+                      current: logPage,
+                      pageSize: logPageSize,
+                      total: logsQuery.data?.data?.total ?? 0,
+                      showSizeChanger: true,
+                      onChange: (p, ps) => {
+                        setLogPage(p);
+                        setLogPageSize(ps);
+                      },
                     }}
                   />
                 ),
@@ -96,8 +128,15 @@ export default function SharePage() {
           />
         </Card>
 
-        <Modal title="编辑分享模板" open={editModalOpen} onCancel={() => setEditModalOpen(false)}
-          onOk={() => editForm.validateFields().then((v) => updateMutation.mutate({ id: editingTemplate?.id, ...v }))}
+        <Modal
+          title="编辑分享模板"
+          open={editModalOpen}
+          onCancel={() => setEditModalOpen(false)}
+          onOk={() =>
+            editForm
+              .validateFields()
+              .then((v) => updateMutation.mutate({ id: editingTemplate?.id, ...v }))
+          }
           confirmLoading={updateMutation.isPending}
         >
           <Form form={editForm} layout="vertical">
@@ -108,7 +147,13 @@ export default function SharePage() {
               <Input />
             </Form.Item>
             <Form.Item name="status" label="状态">
-              <Input />
+              <Select
+                options={[
+                  { value: 'draft', label: '草稿' },
+                  { value: 'published', label: '已发布' },
+                  { value: 'disabled', label: '已禁用' },
+                ]}
+              />
             </Form.Item>
           </Form>
         </Modal>

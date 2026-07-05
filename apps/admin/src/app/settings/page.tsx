@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Form, Input, InputNumber, Switch, Button, message, Spin, Space } from 'antd';
+import { Card, Form, Input, InputNumber, Select, Switch, Button, message, Spin, Space } from 'antd';
 import AuthGuard from '@/components/AuthGuard';
 import AdminLayout from '@/components/Layout';
 import api from '@/lib/api';
@@ -49,7 +49,7 @@ export default function SettingsPage() {
       bannerDisplayCount: Number(settings.bannerDisplayCount) || 5,
       providerDisplayCount: Number(settings.providerDisplayCount) || 10,
       privacyVersion: settings.privacyVersion || '',
-      defaultReviewPolicy: settings.defaultReviewPolicy || 'auto',
+      defaultReviewPolicy: settings.defaultReviewPolicy || 'ai',
     });
   }
 
@@ -87,7 +87,12 @@ export default function SettingsPage() {
                 <Input placeholder="1.0.0" />
               </Form.Item>
               <Form.Item name="defaultReviewPolicy" label="默认审核策略">
-                <Input placeholder="auto / manual" />
+                <Select
+                  options={[
+                    { value: 'ai', label: 'AI 审核' },
+                    { value: 'manual', label: '人工审核' },
+                  ]}
+                />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit" loading={updateMutation.isPending}>
