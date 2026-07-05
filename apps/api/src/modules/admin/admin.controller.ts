@@ -582,6 +582,31 @@ export class AdminController {
     return { code: 0, message: 'ok', data };
   }
 
+  // P-332: 补全 badge PATCH（更新）
+  @Patch('badges/:id')
+  async updateBadge(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @Body()
+    body: {
+      name?: string;
+      description?: string;
+      iconUrl?: string;
+      ruleJson?: any;
+      status?: string;
+    },
+  ) {
+    const data = await this.adminService.updateBadge(userId, id, body);
+    return { code: 0, message: 'ok', data };
+  }
+
+  // P-332: 补全 badge DELETE（停用）
+  @Delete('badges/:id')
+  async deleteBadge(@CurrentUser('userId') userId: string, @Param('id') id: string) {
+    const data = await this.adminService.deleteBadge(userId, id);
+    return { code: 0, message: 'ok', data };
+  }
+
   @Post('users/:userId/badges')
   async awardBadge(
     @Param('userId') userId: string,
@@ -644,6 +669,16 @@ export class AdminController {
     return { code: 0, message: 'ok', data: { items: data } };
   }
 
+  // P-337: 补全 share template POST（创建）
+  @Post('share-templates')
+  async createShareTemplate(
+    @CurrentUser('userId') userId: string,
+    @Body() body: { targetType: string; titleTemplate: string; defaultImageUrl?: string },
+  ) {
+    const data = await this.adminService.createShareTemplate(userId, body);
+    return { code: 0, message: 'ok', data };
+  }
+
   @Patch('share-templates/:id')
   async updateShareTemplate(
     @CurrentUser('userId') userId: string,
@@ -651,6 +686,13 @@ export class AdminController {
     @Body() dto: UpdateShareTemplateDto,
   ) {
     const data = await this.adminService.updateShareTemplate(userId, id, dto);
+    return { code: 0, message: 'ok', data };
+  }
+
+  // P-337: 补全 share template DELETE（停用）
+  @Delete('share-templates/:id')
+  async deleteShareTemplate(@CurrentUser('userId') userId: string, @Param('id') id: string) {
+    const data = await this.adminService.deleteShareTemplate(userId, id);
     return { code: 0, message: 'ok', data };
   }
 

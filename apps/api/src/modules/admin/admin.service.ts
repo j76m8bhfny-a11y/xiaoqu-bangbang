@@ -55,6 +55,30 @@ export class AdminService {
     return result;
   }
 
+  // P-332: 补全 badge PATCH（更新）
+  async updateBadge(
+    adminId: string,
+    id: string,
+    dto: { name?: string; description?: string; iconUrl?: string; ruleJson?: any; status?: string },
+  ) {
+    const result = await this.prisma.badge.update({
+      where: { id },
+      data: dto,
+    });
+    await this.logAudit(adminId, 'update_badge', 'badge', id, dto);
+    return result;
+  }
+
+  // P-332: 补全 badge DELETE（停用，软删除）
+  async deleteBadge(adminId: string, id: string) {
+    const result = await this.prisma.badge.update({
+      where: { id },
+      data: { status: 'inactive', deletedAt: new Date() },
+    });
+    await this.logAudit(adminId, 'delete_badge', 'badge', id, {});
+    return result;
+  }
+
   async awardBadge(
     userId: string,
     badgeId: string,
@@ -1391,6 +1415,18 @@ export class AdminService {
     return this.prisma.shareTemplate.findMany({ where: { status: 'active' } });
   }
 
+  // P-337: 补全 share template POST（创建）
+  async createShareTemplate(
+    adminId: string,
+    dto: { targetType: string; titleTemplate: string; defaultImageUrl?: string },
+  ) {
+    const result = await this.prisma.shareTemplate.create({
+      data: dto,
+    });
+    await this.logAudit(adminId, 'create_share_template', 'share_template', result.id, dto);
+    return result;
+  }
+
   async updateShareTemplate(
     adminId: string,
     id: string,
@@ -1401,6 +1437,16 @@ export class AdminService {
       data: dto,
     });
     await this.logAudit(adminId, 'update_share_template', 'share_template', id, dto);
+    return result;
+  }
+
+  // P-337: 补全 share template DELETE（停用）
+  async deleteShareTemplate(adminId: string, id: string) {
+    const result = await this.prisma.shareTemplate.update({
+      where: { id },
+      data: { status: 'inactive' },
+    });
+    await this.logAudit(adminId, 'delete_share_template', 'share_template', id, {});
     return result;
   }
 

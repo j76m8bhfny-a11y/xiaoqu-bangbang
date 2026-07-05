@@ -742,7 +742,11 @@ export class EventsService {
     return comment;
   }
 
-  async getComments(eventId: string, communityId: string) {
+  async getComments(
+    eventId: string,
+    communityId: string,
+    pagination?: { skip: number; take: number },
+  ) {
     const event = await this.prisma.event.findFirst({
       where: { id: eventId, deletedAt: null },
     });
@@ -754,15 +758,21 @@ export class EventsService {
       throw new ForbiddenException('无权访问该事件');
     }
 
-    const comments = await this.prisma.eventComment.findMany({
-      where: { eventId, deletedAt: null, status: 'visible' },
-      include: {
-        user: { select: { id: true, nickname: true, avatarUrl: true } },
-      },
-      orderBy: { createdAt: 'asc' },
-    });
+    const where = { eventId, deletedAt: null, status: 'visible' };
+    const [comments, total] = await Promise.all([
+      this.prisma.eventComment.findMany({
+        where,
+        include: {
+          user: { select: { id: true, nickname: true, avatarUrl: true } },
+        },
+        orderBy: { createdAt: 'asc' },
+        ...(pagination ?? {}),
+      }),
+      this.prisma.eventComment.count({ where }),
+    ]);
 
-    return comments;
+    // P-230: 返回 { items, total } 以支持分页契约
+    return { items: comments, total };
   }
 
   async toggleLike(userId: string, eventId: string, communityId: string) {

@@ -542,6 +542,21 @@ export class RankingsService {
       orderBy: [{ periodKey: 'desc' }],
     });
 
+    // P-271: 未上榜时返回默认对象而非 null，避免前端额外空值判断
+    if (!snapshot) {
+      return {
+        userId,
+        communityId,
+        periodType: periodType ?? 'month',
+        periodKey: periodKey ?? '',
+        rankNo: null,
+        score: 0,
+        flowerCount: 0,
+        helpCount: 0,
+        badgeCount: 0,
+      };
+    }
+
     return snapshot;
   }
 

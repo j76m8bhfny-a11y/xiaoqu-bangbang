@@ -209,9 +209,19 @@ export class EventsController {
 
   @Get(':id/comments')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
-  async getComments(@Param('id') eventId: string, @CurrentCommunityId() communityId: string) {
-    const comments = await this.eventsService.getComments(eventId, communityId);
-    return { code: 0, message: 'ok', data: { items: comments } };
+  async getComments(
+    @Param('id') eventId: string,
+    @CurrentCommunityId() communityId: string,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ) {
+    // P-230: 补全分页契约 page/pageSize/total
+    const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
+    const { items, total } = await this.eventsService.getComments(eventId, communityId, {
+      skip,
+      take,
+    });
+    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
   }
 
   @Post(':id/like')

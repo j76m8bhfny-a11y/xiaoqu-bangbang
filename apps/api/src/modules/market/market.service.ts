@@ -361,6 +361,39 @@ export class MarketService {
     return updated;
   }
 
+  // P-58: 卖家自行下架商品（区别于管理员 hide）
+  async closeBySeller(userId: string, id: string, communityId: string) {
+    const item = await this.prisma.marketItem.findFirst({
+      where: { id, deletedAt: null },
+    });
+
+    if (!item) {
+      throw new NotFoundException('商品不存在');
+    }
+
+    if (item.communityId !== communityId) {
+      throw new ForbiddenException('无权操作该商品');
+    }
+
+    if (item.sellerId !== userId) {
+      throw new ForbiddenException('只能下架自己发布的商品');
+    }
+
+    if (item.status === 'sold') {
+      throw new BadRequestException('商品已售出，无法下架');
+    }
+    if (item.status === 'closed') {
+      throw new BadRequestException('商品已下架');
+    }
+
+    const updated = await this.prisma.marketItem.update({
+      where: { id },
+      data: { status: 'closed' },
+    });
+
+    return updated;
+  }
+
   async addComment(
     userId: string,
     itemId: string,

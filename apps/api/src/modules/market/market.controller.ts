@@ -85,6 +85,18 @@ export class MarketController {
     return { code: 0, message: 'ok', data: item };
   }
 
+  // P-58: 卖家自行下架商品
+  @Post('items/:id/close')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  async closeBySeller(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const item = await this.marketService.closeBySeller(userId, id, communityId);
+    return { code: 0, message: 'ok', data: item };
+  }
+
   @Get('items/:id/comments')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async getComments(
