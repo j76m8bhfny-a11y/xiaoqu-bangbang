@@ -348,7 +348,9 @@ export default function EventDetail() {
   const isHelper = !!user?.id && !!event.selectedHelperId && user.id === event.selectedHelperId;
   const rateTargetUserId = isCreator ? event.selectedHelperId : isHelper ? event.creatorId : null;
   const interactionDisabled =
-    event.status === EventStatus.CLOSED || event.status === EventStatus.REJECTED;
+    event.status === EventStatus.CLOSED ||
+    event.status === EventStatus.REJECTED ||
+    event.status === EventStatus.PENDING_REVIEW;
   const isHelperType = event.type === EventType.HELP_REQUEST;
   const isPublicFeedback = event.type === EventType.PUBLIC_FEEDBACK;
 

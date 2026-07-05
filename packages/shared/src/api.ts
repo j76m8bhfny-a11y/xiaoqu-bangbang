@@ -302,6 +302,10 @@ export interface MarkSoldRequest {
   buyerId?: string;
 }
 
+export interface AddInterestRequest {
+  message?: string;
+}
+
 // ===== 榜单 =====
 
 export interface RankingQuery {
@@ -472,6 +476,13 @@ export interface EventRateDto {
   createdAt: string;
 }
 
+export interface EventRateRequest {
+  targetUserId: string;
+  rating: number;
+  tags?: string[];
+  content?: string;
+}
+
 export interface MarketReviewDto {
   id: string;
   itemId: string;
@@ -486,6 +497,13 @@ export interface MarketReviewDto {
   // 后端 getReviews 返回嵌套用户信息
   reviewer?: { id: string; nickname: string; avatarUrl: string | null };
   reviewee?: { id: string; nickname: string; avatarUrl: string | null };
+}
+
+export interface CreateMarketReviewRequest {
+  revieweeId: string;
+  rating: number;
+  tags?: string[];
+  content?: string;
 }
 
 export interface AuditLogDto {

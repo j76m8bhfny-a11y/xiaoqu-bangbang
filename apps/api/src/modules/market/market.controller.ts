@@ -102,7 +102,7 @@ export class MarketController {
 
   // 卖家查看意向列表
   @Get('items/:id/interests')
-  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async getInterests(
     @CurrentUser('userId') userId: string,
     @Param('id') id: string,
