@@ -296,6 +296,59 @@ export class EventsService {
       .slice(0, 3);
   }
 
+  // Batch 7: 根据事件标题/描述匹配同小区认证业主的技能
+  async getMatchedSkills(eventId: string, communityId: string) {
+    const event = await this.prisma.event.findFirst({
+      where: { id: eventId, communityId, deletedAt: null },
+      select: { title: true, description: true, type: true, creatorId: true },
+    });
+    if (!event) {
+      throw new NotFoundException('事件不存在');
+    }
+
+    const queryTokens = topicTokenize(`${event.title} ${event.description ?? ''}`);
+    if (queryTokens.size === 0) return [];
+
+    // 同小区认证业主的 userId
+    const members = await this.prisma.communityMember.findMany({
+      where: { communityId, verifyStatus: 'verified', deletedAt: null },
+      select: { userId: true },
+    });
+    const userIds = members.map((m) => m.userId).filter((uid) => uid !== event.creatorId);
+    if (userIds.length === 0) return [];
+
+    const skills = await this.prisma.userSkill.findMany({
+      where: { userId: { in: userIds }, deletedAt: null },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        userId: true,
+        user: { select: { nickname: true, avatarUrl: true } },
+      },
+    });
+    if (skills.length === 0) return [];
+
+    const scored = skills
+      .map((s) => {
+        const tokens = topicTokenize(`${s.title} ${s.description ?? ''}`);
+        return {
+          skillId: s.id,
+          title: s.title,
+          description: s.description,
+          userId: s.userId,
+          userNickname: s.user.nickname,
+          userAvatarUrl: s.user.avatarUrl,
+          similarity: topicJaccard(queryTokens, tokens),
+        };
+      })
+      .filter((s) => s.similarity > 0)
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 5);
+
+    return scored;
+  }
+
   async update(userId: string, id: string, communityId: string, dto: any) {
     const event = await this.prisma.event.findFirst({
       where: { id, deletedAt: null },

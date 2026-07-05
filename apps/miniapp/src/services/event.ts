@@ -10,6 +10,7 @@ import type {
   EventRateRequest,
   EventParticipantDto,
   SelectParticipantRequest,
+  MatchedSkillDto,
 } from '@xiaoqu-bangbang/shared';
 
 interface CommentDto {
@@ -83,6 +84,9 @@ export const eventService = {
 
   confirmParticipant: (eventId: string, participantId: string) =>
     http.post<EventParticipantDto>(`/events/${eventId}/participants/${participantId}/confirm`),
+
+  getMatchedSkills: (eventId: string) =>
+    http.get<{ items: MatchedSkillDto[] }>(`/events/${eventId}/matched-skills`),
 
   // ponytail: 没有 GET /events/:id/ratings 端点，评价列表 UI 暂缺。
   //           升级路径：后端补 GET 端点后，在此加 getEventRatings 方法。

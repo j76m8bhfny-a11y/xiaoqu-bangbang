@@ -7,7 +7,7 @@ import { eventService, shareService, reportService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import BottomSheet from '@/components/bottom-sheet';
-import type { EventDto, EventApplicationDto } from '@xiaoqu-bangbang/shared';
+import type { EventDto, EventApplicationDto, MatchedSkillDto } from '@xiaoqu-bangbang/shared';
 import {
   EventType,
   ActionType,
@@ -122,6 +122,14 @@ export default function EventDetail() {
     [id],
     { enabled: !!id && event?.type === EventType.PUBLIC_FEEDBACK },
   );
+
+  // Matched skills for help_request type
+  const { data: matchedSkillsData } = useRequest<{ items: MatchedSkillDto[] }>(
+    () => eventService.getMatchedSkills(id!),
+    [id],
+    { enabled: !!id && event?.type === EventType.HELP_REQUEST },
+  );
+  const matchedSkills = matchedSkillsData?.items ?? [];
 
   // Share config
   const { data: shareConfig } = useRequest(
@@ -623,6 +631,50 @@ export default function EventDetail() {
                       </Text>
                     </View>
                   )}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Matched skills for help_request */}
+        {isHelperType && matchedSkills.length > 0 && (
+          <View className="event-detail__matched-skills">
+            <Text className="event-detail__matched-skills-header">🔍 匹配的帮手</Text>
+            {matchedSkills.map((s) => (
+              <View
+                key={s.skillId}
+                className="event-detail__matched-skill"
+                onClick={() =>
+                  s.userId && Taro.navigateTo({ url: `/pages/user-profile/index?id=${s.userId}` })
+                }
+              >
+                <View className="event-detail__matched-skill-avatar">
+                  {s.userAvatarUrl ? (
+                    <Image
+                      className="event-detail__matched-skill-avatar-img"
+                      src={s.userAvatarUrl}
+                      mode="aspectFill"
+                    />
+                  ) : (
+                    <Text className="event-detail__matched-skill-avatar-emoji">
+                      {s.userNickname.slice(0, 1)}
+                    </Text>
+                  )}
+                </View>
+                <View className="event-detail__matched-skill-body">
+                  <View className="event-detail__matched-skill-top">
+                    <Text className="event-detail__matched-skill-nickname">{s.userNickname}</Text>
+                    <View className="event-detail__matched-skill-score">
+                      <Text className="event-detail__matched-skill-score-text">
+                        {Math.round(s.similarity * 100)}%
+                      </Text>
+                    </View>
+                  </View>
+                  <Text className="event-detail__matched-skill-title">{s.title}</Text>
+                  {s.description && (
+                    <Text className="event-detail__matched-skill-desc">{s.description}</Text>
+                  )}
+                </View>
               </View>
             ))}
           </View>

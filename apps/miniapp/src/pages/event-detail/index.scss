@@ -645,6 +645,101 @@
     padding: 0 $spacing-md $spacing-md;
   }
 
+  // Matched skills section
+  &__matched-skills {
+    padding: 0 $spacing-md $spacing-md;
+  }
+
+  &__matched-skills-header {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__matched-skill {
+    display: flex;
+    gap: $spacing-sm;
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-sm $spacing-md;
+    box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
+    margin-bottom: $spacing-xs;
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__matched-skill-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__matched-skill-avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  &__matched-skill-avatar-emoji {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__matched-skill-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__matched-skill-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  &__matched-skill-nickname {
+    font-size: $font-size-xs;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+  }
+
+  &__matched-skill-score {
+    padding: 2px 10px;
+    border-radius: $radius-pill;
+    background: $color-bg-green;
+  }
+
+  &__matched-skill-score-text {
+    font-size: 20px;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__matched-skill-title {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+  }
+
+  &__matched-skill-desc {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+
   &__feedback-header {
     display: block;
     font-size: $font-size-md;

@@ -981,3 +981,35 @@ export interface UserProfileDto {
   /** 最多 6 个最新徽章 */
   badges: UserProfileBadgeDto[];
 }
+
+export interface UserSkillDto {
+  id: string;
+  userId: string;
+  title: string;
+  description: string | null;
+  images: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSkillRequest {
+  title: string;
+  description?: string;
+  images?: string[];
+}
+
+export interface UpdateSkillRequest {
+  title?: string;
+  description?: string;
+  images?: string[];
+}
+
+export interface MatchedSkillDto {
+  skillId: string;
+  title: string;
+  description: string | null;
+  userId: string;
+  userNickname: string;
+  userAvatarUrl: string | null;
+  similarity: number;
+}

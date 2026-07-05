@@ -88,4 +88,129 @@
     font-weight: $font-weight-bold;
     color: #fff;
   }
+
+  // 技能管理
+  &__skills {
+    margin-top: $spacing-md;
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    box-shadow: $shadow-card;
+  }
+
+  &__skills-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__skills-title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+
+  &__skills-add {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__skills-empty {
+    display: block;
+    text-align: center;
+    padding: $spacing-lg 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__skill-form {
+    padding: $spacing-sm 0;
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__skill-input {
+    width: 100%;
+    font-size: $font-size-sm;
+    padding: $spacing-xs 0;
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__skill-textarea {
+    width: 100%;
+    min-height: 80px;
+    font-size: $font-size-sm;
+    padding: $spacing-xs 0;
+  }
+
+  &__skill-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-sm;
+    padding-top: $spacing-xs;
+  }
+
+  &__skill-form-btn {
+    font-size: $font-size-sm;
+    padding: 6px 20px;
+    border-radius: $radius-pill;
+
+    &--cancel {
+      color: $color-text-secondary;
+      background: #f5f5f5;
+    }
+
+    &--save {
+      color: #fff;
+      background: $color-primary;
+    }
+  }
+
+  &__skill-item {
+    display: flex;
+    align-items: center;
+    padding: $spacing-sm 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__skill-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__skill-title {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text;
+  }
+
+  &__skill-desc {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  &__skill-actions {
+    display: flex;
+    gap: $spacing-sm;
+    flex-shrink: 0;
+  }
+
+  &__skill-action {
+    font-size: $font-size-xs;
+    color: $color-primary;
+
+    &--danger {
+      color: #ff6b6b;
+    }
+  }
 }

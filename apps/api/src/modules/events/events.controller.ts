@@ -79,6 +79,14 @@ export class EventsController {
     return { code: 0, message: 'ok', data: { items } };
   }
 
+  // Batch 7: 根据事件标题/描述匹配同小区认证业主的技能
+  @Get(':id/matched-skills')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  async getMatchedSkills(@Param('id') eventId: string, @CurrentCommunityId() communityId: string) {
+    const items = await this.eventsService.getMatchedSkills(eventId, communityId);
+    return { code: 0, message: 'ok', data: { items } };
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async findOne(

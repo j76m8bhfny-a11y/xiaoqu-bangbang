@@ -23,6 +23,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { TopicsModule } from './modules/topics/topics.module';
 import { CommunityApplicationsModule } from './modules/community-applications/community-applications.module';
+import { UsersModule } from './modules/users/users.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { HealthController } from './health.controller';
 
@@ -54,6 +55,7 @@ import { HealthController } from './health.controller';
     UploadModule,
     TopicsModule,
     CommunityApplicationsModule,
+    UsersModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })
