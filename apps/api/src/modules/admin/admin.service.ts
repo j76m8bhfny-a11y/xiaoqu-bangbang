@@ -242,6 +242,45 @@ export class AdminService {
         targetType: 'market_item',
         targetId: item.id,
       });
+    } else if (review.targetType === 'event_comment') {
+      // P-304: 补全评论类型审核
+      const comment = await this.prisma.eventComment.update({
+        where: { id: review.targetId },
+        data: { status: 'visible', aiReviewStatus: 'pass' },
+        select: { userId: true, eventId: true },
+      });
+      const event = await this.prisma.event.findUnique({
+        where: { id: comment.eventId },
+        select: { communityId: true },
+      });
+      await this.notificationsService.create({
+        userId: comment.userId,
+        communityId: event?.communityId ?? communityId,
+        type: 'review_result',
+        title: '评论审核通过',
+        content: '您的评论已通过审核',
+        targetType: 'event_comment',
+        targetId: review.targetId,
+      });
+    } else if (review.targetType === 'market_comment') {
+      const comment = await this.prisma.marketComment.update({
+        where: { id: review.targetId },
+        data: { status: 'visible', aiReviewStatus: 'pass' },
+        select: { userId: true, itemId: true },
+      });
+      const item = await this.prisma.marketItem.findUnique({
+        where: { id: comment.itemId },
+        select: { communityId: true },
+      });
+      await this.notificationsService.create({
+        userId: comment.userId,
+        communityId: item?.communityId ?? communityId,
+        type: 'review_result',
+        title: '评论审核通过',
+        content: '您的评论已通过审核',
+        targetType: 'market_comment',
+        targetId: review.targetId,
+      });
     }
     await this.logAudit(adminId, 'approve_review', review.targetType, review.targetId);
     return { id: reviewId, result: 'pass' };
@@ -282,6 +321,45 @@ export class AdminService {
         content: `您发布的商品「${item.title}」未通过审核${reason ? `，原因：${reason}` : ''}`,
         targetType: 'market_item',
         targetId: item.id,
+      });
+    } else if (review.targetType === 'event_comment') {
+      // P-304: 补全评论类型审核
+      const comment = await this.prisma.eventComment.update({
+        where: { id: review.targetId },
+        data: { status: 'hidden', aiReviewStatus: 'reject' },
+        select: { userId: true, eventId: true },
+      });
+      const event = await this.prisma.event.findUnique({
+        where: { id: comment.eventId },
+        select: { communityId: true },
+      });
+      await this.notificationsService.create({
+        userId: comment.userId,
+        communityId: event?.communityId ?? communityId,
+        type: 'review_result',
+        title: '评论审核未通过',
+        content: `您的评论未通过审核${reason ? `，原因：${reason}` : ''}`,
+        targetType: 'event_comment',
+        targetId: review.targetId,
+      });
+    } else if (review.targetType === 'market_comment') {
+      const comment = await this.prisma.marketComment.update({
+        where: { id: review.targetId },
+        data: { status: 'hidden', aiReviewStatus: 'reject' },
+        select: { userId: true, itemId: true },
+      });
+      const item = await this.prisma.marketItem.findUnique({
+        where: { id: comment.itemId },
+        select: { communityId: true },
+      });
+      await this.notificationsService.create({
+        userId: comment.userId,
+        communityId: item?.communityId ?? communityId,
+        type: 'review_result',
+        title: '评论审核未通过',
+        content: `您的评论未通过审核${reason ? `，原因：${reason}` : ''}`,
+        targetType: 'market_comment',
+        targetId: review.targetId,
       });
     }
     await this.logAudit(adminId, 'reject_review', review.targetType, review.targetId, { reason });
@@ -746,10 +824,28 @@ export class AdminService {
   async publishVote(adminId: string, id: string, communityId: string) {
     const vote = await this.prisma.vote.findUnique({
       where: { id },
-      select: { communityId: true },
+      select: { communityId: true, title: true },
     });
     if (!vote || vote.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.vote.update({ where: { id }, data: { status: 'published' } });
+    // P-320: 通知小区成员投票已发布
+    const members = await this.prisma.communityMember.findMany({
+      where: { communityId, verifyStatus: 'verified' },
+      select: { userId: true },
+    });
+    if (members.length > 0) {
+      await this.prisma.notification.createMany({
+        data: members.map((m) => ({
+          userId: m.userId,
+          communityId,
+          type: 'vote',
+          title: '投票已发布',
+          content: `小区投票「${vote.title}」已开始，请参与投票`,
+          targetType: 'vote',
+          targetId: id,
+        })),
+      });
+    }
     await this.logAudit(adminId, 'publish_vote', 'vote', id);
     return { id, status: 'published' };
   }
@@ -757,10 +853,28 @@ export class AdminService {
   async closeVote(adminId: string, id: string, communityId: string) {
     const vote = await this.prisma.vote.findUnique({
       where: { id },
-      select: { communityId: true },
+      select: { communityId: true, title: true },
     });
     if (!vote || vote.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     await this.prisma.vote.update({ where: { id }, data: { status: 'closed' } });
+    // P-320: 通知小区成员投票已结束
+    const members = await this.prisma.communityMember.findMany({
+      where: { communityId, verifyStatus: 'verified' },
+      select: { userId: true },
+    });
+    if (members.length > 0) {
+      await this.prisma.notification.createMany({
+        data: members.map((m) => ({
+          userId: m.userId,
+          communityId,
+          type: 'vote',
+          title: '投票已结束',
+          content: `小区投票「${vote.title}」已结束`,
+          targetType: 'vote',
+          targetId: id,
+        })),
+      });
+    }
     await this.logAudit(adminId, 'close_vote', 'vote', id);
     return { id, status: 'closed' };
   }
@@ -1630,9 +1744,19 @@ export class AdminService {
   async rejectTopic(adminId: string, id: string, communityId: string, reason?: string) {
     const topic = await this.prisma.topic.findUnique({ where: { id } });
     if (!topic || topic.communityId !== communityId) throw new NotFoundException('议题不存在');
+    // P-313: 更新 status 为 rejected 并通知创建者
     const updated = await this.prisma.topic.update({
       where: { id },
-      data: { aiReviewStatus: 'reject' },
+      data: { status: 'rejected', aiReviewStatus: 'reject' },
+    });
+    await this.notificationsService.create({
+      userId: topic.createdBy,
+      communityId,
+      type: 'review_result',
+      title: '议题审核未通过',
+      content: reason ? `您的议题未通过审核，原因：${reason}` : '您的议题未通过审核',
+      targetType: 'topic',
+      targetId: id,
     });
     await this.logAudit(adminId, 'reject_topic', 'topic', id, reason ? { reason } : undefined);
     return updated;
