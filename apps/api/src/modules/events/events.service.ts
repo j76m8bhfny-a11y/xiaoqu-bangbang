@@ -851,7 +851,8 @@ export class EventsService {
     });
 
     if (existing) {
-      throw new BadRequestException('已经感谢过该用户');
+      // P-231: 重复感谢返回 409 Conflict
+      throw new ConflictException('已经感谢过该用户');
     }
 
     const thank = await this.prisma.eventThank.create({

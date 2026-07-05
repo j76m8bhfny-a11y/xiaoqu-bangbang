@@ -469,6 +469,12 @@ export class TopicsService {
   }
 
   async scanMergeSuggestions(communityId: string) {
+    // P-249: 检查 ai_topic_merge 开关
+    const setting = await this.prisma.systemSetting.findUnique({
+      where: { key: 'ai_topic_merge' },
+    });
+    if (setting && setting.value !== 'true') return [];
+
     const topics = await this.prisma.topic.findMany({
       where: { communityId, status: 'open' },
       select: { id: true, title: true, description: true },

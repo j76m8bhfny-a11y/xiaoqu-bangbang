@@ -657,12 +657,13 @@ export class AdminService {
     communityId: string,
     dto: { status: string; content: string; images?: string[]; visibleToPublic?: boolean },
   ) {
-    // P-310: 校验 event 属于当前 admin 的小区
+    // P-310/P-312: event 不存在返回 404，不属于当前小区返回 403
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
       select: { communityId: true },
     });
-    if (!event || event.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    if (!event) throw new NotFoundException('事件不存在');
+    if (event.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     const result = await this.prisma.feedbackProcessLog.create({
       data: {
         eventId,
@@ -1545,15 +1546,16 @@ export class AdminService {
     if (!report || report.communityId !== communityId)
       throw new ForbiddenException('无权操作该资源');
     // Hide the target content
+    // P-315: event/market_item 用 'closed'（schema 无 'hidden'），comment 用 'hidden'
     if (report.targetType === 'event') {
       await this.prisma.event.update({
         where: { id: report.targetId },
-        data: { status: 'hidden' },
+        data: { status: 'closed' },
       });
     } else if (report.targetType === 'market_item') {
       await this.prisma.marketItem.update({
         where: { id: report.targetId },
-        data: { status: 'hidden' },
+        data: { status: 'closed' },
       });
     } else if (report.targetType === 'event_comment') {
       await this.prisma.eventComment.update({
@@ -1800,9 +1802,10 @@ export class AdminService {
       select: { communityId: true },
     });
     if (!item || item.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
-    await this.prisma.marketItem.update({ where: { id }, data: { status: 'hidden' } });
+    // P-315: PRD 要求 status→closed，而非 hidden（schema 无 hidden 枚举值）
+    await this.prisma.marketItem.update({ where: { id }, data: { status: 'closed' } });
     await this.logAudit(adminId, 'hide_market_item', 'market_item', id);
-    return { id, status: 'hidden' };
+    return { id, status: 'closed' };
   }
 
   async restoreMarketItem(adminId: string, id: string, communityId: string) {

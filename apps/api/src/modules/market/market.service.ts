@@ -222,7 +222,7 @@ export class MarketService {
           { imageUrl },
         );
         if (imageResult.result === 'reject') {
-          return await this.prisma.marketItem.create({
+          const rejectedItem = await this.prisma.marketItem.create({
             data: {
               communityId,
               sellerId: userId,
@@ -238,6 +238,12 @@ export class MarketService {
               aiReviewResult: imageResult as any,
             },
           });
+          // P-239: 早返回时也要更新 AI 审核日志的 targetId
+          await this.prisma.aiReviewLog.updateMany({
+            where: { targetType: 'market_item', targetId: tempId },
+            data: { targetId: rejectedItem.id },
+          });
+          return rejectedItem;
         }
         if (imageResult.result === 'manual_review' && aiResult.result !== 'reject') {
           aiResult.result = 'manual_review';

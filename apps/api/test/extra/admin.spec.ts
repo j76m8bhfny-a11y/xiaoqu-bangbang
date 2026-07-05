@@ -639,14 +639,14 @@ describe('Feature: 管理后台（全量）', () => {
       expect(marketItemId).toBeDefined();
     });
 
-    it('POST /admin/market/:id/hide - 应将状态置为 hidden', async () => {
+    it('POST /admin/market/:id/hide - 应将状态置为 closed', async () => {
       const res = await request(app.getHttpServer())
         .post(`/api/v1/admin/market/${marketItemId}/hide`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
       expect(res.body.code).toBe(0);
-      expect(res.body.data.status).toBe('hidden');
+      expect(res.body.data.status).toBe('closed');
     });
 
     it('POST /admin/market/:id/restore - 应恢复为 on_sale', async () => {
