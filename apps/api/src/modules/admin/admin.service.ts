@@ -1398,6 +1398,16 @@ export class AdminService {
       where: { id: reportId },
       data: { status: 'dismissed', handledBy: adminId, handledAt: new Date() },
     });
+    // P-38: 通知举报者处理结果
+    await this.notificationsService.create({
+      userId: report.reporterId,
+      communityId,
+      type: 'system',
+      title: '举报处理结果',
+      content: '您的举报经审核未违规，已驳回处理',
+      targetType: 'report',
+      targetId: reportId,
+    });
     await this.logAudit(adminId, 'dismiss_report', 'report', reportId);
     return updated;
   }
@@ -1431,6 +1441,54 @@ export class AdminService {
     const updated = await this.prisma.report.update({
       where: { id: reportId },
       data: { status: 'takedown', handledBy: adminId, handledAt: new Date() },
+    });
+    // P-38: 通知内容创建者内容被下架
+    let contentOwnerId: string | null = null;
+    if (report.targetType === 'event') {
+      const event = await this.prisma.event.findUnique({
+        where: { id: report.targetId },
+        select: { creatorId: true },
+      });
+      contentOwnerId = event?.creatorId ?? null;
+    } else if (report.targetType === 'market_item') {
+      const item = await this.prisma.marketItem.findUnique({
+        where: { id: report.targetId },
+        select: { sellerId: true },
+      });
+      contentOwnerId = item?.sellerId ?? null;
+    } else if (report.targetType === 'event_comment') {
+      const comment = await this.prisma.eventComment.findUnique({
+        where: { id: report.targetId },
+        select: { userId: true },
+      });
+      contentOwnerId = comment?.userId ?? null;
+    } else if (report.targetType === 'market_comment') {
+      const comment = await this.prisma.marketComment.findUnique({
+        where: { id: report.targetId },
+        select: { userId: true },
+      });
+      contentOwnerId = comment?.userId ?? null;
+    }
+    if (contentOwnerId) {
+      await this.notificationsService.create({
+        userId: contentOwnerId,
+        communityId,
+        type: 'system',
+        title: '内容下架通知',
+        content: `您发布的内容因被举报已被下架${reason ? `，原因：${reason}` : ''}，如有异议请联系管理员`,
+        targetType: report.targetType,
+        targetId: report.targetId,
+      });
+    }
+    // P-38: 通知举报者处理结果
+    await this.notificationsService.create({
+      userId: report.reporterId,
+      communityId,
+      type: 'system',
+      title: '举报处理结果',
+      content: '您的举报已核实，相关内容已被下架处理',
+      targetType: 'report',
+      targetId: reportId,
     });
     await this.logAudit(adminId, 'takedown_report', 'report', reportId, {
       reason,
@@ -1489,6 +1547,16 @@ export class AdminService {
         targetId: report.targetId,
       });
     }
+    // P-38: 通知举报者处理结果
+    await this.notificationsService.create({
+      userId: report.reporterId,
+      communityId,
+      type: 'system',
+      title: '举报处理结果',
+      content: '您的举报已核实，相关用户已收到警告',
+      targetType: 'report',
+      targetId: reportId,
+    });
     await this.logAudit(adminId, 'warn_report', 'report', reportId, { reason, reportedUserId });
     return updated;
   }
@@ -1546,6 +1614,16 @@ export class AdminService {
     const updated = await this.prisma.report.update({
       where: { id: reportId },
       data: { status: 'banned', handledBy: adminId, handledAt: new Date() },
+    });
+    // P-38: 通知举报者处理结果
+    await this.notificationsService.create({
+      userId: report.reporterId,
+      communityId,
+      type: 'system',
+      title: '举报处理结果',
+      content: '您的举报已核实，相关用户已被封禁',
+      targetType: 'report',
+      targetId: reportId,
     });
     await this.logAudit(adminId, 'ban_report', 'report', reportId, { reason, reportedUserId });
     return updated;
