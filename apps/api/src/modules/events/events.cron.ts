@@ -16,10 +16,11 @@ export class EventsCron {
 
     // PRD: 活动仅指新响应(EventApplication 创建)和状态变更，评论/点赞不重置计时器。
     // ponytail: event.updatedAt 会被评论/点赞/toggleLike 更新，不可靠。
-    //           改用 applications.createdAt 判断最后响应时间。
+    //           改用 applications.updatedAt 判断最后响应时间。
+    //           updatedAt 捕捉 selectHelper/selectParticipant 的状态变更（不创建新记录）。
     //           createdAt < 30天前 防止新建无响应事件被误关。
-    //           edge case: processing 状态下选中帮手(更新 application status)不创建新 application，
-    //           可能误关。升级路径: 加 lastActivityAt 字段精确追踪。
+    //           edge case: 帮手确认完成(confirmCompletion)更新的是 confirmation 表不是 application，
+    //           不重置计时器。升级路径: 加 lastActivityAt 字段精确追踪所有互动。
     const staleEvents = await this.prisma.event.findMany({
       where: {
         status: {
@@ -29,7 +30,7 @@ export class EventsCron {
         createdAt: { lt: thirtyDaysAgo },
         applications: {
           none: {
-            createdAt: { gt: thirtyDaysAgo },
+            updatedAt: { gt: thirtyDaysAgo },
           },
         },
       },
