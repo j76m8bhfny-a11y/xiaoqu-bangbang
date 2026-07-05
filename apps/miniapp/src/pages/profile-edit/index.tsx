@@ -14,6 +14,7 @@ export default function ProfileEdit() {
   const [nickname, setNickname] = useState(user?.nickname ?? '');
   const [bio, setBio] = useState(user?.bio ?? '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? '');
+  const [wechatId, setWechatId] = useState((user as any)?.wechatId ?? '');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -120,6 +121,7 @@ export default function ProfileEdit() {
         nickname: nickname.trim(),
         bio: bio.trim() || undefined,
         avatarUrl: avatarUrl || undefined,
+        wechatId: wechatId.trim() || undefined,
       });
       updateUser(result);
       Taro.showToast({ title: '保存成功', icon: 'success' });
@@ -176,9 +178,23 @@ export default function ProfileEdit() {
             autoHeight
           />
         </View>
+
+        <View className="profile-edit__field">
+          <Text className="profile-edit__label">微信号</Text>
+          <Input
+            className="profile-edit__input"
+            placeholder="选填，方便邻居联系你"
+            placeholderClass="profile-edit__placeholder"
+            value={wechatId}
+            onInput={(e) => setWechatId(e.detail.value)}
+            maxlength={50}
+          />
+        </View>
       </View>
 
-      {/* 技能管理 */}
+      {/* 技能管理
+         ponytail: 技能图片上传暂未实现，后端 UserSkill.images 字段已就绪。
+         升级路径：在 skill-form 中添加 Image 上传组件，复用 http.upload。 */}
       <View className="profile-edit__skills">
         <View className="profile-edit__skills-header">
           <Text className="profile-edit__skills-title">我能帮忙</Text>

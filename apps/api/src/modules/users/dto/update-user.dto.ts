@@ -15,4 +15,9 @@ export class UpdateUserDto {
   @IsString()
   @MaxLength(200)
   bio?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  wechatId?: string;
 }

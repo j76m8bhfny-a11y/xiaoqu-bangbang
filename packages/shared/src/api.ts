@@ -105,6 +105,7 @@ export interface UpdateMeRequest {
   nickname?: string;
   avatarUrl?: string;
   bio?: string;
+  wechatId?: string;
 }
 
 // home tab 看板。currentCommunityId 为 null 时其余字段均为零值/空数组。
@@ -1011,5 +1012,6 @@ export interface MatchedSkillDto {
   userId: string;
   userNickname: string;
   userAvatarUrl: string | null;
+  wechatId: string | null;
   similarity: number;
 }

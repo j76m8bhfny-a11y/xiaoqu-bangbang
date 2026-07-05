@@ -305,6 +305,9 @@ export class EventsService {
     if (!event) {
       throw new NotFoundException('事件不存在');
     }
+    if (event.type !== 'help_request') {
+      throw new BadRequestException('仅求助事件支持技能匹配');
+    }
 
     const queryTokens = topicTokenize(`${event.title} ${event.description ?? ''}`);
     if (queryTokens.size === 0) return [];
@@ -324,7 +327,7 @@ export class EventsService {
         title: true,
         description: true,
         userId: true,
-        user: { select: { nickname: true, avatarUrl: true } },
+        user: { select: { nickname: true, avatarUrl: true, wechatId: true } },
       },
     });
     if (skills.length === 0) return [];
@@ -339,6 +342,7 @@ export class EventsService {
           userId: s.userId,
           userNickname: s.user.nickname,
           userAvatarUrl: s.user.avatarUrl,
+          wechatId: s.user.wechatId,
           similarity: topicJaccard(queryTokens, tokens),
         };
       })

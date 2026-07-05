@@ -674,6 +674,9 @@ export default function EventDetail() {
                   {s.description && (
                     <Text className="event-detail__matched-skill-desc">{s.description}</Text>
                   )}
+                  {s.wechatId && (
+                    <Text className="event-detail__matched-skill-wechat">微信: {s.wechatId}</Text>
+                  )}
                 </View>
               </View>
             ))}

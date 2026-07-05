@@ -740,6 +740,13 @@
     margin-top: 2px;
   }
 
+  &__matched-skill-wechat {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-primary;
+    margin-top: 4px;
+  }
+
   &__feedback-header {
     display: block;
     font-size: $font-size-md;

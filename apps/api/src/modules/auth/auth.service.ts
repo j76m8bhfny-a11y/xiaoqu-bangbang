@@ -80,11 +80,14 @@ export class AuthService {
     };
   }
 
-  async updateMe(userId: string, data: { nickname?: string; avatarUrl?: string; bio?: string }) {
+  async updateMe(
+    userId: string,
+    data: { nickname?: string; avatarUrl?: string; bio?: string; wechatId?: string },
+  ) {
     return this.prisma.user.update({
       where: { id: userId },
       data,
-      select: { id: true, nickname: true, avatarUrl: true, bio: true },
+      select: { id: true, nickname: true, avatarUrl: true, bio: true, wechatId: true },
     });
   }
 
