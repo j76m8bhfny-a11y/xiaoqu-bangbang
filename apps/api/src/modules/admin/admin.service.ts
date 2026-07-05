@@ -38,14 +38,21 @@ export class AdminService {
     return this.prisma.badge.findMany({ where: { status: 'active' } });
   }
 
-  async createBadge(dto: {
-    code: string;
-    name: string;
-    description: string;
-    iconUrl: string;
-    ruleJson?: any;
-  }) {
-    return this.prisma.badge.create({ data: { ...dto, ruleJson: dto.ruleJson ?? {} } });
+  async createBadge(
+    adminId: string,
+    dto: {
+      code: string;
+      name: string;
+      description: string;
+      iconUrl: string;
+      ruleJson?: any;
+    },
+  ) {
+    const result = await this.prisma.badge.create({
+      data: { ...dto, ruleJson: dto.ruleJson ?? {} },
+    });
+    await this.logAudit(adminId, 'create_badge', 'badge', result.id, dto);
+    return result;
   }
 
   async awardBadge(
@@ -55,7 +62,7 @@ export class AdminService {
     adminId: string,
     reason?: string,
   ) {
-    return this.prisma.userBadge.create({
+    const result = await this.prisma.userBadge.create({
       data: {
         userId,
         badgeId,
@@ -64,6 +71,8 @@ export class AdminService {
         awardedBy: adminId,
       },
     });
+    await this.logAudit(adminId, 'award_badge', 'badge', badgeId, { userId, reason });
+    return result;
   }
 
   async getDashboard(communityId: string) {
@@ -631,7 +640,7 @@ export class AdminService {
       select: { communityId: true },
     });
     if (!event || event.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
-    return this.prisma.feedbackProcessLog.create({
+    const result = await this.prisma.feedbackProcessLog.create({
       data: {
         eventId,
         operatorId: adminId,
@@ -642,6 +651,8 @@ export class AdminService {
         visibleToPublic: dto.visibleToPublic ?? true,
       },
     });
+    await this.logAudit(adminId, 'add_feedback_log', 'event', eventId, dto);
+    return result;
   }
 
   // === Committee Management ===
@@ -659,15 +670,19 @@ export class AdminService {
   }
 
   async createCommitteeMember(
+    adminId: string,
     communityId: string,
     dto: { name: string; position: string; avatarUrl?: string; responsibility?: string },
   ) {
-    return this.prisma.committeeMember.create({
+    const result = await this.prisma.committeeMember.create({
       data: { communityId, ...dto, claimStatus: 'unclaimed' },
     });
+    await this.logAudit(adminId, 'create_committee_member', 'committee_member', result.id, dto);
+    return result;
   }
 
   async updateCommitteeMember(
+    adminId: string,
     id: string,
     dto: Partial<{ name: string; position: string; avatarUrl: string; responsibility: string }>,
     communityId: string,
@@ -678,7 +693,9 @@ export class AdminService {
     });
     if (!member || member.communityId !== communityId)
       throw new ForbiddenException('无权操作该资源');
-    return this.prisma.committeeMember.update({ where: { id }, data: dto });
+    const result = await this.prisma.committeeMember.update({ where: { id }, data: dto });
+    await this.logAudit(adminId, 'update_committee_member', 'committee_member', id, dto);
+    return result;
   }
 
   async deleteCommitteeMember(adminId: string, id: string, communityId: string) {
@@ -775,7 +792,7 @@ export class AdminService {
     if (dto.options && dto.options.length > 30) {
       throw new BadRequestException('选项不能超过30个');
     }
-    return this.prisma.vote.create({
+    const result = await this.prisma.vote.create({
       data: {
         communityId,
         title: dto.title,
@@ -794,9 +811,12 @@ export class AdminService {
       },
       include: { options: true },
     });
+    await this.logAudit(adminId, 'create_vote', 'vote', result.id, dto);
+    return result;
   }
 
   async updateVote(
+    adminId: string,
     id: string,
     dto: Partial<{
       title: string;
@@ -818,7 +838,9 @@ export class AdminService {
       select: { communityId: true },
     });
     if (!vote || vote.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
-    return this.prisma.vote.update({ where: { id }, data: dto });
+    const result = await this.prisma.vote.update({ where: { id }, data: dto });
+    await this.logAudit(adminId, 'update_vote', 'vote', id, dto);
+    return result;
   }
 
   async publishVote(adminId: string, id: string, communityId: string) {
@@ -919,22 +941,25 @@ export class AdminService {
     return this.prisma.banner.count({ where });
   }
 
-  async createBanner(dto: {
-    communityId?: string;
-    title: string;
-    subtitle?: string;
-    imageUrl: string;
-    linkType?: string;
-    linkId?: string;
-    linkUrl?: string;
-    position?: string;
-    sortOrder?: number;
-    startAt?: string;
-    endAt?: string;
-  }) {
+  async createBanner(
+    adminId: string,
+    dto: {
+      communityId?: string;
+      title: string;
+      subtitle?: string;
+      imageUrl: string;
+      linkType?: string;
+      linkId?: string;
+      linkUrl?: string;
+      position?: string;
+      sortOrder?: number;
+      startAt?: string;
+      endAt?: string;
+    },
+  ) {
     this.assertMaxLength('标题', dto.title, 30);
     this.assertMaxLength('副标题', dto.subtitle, 30);
-    return this.prisma.banner.create({
+    const result = await this.prisma.banner.create({
       data: {
         communityId: dto.communityId,
         title: dto.title,
@@ -950,9 +975,12 @@ export class AdminService {
         endAt: dto.endAt ? new Date(dto.endAt) : null,
       },
     });
+    await this.logAudit(adminId, 'create_banner', 'banner', result.id, dto);
+    return result;
   }
 
   async updateBanner(
+    adminId: string,
     id: string,
     dto: Partial<{ title: string; subtitle: string; imageUrl: string; sortOrder: number }>,
   ) {
@@ -960,7 +988,9 @@ export class AdminService {
     this.assertMaxLength('副标题', dto.subtitle, 30);
     const banner = await this.prisma.banner.findUnique({ where: { id } });
     if (!banner) throw new ForbiddenException('无权操作该资源');
-    return this.prisma.banner.update({ where: { id }, data: dto });
+    const result = await this.prisma.banner.update({ where: { id }, data: dto });
+    await this.logAudit(adminId, 'update_banner', 'banner', id, dto);
+    return result;
   }
 
   async publishBanner(adminId: string, id: string) {
@@ -994,6 +1024,7 @@ export class AdminService {
   }
 
   async createServiceProvider(
+    adminId: string,
     communityId: string,
     dto: {
       name: string;
@@ -1009,7 +1040,7 @@ export class AdminService {
   ) {
     this.assertMaxLength('名称', dto.name, 30);
     this.assertMaxLength('描述', dto.description, 500);
-    return this.prisma.serviceProvider.create({
+    const result = await this.prisma.serviceProvider.create({
       data: {
         communityId,
         name: dto.name,
@@ -1024,9 +1055,12 @@ export class AdminService {
         status: 'pending_review',
       },
     });
+    await this.logAudit(adminId, 'create_service_provider', 'service_provider', result.id, dto);
+    return result;
   }
 
   async updateServiceProvider(
+    adminId: string,
     id: string,
     dto: Partial<{ name: string; category: string; description: string; sortOrder: number }>,
   ) {
@@ -1034,7 +1068,9 @@ export class AdminService {
     this.assertMaxLength('描述', dto.description, 500);
     const provider = await this.prisma.serviceProvider.findUnique({ where: { id } });
     if (!provider) throw new ForbiddenException('无权操作该资源');
-    return this.prisma.serviceProvider.update({ where: { id }, data: dto });
+    const result = await this.prisma.serviceProvider.update({ where: { id }, data: dto });
+    await this.logAudit(adminId, 'update_service_provider', 'service_provider', id, dto);
+    return result;
   }
 
   async publishServiceProvider(adminId: string, id: string) {
@@ -1068,7 +1104,7 @@ export class AdminService {
   }
 
   // === Rankings & Badges ===
-  async recalculateRankings(communityId: string) {
+  async recalculateRankings(adminId: string, communityId: string) {
     const now = new Date();
     const periodKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -1161,6 +1197,7 @@ export class AdminService {
       });
     }
 
+    await this.logAudit(adminId, 'recalculate_rankings', 'community', communityId, null);
     return { recalculated: totalSorted.length, periodKey };
   }
 
@@ -1198,7 +1235,7 @@ export class AdminService {
   ) {
     this.assertMaxLength('标题', dto.title, 50);
     this.assertMaxLength('内容', dto.content, 2000);
-    return this.prisma.committeeAnnouncement.create({
+    const result = await this.prisma.committeeAnnouncement.create({
       data: {
         communityId,
         title: dto.title,
@@ -1208,9 +1245,12 @@ export class AdminService {
         status: 'draft',
       },
     });
+    await this.logAudit(adminId, 'create_announcement', 'announcement', result.id, dto);
+    return result;
   }
 
   async updateAnnouncement(
+    adminId: string,
     id: string,
     dto: Partial<{ title: string; content: string; isPinned: boolean; status: string }>,
     communityId: string,
@@ -1223,7 +1263,9 @@ export class AdminService {
     });
     if (!announcement || announcement.communityId !== communityId)
       throw new ForbiddenException('无权操作该资源');
-    return this.prisma.committeeAnnouncement.update({ where: { id }, data: dto });
+    const result = await this.prisma.committeeAnnouncement.update({ where: { id }, data: dto });
+    await this.logAudit(adminId, 'update_announcement', 'announcement', id, dto);
+    return result;
   }
 
   // === Audit Logs ===
@@ -1272,13 +1314,16 @@ export class AdminService {
   }
 
   async updateShareTemplate(
+    adminId: string,
     id: string,
     dto: { titleTemplate?: string; defaultImageUrl?: string; status?: string },
   ) {
-    return this.prisma.shareTemplate.update({
+    const result = await this.prisma.shareTemplate.update({
       where: { id },
       data: dto,
     });
+    await this.logAudit(adminId, 'update_share_template', 'share_template', id, dto);
+    return result;
   }
 
   // === Social Groups ===
@@ -1296,6 +1341,7 @@ export class AdminService {
   }
 
   async createSocialGroup(
+    adminId: string,
     communityId: string,
     dto: {
       title: string;
@@ -1306,7 +1352,7 @@ export class AdminService {
       sortOrder?: number;
     },
   ) {
-    return this.prisma.communitySocialGroup.create({
+    const result = await this.prisma.communitySocialGroup.create({
       data: {
         communityId,
         title: dto.title,
@@ -1318,9 +1364,12 @@ export class AdminService {
         status: 'active',
       },
     });
+    await this.logAudit(adminId, 'create_social_group', 'social_group', result.id, dto);
+    return result;
   }
 
   async updateSocialGroup(
+    adminId: string,
     id: string,
     communityId: string,
     dto: Partial<{
@@ -1339,7 +1388,9 @@ export class AdminService {
       select: { communityId: true },
     });
     if (!group || group.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
-    return this.prisma.communitySocialGroup.update({ where: { id }, data: dto });
+    const result = await this.prisma.communitySocialGroup.update({ where: { id }, data: dto });
+    await this.logAudit(adminId, 'update_social_group', 'social_group', id, dto);
+    return result;
   }
 
   async deleteSocialGroup(adminId: string, id: string, communityId: string) {

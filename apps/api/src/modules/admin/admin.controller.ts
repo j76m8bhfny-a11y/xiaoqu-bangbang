@@ -222,21 +222,23 @@ export class AdminController {
 
   @Post('committee/members')
   async createCommitteeMember(
+    @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
     @Body() body: { name: string; position: string; avatarUrl?: string; responsibility?: string },
   ) {
-    const data = await this.adminService.createCommitteeMember(communityId, body);
+    const data = await this.adminService.createCommitteeMember(userId, communityId, body);
     return { code: 0, message: 'ok', data };
   }
 
   @Patch('committee/members/:id')
   async updateCommitteeMember(
+    @CurrentUser('userId') userId: string,
     @Param('id') id: string,
     @Body()
     body: Partial<{ name: string; position: string; avatarUrl: string; responsibility: string }>,
     @CurrentCommunityId() communityId: string,
   ) {
-    const data = await this.adminService.updateCommitteeMember(id, body, communityId);
+    const data = await this.adminService.updateCommitteeMember(userId, id, body, communityId);
     return { code: 0, message: 'ok', data };
   }
 
@@ -312,11 +314,12 @@ export class AdminController {
 
   @Patch('committee/announcements/:id')
   async updateAnnouncement(
+    @CurrentUser('userId') userId: string,
     @Param('id') id: string,
     @Body() body: Partial<{ title: string; content: string; isPinned: boolean; status: string }>,
     @CurrentCommunityId() communityId: string,
   ) {
-    const data = await this.adminService.updateAnnouncement(id, body, communityId);
+    const data = await this.adminService.updateAnnouncement(userId, id, body, communityId);
     return { code: 0, message: 'ok', data };
   }
 
@@ -359,6 +362,7 @@ export class AdminController {
 
   @Patch('votes/:id')
   async updateVote(
+    @CurrentUser('userId') userId: string,
     @Param('id') id: string,
     @Body()
     body: Partial<{
@@ -374,7 +378,7 @@ export class AdminController {
     }>,
     @CurrentCommunityId() communityId: string,
   ) {
-    const data = await this.adminService.updateVote(id, body, communityId);
+    const data = await this.adminService.updateVote(userId, id, body, communityId);
     return { code: 0, message: 'ok', data };
   }
 
@@ -422,6 +426,7 @@ export class AdminController {
   @Post('banners')
   @PlatformAdminOnly()
   async createBanner(
+    @CurrentUser('userId') userId: string,
     @Body()
     body: {
       communityId?: string;
@@ -437,17 +442,18 @@ export class AdminController {
       endAt?: string;
     },
   ) {
-    const data = await this.adminService.createBanner(body);
+    const data = await this.adminService.createBanner(userId, body);
     return { code: 0, message: 'ok', data };
   }
 
   @Patch('banners/:id')
   @PlatformAdminOnly()
   async updateBanner(
+    @CurrentUser('userId') userId: string,
     @Param('id') id: string,
     @Body() body: Partial<{ title: string; subtitle: string; imageUrl: string; sortOrder: number }>,
   ) {
-    const data = await this.adminService.updateBanner(id, body);
+    const data = await this.adminService.updateBanner(userId, id, body);
     return { code: 0, message: 'ok', data };
   }
 
@@ -483,6 +489,7 @@ export class AdminController {
   @Post('service-providers')
   @PlatformAdminOnly()
   async createServiceProvider(
+    @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
     @Body()
     body: {
@@ -497,18 +504,19 @@ export class AdminController {
       sortOrder?: number;
     },
   ) {
-    const data = await this.adminService.createServiceProvider(communityId, body);
+    const data = await this.adminService.createServiceProvider(userId, communityId, body);
     return { code: 0, message: 'ok', data };
   }
 
   @Patch('service-providers/:id')
   @PlatformAdminOnly()
   async updateServiceProvider(
+    @CurrentUser('userId') userId: string,
     @Param('id') id: string,
     @Body()
     body: Partial<{ name: string; category: string; description: string; sortOrder: number }>,
   ) {
-    const data = await this.adminService.updateServiceProvider(id, body);
+    const data = await this.adminService.updateServiceProvider(userId, id, body);
     return { code: 0, message: 'ok', data };
   }
 
@@ -560,6 +568,7 @@ export class AdminController {
 
   @Post('badges')
   async createBadge(
+    @CurrentUser('userId') userId: string,
     @Body()
     body: {
       code: string;
@@ -569,7 +578,7 @@ export class AdminController {
       ruleJson?: any;
     },
   ) {
-    const data = await this.adminService.createBadge(body);
+    const data = await this.adminService.createBadge(userId, body);
     return { code: 0, message: 'ok', data };
   }
 
@@ -591,8 +600,11 @@ export class AdminController {
   }
 
   @Post('rankings/recalculate')
-  async recalculateRankings(@CurrentCommunityId() communityId: string) {
-    const data = await this.adminService.recalculateRankings(communityId);
+  async recalculateRankings(
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.recalculateRankings(userId, communityId);
     return { code: 0, message: 'ok', data };
   }
 
@@ -633,8 +645,12 @@ export class AdminController {
   }
 
   @Patch('share-templates/:id')
-  async updateShareTemplate(@Param('id') id: string, @Body() dto: UpdateShareTemplateDto) {
-    const data = await this.adminService.updateShareTemplate(id, dto);
+  async updateShareTemplate(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateShareTemplateDto,
+  ) {
+    const data = await this.adminService.updateShareTemplate(userId, id, dto);
     return { code: 0, message: 'ok', data };
   }
 
@@ -655,6 +671,7 @@ export class AdminController {
 
   @Post('community-social-groups')
   async createSocialGroup(
+    @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
     @Body()
     body: {
@@ -666,12 +683,13 @@ export class AdminController {
       sortOrder?: number;
     },
   ) {
-    const data = await this.adminService.createSocialGroup(communityId, body);
+    const data = await this.adminService.createSocialGroup(userId, communityId, body);
     return { code: 0, message: 'ok', data };
   }
 
   @Patch('community-social-groups/:id')
   async updateSocialGroup(
+    @CurrentUser('userId') userId: string,
     @Param('id') id: string,
     @CurrentCommunityId() communityId: string,
     @Body()
@@ -685,7 +703,7 @@ export class AdminController {
       status: string;
     }>,
   ) {
-    const data = await this.adminService.updateSocialGroup(id, communityId, body);
+    const data = await this.adminService.updateSocialGroup(userId, id, communityId, body);
     return { code: 0, message: 'ok', data };
   }
 
