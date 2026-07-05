@@ -166,11 +166,14 @@ export class MarketService {
     });
 
     if (existing) {
-      await this.prisma.marketLike.delete({ where: { id: existing.id } });
-      const updated = await this.prisma.marketItem.update({
-        where: { id: itemId },
-        data: { likeCount: { decrement: 1 } },
-      });
+      // P-242: delete + decrement 放入事务
+      const [, updated] = await this.prisma.$transaction([
+        this.prisma.marketLike.delete({ where: { id: existing.id } }),
+        this.prisma.marketItem.update({
+          where: { id: itemId },
+          data: { likeCount: { decrement: 1 } },
+        }),
+      ]);
       return { liked: false, likeCount: updated.likeCount };
     }
 

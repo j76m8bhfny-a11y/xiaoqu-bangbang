@@ -23,8 +23,18 @@ export class RankingsService {
 
     // 1. Helper contribution record (if helper exists)
     if (helperId) {
-      await this.prisma.contributionRecord.create({
-        data: {
+      // P-276: 使用 upsert 防止重复记录
+      await this.prisma.contributionRecord.upsert({
+        where: {
+          userId_sourceType_sourceId_action: {
+            userId: helperId,
+            sourceType: 'event',
+            sourceId: event.id,
+            action,
+          },
+        },
+        update: {},
+        create: {
           userId: helperId,
           communityId: event.communityId,
           sourceType: 'event',
@@ -41,8 +51,18 @@ export class RankingsService {
     // 2. Creator contribution record (Standard M10.5: public_welfare 创建者 5 朵)
     const creatorFlowers = this.getCreatorFlowerCount(event.type);
     if (creatorFlowers > 0) {
-      await this.prisma.contributionRecord.create({
-        data: {
+      // P-276: 使用 upsert 防止重复记录
+      await this.prisma.contributionRecord.upsert({
+        where: {
+          userId_sourceType_sourceId_action: {
+            userId: event.creatorId,
+            sourceType: 'event',
+            sourceId: event.id,
+            action,
+          },
+        },
+        update: {},
+        create: {
           userId: event.creatorId,
           communityId: event.communityId,
           sourceType: 'event',
@@ -108,8 +128,18 @@ export class RankingsService {
     const flowerCount = 1;
 
     // 1. Creator contribution record
-    await this.prisma.contributionRecord.create({
-      data: {
+    // P-276: 使用 upsert 防止重复记录
+    await this.prisma.contributionRecord.upsert({
+      where: {
+        userId_sourceType_sourceId_action: {
+          userId: event.creatorId,
+          sourceType: 'event',
+          sourceId: event.id,
+          action: 'feedback',
+        },
+      },
+      update: {},
+      create: {
         userId: event.creatorId,
         communityId: event.communityId,
         sourceType: 'event',
@@ -154,8 +184,18 @@ export class RankingsService {
     if (topic.aiReviewStatus !== 'pass') return;
 
     const flowerCount = 1;
-    await this.prisma.contributionRecord.create({
-      data: {
+    // P-276: 使用 upsert 防止重复记录
+    await this.prisma.contributionRecord.upsert({
+      where: {
+        userId_sourceType_sourceId_action: {
+          userId: topic.createdBy,
+          sourceType: 'topic',
+          sourceId: topic.id,
+          action: 'topic',
+        },
+      },
+      update: {},
+      create: {
         userId: topic.createdBy,
         communityId: topic.communityId,
         sourceType: 'topic',

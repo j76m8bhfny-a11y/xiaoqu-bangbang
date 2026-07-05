@@ -38,19 +38,20 @@ export class CommunitiesService {
       throw new NotFoundException('小区不存在');
     }
 
-    // 确保用户与该小区有关系
-    const existing = await this.prisma.communityMember.findUnique({
-      where: { userId_communityId: { userId, communityId } },
-    });
-    if (!existing) {
-      await this.prisma.communityMember.create({
-        data: { userId, communityId, role: 'resident', verifyStatus: 'unverified' },
+    // P-211: create + update 放入事务
+    await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.communityMember.findUnique({
+        where: { userId_communityId: { userId, communityId } },
       });
-    }
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { currentCommunityId: communityId },
+      if (!existing) {
+        await tx.communityMember.create({
+          data: { userId, communityId, role: 'resident', verifyStatus: 'unverified' },
+        });
+      }
+      await tx.user.update({
+        where: { id: userId },
+        data: { currentCommunityId: communityId },
+      });
     });
 
     return { currentCommunityId: communityId, communityName: community.name };

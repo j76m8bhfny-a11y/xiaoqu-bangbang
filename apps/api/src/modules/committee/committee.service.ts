@@ -196,19 +196,25 @@ export class CommitteeService {
     });
 
     if (existing) {
-      await this.prisma.announcementLike.delete({ where: { id: existing.id } });
-      const updated = await this.prisma.committeeAnnouncement.update({
-        where: { id: announcementId },
-        data: { likeCount: { decrement: 1 } },
-      });
+      // P-264: delete + decrement 放入事务
+      const [, updated] = await this.prisma.$transaction([
+        this.prisma.announcementLike.delete({ where: { id: existing.id } }),
+        this.prisma.committeeAnnouncement.update({
+          where: { id: announcementId },
+          data: { likeCount: { decrement: 1 } },
+        }),
+      ]);
       return { liked: false, likeCount: updated.likeCount };
     }
 
-    await this.prisma.announcementLike.create({ data: { announcementId, userId } });
-    const updated = await this.prisma.committeeAnnouncement.update({
-      where: { id: announcementId },
-      data: { likeCount: { increment: 1 } },
-    });
+    // P-264: create + increment 放入事务
+    const [, updated] = await this.prisma.$transaction([
+      this.prisma.announcementLike.create({ data: { announcementId, userId } }),
+      this.prisma.committeeAnnouncement.update({
+        where: { id: announcementId },
+        data: { likeCount: { increment: 1 } },
+      }),
+    ]);
     return { liked: true, likeCount: updated.likeCount };
   }
 }
