@@ -738,6 +738,30 @@
     font-weight: $font-weight-medium;
   }
 
+  &__participant-actions {
+    display: flex;
+    gap: $spacing-xs;
+    flex-shrink: 0;
+  }
+
+  &__participant-action-btn {
+    padding: 6px 14px;
+    border-radius: $radius-pill;
+    flex-shrink: 0;
+
+    &:active {
+      opacity: 0.7;
+    }
+
+    &--thanks {
+      background: #fff0f0;
+    }
+
+    &--rate {
+      background: $color-bg-green;
+    }
+  }
+
   &__select-helper-btn {
     display: flex;
     align-items: center;

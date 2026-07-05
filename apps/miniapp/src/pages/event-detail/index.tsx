@@ -112,6 +112,8 @@ export default function EventDetail() {
   const [ratingContent, setRatingContent] = useState('');
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
   const [hasRated, setHasRated] = useState(false);
+  // 多帮手事件: 创建者选择要评价的参与者
+  const [ratingTargetUserId, setRatingTargetUserId] = useState<string | null>(null);
 
   // Applications / participants
   const { data: applicationsData } = useRequest<{ items: EventApplicationDto[] }>(
@@ -331,21 +333,28 @@ export default function EventDetail() {
     }
   }, [id, submitting, refresh]);
 
-  const handleThanks = useCallback(async () => {
-    if (!id || submitting) return;
-    try {
-      await eventService.sendThanks(id);
-      Taro.showToast({ title: '已送花感谢', icon: 'success' });
-      refresh();
-    } catch {
-      Taro.showToast({ title: '操作失败', icon: 'none' });
-    }
-  }, [id, submitting, refresh]);
+  const handleThanks = useCallback(
+    async (toUserId?: string) => {
+      if (!id || submitting) return;
+      try {
+        await eventService.sendThanks(id, toUserId);
+        Taro.showToast({ title: '已送花感谢', icon: 'success' });
+        refresh();
+      } catch (e: any) {
+        const msg = e?.message ?? '操作失败';
+        Taro.showToast({ title: msg, icon: 'none' });
+      }
+    },
+    [id, submitting, refresh],
+  );
 
   const handleRateHelper = useCallback(async () => {
     if (!id || !event || ratingSubmitting) return;
     const isCreator = !!user?.id && user.id === event.creatorId;
-    const targetUserId = isCreator ? event.selectedHelperId : event.creatorId;
+    // 单帮手: creator → selectedHelperId; 多帮手: creator → ratingTargetUserId
+    const targetUserId = isCreator
+      ? (event.selectedHelperId ?? ratingTargetUserId)
+      : event.creatorId;
     if (!targetUserId || ratingStars < 1) {
       Taro.showToast({ title: '请选择星级', icon: 'none' });
       return;
@@ -360,10 +369,12 @@ export default function EventDetail() {
       });
       Taro.showToast({ title: '评价成功', icon: 'success' });
       setHasRated(true);
+      setRatingTargetUserId(null);
     } catch (e: any) {
       const msg = e?.message ?? '';
       if (msg.includes('已评价过')) {
         setHasRated(true);
+        setRatingTargetUserId(null);
         Taro.showToast({ title: '已评价过', icon: 'none' });
       } else {
         Taro.showToast({ title: msg || '评价失败', icon: 'none' });
@@ -371,7 +382,16 @@ export default function EventDetail() {
     } finally {
       setRatingSubmitting(false);
     }
-  }, [id, event, user, ratingStars, selectedTags, ratingContent, ratingSubmitting]);
+  }, [
+    id,
+    event,
+    user,
+    ratingStars,
+    selectedTags,
+    ratingContent,
+    ratingSubmitting,
+    ratingTargetUserId,
+  ]);
 
   const handleReport = useCallback(async () => {
     if (!id) return;
@@ -402,8 +422,17 @@ export default function EventDetail() {
   const typeConfig = EVENT_TYPE_CONFIG[event.type] ?? EVENT_TYPE_CONFIG.discussion;
   const statusLabel = EVENT_STATUS_LABELS[event.status] ?? event.status;
   const isCreator = !!user?.id && user.id === event.creatorId;
-  const isHelper = !!user?.id && !!event.selectedHelperId && user.id === event.selectedHelperId;
-  const rateTargetUserId = isCreator ? event.selectedHelperId : isHelper ? event.creatorId : null;
+  const participants = event.participants ?? [];
+  const isHelper =
+    (!!user?.id && !!event.selectedHelperId && user.id === event.selectedHelperId) ||
+    (!!user?.id && participants.some((p) => p.userId === user.id));
+  // 单帮手: creator→selectedHelperId, helper→creatorId
+  // 多帮手: creator→null(需选参与者), participant→creatorId
+  const rateTargetUserId = isCreator
+    ? (event.selectedHelperId ?? ratingTargetUserId)
+    : isHelper
+      ? event.creatorId
+      : null;
   const interactionDisabled =
     event.status === EventStatus.CLOSED ||
     event.status === EventStatus.REJECTED ||
@@ -412,7 +441,6 @@ export default function EventDetail() {
   const isMultiHelperType =
     event.type === EventType.PUBLIC_WELFARE || event.type === EventType.LOST_FOUND;
   const isPublicFeedback = event.type === EventType.PUBLIC_FEEDBACK;
-  const participants = event.participants ?? [];
 
   return (
     <View className="event-detail">
@@ -644,6 +672,31 @@ export default function EventDetail() {
                       </Text>
                     </View>
                   )}
+                {isCreator &&
+                  p.status === 'confirmed' &&
+                  event.status === EventStatus.COMPLETED &&
+                  p.userId && (
+                    <View className="event-detail__participant-actions">
+                      <View
+                        className="event-detail__participant-action-btn event-detail__participant-action-btn--thanks"
+                        onClick={() => handleThanks(p.userId)}
+                      >
+                        <Text className="event-detail__participant-action-text">🌸 送花</Text>
+                      </View>
+                      <View
+                        className="event-detail__participant-action-btn event-detail__participant-action-btn--rate"
+                        onClick={() => {
+                          setRatingTargetUserId(p.userId);
+                          setRatingStars(0);
+                          setSelectedTags([]);
+                          setRatingContent('');
+                          setHasRated(false);
+                        }}
+                      >
+                        <Text className="event-detail__participant-action-text">⭐ 评价</Text>
+                      </View>
+                    </View>
+                  )}
               </View>
             ))}
           </View>
@@ -826,10 +879,10 @@ export default function EventDetail() {
                 </Text>
               </View>
             )}
-          {isCreator && event.status === EventStatus.COMPLETED && (
+          {isCreator && !isMultiHelperType && event.status === EventStatus.COMPLETED && (
             <View
               className="event-detail__lifecycle-btn event-detail__lifecycle-btn--thanks"
-              onClick={handleThanks}
+              onClick={() => handleThanks()}
             >
               <Text className="event-detail__lifecycle-btn-text" style={{ color: '#FF6B6B' }}>
                 🌸 送花感谢

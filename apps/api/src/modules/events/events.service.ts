@@ -1111,6 +1111,17 @@ export class EventsService {
       throw new BadRequestException('不能感谢自己');
     }
 
+    // 多帮手事件(selectedHelperId 为 null): 校验 toUserId 是该事件的 confirmed participant
+    if (toUserId && !event.selectedHelperId) {
+      const participant = await this.prisma.eventParticipant.findFirst({
+        where: { eventId, userId: toUserId, status: 'confirmed' },
+        select: { id: true },
+      });
+      if (!participant) {
+        throw new BadRequestException('感谢对象不是该事件的已确认参与者');
+      }
+    }
+
     const existing = await this.prisma.eventThank.findUnique({
       where: {
         eventId_fromUserId_toUserId: { eventId, fromUserId, toUserId: targetUserId },
@@ -1260,17 +1271,43 @@ export class EventsService {
     // Only creator or helper can rate
     const isCreator = event.creatorId === userId;
     const isHelper = event.selectedHelperId === userId;
+    // 多帮手事件: 检查 EventParticipant 表是否存在记录
     if (!isCreator && !isHelper) {
-      throw new ForbiddenException('只有事件参与者可以评价');
+      const participant = await this.prisma.eventParticipant.findFirst({
+        where: { eventId, userId },
+        select: { id: true },
+      });
+      if (!participant) {
+        throw new ForbiddenException('只有事件参与者可以评价');
+      }
     }
 
     // targetUserId must be the other participant
-    const validTarget = isCreator ? event.selectedHelperId : event.creatorId;
+    let validTarget: string | null;
+    if (isCreator) {
+      if (event.selectedHelperId) {
+        // 单帮手: 评价 selectedHelperId
+        validTarget = event.selectedHelperId;
+      } else {
+        // 多帮手: dto.targetUserId 必须是 confirmed participant
+        const participant = await this.prisma.eventParticipant.findFirst({
+          where: { eventId, userId: dto.targetUserId, status: 'confirmed' },
+          select: { id: true },
+        });
+        validTarget = participant ? dto.targetUserId : null;
+      }
+    } else {
+      // helper/participant 评价创建者
+      validTarget = event.creatorId;
+    }
     if (dto.targetUserId !== validTarget) {
       throw new BadRequestException('评价目标用户无效');
     }
 
-    // P-229: 禁止覆盖已有评价
+    // ponytail: 当前 schema 的 @@unique([eventId, userId, role]) 限制创建者只能存一条评价记录。
+    //           多帮手事件创建者评价 = 整体帮手体验评价（一条）。
+    //           升级路径: 加 targetUserId 字段 + 改 unique 约束为 [eventId, userId, role, targetUserId]，
+    //           支持创建者对每个参与者分别评价。
     const role = isCreator ? 'creator' : 'helper';
     const existing = await this.prisma.eventCompletionConfirmation.findUnique({
       where: { eventId_userId_role: { eventId, userId, role } },

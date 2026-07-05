@@ -57,7 +57,8 @@ export const eventService = {
 
   toggleLike: (eventId: string) => http.post<{ liked: boolean }>(`/events/${eventId}/like`),
 
-  sendThanks: (eventId: string) => http.post<void>(`/events/${eventId}/thanks`),
+  sendThanks: (eventId: string, toUserId?: string) =>
+    http.post<void>(`/events/${eventId}/thanks`, toUserId ? { toUserId } : undefined),
 
   toggleFavorite: (eventId: string) =>
     http.post<{ favorited: boolean }>(`/events/${eventId}/favorite`),
