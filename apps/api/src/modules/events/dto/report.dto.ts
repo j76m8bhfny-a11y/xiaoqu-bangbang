@@ -9,7 +9,16 @@ export class ReportDto {
   @MaxLength(500)
   description?: string;
 
-  @IsEnum(['event', 'event_comment', 'market_item', 'market_comment', 'user'])
+  @IsEnum([
+    'event',
+    'event_comment',
+    'market_item',
+    'market_comment',
+    'user',
+    'topic',
+    'topic_comment',
+    'vote',
+  ])
   targetType: string;
 
   @IsUUID()

@@ -927,6 +927,30 @@ export class EventsService {
         select: { currentCommunityId: true },
       });
       communityId = reporter?.currentCommunityId ?? null;
+    } else if (dto.targetType === 'topic') {
+      // P-232: topic 举报
+      const topic = await this.prisma.topic.findUnique({
+        where: { id: dto.targetId },
+        select: { communityId: true },
+      });
+      if (!topic) throw new NotFoundException('举报目标不存在');
+      communityId = topic.communityId;
+    } else if (dto.targetType === 'topic_comment') {
+      // P-232: topic_comment 举报
+      const comment = await this.prisma.topicComment.findUnique({
+        where: { id: dto.targetId },
+        select: { topic: { select: { communityId: true } } },
+      });
+      if (!comment) throw new NotFoundException('举报目标不存在');
+      communityId = comment.topic.communityId;
+    } else if (dto.targetType === 'vote') {
+      // P-232: vote 举报
+      const vote = await this.prisma.vote.findUnique({
+        where: { id: dto.targetId },
+        select: { communityId: true },
+      });
+      if (!vote) throw new NotFoundException('举报目标不存在');
+      communityId = vote.communityId;
     } else {
       throw new BadRequestException('不支持的举报目标类型');
     }
