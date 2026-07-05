@@ -468,7 +468,8 @@ export class RankingsService {
     pagination?: { skip: number; take: number },
   ) {
     const where: any = { communityId };
-    if (query?.periodType) where.periodType = query.periodType;
+    // P-270: 默认过滤 periodType，避免 month 和 total 混合
+    where.periodType = query?.periodType ?? 'month';
     if (query?.periodKey) where.periodKey = query.periodKey;
 
     return this.prisma.rankingSnapshot.findMany({
@@ -505,8 +506,9 @@ export class RankingsService {
   }
 
   async getBadges() {
+    // P-272: 排除 deleted 勋章，保留 draft 等非 deleted 状态
     return this.prisma.badge.findMany({
-      where: { status: 'active', deletedAt: null },
+      where: { status: { not: 'deleted' }, deletedAt: null },
       select: {
         id: true,
         code: true,

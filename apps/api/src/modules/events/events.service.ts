@@ -308,6 +308,46 @@ export class EventsService {
       throw new BadRequestException('已关闭或已完成的事件无法编辑');
     }
 
+    // P-226: 修改 type 时重新校验 topicId 规则
+    const effectiveType = dto.type ?? event.type;
+    const isTopicType = effectiveType === 'public_feedback' || effectiveType === 'discussion';
+    if (dto.type !== undefined) {
+      if (isTopicType && !dto.topicId && !event.topicId) {
+        throw new BadRequestException('议事类事件必须选择议题');
+      }
+      if (!isTopicType && dto.topicId) {
+        throw new BadRequestException('非议事类事件不能挂议题');
+      }
+    }
+    if (dto.topicId !== undefined) {
+      if (!isTopicType) {
+        throw new BadRequestException('非议事类事件不能挂议题');
+      }
+      const topic = await this.prisma.topic.findUnique({ where: { id: dto.topicId } });
+      if (!topic || topic.communityId !== communityId) {
+        throw new BadRequestException('议题不存在或不属于当前小区');
+      }
+    }
+
+    // P-19: 有人响应后禁止编辑核心内容
+    const coreFields = [
+      'type',
+      'title',
+      'description',
+      'rewardType',
+      'rewardAmount',
+      'expectedTime',
+    ];
+    const editingCore = coreFields.some((f) => dto[f] !== undefined);
+    if (editingCore) {
+      const appCount = await this.prisma.eventApplication.count({
+        where: { eventId: id, deletedAt: null },
+      });
+      if (appCount > 0) {
+        throw new BadRequestException('已有响应者，无法编辑核心内容');
+      }
+    }
+
     const updateData: any = {};
     if (dto.type !== undefined) updateData.type = dto.type;
     if (dto.title !== undefined) updateData.title = dto.title;
@@ -364,8 +404,8 @@ export class EventsService {
     if (event.creatorId !== userId) {
       throw new ForbiddenException('只有创建者可以关闭');
     }
-    if (event.status === 'closed') {
-      throw new BadRequestException('事件已关闭');
+    if (event.status === 'closed' || event.status === 'completed') {
+      throw new BadRequestException('事件已关闭或已完成');
     }
 
     const closed = await this.prisma.event.update({
@@ -482,6 +522,11 @@ export class EventsService {
     }
     if (event.creatorId !== creatorId) {
       throw new ForbiddenException('只有创建者可以选择帮手');
+    }
+
+    // P-228: 已选帮手不允许重复选择
+    if (event.selectedHelperId) {
+      throw new BadRequestException('该事件已选择帮手');
     }
 
     const application = await this.prisma.eventApplication.findFirst({
@@ -853,23 +898,29 @@ export class EventsService {
     dto: { targetType: string; targetId: string; reason: string; description?: string },
   ) {
     // Resolve communityId from the target
-    let communityId: string | null = null;
+    let communityId: string;
     if (dto.targetType === 'event' || dto.targetType === 'event_comment') {
       let eventId = dto.targetId;
       if (dto.targetType === 'event_comment') {
         const comment = await this.prisma.eventComment.findUnique({ where: { id: dto.targetId } });
-        if (comment) eventId = comment.eventId;
+        if (!comment) throw new NotFoundException('举报目标不存在');
+        eventId = comment.eventId;
       }
       const event = await this.prisma.event.findUnique({ where: { id: eventId } });
-      communityId = event?.communityId ?? null;
+      if (!event) throw new NotFoundException('举报目标不存在');
+      communityId = event.communityId;
     } else if (dto.targetType === 'market_item' || dto.targetType === 'market_comment') {
       let itemId = dto.targetId;
       if (dto.targetType === 'market_comment') {
         const comment = await this.prisma.marketComment.findUnique({ where: { id: dto.targetId } });
-        if (comment) itemId = comment.itemId;
+        if (!comment) throw new NotFoundException('举报目标不存在');
+        itemId = comment.itemId;
       }
       const item = await this.prisma.marketItem.findUnique({ where: { id: itemId } });
-      communityId = item?.communityId ?? null;
+      if (!item) throw new NotFoundException('举报目标不存在');
+      communityId = item.communityId;
+    } else {
+      throw new BadRequestException('不支持的举报目标类型');
     }
 
     const report = await this.prisma.report.create({
@@ -920,8 +971,15 @@ export class EventsService {
       throw new BadRequestException('评价目标用户无效');
     }
 
-    // Find or create a completion confirmation for this user to store the rating
+    // P-229: 禁止覆盖已有评价
     const role = isCreator ? 'creator' : 'helper';
+    const existing = await this.prisma.eventCompletionConfirmation.findUnique({
+      where: { eventId_userId_role: { eventId, userId, role } },
+    });
+    if (existing?.rating) {
+      throw new BadRequestException('已评价过，不能重复评价');
+    }
+
     const confirmation = await this.prisma.eventCompletionConfirmation.upsert({
       where: { eventId_userId_role: { eventId, userId, role } },
       update: {

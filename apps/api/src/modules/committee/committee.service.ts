@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -96,7 +96,7 @@ export class CommitteeService {
     }
 
     if (member.claimStatus === 'claimed') {
-      throw new NotFoundException('该成员已被认领');
+      throw new BadRequestException('该成员已被认领');
     }
 
     // 检查是否已提交过认领申请
@@ -104,7 +104,7 @@ export class CommitteeService {
       where: { committeeMemberId_userId: { committeeMemberId: memberId, userId } },
     });
     if (existingClaim) {
-      throw new NotFoundException('您已提交过认领申请');
+      throw new BadRequestException('您已提交过认领申请');
     }
 
     const claim = await this.prisma.committeeMemberClaim.create({
@@ -185,6 +185,10 @@ export class CommitteeService {
     });
     if (!announcement) {
       throw new NotFoundException('公告不存在');
+    }
+    // P-263: 仅 published 公告可点赞
+    if (announcement.status !== 'published') {
+      throw new BadRequestException('该公告当前无法点赞');
     }
 
     const existing = await this.prisma.announcementLike.findUnique({

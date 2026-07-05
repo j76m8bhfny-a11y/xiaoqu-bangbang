@@ -66,6 +66,18 @@ export class VerificationsService {
       throw new BadRequestException('必须同意授权');
     }
 
+    // P-214: 禁止重复提交待审核的认证
+    const pending = await this.prisma.verification.findFirst({
+      where: {
+        userId,
+        communityId: dto.communityId,
+        status: { in: ['pending_review', 'manual_review'] },
+      },
+    });
+    if (pending) {
+      throw new BadRequestException('您已有待审核的认证申请，请等待审核结果');
+    }
+
     // OCR 识别
     const ocrResult = await this.ocrService.recognizeMaterial(dto.fileUrl, dto.materialType);
 

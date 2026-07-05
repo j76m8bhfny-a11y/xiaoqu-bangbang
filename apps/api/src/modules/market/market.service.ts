@@ -333,8 +333,12 @@ export class MarketService {
       throw new ForbiddenException('只能标记自己发布的商品为已售');
     }
 
+    // P-240/P-241: 已售/已下架商品不能标记已售
     if (item.status === 'sold') {
-      throw new ForbiddenException('商品已标记为已售');
+      throw new BadRequestException('商品已标记为已售');
+    }
+    if (item.status === 'closed') {
+      throw new BadRequestException('商品已下架');
     }
 
     const updated = await this.prisma.marketItem.update({
