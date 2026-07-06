@@ -7,7 +7,12 @@ import type { ColumnsType } from 'antd/es/table';
 import AuthGuard from '@/components/AuthGuard';
 import AdminLayout from '@/components/Layout';
 import api from '@/lib/api';
-import type { ApiResponse, PaginatedData } from '@xiaoqu-bangbang/shared';
+import type {
+  ApiResponse,
+  PaginatedData,
+  AdminContributionDto,
+  BadgeDto,
+} from '@xiaoqu-bangbang/shared';
 
 export default function RankingsPage() {
   const queryClient = useQueryClient();
@@ -20,13 +25,13 @@ export default function RankingsPage() {
 
   const badgesQuery = useQuery({
     queryKey: ['admin', 'badges'],
-    queryFn: () => api.get<null, ApiResponse<{ items: any[] }>>('/admin/badges'),
+    queryFn: () => api.get<null, ApiResponse<{ items: BadgeDto[] }>>('/admin/badges'),
   });
 
   const contributionsQuery = useQuery({
     queryKey: ['admin', 'contributions', page, pageSize],
     queryFn: () =>
-      api.get<null, ApiResponse<PaginatedData<any>>>('/admin/contributions', {
+      api.get<null, ApiResponse<PaginatedData<AdminContributionDto>>>('/admin/contributions', {
         params: { page, pageSize },
       }),
   });
@@ -190,7 +195,7 @@ export default function RankingsPage() {
             </Form.Item>
             <Form.Item name="badgeId" label="奖章" rules={[{ required: true }]}>
               <Select
-                options={(badgesQuery.data?.data?.items ?? []).map((b: any) => ({
+                options={(badgesQuery.data?.data?.items ?? []).map((b) => ({
                   value: b.id,
                   label: b.name,
                 }))}

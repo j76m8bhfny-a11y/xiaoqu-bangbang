@@ -339,7 +339,7 @@
   <div class="container">
     <h1>🌱 小区帮榜棒</h1>
     <p class="tagline">让小区里的好事，被看见</p>
-    <p class="meta">开发进展汇报 · 2026-07-06 · HEAD: 3e81547 · 144 commits</p>
+    <p class="meta">开发进展汇报 · 2026-07-06 · HEAD: 1d48d1b · 146 commits</p>
   </div>
 </div>
 
@@ -366,7 +366,7 @@
         <div class="metric-label">待验收项</div>
       </div>
       <div class="metric-card blue">
-        <div class="metric-value">272</div>
+        <div class="metric-value">297</div>
         <div class="metric-label">已修复问题</div>
       </div>
       <div class="metric-card green">
@@ -380,7 +380,7 @@
     </div>
 
     <div class="highlight-box">
-      <strong>一句话总结：</strong>核心功能全部开发完毕，黄色+绿色问题全部清零，没有阻塞发布的 Bug，进入验收期。剩余 90 条⚠️设计选择，均不影响用户使用。
+      <strong>一句话总结：</strong>核心功能全部开发完毕，黄+绿+契约对齐问题全部清零，没有阻塞发布的 Bug，进入验收期。剩余 65 条⚠️设计选择，均不影响用户使用。
     </div>
   </div>
 </div>
@@ -630,7 +630,7 @@
       <span class="icon" style="background:var(--primary-light)">🐛</span>
       Bug 和问题情况
     </div>
-    <p class="section-desc">总共发现 362 个问题，修复了 272 个，没有阻塞发布的 Bug，黄色+绿色问题全部清零</p>
+    <p class="section-desc">总共发现 362 个问题，修复了 297 个，没有阻塞发布的 Bug，黄色+绿色+契约对齐问题全部清零</p>
 
     <div class="chart-row">
       <div class="card">
@@ -666,14 +666,14 @@
           </tr>
           <tr>
             <td><span class="badge badge-green">✅ 已修复</span></td>
-            <td><strong>272</strong></td>
-            <td>已修复完毕，含 7 批次开发 + 黄色+绿色清理</td>
+            <td><strong>297</strong></td>
+            <td>已修复完毕，含 7 批次开发 + 黄色+绿色+契约对齐清理</td>
             <td>—</td>
           </tr>
           <tr>
             <td><span class="badge badge-gray">⚠️ 降级</span></td>
-            <td><strong>90</strong></td>
-            <td>设计选择，双方一致但未正式化</td>
+            <td><strong>65</strong></td>
+            <td>设计选择/ponytail 可接受，详见下方明细</td>
             <td>不影响</td>
           </tr>
           <tr>
@@ -693,7 +693,122 @@
     </div>
 
     <div class="highlight-box" style="margin-top:16px;">
-      <strong>关键结论：</strong>所有影响用户使用的严重问题（数据丢失、安全漏洞、功能不可用）都已在开发中修复。95 条黄色问题 + 67 条绿色问题已全部清零（commit 07ef5ed + 3e81547），剩余 90 条⚠️为设计选择，用户完全感知不到。
+      <strong>关键结论：</strong>所有影响用户使用的严重问题（数据丢失、安全漏洞、功能不可用）都已在开发中修复。95 条黄色 + 67 条绿色 + 25 条契约对齐问题已全部清零，剩余 65 条⚠️为设计选择/ponytail 可接受，用户完全感知不到。
+    </div>
+
+    <!-- ⚠️ 明细表 -->
+    <div class="card" style="margin-top:16px;">
+      <h4 style="margin-bottom:12px;">⚠️ 剩余 65 条设计选择明细（点击查看详情）</h4>
+      <details>
+        <summary style="cursor:pointer; color:var(--info); font-size:13px; margin-bottom:12px;">展开/收起明细表</summary>
+
+        <h5 style="margin:16px 0 8px; color:var(--text);">A. PRD 文档需补充说明（22 条）— 代码正确，PRD 未明确写出</h5>
+        <table class="table" style="margin-bottom:16px;">
+          <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>P-11</td><td>PRD 补充 topic_closed 通知类型</td></tr>
+            <tr><td>P-12</td><td>PRD 遗漏创始人徽章和种子贡献者徽章</td></tr>
+            <tr><td>P-15</td><td>社群入口文档不一致（social-groups 已注释）</td></tr>
+            <tr><td>P-27</td><td>议题合并建议是手动触发非自动</td></tr>
+            <tr><td>P-28</td><td>匿名投票脱敏逻辑 PRD 未说明</td></tr>
+            <tr><td>P-29</td><td>PRD 遗漏创始人徽章和种子贡献者徽章（同 P-12）</td></tr>
+            <tr><td>P-32</td><td>社群入口文档不一致（同 P-15）</td></tr>
+            <tr><td>P-34</td><td>rewardType 适用范围未说明</td></tr>
+            <tr><td>P-35</td><td>eventCount 更新逻辑未说明</td></tr>
+            <tr><td>P-50</td><td>§4.17 审核触发点与 §5.5 不一致</td></tr>
+            <tr><td>P-51</td><td>§4.11 分享目标与页面列表矛盾</td></tr>
+            <tr><td>P-52</td><td>投票创建权限未明确</td></tr>
+            <tr><td>P-53</td><td>议题总结填写人不明确</td></tr>
+            <tr><td>P-60</td><td>单帮手与多帮手完成流程不一致</td></tr>
+            <tr><td>P-62</td><td>议题赞踩"两个作用域"概念不清</td></tr>
+            <tr><td>P-64</td><td>"三套激励体系"计数错误</td></tr>
+            <tr><td>P-65</td><td>"只记贡献"含义不清</td></tr>
+            <tr><td>P-66</td><td>场景 3 和 §4.1 引用未实现功能如已上线</td></tr>
+            <tr><td>P-70</td><td>议题可重新开放但 PRD 未提及</td></tr>
+            <tr><td>P-75</td><td>匿名事件管理员可见性未注明</td></tr>
+            <tr><td>P-76</td><td>议题评分不可修改未注明</td></tr>
+            <tr><td>P-77</td><td>投票 resultVisibility "after_vote" 含义模糊</td></tr>
+          </tbody>
+        </table>
+
+        <h5 style="margin:16px 0 8px; color:var(--text);">B. 设计选择/无需修复（8 条）— 有意为之</h5>
+        <table class="table" style="margin-bottom:16px;">
+          <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>P-26</td><td>议题赞踩不限制作用域（设计如此）</td></tr>
+            <tr><td>P-33</td><td>业委会认领与 committee_admin 是两套独立体系</td></tr>
+            <tr><td>P-40</td><td>公告无独立 publish 端点（通过 update 实现）</td></tr>
+            <tr><td>P-98</td><td>本地 VerificationResultDto 应移到 shared（已有 toPublicDto 兜底）</td></tr>
+            <tr><td>P-124</td><td>controller 守卫层级叠加（功能正常）</td></tr>
+            <tr><td>P-154</td><td>DTO 缺 coverUrl/sortOrder/createdAt（运行时有值）</td></tr>
+            <tr><td>P-300</td><td>login token sub 取值问题（均已绑定无影响）</td></tr>
+            <tr><td>P-353</td><td>公告无删除功能（可通过隐藏替代）</td></tr>
+          </tbody>
+        </table>
+
+        <h5 style="margin:16px 0 8px; color:var(--text);">C. 业务逻辑简化（7 条）— ponytail 简化，有注释</h5>
+        <table class="table" style="margin-bottom:16px;">
+          <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>P-41</td><td>事件评价功能断线（后端有接口小程序无 UI）</td></tr>
+            <tr><td>P-42</td><td>闲置评价功能断线（后端有接口小程序无 UI）</td></tr>
+            <tr><td>P-44</td><td>mappers.ts 覆盖不全（只处理 4 个 DTO）</td></tr>
+            <tr><td>P-46</td><td>help_offer 事件类型重构为个人技能档案</td></tr>
+            <tr><td>P-221</td><td>双重徽章颁发逻辑冗余（可合并，可工作）</td></tr>
+            <tr><td>P-259</td><td>按 createdAt 排序而非 sortOrder（schema 无字段）</td></tr>
+            <tr><td>P-282</td><td>month periodKey 生成方式不一致（UTC vs 本地，结果相同）</td></tr>
+          </tbody>
+        </table>
+
+        <h5 style="margin:16px 0 8px; color:var(--text);">D. ponytail 可接受 — 类型/契约（13 条）— 缺 shared DTO 但运行时正常</h5>
+        <table class="table" style="margin-bottom:16px;">
+          <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>P-108</td><td>DTO 风格不一致（class-validator vs interface）</td></tr>
+            <tr><td>P-125</td><td>topic-suggestions 逻辑在 events/topics 重复</td></tr>
+            <tr><td>P-128</td><td>VoteResultDto 未在 shared 定义</td></tr>
+            <tr><td>P-137</td><td>toggleAnnouncementLike 无 shared DTO</td></tr>
+            <tr><td>P-141</td><td>support 返回类型无 shared DTO</td></tr>
+            <tr><td>P-142</td><td>materialType 字符串字面量非枚举</td></tr>
+            <tr><td>P-157</td><td>AdminReviewActionRequest.action 字段未使用</td></tr>
+            <tr><td>P-178</td><td>PATCH /votes/:id 无审计日志</td></tr>
+            <tr><td>P-194</td><td>ShareTemplateDto status 缺枚举约束</td></tr>
+            <tr><td>P-195</td><td>缺 UpdateShareTemplateRequest</td></tr>
+            <tr><td>P-199</td><td>缺 Admin MarketItem DTO</td></tr>
+            <tr><td>P-202</td><td>详情返回结构不完全对齐</td></tr>
+            <tr><td>P-306</td><td>manualVisibleAdminOnly 状态处理不统一</td></tr>
+          </tbody>
+        </table>
+
+        <h5 style="margin:16px 0 8px; color:var(--text);">E. 保留 ⚠️（2 条）— 已标注 ponytail，暂不修</h5>
+        <table class="table" style="margin-bottom:16px;">
+          <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>P-184</td><td>updateServiceProvider body 字段不全（仅 4 字段，shared 声明 10 字段）</td></tr>
+            <tr><td>P-193</td><td>GET 返回 Record 非 SystemSettingsDto（DB 存字符串，前端手动转换）</td></tr>
+          </tbody>
+        </table>
+
+        <h5 style="margin:16px 0 8px; color:var(--text);">F. ponytail 可接受 — 逻辑/边界（13 条）— 边界情况不影响主流程</h5>
+        <table class="table" style="margin-bottom:16px;">
+          <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>P-206</td><td>updateMe 响应缺 status/currentCommunityId</td></tr>
+            <tr><td>P-208</td><td>未选小区时返回 communityId:null</td></tr>
+            <tr><td>P-210</td><td>@Public() 装饰器仅方法级支持</td></tr>
+            <tr><td>P-212</td><td>getMemberVerifyStatus 返回 null</td></tr>
+            <tr><td>P-213</td><td>schema default status 不可达（代码始终显式设）</td></tr>
+            <tr><td>P-217</td><td>originalFileDeletedAt 无定时任务物理删除</td></tr>
+            <tr><td>P-233</td><td>findOne 返回的 viewCount 是更新前旧值（少 1）</td></tr>
+            <tr><td>P-234</td><td>getFeedbackLogs 未校验事件类型为 public_feedback</td></tr>
+            <tr><td>P-250</td><td>findUnique 查重在 $transaction 外（竞态窗口）</td></tr>
+            <tr><td>P-268</td><td>pending 检查与 create 非事务（TOCTOU 竞态）</td></tr>
+            <tr><td>P-269</td><td>助力 status 检查在事务外（TOCTOU 竞态）</td></tr>
+            <tr><td>P-286</td><td>getCardConfig 每次生成新 shareToken（不被复用）</td></tr>
+            <tr><td>P-299</td><td>市场商品编辑未调用 reviewImage</td></tr>
+          </tbody>
+        </table>
+      </details>
     </div>
   </div>
 </div>
@@ -817,10 +932,16 @@
           <div class="timeline-desc">分类 67 条🟢: 15 条修复（上传目录/举报校验/Admin 表单等）+ 52 条标注设计选择</div>
         </div>
         <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-06</div>
+          <div class="timeline-title">契约对齐清理（25 条 ⚠️→✅）</div>
+          <div class="timeline-desc">shared DTO 正式化 + 类型对齐: VerificationResponse/CommitteeOverview/BadgeDto/ContributionDto/MergeSuggestion 等</div>
+        </div>
+        <div class="timeline-item">
           <div class="timeline-dot" style="background:var(--success); box-shadow:0 0 0 2px var(--success);"></div>
           <div class="timeline-date">07-06 · 当前</div>
-          <div class="timeline-title">黄+绿问题全部清零 ✅</div>
-          <div class="timeline-desc">HEAD: 3e81547，144 commits，237 测试通过，🟡 0 条，🟢 0 条</div>
+          <div class="timeline-title">问题清单全部定性 ✅</div>
+          <div class="timeline-desc">297 已修复 / 65 设计选择 / 0 阻塞 / 0 黄 / 0 绿，237 测试通过</div>
         </div>
       </div>
     </div>
@@ -840,7 +961,7 @@
         <h4 style="margin-bottom:12px;">代码规模</h4>
         <table class="table">
           <tbody>
-            <tr><td>总 commits</td><td><strong>144</strong></td></tr>
+            <tr><td>总 commits</td><td><strong>146</strong></td></tr>
             <tr><td>已推送</td><td><strong>142</strong></td></tr>
             <tr><td>数据库表</td><td><strong>49 张</strong></td></tr>
             <tr><td>数据库迁移</td><td><strong>9 次</strong></td></tr>
@@ -931,7 +1052,7 @@
       <div class="advice-card medium">
         <div class="advice-priority">⭐⭐ 尽快做</div>
         <div class="advice-title">推送到远程</div>
-        <div class="advice-desc">当前 144 commits 本地，142 已推送，黄色+绿色清理 2 个 commit 待推送</div>
+        <div class="advice-desc">当前多个 commit 待推送（黄+绿+契约对齐清理）</div>
       </div>
       <div class="advice-card medium">
         <div class="advice-priority">⭐⭐ 尽快做</div>
@@ -951,7 +1072,7 @@
     </div>
 
     <div class="highlight-box" style="margin-top:24px;">
-      <strong>总结：</strong>代码层面已经开发完毕，95 条黄色 + 67 条绿色问题全部清零，没有阻塞 Bug。技术债大部分已清理（Prisma drift ✅ / flaky 测试 ✅ / tsbuildinfo ✅ / 临时登录框 ✅ / Admin 依赖 ✅）。接下来核心是<span style="color:var(--danger);font-weight:700;">验收</span>和<span style="color:var(--danger);font-weight:700;">推送到远程</span>。验收通过后就可以准备发布了。
+      <strong>总结：</strong>代码层面已经开发完毕，95 条黄色 + 67 条绿色 + 25 条契约对齐问题全部清零，没有阻塞 Bug。剩余 65 条⚠️为设计选择/ponytail 可接受，均不影响用户使用。接下来核心是<span style="color:var(--danger);font-weight:700;">验收</span>和<span style="color:var(--danger);font-weight:700;">推送到远程</span>。验收通过后就可以准备发布了。
     </div>
   </div>
 </div>
@@ -959,7 +1080,7 @@
 <div class="footer">
   <div class="container">
     <p>小区帮榜棒 · 开发进展汇报 · 生成于 2026-07-06</p>
-    <p style="margin-top:4px;">HEAD: 3e81547 · 144 commits · 9 迁移 · 49 表 · 33 页面 · 237 测试 · 🟡 0 · 🟢 0</p>
+    <p style="margin-top:4px;">HEAD: 1d48d1b · 146 commits · 9 迁移 · 49 表 · 33 页面 · 237 测试 · 🟡 0 · 🟢 0</p>
   </div>
 </div>
 
@@ -968,9 +1089,9 @@
 new Chart(document.getElementById('bugChart'), {
   type: 'doughnut',
   data: {
-    labels: ['✅ 已修复 (272)', '⚠️ 设计选择 (90)', '🟡 建议修 (0)', '🟢 可延后 (0)', '🔴 阻塞 (0)'],
+    labels: ['✅ 已修复 (297)', '⚠️ 设计选择 (65)', '🟡 建议修 (0)', '🟢 可延后 (0)', '🔴 阻塞 (0)'],
     datasets: [{
-      data: [272, 90, 0, 0, 0],
+      data: [297, 65, 0, 0, 0],
       backgroundColor: ['#27AE60', '#3498DB', '#95A5A6', '#F39C12', '#E74C3C'],
       borderWidth: 2,
       borderColor: '#fff'

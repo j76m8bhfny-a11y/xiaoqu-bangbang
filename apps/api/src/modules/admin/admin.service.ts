@@ -1311,8 +1311,13 @@ export class AdminService {
     const nicknameMap = new Map(admins.map((a) => [a.id, a.username]));
 
     return announcements.map((a) => ({
-      ...a,
+      id: a.id,
+      title: a.title,
+      content: a.content,
+      images: a.images as string[],
       publisherNickname: nicknameMap.get(a.publisherId) ?? '未知',
+      isPinned: a.isPinned,
+      publishedAt: a.publishedAt?.toISOString() ?? '',
     }));
   }
 
@@ -1494,7 +1499,7 @@ export class AdminService {
     dto: {
       title: string;
       description?: string;
-      qrImageUrl: string;
+      qrImageUrl?: string;
       contactText?: string;
       visibleTo?: string;
       sortOrder?: number;
@@ -1979,6 +1984,8 @@ export class AdminService {
   }
 
   // === System Settings ===
+  // P-193: ponytail: getSettings 返回 Record<string, string> 而非 SystemSettingsDto，因为 DB 中所有值存为字符串
+  // 前端手动 Number() 转换数字字段。升级路径: service 层映射到 SystemSettingsDto
   async getSettings() {
     const settings = await this.prisma.systemSetting.findMany();
     const result: Record<string, string> = {};

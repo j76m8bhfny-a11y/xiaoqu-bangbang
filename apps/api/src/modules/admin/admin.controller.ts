@@ -22,7 +22,7 @@ import { UpdateShareTemplateDto } from './dto/update-share-template.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { getPaginationParams } from '../../common/helpers/pagination';
 import { Public, PlatformAdminOnly } from '../../common/constants';
-import { ErrorCodes } from '@xiaoqu-bangbang/shared';
+import { ErrorCodes, type ApiResponse, type AdminDashboardDto } from '@xiaoqu-bangbang/shared';
 import { JwtService } from '@nestjs/jwt';
 
 @Controller('admin')
@@ -64,7 +64,9 @@ export class AdminController {
   }
 
   @Get('dashboard')
-  async getDashboard(@CurrentCommunityId() communityId: string) {
+  async getDashboard(
+    @CurrentCommunityId() communityId: string,
+  ): Promise<ApiResponse<AdminDashboardDto>> {
     const data = await this.adminService.getDashboard(communityId);
     return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
@@ -819,7 +821,7 @@ export class AdminController {
     body: {
       title: string;
       description?: string;
-      qrImageUrl: string;
+      qrImageUrl?: string;
       contactText?: string;
       visibleTo?: string;
       sortOrder?: number;

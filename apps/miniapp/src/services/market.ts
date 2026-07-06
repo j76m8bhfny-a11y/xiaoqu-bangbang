@@ -33,8 +33,7 @@ export const marketService = {
 
   create: (data: CreateMarketItemRequest) => http.post<MarketItemDto>('/market/items', data),
 
-  getById: (id: string, communityId?: string) =>
-    http.get<MarketItemDto>(`/market/items/${id}`, communityId ? { communityId } : undefined),
+  getById: (id: string) => http.get<MarketItemDto>(`/market/items/${id}`),
 
   update: (id: string, data: Partial<CreateMarketItemRequest>) =>
     http.patch<MarketItemDto>(`/market/items/${id}`, data),

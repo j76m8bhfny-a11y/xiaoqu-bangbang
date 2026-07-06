@@ -3,6 +3,7 @@ import { getToken } from '@/utils/storage';
 import type {
   CreateCommunityApplicationRequest,
   CommunityApplicationDto,
+  PaginatedData,
 } from '@xiaoqu-bangbang/shared';
 
 export const communityApplicationService = {
@@ -15,11 +16,7 @@ export const communityApplicationService = {
     keyword?: string;
     page?: number;
     pageSize?: number;
-  }) =>
-    http.get<{ items: CommunityApplicationDto[]; total: number }>(
-      '/community-applications',
-      params,
-    ),
+  }) => http.get<PaginatedData<CommunityApplicationDto>>('/community-applications', params),
 
   listMine: () => http.get<{ items: CommunityApplicationDto[] }>('/community-applications/me'),
 

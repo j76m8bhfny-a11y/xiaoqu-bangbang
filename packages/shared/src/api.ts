@@ -172,6 +172,20 @@ export interface VerificationDto {
   status: VerificationStatus;
   rejectReason: string | null;
   reviewedAt: string | null;
+  maskedFileUrl?: string;
+  createdAt: string;
+}
+
+export interface SubmitVerificationResponse {
+  id: string;
+  status: VerificationStatus;
+  ocrSummary: {
+    communityName: string;
+    address: string;
+    ownerName: string;
+    confidence: number;
+  } | null;
+  matchResult: { matched: boolean; confidence: number } | null;
 }
 
 // ===== 事件 =====
@@ -334,7 +348,6 @@ export interface AddInterestRequest {
 // ===== 榜单 =====
 
 export interface RankingQuery {
-  communityId?: string;
   periodType: PeriodType;
   periodKey?: string;
   page?: number;
@@ -387,6 +400,27 @@ export interface CommitteeAnnouncementDto {
   publisherNickname: string;
   isPinned: boolean;
   publishedAt: string;
+  isLiked: boolean;
+  likeCount: number;
+}
+
+export interface CommitteeOverviewDto {
+  memberCount: number;
+  announcementCount: number;
+  latestAnnouncement: { id: string; title: string; publishedAt: string } | null;
+}
+
+export interface CommitteeMemberClaimDto {
+  id: string;
+  committeeMemberId: string;
+  statement: string;
+  status: string;
+  createdAt: string;
+  committeeMember: { name: string; position: string; avatarUrl: string | null };
+}
+
+export interface CommitteeMemberDetailDto extends CommitteeMemberDto {
+  claims: Omit<CommitteeMemberClaimDto, 'committeeMember'>[];
 }
 
 // ===== 投票 =====
@@ -670,14 +704,15 @@ export interface UpdateAnnouncementRequest {
 // 投票 CRUD
 export interface CreateVoteRequest {
   title: string;
-  description: string;
+  description?: string;
   voteType: 'single' | 'multiple';
   maxChoices?: number;
   resultVisibility: 'always' | 'after_vote' | 'after_end' | 'admin_only';
   isAnonymous: boolean;
+  onlyVerified?: boolean;
   startAt: string;
   endAt: string;
-  options: { content: string; sortOrder: number }[];
+  options: string[];
 }
 
 export interface UpdateVoteRequest {
@@ -698,10 +733,10 @@ export interface CreateBannerRequest {
   title: string;
   subtitle?: string;
   imageUrl: string;
-  linkType: 'event' | 'market' | 'announcement' | 'service_provider' | 'url' | 'none';
+  linkType?: 'event' | 'market' | 'announcement' | 'service_provider' | 'url' | 'none';
   linkId?: string;
   linkUrl?: string;
-  position: 'home_top' | 'event_list' | 'market_list';
+  position?: 'home_top' | 'event_list' | 'market_list';
   sortOrder?: number;
   startAt?: string;
   endAt?: string;
@@ -727,8 +762,8 @@ export interface CreateServiceProviderRequest {
   category: 'repair' | 'cleaning' | 'lock' | 'home_appliance' | 'moving' | 'pet' | 'other';
   logoUrl?: string;
   coverUrl?: string;
-  description: string;
-  contactText: string;
+  description?: string;
+  contactText?: string;
   serviceArea?: string;
   recommendationSource: 'platform' | 'committee' | 'community';
   sortOrder?: number;
@@ -1033,4 +1068,48 @@ export interface MatchedSkillDto {
   userAvatarUrl: string | null;
   wechatId: string | null;
   similarity: number;
+}
+
+// ===== 通用列表响应（非分页） =====
+
+export interface ListResponse<T> {
+  items: T[];
+}
+
+// ===== Admin 贡献记录 =====
+
+export interface AdminContributionDto {
+  id: string;
+  userId: string;
+  action: string;
+  score: number;
+  flowerCount: number;
+  status: string;
+  createdAt: string;
+}
+
+// ===== Admin 奖章 =====
+
+export interface BadgeDto {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  iconUrl: string | null;
+  ruleJson: unknown;
+  status: string;
+  createdAt: string;
+}
+
+// ===== Admin 议题合并建议 =====
+
+export interface MergeSuggestionDto {
+  id: string;
+  sourceTopicId: string;
+  targetTopicId: string;
+  similarity: number;
+  status: string;
+  sourceTopic: { id: string; title: string; eventCount: number };
+  targetTopic: { id: string; title: string; eventCount: number };
+  createdAt: string;
 }

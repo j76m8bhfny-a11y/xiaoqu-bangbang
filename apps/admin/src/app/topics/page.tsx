@@ -20,7 +20,7 @@ import type { ColumnsType } from 'antd/es/table';
 import AuthGuard from '@/components/AuthGuard';
 import AdminLayout from '@/components/Layout';
 import api from '@/lib/api';
-import type { ApiResponse, PaginatedData } from '@xiaoqu-bangbang/shared';
+import type { ApiResponse, PaginatedData, MergeSuggestionDto } from '@xiaoqu-bangbang/shared';
 
 const { Search, TextArea } = Input;
 
@@ -391,7 +391,10 @@ function MergeSuggestions() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'merge-suggestions', status],
     queryFn: () =>
-      api.get<null, ApiResponse<any>>('/admin/topics/merge-suggestions', { params: { status } }),
+      api.get<null, ApiResponse<{ items: MergeSuggestionDto[] }>>(
+        '/admin/topics/merge-suggestions',
+        { params: { status } },
+      ),
   });
   const items: any[] = data?.data?.items ?? [];
 

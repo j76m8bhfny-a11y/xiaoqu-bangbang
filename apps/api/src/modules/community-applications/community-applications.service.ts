@@ -19,9 +19,13 @@ export class CommunityApplicationsService {
     if (existingPending) {
       throw new ConflictException('您已有一个待审核的小区申请');
     }
-    return this.prisma.communityApplication.create({
+    const created = await this.prisma.communityApplication.create({
       data: { ...dto, applicantId: userId },
+      include: {
+        applicant: { select: { id: true, nickname: true, avatarUrl: true } },
+      },
     });
+    return this.toPublicDto(created, false);
   }
 
   async list(

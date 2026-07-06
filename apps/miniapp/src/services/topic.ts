@@ -27,7 +27,7 @@ export const topicService = {
     http.post<{ likeCount: number; dislikeCount: number }>(`/topics/${id}/dislike`, { scope }),
 
   unlike: (id: string, scope: 'open' | 'closed') =>
-    http.del<{ likeCount: number; dislikeCount: number }>(`/topics/${id}/like`, { scope }),
+    http.del<{ likeCount: number; dislikeCount: number }>(`/topics/${id}/like?scope=${scope}`),
 
   rate: (id: string, rating: number) =>
     http.post<{ avgRating: number; ratingCount: number }>(`/topics/${id}/rating`, { rating }),
@@ -37,7 +37,7 @@ export const topicService = {
 
   comments: (
     id: string,
-    params: { eventId?: string; sort?: string; page?: number; pageSize?: number },
+    params: { eventId?: string; sort?: 'hot' | 'new'; page?: number; pageSize?: number },
   ) => http.get<PaginatedData<TopicCommentDto>>(`/topics/${id}/comments`, params),
 
   createComment: (id: string, data: CreateTopicCommentRequest) =>

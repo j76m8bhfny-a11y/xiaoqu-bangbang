@@ -4,6 +4,7 @@ import { CreateCommunityApplicationDto } from './dto/create-application.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { getPaginationParams } from '../../common/helpers/pagination';
+import { ErrorCodes } from '@xiaoqu-bangbang/shared';
 import type { ApiResponse, PaginatedData, CommunityApplicationDto } from '@xiaoqu-bangbang/shared';
 
 @Controller('community-applications')
@@ -12,15 +13,14 @@ export class CommunityApplicationsController {
     @Inject(CommunityApplicationsService) private service: CommunityApplicationsService,
   ) {}
 
-  // ponytail: create 返回原始 Prisma 对象，字段类型 (null vs undefined, Date vs string) 与 CommunityApplicationDto 不完全匹配
   @Post()
   @UseGuards(JwtAuthGuard)
   async create(
     @CurrentUser('userId') userId: string,
     @Body() dto: CreateCommunityApplicationDto,
-  ): Promise<ApiResponse> {
+  ): Promise<ApiResponse<CommunityApplicationDto>> {
     const data = await this.service.create(userId, dto);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // ponytail: 公开端点，未注入 viewerId，故列表项的 hasSupported 恒为 false。
@@ -48,18 +48,26 @@ export class CommunityApplicationsController {
   @UseGuards(JwtAuthGuard)
   async listMine(
     @CurrentUser('userId') userId: string,
-  ): Promise<ApiResponse<{ items: CommunityApplicationDto[] }>> {
+  ): Promise<ApiResponse<PaginatedData<CommunityApplicationDto>>> {
     const items = await this.service.listMine(userId);
-    return { code: 0, message: 'ok', data: { items } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: 1, pageSize: items.length, total: items.length },
+    };
   }
 
   @Get('supported')
   @UseGuards(JwtAuthGuard)
   async listSupported(
     @CurrentUser('userId') userId: string,
-  ): Promise<ApiResponse<{ items: CommunityApplicationDto[] }>> {
+  ): Promise<ApiResponse<PaginatedData<CommunityApplicationDto>>> {
     const items = await this.service.listSupported(userId);
-    return { code: 0, message: 'ok', data: { items } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: 1, pageSize: items.length, total: items.length },
+    };
   }
 
   @Get(':id')

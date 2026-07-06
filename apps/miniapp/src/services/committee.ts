@@ -3,27 +3,11 @@ import type {
   CommitteeMemberDto,
   ClaimCommitteeMemberRequest,
   CommitteeAnnouncementDto,
+  CommitteeOverviewDto,
+  CommitteeMemberDetailDto,
+  CommitteeMemberClaimDto,
   PaginatedData,
 } from '@xiaoqu-bangbang/shared';
-
-interface CommitteeOverviewDto {
-  memberCount: number;
-  announcementCount: number;
-  latestAnnouncement: { id: string; title: string; publishedAt: string } | null;
-}
-
-interface CommitteeMemberDetailDto extends CommitteeMemberDto {
-  claims: { id: string; userId: string; statement: string; status: string; createdAt: string }[];
-}
-
-interface CommitteeMemberClaimDto {
-  id: string;
-  committeeMemberId: string;
-  statement: string;
-  status: string;
-  createdAt: string;
-  committeeMember: { name: string; position: string; avatarUrl: string | null };
-}
 
 export const committeeService = {
   getOverview: () => http.get<CommitteeOverviewDto>('/committee'),
@@ -44,9 +28,7 @@ export const committeeService = {
     http.get<PaginatedData<CommitteeAnnouncementDto>>('/committee/announcements'),
 
   getAnnouncementDetail: (id: string) =>
-    http.get<CommitteeAnnouncementDto & { isLiked: boolean; likeCount: number }>(
-      `/committee/announcements/${id}`,
-    ),
+    http.get<CommitteeAnnouncementDto>(`/committee/announcements/${id}`),
 
   toggleAnnouncementLike: (id: string) =>
     http.post<{ liked: boolean; likeCount: number }>(`/committee/announcements/${id}/like`),

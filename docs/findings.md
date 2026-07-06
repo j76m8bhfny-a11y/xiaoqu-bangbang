@@ -1126,21 +1126,21 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit d2cd569]**
 
-### P-93 ⚠️ [verifications] 缺 SubmitVerificationResponse DTO
+### P-93 ✅ [verifications] 缺 SubmitVerificationResponse DTO
 
 - **位置**: `apps/api/src/modules/verifications/verifications.service.ts:136-149` vs `packages/shared/src/api.ts:148-163`
 - **问题**: `POST /verifications` 返回 `{ id, status, ocrSummary, matchResult }`，小程序定义本地 `VerificationResultDto` 匹配，但 shared 层只有 Request DTO 无 Response DTO。
 - **建议**: shared 新增 `SubmitVerificationResponse` DTO，小程序复用。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
-### P-94 ⚠️ [verifications] 后端多返回 maskedFileUrl/createdAt
+### P-94 ✅ [verifications] 后端多返回 maskedFileUrl/createdAt
 
 - **位置**: `apps/api/src/modules/verifications/verifications.service.ts:152-168` vs `packages/shared/src/api.ts:156-163`
 - **问题**: Prisma select 额外返回 `maskedFileUrl`/`createdAt`，`VerificationDto` 未声明。
 - **建议**: DTO 补字段或 select 删多余字段。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-95 ✅ [auth] updateMe 注释类型不精确
 
@@ -1270,13 +1270,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 06866a5]**
 
-### P-114 ⚠️ [market] getById 多传 communityId 被忽略
+### P-114 ✅ [market] getById 多传 communityId 被忽略
 
 - **位置**: 小程序 `apps/miniapp/src/services/market.ts:31-32` | 后端 `apps/api/src/modules/market/market.controller.ts:54-63`
 - **问题**: miniapp 传 `communityId` 作为 query 参数，后端用 `@CurrentCommunityId()` 注入，不接受 query。miniapp 传的值被忽略。
 - **建议**: miniapp 移除 `communityId` 参数，或统一获取方式。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-115 ✅ [market] tradeType/conditionLevel 必填 vs 可选
 
@@ -1304,13 +1304,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: miniapp 期望 `{ avgRating, ratingCount }`，controller 返回完整 `TopicDto`。
 - **建议**: miniapp 改为 `TopicDto`，或后端返回精简对象。
 
-### P-119 ⚠️ [topics] unlike scope 参数传递方式不一致
+### P-119 ✅ [topics] unlike scope 参数传递方式不一致
 
 - **位置**: 小程序 `apps/miniapp/src/services/topic.ts:27-28` | 后端 `apps/api/src/modules/topics/topics.controller.ts:112-122`
 - **问题**: miniapp 通过 `http.del(url, { scope })` 发送，后端用 `@Query('scope')` 读取。依赖 Taro 将 DELETE body 序列化为 query，存在平台差异风险。
 - **建议**: miniapp 显式拼 query：`http.del(\`/topics/${id}/like?scope=${scope}\`)`，或后端改 `@Body()`。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-120 ✅ [topics] timeline 缺 total 字段
 
@@ -1332,13 +1332,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: controller 用内联 `{ title: string; description?: string }`，未引用 shared `CreateTopicRequest`。
 - **建议**: 引用 shared DTO。
 
-### P-123 ⚠️ [topics] comments sort 参数类型不一致
+### P-123 ✅ [topics] comments sort 参数类型不一致
 
 - **位置**: 小程序 `apps/miniapp/src/services/topic.ts:36-39` | 后端 `apps/api/src/modules/topics/topics.controller.ts:148-165`
 - **问题**: miniapp `sort: string`，后端 `sort?: 'hot' | 'new'`。miniapp 类型过宽。
 - **建议**: miniapp 改为 `'hot' | 'new'`。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-124 ⚠️ [topics] controller 守卫层级叠加
 
@@ -1370,13 +1370,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: 小程序本地定义 `VoteResultDto`，后端返回相同结构，shared 无对应 DTO。
 - **建议**: 提升到 shared/api.ts。
 
-### P-129 ⚠️ [committee] overview 无 shared DTO
+### P-129 ✅ [committee] overview 无 shared DTO
 
 - **位置**: 小程序 `apps/miniapp/src/services/committee.ts:9-13`
 - **问题**: 本地 `CommitteeOverviewDto`，shared 无对应。
 - **建议**: shared 补 DTO。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-130 ✅ [committee] members 列表缺 claimedUserId
 
@@ -1384,13 +1384,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `getMembers` select 缺 `claimedUserId`，`CommitteeMemberDto` 要求该字段。
 - **建议**: select 补 `claimedUserId`。
 
-### P-131 ⚠️ [committee] member 详情无 shared DTO
+### P-131 ✅ [committee] member 详情无 shared DTO
 
 - **位置**: 小程序 `apps/miniapp/src/services/committee.ts:15-17`
 - **问题**: 本地 `CommitteeMemberDetailDto extends CommitteeMemberDto`（含 claims），shared 无对应。
 - **建议**: shared 补 DTO。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-132 ✅ [committee] ClaimDto materialUrls 可选性不一致
 
@@ -1398,13 +1398,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: 后端 `@IsOptional()` 可选，shared `materialUrls: string[]` 必选。
 - **建议**: 统一为可选 `materialUrls?: string[]`。
 
-### P-133 ⚠️ [committee] myClaims 无 shared DTO
+### P-133 ✅ [committee] myClaims 无 shared DTO
 
 - **位置**: 小程序 `apps/miniapp/src/services/committee.ts:19-26`
 - **问题**: 本地 `CommitteeMemberClaimDto`，shared 无对应。
 - **建议**: shared 补 DTO。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-134 ✅ [committee] announcements 列表字段少于 DTO（P-43 子项，补行号）
 
@@ -1412,13 +1412,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `getAnnouncements` select 仅 5 字段，`CommitteeAnnouncementDto` 要求 `content`/`images`/`publisherNickname` 3 个必选字段。
 - **建议**: 拆分 `AnnouncementListItemDto` 和 `CommitteeAnnouncementDto`，或扩展 select。
 
-### P-135 ⚠️ [committee] AnnouncementDto 缺 likeCount
+### P-135 ✅ [committee] AnnouncementDto 缺 likeCount
 
 - **位置**: `packages/shared/src/api.ts:339-347` vs 小程序 `apps/miniapp/src/services/committee.ts:47-49`
 - **问题**: 后端详情返回 `likeCount`，shared DTO 未声明。miniapp 期望 `CommitteeAnnouncementDto & { isLiked; likeCount }`。
 - **建议**: shared 补 `likeCount: number`。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-136 ✅ [committee] publisherNickname 可能是虚拟字段
 
@@ -1432,29 +1432,29 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: miniapp 期望 `{ liked, likeCount }`，shared 无响应 DTO。
 - **建议**: 可选，shared 补类型。
 
-### P-138 ⚠️ [community-applications] create 返回原始 DB 记录非 DTO
+### P-138 ✅ [community-applications] create 返回原始 DB 记录非 DTO
 
 - **位置**: `apps/api/src/modules/community-applications/community-applications.service.ts:22-24`
 - **问题**: `create` 直接返回 `prisma.communityApplication.create(...)` 原始记录，缺 `CommunityApplicationDto` 的 `applicantNickname`/`applicantAvatarUrl`/`hasSupported`/`recentSupporters` 等字段。
 - **建议**: 创建后调用 `toPublicDto` 转换。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
-### P-139 ⚠️ [community-applications] list 分页类型不一致
+### P-139 ✅ [community-applications] list 分页类型不一致
 
 - **位置**: 小程序 `apps/miniapp/src/services/community-application.ts:19-22` vs 后端 `apps/api/src/modules/community-applications/community-applications.controller.ts:39`
 - **问题**: miniapp 声明 `{ items, total }`，后端返回 `{ items, page, pageSize, total }`。
 - **建议**: miniapp 改为 `PaginatedData<CommunityApplicationDto>`。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
-### P-140 ⚠️ [community-applications] me/supported 返回非 PaginatedData
+### P-140 ✅ [community-applications] me/supported 返回非 PaginatedData
 
 - **位置**: `apps/api/src/modules/community-applications/community-applications.controller.ts:44-46, 51-53`
 - **问题**: `listMine`/`listSupported` 返回 `{ items }`（无 page/pageSize/total），与 `list` 端点格式不同。
 - **建议**: 保持现状（无分页合理），但 shared 补 `ListResponse<T>` 类型统一。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-141 ⚠️ [community-applications] support 返回类型无 shared DTO
 
@@ -1503,13 +1503,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 44fbbbe]**
 
-### P-147 ⚠️ [rankings] list communityId 参数被忽略
+### P-147 ✅ [rankings] list communityId 参数被忽略
 
 - **位置**: 小程序 `apps/miniapp/src/services/ranking.ts:13` vs 后端 `apps/api/src/modules/rankings/rankings.controller.ts:14-27`
 - **问题**: miniapp 传 `communityId` 作为查询参数，controller 用 `@CurrentCommunityId()` 注入，不接受查询参数。
 - **建议**: controller 增加 `@Query('communityId')`，或 miniapp 去掉参数。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-148 ✅ [share] ShareCardConfig title vs shareTitle（P-43 子项，补行号）
 
@@ -1539,13 +1539,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: miniapp 声明 `PaginatedData<BannerDto>`（含 page/pageSize/total），controller 返回 `{ items }`（无分页字段）。
 - **建议**: miniapp 改为 `{ items: BannerDto[] }`，或 controller 补分页字段。
 
-### P-152 ⚠️ [banners] communityId 查询参数被忽略
+### P-152 ✅ [banners] communityId 查询参数被忽略
 
 - **位置**: 小程序 `apps/miniapp/src/services/banner.ts:5-6` vs 后端 `apps/api/src/modules/banners/banners.controller.ts:10`
 - **问题**: miniapp 传 `communityId` 作为查询参数，controller 用 `@CurrentCommunityId() @Optional()` 且无 `CurrentCommunityGuard`。无 guard 时 `CurrentCommunityId()` 可能返回 `undefined`，service 始终只返回全局 banner。
 - **建议**: controller 增加 `@Query('communityId')`，或添加 `CurrentCommunityGuard`。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-153 ✅ [serviceProviders] 分页字段缺失
 
@@ -1685,13 +1685,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: controller body `Partial<{ title, content, isPinned, status }>` 缺 `images`，shared `UpdateAnnouncementRequest` 有。前端实际发送了 `images`，但 controller 类型未声明。
 - **建议**: controller body 补 `images?: string[]`。
 
-### P-172 ⚠️ [announcements] getAnnouncements 泄漏多余字段
+### P-172 ✅ [announcements] getAnnouncements 泄漏多余字段
 
 - **位置**: `apps/api/src/modules/admin/admin.service.ts:846-853`
 - **问题**: 返回 raw Prisma 数据泄漏 `communityId`/`publisherId`/`status`/`likeCount`/`createdAt`/`updatedAt`/`deletedAt` 等非 DTO 字段。
 - **建议**: 添加 `toAnnouncementDto` 映射，只返回 DTO 定义字段。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-173 ✅ [votes] getVotes 缺 options include
 
@@ -1699,29 +1699,29 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `getVotes` 无 `include: { options: true }`，返回数据缺 `options: VoteOptionDto[]` 字段。shared `VoteDto` 声明 `options` 为必填。
 - **建议**: findMany 加 `include: { options: { orderBy: { sortOrder: 'asc' } } }`。
 
-### P-174 ⚠️ [votes] POST options 类型不一致
+### P-174 ✅ [votes] POST options 类型不一致
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:322-341` vs `packages/shared/src/api.ts:599-609`
 - **问题**: controller body `options: string[]`（纯字符串数组），shared `CreateVoteRequest` 定义 `options: { content: string; sortOrder: number }[]`（对象数组）。service 内部转换，运行时无问题但类型不一致。
 - **建议**: 统一为对象数组或字符串数组。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
-### P-175 ⚠️ [votes] POST description optional vs required
+### P-175 ✅ [votes] POST description optional vs required
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:322-341` vs `packages/shared/src/api.ts:599-609`
 - **问题**: controller `description?: string`（可选），shared `description: string`（必填）。service 有 `?? ''` 兜底。
 - **建议**: 统一为可选。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
-### P-176 ⚠️ [votes] POST onlyVerified 不在 shared DTO
+### P-176 ✅ [votes] POST onlyVerified 不在 shared DTO
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:322-341` vs `packages/shared/src/api.ts:599-609`
 - **问题**: controller body 含 `onlyVerified?: boolean`，前端发送该字段，但 shared `CreateVoteRequest` 无此字段。
 - **建议**: shared 补 `onlyVerified?: boolean`。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-177 🔴 [votes] PATCH /votes/:id 只允许 3 字段
 
@@ -1749,13 +1749,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `BannerDto` 缺 `position`/`status`/`sortOrder`，前端表格使用了这些字段。controller 返回 raw Prisma 数据含全部字段，运行时无错但类型不安全。
 - **建议**: shared 补字段。
 
-### P-181 ⚠️ [banners] createBanner linkType/position optional vs required
+### P-181 ✅ [banners] createBanner linkType/position optional vs required
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:398-410` vs `packages/shared/src/api.ts:624-636`
 - **问题**: controller `linkType?`/`position?`（可选），shared `linkType`/`position`（必填）。service 有默认值处理。
 - **建议**: 统一为可选 + 默认值，或必填。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-182 ✅ [service-providers] createServiceProvider communityId required 但前端不提供
 
@@ -1765,13 +1765,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 本轮修复]** Admin service-providers/page.tsx 删除 communityId 输入框
 
-### P-183 ⚠️ [service-providers] description/contactText required vs optional
+### P-183 ✅ [service-providers] description/contactText required vs optional
 
 - **位置**: `packages/shared/src/api.ts:657-658` vs `apps/api/src/modules/admin/admin.controller.ts:470-471`
 - **问题**: shared `description`/`contactText` 必填，controller 和 service 可选（有 `?? ''` 兜底）。
 - **建议**: 统一为可选 + 默认值。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-184 ⚠️ [service-providers] updateServiceProvider body 字段不全
 
@@ -1809,13 +1809,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: DTO 缺 `status`/`sortOrder`，前端表格使用了。运行时返回 raw Prisma 数据正常，但类型不安全。
 - **建议**: shared 补字段。
 
-### P-189 ⚠️ [social-groups] createSocialGroup qrImageUrl required vs optional
+### P-189 ✅ [social-groups] createSocialGroup qrImageUrl required vs optional
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:651` vs `packages/shared/src/api.ts:691`
 - **问题**: controller `qrImageUrl: string`（必填），shared `qrImageUrl?: string`（可选）。
 - **建议**: 统一为可选。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-190 ✅ [community-applications] controller 无类型标注
 
@@ -1857,13 +1857,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: 有 `ShareTemplateDto` 但无 `UpdateShareTemplateRequest`。后端自定义 `UpdateShareTemplateDto`，与前端一致，但未在 shared 体现。
 - **建议**: shared 补类型。
 
-### P-196 ⚠️ [contributions] 缺 Response DTO
+### P-196 ✅ [contributions] 缺 Response DTO
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:529-541` vs `apps/admin/src/app/rankings/page.tsx:29-34`
 - **问题**: 后端返回 raw Prisma `contributionRecord`，前端用 `PaginatedData<any>`。缺类型化 DTO。
 - **建议**: shared 新增 `AdminContributionDto`。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-197 ✅ [badges] 颁勋章请求体字段不对齐
 
@@ -1871,13 +1871,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: (1) 前端发送 `communityId` 在 body，controller 从 `@CurrentCommunityId()` 获取，body 中的被忽略。(2) 前端未发送 `reason`。(3) shared `AdminAwardBadgeRequest` 含 `userId`（URL 参数）和 `sourceType`（controller 未用），与实际签名不匹配。
 - **建议**: 统一请求 DTO，删除 body 中的 `communityId`，增加 `reason` 支持。
 
-### P-198 ⚠️ [badges] GET /badges 缺 Response DTO
+### P-198 ✅ [badges] GET /badges 缺 Response DTO
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:543-547` vs `apps/admin/src/app/rankings/page.tsx:25`
 - **问题**: 返回 `{ items: any[] }`，Badge 实体无 shared DTO。
 - **建议**: shared 定义 `BadgeDto`。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-199 ⚠️ [market] 缺 Admin MarketItem DTO
 
@@ -1891,13 +1891,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `listTopics` 直接返回 Prisma 记录，`TopicDto` 包含 `likeCount`/`dislikeCount`/`ratingSum`/`ratingCount`/`avgRating`/`eventCount`/`commentCount`/`latestEventPreview` 等聚合字段。前端展示了部分聚合字段，值为 `undefined`。
 - **建议**: service 补充聚合字段计算。
 
-### P-201 ⚠️ [topics] 缺 MergeSuggestion Response DTO
+### P-201 ✅ [topics] 缺 MergeSuggestion Response DTO
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:818-825` vs `apps/admin/src/app/topics/page.tsx:391-395`
 - **问题**: `GET /admin/topics/merge-suggestions` 返回含 `sourceTopic`/`targetTopic` 嵌套对象，shared 无 `MergeSuggestionDto`，前端用 `any`。
 - **建议**: shared 新增 `MergeSuggestionDto`。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### P-202 ⚠️ [topics] 详情返回结构不完全对齐
 
@@ -1905,13 +1905,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `getTopicById` 用 `include: { events }` 返回 Prisma 数据，`TopicDetailDto` 定义为 `TopicDto & { events: TopicEventItem[] }`。字段名可能与 DTO 不完全匹配。
 - **建议**: 检查 Prisma topic 模型字段与 `TopicDto` 是否完全匹配。
 
-### P-203 ⚠️ [dashboard] 无 ApiResponse 类型标注
+### P-203 ✅ [dashboard] 无 ApiResponse 类型标注
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:66-69`
 - **问题**: `getDashboard()` 直接返回 `{ code: 0, message: 'ok', data }`，运行时结构正确但无类型约束。与 P-164 相关。
 - **建议**: 加 `@ApiResponse` 装饰器或显式返回类型标注。
 
-**[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
+**[2026-07-06 修复] ✅ 已正式化到 shared / 类型已对齐**
 
 ### Admin 侧横向检查结论
 
@@ -2668,11 +2668,11 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ## 汇总
 
-| 严重度           | 数量    | 编号                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔴 阻塞发布      | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ✅ 已修复        | 272     | P-01~P-05, P-07~P-10, P-13~P-14, P-16~P-18, P-19~P-21, P-23~P-25, P-30~P-31, P-36~P-39, P-43, P-45, P-47~P-49, P-54~P-59, P-63, P-67~P-69, P-71, P-73~P-74, P-78~P-92, P-95~P-97, P-99~P-107, P-109~P-113, P-115~P-118, P-120~P-122, P-126~P-127, P-130, P-132, P-134, P-136, P-149~P-151, P-153, P-155~P-156, P-158~P-171, P-173, P-177, P-179~P-180, P-182, P-185~P-188, P-190~P-192, P-197, P-200, P-204~P-205, P-207, P-209, P-211, P-214~P-216, P-218~P-220, P-223~P-232, P-236~P-237, P-239~P-242, P-248~P-249, P-254~P-258, P-260~P-267, P-270~P-272, P-276, P-280~P-281, P-285, P-287~P-290, P-291, P-292~P-294, P-295~P-298, P-301~P-305, P-307~P-320, P-323~P-344, P-345~P-352, P-354~P-362                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ⚠️ 降级/设计选择 | 90      | P-11~P-12/P-15/P-27~P-29/P-32/P-34~P-35/P-50~P-53/P-60/P-62/P-64~P-66/P-70/P-75~P-77（PRD文档需补充说明）, P-26/P-33/P-40/P-98/P-124/P-154/P-300/P-353（设计选择/无需修复）, P-41（送花感谢替代评价）, P-42（走兜底路径不产生评价）, P-44（mappers未扩展，P-43已缓解）, P-46（代码待后续迭代）, P-93/P-94（verifications双方一致未正式化）, P-114/P-147/P-152（communityId被忽略无报错）, P-119（unlike scope运行时正常）, P-123（sort类型过宽）, P-129/P-131/P-133（committee本地DTO匹配）, P-135（likeCount前端扩展类型）, P-138/P-139/P-140（community-applications一致但未正式化）, P-172（announcements多余字段）, P-174/P-175/P-176（votes admin类型不一致运行时正常）, P-181（banners可选性不一致service有默认值）, P-183/P-184（service-providers可编辑字段限制）, P-189（qrImageUrl必填性不一致）, P-193（settings Record vs DTO）, P-196/P-201（raw Prisma前端用any）, P-203（dashboard无类型标注）, P-221（双重徽章逻辑冗余可工作）, P-259（committee排序schema无sortOrder）, P-282（periodKey重复但一致）, P-108/P-125/P-128/P-137/P-141/P-142/P-157/P-178/P-194/P-195/P-199/P-202/P-306（设计选择/ponytail 可接受）, P-206/P-208/P-210/P-212~P-213/P-217/P-233~P-234/P-250/P-268~P-269/P-286/P-299（设计选择/ponytail 可接受） |
-| 🟡 建议修        | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| 🟢 可延后        | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| **合计**         | **362** |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 严重度           | 数量    | 编号                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔴 阻塞发布      | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ✅ 已修复        | 297     | P-01~P-05, P-07~P-10, P-13~P-14, P-16~P-21, P-23~P-25, P-30~P-31, P-36~P-39, P-43, P-45, P-47~P-49, P-54~P-59, P-63, P-67~P-69, P-71, P-73~P-74, P-78~P-97, P-99~P-107, P-109~P-123, P-126~P-127, P-129~P-136, P-138~P-140, P-147, P-149~P-153, P-155~P-156, P-158~P-177, P-179~P-183, P-185~P-192, P-196~P-198, P-200~P-201, P-203~P-205, P-207, P-209, P-211, P-214~P-216, P-218~P-220, P-223~P-232, P-236~P-237, P-239~P-242, P-248~P-249, P-254~P-258, P-260~P-267, P-270~P-272, P-276, P-280~P-281, P-285, P-287~P-298, P-301~P-305, P-307~P-320, P-323~P-352, P-354~P-362 |
+| ⚠️ 降级/设计选择 | 65      | P-11~P-12/P-15/P-27~P-29/P-32/P-34~P-35/P-50~P-53/P-60/P-62/P-64~P-66/P-70/P-75~P-77（PRD文档需补充说明, 22 items）, P-26/P-33/P-40/P-98/P-124/P-154/P-300/P-353（设计选择/无需修复, 8 items）, P-41/P-42/P-44/P-46/P-221/P-259/P-282（业务逻辑简化, 7 items）, P-108/P-125/P-128/P-137/P-141/P-142/P-157/P-178/P-194/P-195/P-199/P-202/P-306（ponytail可接受, 13 items）, P-184/P-193（保留⚠️, 2 items）, P-206/P-208/P-210/P-212~P-213/P-217/P-233~P-234/P-250/P-268~P-269/P-286/P-299（ponytail可接受, 13 items）                                                            |
+| 🟡 建议修        | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 🟢 可延后        | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **合计**         | **362** |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |

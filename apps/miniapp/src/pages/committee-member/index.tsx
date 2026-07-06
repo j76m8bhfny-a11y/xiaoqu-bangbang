@@ -5,21 +5,8 @@ import { useRequest } from '@/hooks';
 import { committeeService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
-import { ClaimStatus } from '@xiaoqu-bangbang/shared';
+import { ClaimStatus, type CommitteeMemberDetailDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
-
-interface CommitteeMemberDetailDto {
-  id: string;
-  name: string;
-  position: string;
-  avatarUrl: string | null;
-  responsibility: string | null;
-  termStart: string | null;
-  termEnd: string | null;
-  claimStatus: ClaimStatus;
-  claimedUserId: string | null;
-  claims: { id: string; userId: string; statement: string; status: string; createdAt: string }[];
-}
 
 const CLAIM_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
   [ClaimStatus.UNCLAIMED]: { label: '待认领', color: '#e0a458', bgColor: '#fbf0dd' },
