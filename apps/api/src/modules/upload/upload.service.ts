@@ -3,6 +3,7 @@ import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer
 import * as multer from 'multer';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { existsSync, mkdirSync } from 'fs';
 import { Request } from 'express';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
@@ -11,6 +12,10 @@ const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 @Injectable()
 export class UploadService {
   static multerOptions(): MulterOptions {
+    // P-291: 确保 uploads/ 目录存在，避免全新部署时 multer destination ENOENT
+    if (!existsSync(UPLOAD_DIR)) {
+      mkdirSync(UPLOAD_DIR, { recursive: true });
+    }
     return {
       storage: multer.diskStorage({
         destination: (

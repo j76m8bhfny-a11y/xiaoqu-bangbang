@@ -110,7 +110,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const { adminUser, logout } = useAuthStore();
 
-  const role = adminUser?.role || 'platform_admin';
+  // P-346: role 未加载时默认空字符串，避免 platform_admin 菜单闪烁
+  const role = adminUser?.role || '';
 
   const filteredMenuItems = allMenuItems
     .filter((item) => item.roles.includes(role))

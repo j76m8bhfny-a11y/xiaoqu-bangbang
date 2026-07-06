@@ -4,6 +4,7 @@ import { CreateCommunityApplicationDto } from './dto/create-application.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { getPaginationParams } from '../../common/helpers/pagination';
+import type { ApiResponse, PaginatedData, CommunityApplicationDto } from '@xiaoqu-bangbang/shared';
 
 @Controller('community-applications')
 export class CommunityApplicationsController {
@@ -11,9 +12,13 @@ export class CommunityApplicationsController {
     @Inject(CommunityApplicationsService) private service: CommunityApplicationsService,
   ) {}
 
+  // ponytail: create 返回原始 Prisma 对象，字段类型 (null vs undefined, Date vs string) 与 CommunityApplicationDto 不完全匹配
   @Post()
   @UseGuards(JwtAuthGuard)
-  async create(@CurrentUser('userId') userId: string, @Body() dto: CreateCommunityApplicationDto) {
+  async create(
+    @CurrentUser('userId') userId: string,
+    @Body() dto: CreateCommunityApplicationDto,
+  ): Promise<ApiResponse> {
     const data = await this.service.create(userId, dto);
     return { code: 0, message: 'ok', data };
   }
@@ -30,7 +35,7 @@ export class CommunityApplicationsController {
       page?: string;
       pageSize?: string;
     },
-  ) {
+  ): Promise<ApiResponse<PaginatedData<CommunityApplicationDto>>> {
     const { page, pageSize, skip, take } = getPaginationParams(
       Number(query.page),
       Number(query.pageSize),
@@ -41,34 +46,44 @@ export class CommunityApplicationsController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async listMine(@CurrentUser('userId') userId: string) {
+  async listMine(
+    @CurrentUser('userId') userId: string,
+  ): Promise<ApiResponse<{ items: CommunityApplicationDto[] }>> {
     const items = await this.service.listMine(userId);
     return { code: 0, message: 'ok', data: { items } };
   }
 
   @Get('supported')
   @UseGuards(JwtAuthGuard)
-  async listSupported(@CurrentUser('userId') userId: string) {
+  async listSupported(
+    @CurrentUser('userId') userId: string,
+  ): Promise<ApiResponse<{ items: CommunityApplicationDto[] }>> {
     const items = await this.service.listSupported(userId);
     return { code: 0, message: 'ok', data: { items } };
   }
 
   @Get(':id')
-  async detail(@Param('id') id: string) {
+  async detail(@Param('id') id: string): Promise<ApiResponse<CommunityApplicationDto>> {
     const data = await this.service.detail(id);
     return { code: 0, message: 'ok', data };
   }
 
   @Get(':id/me')
   @UseGuards(JwtAuthGuard)
-  async detailForUser(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+  async detailForUser(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+  ): Promise<ApiResponse<CommunityApplicationDto>> {
     const data = await this.service.detail(id, userId);
     return { code: 0, message: 'ok', data };
   }
 
   @Post(':id/support')
   @UseGuards(JwtAuthGuard)
-  async support(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+  async support(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+  ): Promise<ApiResponse<{ ok: boolean }>> {
     const data = await this.service.support(id, userId);
     return { code: 0, message: 'ok', data };
   }

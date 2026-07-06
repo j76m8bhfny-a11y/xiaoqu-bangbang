@@ -6,5 +6,5 @@ export const shareService = {
     http.get<ShareCardConfig>('/share/card-config', params),
 
   logShare: (data: ShareLogRequest) =>
-    http.post('/share/logs', data),
+    http.post<{ id: string; createdAt: string }>('/share/logs', data),
 };

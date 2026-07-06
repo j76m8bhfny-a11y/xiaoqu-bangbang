@@ -211,6 +211,8 @@ export enum ContributionAction {
   PUBLIC_WELFARE = 'public_welfare',
   LOST_FOUND = 'lost_found',
   FEEDBACK = 'feedback',
+  COMMUNITY_FOUNDING = 'community_founding',
+  // ponytail: 预留枚举值，当前未使用但未来可能需要
   MARKET = 'market',
   GOOD_REVIEW = 'good_review',
   MANUAL = 'manual',
@@ -346,6 +348,7 @@ export enum NotificationType {
   VOTE = 'vote',
   ANNOUNCEMENT = 'announcement',
   SYSTEM = 'system',
+  TOPIC_CLOSED = 'topic_closed',
 }
 
 /** 分享目标类型 */

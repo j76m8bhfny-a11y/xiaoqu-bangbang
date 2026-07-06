@@ -39,8 +39,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   // P-344: committee_admin 访问 platform_admin 专属页面时重定向
   useEffect(() => {
     if (hasToken && adminUser) {
-      const role = adminUser.role || 'platform_admin';
-      if (role !== 'platform_admin' && platformOnlyPaths.some((p) => pathname.startsWith(p))) {
+      // P-346: role 未加载时不默认 platform_admin，避免菜单闪烁
+      const role = adminUser.role || '';
+      if (
+        role &&
+        role !== 'platform_admin' &&
+        platformOnlyPaths.some((p) => pathname.startsWith(p))
+      ) {
         router.replace('/dashboard');
       }
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Form, Input, Button, Card, Typography, message, Space } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
@@ -10,6 +10,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const login = useAuthStore((s) => s.login);
+
+  // P-345: 已登录用户直接跳转 dashboard
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      router.replace('/dashboard');
+    }
+  }, [router]);
 
   const handleSubmit = async (values: { username: string; password: string }) => {
     setLoading(true);

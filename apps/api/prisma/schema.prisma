@@ -409,7 +409,7 @@ model Report {
   communityId String?   @map("community_id") @db.Uuid
   reason      String // privacy/false_info/harassment/illegal/ad_spam/other
   description String?
-  status      String    @default("pending") // pending/processed/rejected
+  status      String    @default("pending") // pending/dismissed/takedown/warned/banned
   handledBy   String?   @map("handled_by") @db.Uuid
   handledAt   DateTime? @map("handled_at")
   createdAt   DateTime  @default(now()) @map("created_at")

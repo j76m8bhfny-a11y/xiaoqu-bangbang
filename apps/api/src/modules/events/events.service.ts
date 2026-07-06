@@ -1251,6 +1251,17 @@ export class EventsService {
       throw new BadRequestException('不支持的举报目标类型');
     }
 
+    // P-294: 防重复举报和自举报
+    if (dto.targetType === 'user' && reporterId === dto.targetId) {
+      throw new BadRequestException('不能举报自己');
+    }
+    const existingReport = await this.prisma.report.findFirst({
+      where: { reporterId, targetId: dto.targetId, targetType: dto.targetType },
+    });
+    if (existingReport) {
+      throw new BadRequestException('您已举报过此内容');
+    }
+
     const report = await this.prisma.report.create({
       data: {
         reporterId,

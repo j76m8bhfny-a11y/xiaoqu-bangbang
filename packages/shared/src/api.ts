@@ -285,8 +285,8 @@ export interface CreateMarketItemRequest {
   description: string;
   images: string[];
   price?: number | null;
-  tradeType: TradeType;
-  conditionLevel: ConditionLevel;
+  tradeType?: TradeType;
+  conditionLevel?: ConditionLevel;
   contactText?: string;
 }
 

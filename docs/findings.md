@@ -186,7 +186,7 @@ if (vote.onlyVerified) {
 
 ---
 
-### P-11 🟢 PRD 补充 topic_closed 通知类型
+### P-11 ⚠️ PRD 补充 topic_closed 通知类型
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:1362`
 
@@ -198,7 +198,7 @@ if (vote.onlyVerified) {
 
 ## 五、文档与代码不一致
 
-### P-12 🟢 PRD 遗漏创始人徽章和种子贡献者徽章
+### P-12 ⚠️ PRD 遗漏创始人徽章和种子贡献者徽章
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:1792, 1763`
 
@@ -208,7 +208,7 @@ if (vote.onlyVerified) {
 
 ---
 
-### P-13 🟢 PRD 遗漏 community_founding 贡献记录
+### P-13 ✅ PRD 遗漏 community_founding 贡献记录
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:1774-1788`
 
@@ -221,7 +221,7 @@ if (vote.onlyVerified) {
 
 ---
 
-### P-14 🟢 ContributionAction 枚举有 3 个未使用的值
+### P-14 ✅ ContributionAction 枚举有 3 个未使用的值
 
 **位置**: `packages/shared/src/enums.ts:204-213`
 
@@ -234,7 +234,7 @@ if (vote.onlyVerified) {
 
 ---
 
-### P-15 🟢 社群入口文档不一致
+### P-15 ⚠️ 社群入口文档不一致
 
 **位置**: `apps/miniapp/src/app.config.ts:37-39`
 
@@ -407,7 +407,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
-### P-26 🟢 议题赞踩不限制作用域
+### P-26 ⚠️ 议题赞踩不限制作用域
 
 **位置**: `apps/api/src/modules/topics/topics.service.ts:114-148`
 
@@ -417,7 +417,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
-### P-27 🟢 议题合并建议是手动触发，非自动
+### P-27 ⚠️ 议题合并建议是手动触发，非自动
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:829`
 
@@ -427,7 +427,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
-### P-28 🟢 匿名投票脱敏逻辑 PRD 未说明
+### P-28 ⚠️ 匿名投票脱敏逻辑 PRD 未说明
 
 **问题**: PRD §4.7 有 `isAnonymous` 字段，但没有说明匿名投票的脱敏逻辑。代码中 `getResults()` 不返回投票者信息（隐式脱敏），但 `VoteRecord` 表存储了 userId。
 
@@ -437,7 +437,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ## 十、其他文档问题
 
-### P-29 🟢 PRD 遗漏创始人徽章和种子贡献者徽章
+### P-29 ⚠️ PRD 遗漏创始人徽章和种子贡献者徽章
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:1792, 1763`
 
@@ -447,7 +447,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
-### P-30 🟢 PRD 遗漏 community_founding 贡献记录
+### P-30 ✅ PRD 遗漏 community_founding 贡献记录
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:1774-1888`
 
@@ -460,7 +460,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
-### P-31 🟢 ContributionAction 枚举有 3 个未使用的值
+### P-31 ✅ ContributionAction 枚举有 3 个未使用的值
 
 **位置**: `packages/shared/src/enums.ts:204-213`
 
@@ -470,7 +470,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
-### P-32 🟢 社群入口文档不一致
+### P-32 ⚠️ 社群入口文档不一致
 
 **位置**: `apps/miniapp/src/app.config.ts:37-39`
 
@@ -480,7 +480,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
-### P-33 🟢 业委会认领与 committee_admin 角色是两套独立体系
+### P-33 ⚠️ 业委会认领与 committee_admin 角色是两套独立体系
 
 **问题**: PRD §2.2 说"认证业主 → (平台分配) → 业委会管理员"，§4.8 说"业委会成员认领"。两者关系未说明。
 
@@ -493,7 +493,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
-### P-34 🟢 奖励方式 rewardType 适用范围未说明
+### P-34 ⚠️ 奖励方式 rewardType 适用范围未说明
 
 **问题**: `rewardType`（free/paid/negotiable/none）对所有事件类型可选，但只对 help_request 有意义（区分 help_free/help_paid 积分）。
 
@@ -501,7 +501,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
-### P-35 🟢 eventCount 更新逻辑未说明
+### P-35 ⚠️ eventCount 更新逻辑未说明
 
 **问题**: 事件创建审核通过时 topic.eventCount +1，但事件 close 时不 -1。
 
@@ -556,7 +556,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ## 十二、Schema 注释
 
-### P-39 🟢 Report 状态注释与代码不一致
+### P-39 ✅ Report 状态注释与代码不一致
 
 **位置**: `apps/api/prisma/schema.prisma` Report 模型
 
@@ -566,7 +566,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ---
 
-### P-40 🟢 公告无独立 publish 端点
+### P-40 ⚠️ 公告无独立 publish 端点
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts`
 
@@ -701,31 +701,31 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 核对已实现]**
 
-### P-50 🟢 §4.17 审核触发点与 §5.5 不一致
+### P-50 ⚠️ §4.17 审核触发点与 §5.5 不一致
 
 **问题**: §4.17 缺少"议题创建"，§5.5 有。
 
 **方案**: §4.17 补充"议题创建"，两处对齐。
 
-### P-51 🟢 §4.11 分享目标与页面列表矛盾
+### P-51 ⚠️ §4.11 分享目标与页面列表矛盾
 
 **问题**: "可分享目标"只有 event/market/service_provider，但页面列表包含 committee-announcement/vote-detail。
 
 **方案**: 结构化分享仅 event/market/service_provider；公告/投票走微信原生分享（onShareAppMessage）。
 
-### P-52 🟢 投票创建权限未明确
+### P-52 ⚠️ 投票创建权限未明确
 
 **问题**: PRD 未明确说明谁可以创建投票。
 
 **方案**: §4.7 明确"投票由管理员创建，普通用户仅参与投票"。
 
-### P-53 🟢 议题总结填写人不明确
+### P-53 ⚠️ 议题总结填写人不明确
 
 **问题**: §4.6 说议题 closed"含总结"，但未说谁写。
 
 **方案**: §4.6 明确"仅管理员可关闭议题并填写总结（closedSummary）"。
 
-### P-54 🟢 月榜无定时重算
+### P-54 ✅ 月榜无定时重算
 
 **问题**: 无定时任务，月榜在月初可能短暂为空，需等事件完成触发重算。
 
@@ -765,7 +765,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 本轮修复]** topic-detail/vote-detail 加举报按钮 + shared 枚举补全。议题评论（topic_comment）举报入口延后，需评论组件逐条加按钮。
 
-### P-57 🟢 事件"评价"与"送花感谢"概念需厘清
+### P-57 ✅ 事件"评价"与"送花感谢"概念需厘清
 
 **位置**: `apps/miniapp/src/pages/event-detail/index.tsx`, `apps/api/src/modules/events/events.controller.ts:173`
 
@@ -792,7 +792,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 62f3ec4]**
 
-### P-59 🟢 topic_closed 通知类型未在共享枚举中声明
+### P-59 ✅ topic_closed 通知类型未在共享枚举中声明
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:1362`, `packages/shared/src/enums.ts:336-345`
 
@@ -806,7 +806,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ## 十六、PRD 反直觉/冗余/歧义审查（第四轮）
 
-### P-60 🟢 单帮手与多帮手完成流程不一致 + "双方确认"歧义
+### P-60 ⚠️ 单帮手与多帮手完成流程不一致 + "双方确认"歧义
 
 **问题**: §4.4 单帮手完成是"帮手申请完成→创建者确认"三步（R11 双方确认），多帮手只有"创建者逐个确认"两步（参与确认）。场景1 step6 用"双方确认"描述但含义不清。
 
@@ -820,7 +820,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 7c9d190]**
 
-### P-62 🟢 议题赞踩"两个作用域"概念不清
+### P-62 ⚠️ 议题赞踩"两个作用域"概念不清
 
 **问题**: §4.6 赞踩分 open/closed 两个作用域，概念复杂，大多数用户不理解。
 
@@ -834,19 +834,19 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 7c9d190]**
 
-### P-64 🟢 "三套激励体系"计数错误
+### P-64 ⚠️ "三套激励体系"计数错误
 
 **问题**: §4.9 说"三套"但列了四节（互助/议事/议题/小区创建）。
 
 **方案**: 改为"四套独立激励体系"。
 
-### P-65 🟢 "只记贡献"含义不清
+### P-65 ⚠️ "只记贡献"含义不清
 
 **问题**: §4.9 激励表"0 朵（只记贡献）"含义模糊，用户觉得"发了求助什么都没得到"。
 
 **方案**: 改为"0 朵"，说明列写明"发起求助是寻求帮助而非贡献劳动"。
 
-### P-66 🟢 场景3和§4.1引用未实现功能如已上线
+### P-66 ⚠️ 场景3和§4.1引用未实现功能如已上线
 
 **问题**: 场景3描述意向记录/买家选择/互评如已可用（P-55 已决定本期不实现）。§4.1"手机号/微信号/楼栋房号"引用技能匹配如已可用（§4.19 本期不实现）。
 
@@ -892,7 +892,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 7c9d190]**
 
-### P-70 🟢 议题可重新开放但 PRD 未提及
+### P-70 ⚠️ 议题可重新开放但 PRD 未提及
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:903`, `apps/api/src/modules/admin/admin.service.ts:1372`
 
@@ -948,7 +948,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 0fba0d4]**
 
-### P-75 🟢 匿名事件管理员可见性未注明
+### P-75 ⚠️ 匿名事件管理员可见性未注明
 
 **位置**: `apps/api/src/modules/events/events.service.ts:77-88` (maskAnonymous)
 
@@ -956,7 +956,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD §4.4 匿名规则补充"管理员可见匿名事件创建者（用于审核管理）"。
 
-### P-76 🟢 议题评分不可修改未注明
+### P-76 ⚠️ 议题评分不可修改未注明
 
 **位置**: `apps/api/src/modules/topics/topics.service.ts:167-191` (rate 方法)
 
@@ -964,7 +964,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD §4.6 评分规则补充"提交后不可修改"。
 
-### P-77 🟢 投票 resultVisibility "after_vote" 含义模糊
+### P-77 ⚠️ 投票 resultVisibility "after_vote" 含义模糊
 
 **位置**: `apps/api/src/modules/votes/votes.service.ts:141-148`, PRD §4.7
 
@@ -1055,7 +1055,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 核对已实现]**
 
-### P-85 🟢 "30天无活动"中"活动"定义不够精确
+### P-85 ✅ "30天无活动"中"活动"定义不够精确
 
 **位置**: PRD §4.4 自动过期规则
 
@@ -1063,7 +1063,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD §4.4 已明确"活动仅指新响应（EventApplication 创建）和状态变更，评论/点赞不重置计时器"。
 
-### P-86 🟢 §4.5 意向记录缺"本期不实现"内联标注
+### P-86 ✅ §4.5 意向记录缺"本期不实现"内联标注
 
 **位置**: PRD §4.5 意向记录段落
 
@@ -1071,7 +1071,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **方案**（用户确认）: PRD §4.5 已补充"⚠️ 本期不实现"内联标注。
 
-### P-87 🟢 管理端内容输入长度未定义
+### P-87 ✅ 管理端内容输入长度未定义
 
 **位置**: PRD §6.2 输入长度限制表
 
@@ -1142,25 +1142,25 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
 
-### P-95 🟢 [auth] updateMe 注释类型不精确
+### P-95 ✅ [auth] updateMe 注释类型不精确
 
 - **位置**: `apps/miniapp/src/services/auth.ts:16`
 - **问题**: 注释为 `UserDto` 但实际只返回 4 字段（见 P-91）。
 - **建议**: 与 P-91 同修。
 
-### P-96 🟢 [auth] openid 字段在 LoginResponse 和 UserDto 间隐式耦合
+### P-96 ✅ [auth] openid 字段在 LoginResponse 和 UserDto 间隐式耦合
 
 - **位置**: `packages/shared/src/api.ts:86-89` vs `apps/api/src/modules/auth/auth.controller.ts:22-26`
 - **问题**: `LoginResponse.user` 含 `openid`（wechatLogin 补上），但 `GET /me` 不含。两个接口在 `openid` 字段上不一致。
 - **建议**: `UserDto.openid` 改可选，或统一两端都返回。
 
-### P-97 🟢 [communities] 重复定义 SocialGroupDto
+### P-97 ✅ [communities] 重复定义 SocialGroupDto
 
 - **位置**: `apps/miniapp/src/services/community.ts:4-11`
 - **问题**: 本地定义 `SocialGroupDto` 与 shared 重复。
 - **建议**: 与 P-92 同修。
 
-### P-98 🟢 [verifications] 本地 VerificationResultDto 应移到 shared
+### P-98 ⚠️ [verifications] 本地 VerificationResultDto 应移到 shared
 
 - **位置**: `apps/miniapp/src/services/verification.ts:4-9`
 - **问题**: 与 P-93 同类问题，类型定义分散在 service 文件。
@@ -1226,7 +1226,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `EventDto._count` 定义 5 字段，后端 list 只返回 3 个（缺 `thanks`/`favorites`）。findOne 的 \_count 含 5 个，list 和 detail 不一致。
 - **建议**: 后端 list 也加上 `thanks`/`favorites` 计数。
 
-### P-108 🟢 [events] DTO 风格不一致（class-validator vs interface）
+### P-108 ⚠️ [events] DTO 风格不一致（class-validator vs interface）
 
 - **位置**: 后端 DTOs | shared api.ts
 - **问题**: 后端用 class-validator 装饰器，shared 用 TS interface。后端枚举值硬编码字符串数组而非引用 shared enums。
@@ -1278,7 +1278,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
 
-### P-115 🟢 [market] tradeType/conditionLevel 必填 vs 可选
+### P-115 ✅ [market] tradeType/conditionLevel 必填 vs 可选
 
 - **位置**: shared `packages/shared/src/api.ts:263-264` | 后端 `apps/api/src/modules/market/dto/create-market-item.dto.ts:24-31`
 - **问题**: shared 必填，后端可选（有默认值 `'free'`/`'good'`）。
@@ -1340,13 +1340,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
 
-### P-124 🟢 [topics] controller 守卫层级叠加
+### P-124 ⚠️ [topics] controller 守卫层级叠加
 
 - **位置**: `apps/api/src/modules/topics/topics.controller.ts:21`
 - **问题**: 类级 `@UseGuards(JwtAuthGuard, CurrentCommunityGuard)`，方法级又加 `@UseGuards(VerifiedMemberGuard)`，NestJS 合并不覆盖，实际 3 守卫叠加。
 - **建议**: 明确守卫层级，避免不必要叠加。
 
-### P-125 🟢 [topics] topic-suggestions 逻辑在 events/topics service 重复
+### P-125 ⚠️ [topics] topic-suggestions 逻辑在 events/topics service 重复
 
 - **位置**: `apps/api/src/modules/events/events.service.ts:246-262` 和 `apps/api/src/modules/topics/topics.service.ts:399-415`
 - **问题**: tokenize + jaccard 逻辑完全重复，topicsService.suggestTopics 未被 controller 引用。
@@ -1364,7 +1364,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: 后端 list/findOne 返回 `createdAt`，`VoteDto` 未声明。
 - **建议**: shared 补 `createdAt: string`。
 
-### P-128 🟢 [votes] VoteResultDto 未在 shared 定义
+### P-128 ⚠️ [votes] VoteResultDto 未在 shared 定义
 
 - **位置**: 小程序 `apps/miniapp/src/services/vote.ts:4-9`
 - **问题**: 小程序本地定义 `VoteResultDto`，后端返回相同结构，shared 无对应 DTO。
@@ -1426,7 +1426,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: `CommitteeAnnouncementDto` 有 `publisherNickname: string`，但 service `getAnnouncementDetail` 用 `findFirst` 无 `include`，若 DB 用 `publisherId` 外键则返回无 `publisherNickname`。
 - **建议**: 确认 DB 字段名，若为 `publisherId` 则 service 加 `include: { publisher: { select: { nickname: true } } }` 并映射。
 
-### P-137 🟢 [committee] toggleAnnouncementLike 无 shared DTO
+### P-137 ⚠️ [committee] toggleAnnouncementLike 无 shared DTO
 
 - **位置**: 小程序 `apps/miniapp/src/services/committee.ts:51-52`
 - **问题**: miniapp 期望 `{ liked, likeCount }`，shared 无响应 DTO。
@@ -1456,13 +1456,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
 
-### P-141 🟢 [community-applications] support 返回类型无 shared DTO
+### P-141 ⚠️ [community-applications] support 返回类型无 shared DTO
 
 - **位置**: 小程序 `apps/miniapp/src/services/community-application.ts:35`
 - **问题**: miniapp 期望 `{ ok: boolean }`，shared 无 DTO。
 - **建议**: 可选，shared 补类型。
 
-### P-142 🟢 [community-applications] materialType 字符串字面量非枚举
+### P-142 ⚠️ [community-applications] materialType 字符串字面量非枚举
 
 - **位置**: 后端 `apps/api/src/modules/community-applications/dto/create-application.dto.ts:30-31` vs `packages/shared/src/api.ts:861`
 - **问题**: 两端都用字符串字面量而非引用 `MaterialType` 枚举。
@@ -1527,7 +1527,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 5d2fe07]**
 
-### P-150 🟢 [share] logShare 返回类型 unknown
+### P-150 ✅ [share] logShare 返回类型 unknown
 
 - **位置**: 小程序 `apps/miniapp/src/services/share.ts:8-9`
 - **问题**: `http.post('/share/logs', data)` 无泛型参数，类型为 `unknown`，后端实际返回 `{ id, createdAt }`。
@@ -1553,7 +1553,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: 同 P-151，miniapp 声明 `PaginatedData`，controller 返回 `{ items }`。
 - **建议**: 同 P-151。
 
-### P-154 🟢 [serviceProviders] DTO 缺 coverUrl/sortOrder/createdAt
+### P-154 ⚠️ [serviceProviders] DTO 缺 coverUrl/sortOrder/createdAt
 
 - **位置**: `apps/api/src/modules/serviceProviders/service-providers.service.ts:22-35` vs `packages/shared/src/api.ts:388-398`
 - **问题**: 后端返回 `coverUrl`/`sortOrder`/`createdAt`，`ServiceProviderDto` 未声明。小程序未使用这些字段，不影响功能。
@@ -1587,7 +1587,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: shared `AdminReviewActionRequest.rejectReason`，controller 接收 `body: { reason? }`，前端发送 `{ reason }`。三端字段名不一致。
 - **建议**: 统一为 `rejectReason`（与 shared DTO 一致）。
 
-### P-157 🟢 [reviews] AdminReviewActionRequest.action 字段未使用
+### P-157 ⚠️ [reviews] AdminReviewActionRequest.action 字段未使用
 
 - **位置**: `packages/shared/src/api.ts:544-547` vs `apps/api/src/modules/admin/admin.controller.ts:86-106`
 - **问题**: shared DTO 的 `action: 'approve'|'reject'|'manual-visible-admin-only'` 将动作作为字段，但 controller 拆分为三个独立路由，`action` 从未被接收。
@@ -1627,7 +1627,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: shared `visibleToPublic: boolean`（必填），controller `visibleToPublic?: boolean`（可选，service 默认 `?? true`）。
 - **建议**: shared 改为可选 `visibleToPublic?: boolean`。
 
-### P-163 🟢 [events] FeedbackLogDto 无 GET 端点消费
+### P-163 ✅ [events] FeedbackLogDto 无 GET 端点消费
 
 - **位置**: `packages/shared/src/api.ts:440-449`
 - **问题**: shared 定义了 `FeedbackLogDto`（读模型），但 controller 仅有 `POST events/:id/feedback-logs` 创建端点，无 GET 读取列表。前端也只支持添加，不显示历史。
@@ -1653,7 +1653,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 - **问题**: controller body `Partial<{ name, position, avatarUrl, responsibility }>` 缺 `termStart`/`termEnd`/`status`，shared `UpdateCommitteeMemberRequest` 有这些字段。
 - **建议**: controller body 补齐字段。
 
-### P-167 🟢 [committee] 前端编辑弹窗缺字段
+### P-167 ✅ [committee] 前端编辑弹窗缺字段
 
 - **位置**: `apps/admin/src/app/committee/page.tsx:190-205`
 - **问题**: 编辑弹窗缺 `termStart`/`termEnd`/`avatarUrl` 输入字段。
@@ -1731,7 +1731,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 0d015a3]**
 
-### P-178 🟢 [votes] PATCH /votes/:id 无审计日志
+### P-178 ⚠️ [votes] PATCH /votes/:id 无审计日志
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:344-352`
 - **问题**: 未声明 `@CurrentUser('userId')`，service `updateVote` 无 `logAudit` 调用。对比 publish/close 都有审计日志（R6 红线相关）。
@@ -1817,7 +1817,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
 
-### P-190 🟢 [community-applications] controller 无类型标注
+### P-190 ✅ [community-applications] controller 无类型标注
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:944-985`
 - **问题**: list 和 getDetail 返回值未标注 TypeScript 类型，实际结构与 `AdminCommunityApplicationDto` 一致（service 的 `toAdminApplicationDto` 对齐）。
@@ -1845,13 +1845,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
 
-### P-194 🟢 [share] ShareTemplateDto status 缺枚举约束
+### P-194 ⚠️ [share] ShareTemplateDto status 缺枚举约束
 
 - **位置**: `packages/shared/src/api.ts:499-505`
 - **问题**: `status: string` 仅泛型 string，Prisma 模型为 `active`/`inactive`。
 - **建议**: 定义 `'active' | 'inactive'` 联合类型。
 
-### P-195 🟢 [share] 缺 UpdateShareTemplateRequest
+### P-195 ⚠️ [share] 缺 UpdateShareTemplateRequest
 
 - **位置**: `packages/shared/src/api.ts`
 - **问题**: 有 `ShareTemplateDto` 但无 `UpdateShareTemplateRequest`。后端自定义 `UpdateShareTemplateDto`，与前端一致，但未在 shared 体现。
@@ -1879,7 +1879,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
 
-### P-199 🟢 [market] 缺 Admin MarketItem DTO
+### P-199 ⚠️ [market] 缺 Admin MarketItem DTO
 
 - **位置**: `apps/api/src/modules/admin/admin.controller.ts:735-748` vs `apps/admin/src/app/market/page.tsx:38-43`
 - **问题**: 后端返回精选字段子集，前端用 `PaginatedData<any>`。`MarketItemDto` 是全量字段，与 admin 返回子集不匹配。
@@ -1899,7 +1899,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-06 核对] ⚠️ 设计选择/无需修复 — 见汇总表说明**
 
-### P-202 🟢 [topics] 详情返回结构不完全对齐
+### P-202 ⚠️ [topics] 详情返回结构不完全对齐
 
 - **位置**: `apps/api/src/modules/admin/admin.service.ts:1323-1334` vs `packages/shared/src/api.ts:793-795`
 - **问题**: `getTopicById` 用 `include: { events }` 返回 Prisma 数据，`TopicDetailDto` 定义为 `TopicDto & { events: TopicEventItem[] }`。字段名可能与 DTO 不完全匹配。
@@ -1936,28 +1936,28 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 | ----- | ------ | ---- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | P-204 | 🟡     | M1.2 | auth.service.ts:60           | `getMe` 在用户不存在时返回 `null`，controller 直接包装为 `{code:0,data:null}`，前端拿到 `data:null` 不知是异常还是未登录 **[2026-07-05 已修复, commit 2493f33]** |
 | P-205 | 🟡     | M1.3 | users/dto/update-user.dto.ts | `UpdateUserDto` 的 `nickname`/`bio` 只有 `@IsString()` 无 `@MaxLength()`，PRD 要求 nickname ≤20、bio ≤200 **[2026-07-05 已修复, commit 2493f33]**                |
-| P-206 | 🟢     | M1.3 | auth.service.ts:80-86        | `updateMe` 响应仅返回 `{id,nickname,avatarUrl,bio}`，缺 `status`/`currentCommunityId`，前端需二次调 getMe 刷新                                                   |
+| P-206 | ⚠️     | M1.3 | auth.service.ts:80-86        | `updateMe` 响应仅返回 `{id,nickname,avatarUrl,bio}`，缺 `status`/`currentCommunityId`，前端需二次调 getMe 刷新                                                   |
 | P-207 | 🟡     | M1.4 | auth.service.ts:218-220      | `myActiveEventCount` 查询 `status:'open'` 仅计单状态，应含 `in_progress`/`processing`（活跃中事件） **[2026-07-05 已修复, commit 2493f33]**                      |
-| P-208 | 🟢     | M1.4 | auth.service.ts:180-188      | 未选小区时返回 `communityId:null` + 全部归零，前端需判空处理                                                                                                     |
+| P-208 | ⚠️     | M1.4 | auth.service.ts:180-188      | 未选小区时返回 `communityId:null` + 全部归零，前端需判空处理                                                                                                     |
 | P-209 | ✅     | M1.6 | Standard.md M1.6             | Standard 验收标准笔误: 写 "返回 40301"，实际 40301=Forbidden，40101=Unauthorized，退出登录应返回 40101（文档问题）                                               |
-| P-210 | 🟢     | M1.6 | auth.controller.ts           | `@Public()` 装饰器仅方法级支持，class 级别 `@Public()` 未实现（当前无此需求）                                                                                    |
+| P-210 | ⚠️     | M1.6 | auth.controller.ts           | `@Public()` 装饰器仅方法级支持，class 级别 `@Public()` 未实现（当前无此需求）                                                                                    |
 
 ### communities 模块 (M2)
 
 | 编号  | 严重度 | 任务 | 位置                         | 描述                                                                                                            |
 | ----- | ------ | ---- | ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | P-211 | 🟡     | M2.2 | communities.service.ts:42-48 | `select` 先查 `communityMember` 再 `create`，两步非事务，并发可重复创建 **[2026-07-05 已修复, commit c9400e2]** |
-| P-212 | 🟢     | M2.3 | communities.controller.ts    | `getMemberVerifyStatus` 返回 null 时前端需兜底处理                                                              |
+| P-212 | ⚠️     | M2.3 | communities.controller.ts    | `getMemberVerifyStatus` 返回 null 时前端需兜底处理                                                              |
 
 ### verifications 模块 (M3)
 
 | 编号  | 严重度 | 任务      | 位置                                | 描述                                                                                                                                                                                                                                                                                                          |
 | ----- | ------ | --------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P-213 | 🟢     | M3.1      | verifications.service.ts:111        | schema default `status:'pending'` 不可达——代码始终显式设 `verificationStatus`，default 永远不生效                                                                                                                                                                                                             |
+| P-213 | ⚠️     | M3.1      | verifications.service.ts:111        | schema default `status:'pending'` 不可达——代码始终显式设 `verificationStatus`，default 永远不生效                                                                                                                                                                                                             |
 | P-214 | 🟡     | M3.1      | verifications.service.ts            | 重复提交认证未限制——同一用户已有 pending 时再提交会覆盖，无幂等校验 **[2026-07-05 已修复, commit 0d0ad5d]**                                                                                                                                                                                                   |
 | P-215 | ✅     | M3.3      | Standard.md M3.3                    | Standard 验收标准缺 0.5 阈值描述（OCR ≥0.5 判通过）和 rejected 分支说明（文档问题）                                                                                                                                                                                                                           |
 | P-216 | 🔴     | M3.6      | verifications.service.ts:115-119    | **[R5 红线违反]** `originalFileDeletedAt` 在所有状态下都被设置（approved/rejected/pending），违反 PRD——仅 approved 时应标记删除 **[2026-07-05 已修复, commit 521075e]**                                                                                                                                       |
-| P-217 | 🟢     | M3.6      | verifications.service.ts            | `originalFileDeletedAt` 仅标记时间，无定时任务物理删除原图文件                                                                                                                                                                                                                                                |
+| P-217 | ⚠️     | M3.6      | verifications.service.ts            | `originalFileDeletedAt` 仅标记时间，无定时任务物理删除原图文件                                                                                                                                                                                                                                                |
 | P-218 | 🔴     | M3.7      | votes.controller.ts:35-36           | **[R3 红线违反]** `submitVote` 缺 `VerifiedMemberGuard`，未认证用户可投票（与 P-06 交叉引用: P-06 是 service 层 onlyVerified 逻辑 bug，P-218 是 controller 层缺守卫，同一根因不同修复点） **[2026-07-05 已修复, commit 32f253e]**                                                                             |
 | P-219 | 🟡     | M3.7      | events.controller.ts                | 6 个写操作缺 `VerifiedMemberGuard`: `@Patch(':id')` / `@Post(':id/close')` / `@Post(':id/applications')` / `@Post(':id/applications/:applicationId/select')` / `@Post(':id/complete/request')` / `@Post(':id/complete/confirm')`。创建/评论/点赞/感谢/评分已有守卫 ✅ **[2026-07-05 已修复, commit d264c85]** |
 | P-220 | 🟡     | M3.7      | committee.controller.ts:43-44,87-88 | `claimMembership` 和 `like` 缺 `VerifiedMemberGuard`，未认证用户可认领业委会成员/点赞公告 **[2026-07-05 已修复, commit d264c85]**                                                                                                                                                                             |
@@ -1993,8 +1993,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 | P-230 | 🟡     | M4.11 | events.controller.ts:210 | getComments 无分页，缺少 page/pageSize/total，service 直接 findMany 返回全部 **[2026-07-05 已修复, commit 91f29b6]**                                               |
 | P-231 | 🟡     | M4.13 | events.service.ts:722    | 重复感谢返回 400 而非 409（应改用 ConflictException） **[2026-07-05 已修复, commit 4641336]**                                                                      |
 | P-232 | 🟡     | M4.17 | report.dto.ts:11         | targetType 只有 5 种，缺 topic/topic_comment/vote（Standard 要求 8 种）。service report 方法也只处理 4 种 communityId 解析 **[2026-07-05 已修复, commit d1385b6]** |
-| P-233 | 🟢     | M4.3  | events.service.ts:149    | findOne 返回的 viewCount 是更新前旧值（少 1）                                                                                                                      |
-| P-234 | 🟢     | M4.15 | events.service.ts:860    | getFeedbackLogs 未校验事件类型为 public_feedback                                                                                                                   |
+| P-233 | ⚠️     | M4.3  | events.service.ts:149    | findOne 返回的 viewCount 是更新前旧值（少 1）                                                                                                                      |
+| P-234 | ⚠️     | M4.15 | events.service.ts:860    | getFeedbackLogs 未校验事件类型为 public_feedback                                                                                                                   |
 
 ### market 模块 (M5)
 
@@ -2020,7 +2020,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 | P-247 | ✅     | M6.3  | topics.service.ts:86  | findById 未 include events 数组，TopicDetailDto 缺 events 字段（仅返回 latestEventPreview，不满足 Standard 要求） **[2026-07-05 已修复, commit 1edd631]** |
 | P-248 | ✅     | M6.2  | topics.service.ts:96  | description 长度未校验（≤500 字） **[2026-07-05 已修复, commit 4734f45]**                                                                                 |
 | P-249 | 🟡     | M6.10 | topics.service.ts:417 | scanMergeSuggestions 未检查 ai_topic_merge 系统开关 **[2026-07-05 已修复, commit 4641336]**                                                               |
-| P-250 | 🟢     | M6.5  | topics.service.ts:175 | findUnique 查重在 $transaction 外，竞态窗口（schema 有 UNIQUE 兜底但 P2002 未处理）                                                                       |
+| P-250 | ⚠️     | M6.5  | topics.service.ts:175 | findUnique 查重在 $transaction 外，竞态窗口（schema 有 UNIQUE 兜底但 P2002 未处理）                                                                       |
 
 > 注: M6.9 (AI 议题推荐) 与 M4.16 (议题推荐) 是同一代码 `events.service.ts:suggestTopics`，已在 P-225 记录，不重复编号。
 
@@ -2055,8 +2055,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 | P-265 | 🔴     | M9补充 | admin.service.ts:1791                 | 申请人缺少 community_founding 贡献记录(score=10)。助力人有 score=5 贡献记录，但申请人只获 founder 徽章无贡献记录，影响排行榜和鲜花 **[2026-07-05 已修复, commit a243bb4]** |
 | P-266 | 🟡     | M9补充 | admin.service.ts:1844                 | 驳回申请未通知申请人（approve 有通知，reject 无通知，体验不一致） **[2026-07-05 已修复, commit 83d1b7b]**                                                                  |
 | P-267 | 🟡     | M9补充 | schema.prisma:1040                    | CommunityApplication.status 注释为 "pending/approved/rejected"，代码已用 'approving' 中间态，注释未同步 **[2026-07-05 已修复, commit 2493f33]**                            |
-| P-268 | 🟢     | M9.1   | community-applications.service.ts:16  | pending 检查与 create 非事务，TOCTOU 竞态（无 DB 层唯一索引兜底）                                                                                                          |
-| P-269 | 🟢     | M9.6   | community-applications.service.ts:128 | 助力 status 检查在事务外，TOCTOU 竞态（审批低频，影响极小）                                                                                                                |
+| P-268 | ⚠️     | M9.1   | community-applications.service.ts:16  | pending 检查与 create 非事务，TOCTOU 竞态（无 DB 层唯一索引兜底）                                                                                                          |
+| P-269 | ⚠️     | M9.6   | community-applications.service.ts:128 | 助力 status 检查在事务外，TOCTOU 竞态（审批低频，影响极小）                                                                                                                |
 
 **业务层小结**:
 
@@ -2105,7 +2105,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 | 编号  | 严重度 | 任务  | 位置                 | 描述                                                                                                          |
 | ----- | ------ | ----- | -------------------- | ------------------------------------------------------------------------------------------------------------- |
 | P-285 | 🟡     | M12.2 | share.service.ts:100 | logShare canShare 检查异常被 catch 吞掉，不存在的内容仍可记录分享日志 **[2026-07-05 已修复, commit 2493f33]** |
-| P-286 | 🟢     | M12.1 | share.service.ts:78  | getCardConfig 每次生成新 shareToken，GET 请求生成的 token 不会被复用                                          |
+| P-286 | ⚠️     | M12.1 | share.service.ts:78  | getCardConfig 每次生成新 shareToken，GET 请求生成的 token 不会被复用                                          |
 
 > M12.3 ✅ — 分享限制通过（审核中/rejected/admin_only 正确设 canShare=false）
 
@@ -2126,7 +2126,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 | 编号  | 严重度 | 任务  | 位置                | 描述                                                                                                |
 | ----- | ------ | ----- | ------------------- | --------------------------------------------------------------------------------------------------- |
 | P-290 | 🟡     | M15.2 | upload.service.ts   | 文件超限返回 413 (PayloadTooLarge) 而非 Standard 要求的 400 **[2026-07-05 已修复, commit 7225e87]** |
-| P-291 | 🟢     | M15.3 | upload.service.ts:8 | 未创建 uploads/ 目录，全新部署时 multer destination ENOENT → 500                                    |
+| P-291 | ✅     | M15.3 | upload.service.ts:8 | 未创建 uploads/ 目录，全新部署时 multer destination ENOENT → 500 **[2026-07-06 已修复]**            |
 
 > M15.1 ✅ | M15.4 ✅ | M15.5 ✅ — 上传/静态服务/跳过小区检查通过
 
@@ -2136,7 +2136,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 | ----- | ------ | ----- | --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | P-292 | 🟡     | M16.2 | events.service.ts:764 | report 不验证 targetId 是否真实存在，不存在的目标 communityId 为 null，举报仍被创建 **[2026-07-05 已修复, commit 0d0ad5d]** |
 | P-293 | 🟡     | M16.2 | events.service.ts:764 | user 类型举报 communityId 恒为 null，无法按社区维度筛选 **[2026-07-05 已修复, commit 7225e87]**                             |
-| P-294 | 🟢     | M16.2 | events.service.ts:764 | 缺防重复举报检查和自举报检查（reporterId === targetId when targetType='user'）                                              |
+| P-294 | ✅     | M16.2 | events.service.ts:764 | 缺防重复举报检查和自举报检查（reporterId === targetId when targetType='user'）**[2026-07-06 已修复]**                       |
 
 > M16.1 ✅ | M16.3 ✅ — 提交举报/举报理由通过
 
@@ -2147,8 +2147,8 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 | P-295 | 🔴     | M17.2 | events.service.ts:157 | **事件创建/编辑未调用 reviewImage**。只有 market 商品创建调用了 reviewImage，事件图片未经 AI 审核 **[2026-07-05 已修复, commit b872ffb]**                                                      |
 | P-296 | 🔴     | M17.6 | 多处                  | **ai_content_review 开关未检查**。所有 reviewText/reviewImage 调用点均未读取开关，关闭后仍审核。（ai_topic_suggest 见 P-225，ai_topic_merge 见 P-249） **[2026-07-05 已修复, commit b872ffb]** |
 | P-297 | 🟡     | M17.5 | admin.service.ts:69   | 审核日志查询不支持按 targetId 查询，只支持按 targetType **[2026-07-05 已修复, commit 7225e87]**                                                                                                |
-| P-298 | 🟢     | M17.4 | ocr.service.ts:31     | 社区匹配增加 confidence<0.5 → rejected 分支，超出 Standard 定义（业务合理但需确认 PRD）                                                                                                        |
-| P-299 | 🟢     | M17.2 | market.service.ts:249 | 市场商品编辑未调用 reviewImage（Standard 仅要求创建时调用）                                                                                                                                    |
+| P-298 | ✅     | M17.4 | ocr.service.ts:31     | 社区匹配增加 confidence<0.5 → rejected 分支，超出 Standard 定义（业务合理但需确认 PRD）**[2026-07-06 已确认, P-215 已补充 0.5 阈值描述到 Standard.md]**                                        |
+| P-299 | ⚠️     | M17.2 | market.service.ts:249 | 市场商品编辑未调用 reviewImage（Standard 仅要求创建时调用）                                                                                                                                    |
 
 > M17.1 ✅ | M17.3 ✅ — 文本审核/OCR 识别通过
 
@@ -2167,7 +2167,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 > 方式: 3 个并行 agent — Agent 1 审 M18.1-M18.9, Agent 2 审 M18.10-M18.19, Agent 3 审 M19.1-M19.19
 > 已排除契约对齐扫描阶段已记录的 P-164/P-169/P-177/P-191/P-265/P-266/P-267/P-280/P-281/P-282/P-262/P-155
 
-### P-300 🟢 M18.1 login token sub 取值问题
+### P-300 ⚠️ M18.1 login token sub 取值问题
 
 **位置**: `apps/api/src/modules/admin/admin.controller.ts:44`, `admin.guard.ts:18`
 
@@ -2213,7 +2213,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 06866a5]**
 
-### P-306 🟢 M18.3 manualVisibleAdminOnly 状态处理不统一
+### P-306 ⚠️ M18.3 manualVisibleAdminOnly 状态处理不统一
 
 **位置**: `apps/api/src/modules/admin/admin.service.ts:193-197`
 
@@ -2523,19 +2523,19 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit f559f30]**
 
-### P-345 🟢 M19.1 登录页不重定向已登录用户
+### P-345 ✅ M19.1 登录页不重定向已登录用户
 
 **位置**: `apps/admin/src/app/login/page.tsx`
 
 **问题**: 登录页不检查是否已登录。已登录用户访问 /login 不会自动跳转 /dashboard，需手动导航。
 
-### P-346 🟢 M19.1 role 默认值导致菜单闪烁
+### P-346 ✅ M19.1 role 默认值导致菜单闪烁
 
 **位置**: `apps/admin/src/components/Layout.tsx:106`
 
 **问题**: role 默认值为 'platform_admin'（`adminUser?.role || 'platform_admin'`）。hydrate 完成前，committee_admin 会短暂看到全部菜单项，造成视觉闪烁。
 
-### P-347 🟢 M19.2 统计卡片点击整页刷新
+### P-347 ✅ M19.2 统计卡片点击整页刷新
 
 **位置**: `apps/admin/src/app/dashboard/page.tsx:72`
 
@@ -2565,7 +2565,7 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit 88a8725]**
 
-### P-351 🟢 M19.7 拒绝认证原因为空无提示
+### P-351 ✅ M19.7 拒绝认证原因为空无提示
 
 **位置**: `apps/admin/src/app/verifications/page.tsx:167`
 
@@ -2579,13 +2579,13 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 **[2026-07-05 已修复, commit fba40fe]**
 
-### P-353 🟢 M19.9 公告无删除功能
+### P-353 ⚠️ M19.9 公告无删除功能
 
 **位置**: `apps/admin/src/app/committee/announcements/page.tsx`
 
 **问题**: 公告只有创建和更新（含发布/隐藏/置顶），无删除功能。后端控制器也无 DELETE 公告接口。如果"CRUD"中的 Delete 通过"隐藏"实现则可接受，但严格来说缺少删除操作。
 
-### P-354 🟢 M19.9 认领拒绝原因为空无提示
+### P-354 ✅ M19.9 认领拒绝原因为空无提示
 
 **位置**: `apps/admin/src/app/committee/page.tsx:228`
 
@@ -2668,11 +2668,11 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 
 ## 汇总
 
-| 严重度           | 数量    | 编号                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ---------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔴 阻塞发布      | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ✅ 已修复        | 245     | P-01~P-05, P-07~P-10, P-16~P-18, P-19~P-21, P-23~P-25, P-36~P-38, P-43, P-45, P-47~P-49, P-55~P-56, P-58, P-63, P-67~P-69, P-71, P-73~P-74, P-78~P-84, P-88~P-92, P-99~P-107, P-109~P-113, P-116~P-118, P-120~P-122, P-126~P-127, P-130, P-132, P-134, P-136, P-149, P-151, P-153, P-155~P-156, P-158~P-162, P-164~P-166, P-168~P-171, P-173, P-177, P-179~P-180, P-182, P-185~P-188, P-191~P-192, P-197, P-200, P-204~P-205, P-207, P-209, P-211, P-214~P-216, P-218~P-220, P-223~P-232, P-236~P-237, P-239~P-242, P-248~P-249, P-254~P-258, P-260~P-267, P-270~P-272, P-276, P-280~P-281, P-285, P-287~P-290, P-292~P-293, P-295~P-297, P-301~P-305, P-307~P-320, P-323~P-344, P-348~P-350, P-352, P-355~P-362                                                                                                                         |
-| ⚠️ 降级/设计选择 | 34      | P-41（送花感谢替代评价）, P-42（走兜底路径不产生评价）, P-44（mappers未扩展，P-43已缓解）, P-46（代码待后续迭代）, P-93/P-94（verifications双方一致未正式化）, P-114/P-147/P-152（communityId被忽略无报错）, P-119（unlike scope运行时正常）, P-123（sort类型过宽）, P-129/P-131/P-133（committee本地DTO匹配）, P-135（likeCount前端扩展类型）, P-138/P-139/P-140（community-applications一致但未正式化）, P-172（announcements多余字段）, P-174/P-175/P-176（votes admin类型不一致运行时正常）, P-181（banners可选性不一致service有默认值）, P-183/P-184（service-providers可编辑字段限制）, P-189（qrImageUrl必填性不一致）, P-193（settings Record vs DTO）, P-196/P-201（raw Prisma前端用any）, P-203（dashboard无类型标注）, P-221（双重徽章逻辑冗余可工作）, P-259（committee排序schema无sortOrder）, P-282（periodKey重复但一致） |
-| 🟡 建议修        | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| 🟢 可延后        | 83      | P-11~P-15, P-26~P-35, P-39~P-40, P-50~P-54, P-57, P-59~P-60, P-62, P-64~P-66, P-70, P-75~P-77, P-85~P-87, P-95~P-98, P-108, P-115, P-124~P-125, P-128, P-137, P-141~P-142, P-150, P-154, P-157, P-163, P-167, P-178, P-190, P-194~P-195, P-199, P-202, P-206, P-208, P-210, P-212~P-213, P-217, P-233~P-234, P-250, P-268~P-269, P-286, P-291, P-294, P-298~P-300, P-306, P-345~P-347, P-351, P-353~P-354                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| **合计**         | **362** |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| 严重度           | 数量    | 编号                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔴 阻塞发布      | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ✅ 已修复        | 272     | P-01~P-05, P-07~P-10, P-13~P-14, P-16~P-18, P-19~P-21, P-23~P-25, P-30~P-31, P-36~P-39, P-43, P-45, P-47~P-49, P-54~P-59, P-63, P-67~P-69, P-71, P-73~P-74, P-78~P-92, P-95~P-97, P-99~P-107, P-109~P-113, P-115~P-118, P-120~P-122, P-126~P-127, P-130, P-132, P-134, P-136, P-149~P-151, P-153, P-155~P-156, P-158~P-171, P-173, P-177, P-179~P-180, P-182, P-185~P-188, P-190~P-192, P-197, P-200, P-204~P-205, P-207, P-209, P-211, P-214~P-216, P-218~P-220, P-223~P-232, P-236~P-237, P-239~P-242, P-248~P-249, P-254~P-258, P-260~P-267, P-270~P-272, P-276, P-280~P-281, P-285, P-287~P-290, P-291, P-292~P-294, P-295~P-298, P-301~P-305, P-307~P-320, P-323~P-344, P-345~P-352, P-354~P-362                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ⚠️ 降级/设计选择 | 90      | P-11~P-12/P-15/P-27~P-29/P-32/P-34~P-35/P-50~P-53/P-60/P-62/P-64~P-66/P-70/P-75~P-77（PRD文档需补充说明）, P-26/P-33/P-40/P-98/P-124/P-154/P-300/P-353（设计选择/无需修复）, P-41（送花感谢替代评价）, P-42（走兜底路径不产生评价）, P-44（mappers未扩展，P-43已缓解）, P-46（代码待后续迭代）, P-93/P-94（verifications双方一致未正式化）, P-114/P-147/P-152（communityId被忽略无报错）, P-119（unlike scope运行时正常）, P-123（sort类型过宽）, P-129/P-131/P-133（committee本地DTO匹配）, P-135（likeCount前端扩展类型）, P-138/P-139/P-140（community-applications一致但未正式化）, P-172（announcements多余字段）, P-174/P-175/P-176（votes admin类型不一致运行时正常）, P-181（banners可选性不一致service有默认值）, P-183/P-184（service-providers可编辑字段限制）, P-189（qrImageUrl必填性不一致）, P-193（settings Record vs DTO）, P-196/P-201（raw Prisma前端用any）, P-203（dashboard无类型标注）, P-221（双重徽章逻辑冗余可工作）, P-259（committee排序schema无sortOrder）, P-282（periodKey重复但一致）, P-108/P-125/P-128/P-137/P-141/P-142/P-157/P-178/P-194/P-195/P-199/P-202/P-306（设计选择/ponytail 可接受）, P-206/P-208/P-210/P-212~P-213/P-217/P-233~P-234/P-250/P-268~P-269/P-286/P-299（设计选择/ponytail 可接受） |
+| 🟡 建议修        | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 🟢 可延后        | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **合计**         | **362** |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
