@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小区帮榜棒 — E2E 交互式测试单</title>
+<style>
+  :root {
+    --primary: #5B9E6F;
+    --primary-light: #E8F5ED;
+    --accent: #F5A623;
+    --danger: #E74C3C;
+    --warning: #F39C12;
+    --success: #27AE60;
+    --info: #3498DB;
+    --bg: #FAFBF7;
+    --card-bg: #FFFFFF;
+    --text: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --border: #E5E7EB;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%);
+    color: white;
+    padding: 48px 0 40px;
+    text-align: center;
+  }
+  .hero h1 { font-size: 32px; margin-bottom: 8px; }
+  .hero .tagline { font-size: 18px; opacity: 0.9; }
+  .hero .meta { margin-top: 16px; font-size: 14px; opacity: 0.8; }
+
+  /* Section */
+  .section { padding: 32px 0; }
+  .section-title {
+    font-size: 22px; font-weight: 700; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; }
+
+  /* Metrics */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .metric-value { font-size: 32px; font-weight: 700; color: var(--primary); }
+  .metric-label { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .metric-card.green .metric-value { color: var(--success); }
+  .metric-card.orange .metric-value { color: var(--accent); }
+  .metric-card.red .metric-value { color: var(--danger); }
+  .metric-card.blue .metric-value { color: var(--info); }
+  .metric-card.gray .metric-value { color: var(--text-secondary); }
+
+  /* Progress bar */
+  .progress-bar-container {
+    background: var(--border);
+    border-radius: 20px;
+    height: 24px;
+    overflow: hidden;
+    margin: 8px 0 4px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    transition: width 0.4s ease;
+    min-width: 32px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  /* Highlight box */
+  .highlight-box {
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin: 16px 0;
+    border-left: 4px solid var(--primary);
+  }
+  .highlight-box strong { color: var(--primary); }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-green { background: #E8F5ED; color: #27AE60; }
+  .badge-orange { background: #FFF3E0; color: #F39C12; }
+  .badge-red { background: #FDECEA; color: #E74C3C; }
+  .badge-blue { background: #E3F2FD; color: #3498DB; }
+  .badge-gray { background: #F5F5F5; color: #7F8C8D; }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .filter-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  /* Domain section */
+  .domain-section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .domain-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.2s;
+  }
+  .domain-header:hover { background: var(--primary-light); }
+  .domain-header.has-body { border-bottom-color: var(--border); }
+  .domain-icon { font-size: 24px; flex-shrink: 0; }
+  .domain-name { font-size: 18px; font-weight: 700; flex: 1; }
+  .domain-progress {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    background: var(--bg);
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+  .domain-toggle { font-size: 14px; color: var(--text-secondary); transition: transform 0.2s; }
+  .domain-header.collapsed .domain-toggle { transform: rotate(-90deg); }
+  .domain-body { padding: 4px 0; }
+  .domain-body.collapsed { display: none; }
+
+  /* Test row */
+  .test-row {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .test-row:last-child { border-bottom: none; }
+  .test-row.pass { background: #F8FCF9; }
+  .test-row.fail { background: #FEF5F4; }
+  .test-row.skip { background: #FFF9F0; }
+
+  .test-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .test-id {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .test-title { font-size: 15px; font-weight: 600; flex: 1; }
+  .test-status-icon { font-size: 18px; flex-shrink: 0; }
+
+  .test-body { padding: 8px 0 0; }
+  .test-section { margin-bottom: 8px; }
+  .test-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .test-steps {
+    font-size: 13px;
+    color: var(--text);
+    padding-left: 20px;
+    margin: 0;
+  }
+  .test-steps li { margin-bottom: 2px; }
+  .test-expected {
+    font-size: 13px;
+    color: var(--text);
+    background: var(--primary-light);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary);
+  }
+
+  .test-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .btn-action {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-action:hover { transform: translateY(-1px); }
+  .btn-pass:hover { background: var(--success); color: white; border-color: var(--success); }
+  .btn-fail:hover { background: var(--danger); color: white; border-color: var(--danger); }
+  .btn-skip:hover { background: var(--warning); color: white; border-color: var(--warning); }
+  .btn-reset:hover { background: var(--text-secondary); color: white; border-color: var(--text-secondary); }
+  .btn-action.active-pass { background: var(--success); color: white; border-color: var(--success); }
+  .btn-action.active-fail { background: var(--danger); color: white; border-color: var(--danger); }
+  .btn-action.active-skip { background: var(--warning); color: white; border-color: var(--warning); }
+
+  .bug-desc-area {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+    display: none;
+    box-sizing: border-box;
+  }
+  .bug-desc-area.visible { display: block; }
+  .bug-desc-area:focus { outline: none; box-shadow: 0 0 0 2px rgba(231,76,60,0.15); }
+
+  /* Export area */
+  .export-section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .export-section h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+  .export-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .btn-export {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-export-bug { background: var(--danger); color: white; }
+  .btn-export-bug:hover { background: #C0392B; }
+  .btn-export-full { background: var(--info); color: white; }
+  .btn-export-full:hover { background: #2980B9; }
+  .btn-reset-all { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); }
+  .btn-reset-all:hover { background: var(--danger); color: white; }
+
+  .export-output {
+    background: #1E2A32;
+    color: #D4E6D4;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 400px;
+    overflow-y: auto;
+    display: none;
+    margin-top: 8px;
+  }
+  .export-output.visible { display: block; }
+  .copy-hint { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+
+  .footer {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  .footer .ponytail-note { font-size: 11px; margin-top: 4px; opacity: 0.7; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .container { padding: 0 16px; }
+    .hero h1 { font-size: 24px; }
+    .hero .tagline { font-size: 15px; }
+    .test-header { flex-wrap: wrap; }
+    .test-title { font-size: 14px; width: 100%; }
+    .export-actions { flex-direction: column; }
+    .btn-export { width: 100%; }
+    .domain-header { padding: 14px 16px; }
+    .test-row { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="container">
+    <h1>🧪 小区帮榜棒 — E2E 交互式测试单</h1>
+    <p class="tagline">全业务模块端到端验收 · 8 板块 57 用例</p>
+    <p class="meta" id="hero-meta">日期: 2026-07-06 · 数据保存在本地浏览器</p>
+  </div>
+</div>
+
+<!-- 进度统计 -->
+<div class="section">
+  <div class="container">
+    <div class="metrics-grid">
+      <div class="metric-card green">
+        <div class="metric-value" id="stat-pass">0</div>
+        <div class="metric-label">✅ 已通过</div>
+      </div>
+      <div class="metric-card red">
+        <div class="metric-value" id="stat-fail">0</div>
+        <div class="metric-label">❌ 有 Bug</div>
+      </div>
+      <div class="metric-card orange">
+        <div class="metric-value" id="stat-skip">0</div>
+        <div class="metric-label">⏸ 跳过</div>
+      </div>
+      <div class="metric-card gray">
+        <div class="metric-value" id="stat-pending">57</div>
+        <div class="metric-label">⏳ 待测</div>
+      </div>
+      <div class="metric-card blue">
+        <div class="metric-value" id="stat-rate">0%</div>
+        <div class="metric-label">📊 完成率</div>
+      </div>
+    </div>
+
+    <div class="progress-label">
+      <span>总体进度</span>
+      <span id="progress-text">0 / 57</span>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="progress-fill" style="width: 0%; background: var(--primary);">0%</div>
+    </div>
+
+    <div class="highlight-box">
+      <strong>使用说明：</strong>
+      逐项操作小程序 / Admin 后台，点击对应按钮标记结果。Bug 描述框在标记"❌ Bug"时自动展开，填写复现步骤。
+      数据自动保存到 localStorage，刷新不丢失。测完点击"导出 Bug 清单"交给 agent 分板块修复。
+    </div>
+  </div>
+</div>
+
+<!-- 板块筛选 -->
+<div class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="filter-bar" id="filter-bar"></div>
+  </div>
+</div>
+
+<!-- 测试用例容器 -->
+<div class="section" style="padding-top: 0;">
+  <div class="container">
+    <div id="test-container"></div>
+  </div>
+</div>
+
+<!-- 导出区 -->
+<div class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="export-section">
+      <h3>📤 导出测试结果</h3>
+      <div class="export-actions">
+        <button class="btn-export btn-export-bug" onclick="exportBugList()">📋 导出 Bug 清单</button>
+        <button class="btn-export btn-export-full" onclick="exportFullReport()">📄 导出完整报告</button>
+        <button class="btn-export btn-reset-all" onclick="resetAll()">🗑 清空重测</button>
+      </div>
+      <pre class="export-output" id="export-output"></pre>
+      <p class="copy-hint" id="copy-hint" style="display:none;">点击上方按钮后，文本展示在此处，可全选复制。</p>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="container">
+    <p>小区帮榜棒 E2E 测试单 · v1.0 · 2026-07-06 · 57 用例 / 8 板块</p>
+    <p class="ponytail-note">ponytail: 折叠状态不存 localStorage，刷新恢复全展开 · 导出文本展示在 pre 区手动复制 · 用例 id 不变，新增用例旧数据自动 fallback 为 pending</p>
+  </div>
+</div>
+
+<script>
+// ===== 数据层 =====
+const STORAGE_KEY = 'xbb_e2e_checklist_v1';
+
+const DOMAINS = [
+  { id: '认证与小区', icon: '🔐', label: '① 认证与小区' },
+  { id: '事件互助', icon: '🤝', label: '② 事件互助' },
+  { id: '闲置流转', icon: '♻️', label: '③ 闲置流转' },
+  { id: '议事讨论', icon: '💬', label: '④ 议事讨论' },
+  { id: '业委会', icon: '🏛️', label: '⑤ 业委会' },
+  { id: '激励体系', icon: '🏆', label: '⑥ 激励体系' },
+  { id: '运营支撑', icon: '🛠️', label: '⑦ 运营支撑' },
+  { id: 'Admin 后台', icon: '⚙️', label: '⑧ Admin 后台' },
+];
+
+const TEST_CASES = [
+  // ① 认证与小区 (8)
+  {
+    id: '1.1', domain: '认证与小区', title: '微信登录选小区',
+    steps: [
+      '清空小程序缓存，打开进入登录页 login',
+      '点击微信一键登录，授权手机号',
+      '首次登录跳转到小区选择页 community-select',
+      '从列表选择一个已有小区（如：阳光花园）',
+    ],
+    expected: '登录成功，tabBar 显示首屏「小区事」，顶部显示当前小区名称「阳光花园」'
+  },
+  {
+    id: '1.2', domain: '认证与小区', title: '业主认证流程',
+    steps: [
+      '登录后进入「我的」→ 点击「业主认证」入口 verify',
+      '填写楼栋号、单元号、房号',
+      '上传房产证明图片（拍照或相册）',
+      '提交认证申请',
+    ],
+    expected: '提示「认证审核中」，我的页面认证状态变为「审核中」；Admin 后台能看到申请'
+  },
+  {
+    id: '1.3', domain: '认证与小区', title: '未认证拦截',
+    steps: [
+      '用一个未认证业主的账号登录',
+      '尝试创建求助事件 event-create',
+      '尝试发布闲置 market-create',
+      '尝试创建议题 topic-create',
+    ],
+    expected: '发帖类操作被拦截，提示「请先完成业主认证」并跳转到 verify 页面'
+  },
+  {
+    id: '1.4', domain: '认证与小区', title: '申请新小区',
+    steps: [
+      '在小区选择页 community-select 点击「没找到？申请新小区」',
+      '进入 community-apply 填写小区名、城市、地址',
+      '提交申请',
+      '到「我的」→ my-applications 查看申请状态',
+    ],
+    expected: '申请提交成功，my-applications 列表显示该申请为「待审核」状态'
+  },
+  {
+    id: '1.5', domain: '认证与小区', title: '草稿恢复',
+    steps: [
+      '在 event-create 页面填写标题和描述',
+      '不点发布，直接退出小程序',
+      '重新打开，再次进入 event-create',
+    ],
+    expected: '之前填写的标题和描述自动恢复（草稿保存在本地）'
+  },
+  {
+    id: '1.6', domain: '认证与小区', title: '助力防重复',
+    steps: [
+      '找到一个进行中的求助事件',
+      '点击「我来帮忙」响应一次',
+      '再次进入该事件详情，尝试再次响应',
+    ],
+    expected: '第二次响应被拦截，提示「您已响应过此求助」，按钮变为「已响应」状态'
+  },
+  {
+    id: '1.7', domain: '认证与小区', title: 'Admin 审批自动建小区',
+    steps: [
+      '用户在小程序提交一个新小区申请',
+      '登录 Admin 后台 → 小区审批页',
+      '审批通过该申请',
+    ],
+    expected: 'Admin 审批通过后，新小区自动进入小区表；用户刷新 my-applications 看到状态变为「已通过」，可切换到该小区'
+  },
+  {
+    id: '1.8', domain: '认证与小区', title: '用户主页',
+    steps: [
+      '在小程序任意位置点击某用户头像',
+      '进入 user-profile 用户主页',
+      '查看该用户的基本信息、小红花数、勋章、发布历史',
+    ],
+    expected: '用户主页展示头像、昵称、小区、小红花总数、勋章列表、发布过的事件/闲置/议题'
+  },
+
+  // ② 事件互助 (8)
+  {
+    id: '2.1', domain: '事件互助', title: '创建求助',
+    steps: [
+      '进入「邻里帮」→ 点击「+」发布 event-create',
+      '填写标题、描述、分类（如：代取快递）',
+      '设置紧急程度，提交',
+    ],
+    expected: '创建成功，跳转到 event-detail，列表中能看到该事件，状态为「待响应」'
+  },
+  {
+    id: '2.2', domain: '事件互助', title: '响应选帮手确认',
+    steps: [
+      '用 B 用户登录，进入 A 创建的事件详情',
+      '点击「我来帮忙」响应',
+      '切换回 A 用户，进入事件详情，在响应列表中选择 B 为帮手',
+      'A 点击「确认完成」',
+    ],
+    expected: 'B 被选为帮手后状态变为「进行中」；A 确认完成后事件状态变为「待评价」'
+  },
+  {
+    id: '2.3', domain: '事件互助', title: '多帮手流程',
+    steps: [
+      '创建一个多帮手事件（如：搬家需要 3 人）',
+      'B、C、D 三人分别响应',
+      'A 逐个确认 B、C、D 为帮手',
+      '逐个标记完成，逐个发花',
+    ],
+    expected: '每个帮手独立确认完成、独立发花，事件在所有帮手完成后才进入待评价状态'
+  },
+  {
+    id: '2.4', domain: '事件互助', title: '匿名脱敏',
+    steps: [
+      '创建求助时勾选「匿名发布」',
+      '发布后在事件列表和详情查看作者信息',
+      '用其他用户查看该事件',
+    ],
+    expected: '作者显示为「匿名邻居」，头像为默认占位图，无法点击进入主页'
+  },
+  {
+    id: '2.5', domain: '事件互助', title: '编辑收藏点赞',
+    steps: [
+      '进入自己创建的事件详情',
+      '点击编辑，修改描述，保存',
+      '点击收藏按钮，再点击取消',
+      '点击点赞按钮',
+    ],
+    expected: '编辑保存成功；收藏状态正确切换；点赞数 +1 且按钮高亮'
+  },
+  {
+    id: '2.6', domain: '事件互助', title: '结构化评价',
+    steps: [
+      '完成一次互助流程（A 求助，B 帮忙，A 确认完成）',
+      'A 对 B 进行评价：选择评分（1-5 星）+ 选择标签（如：及时、专业、热情）+ 写文字',
+      'B 也对 A 进行评价',
+    ],
+    expected: '双方评价提交成功，事件详情显示双向评价卡片，含星级、标签、文字'
+  },
+  {
+    id: '2.7', domain: '事件互助', title: '技能匹配',
+    steps: [
+      'B 用户在「我的」→ 技能档案勾选「水电维修」',
+      'A 用户创建一个分类为「水电维修」的求助',
+      'B 查看「邻里帮」列表',
+    ],
+    expected: 'A 的求助在 B 端列表中带有「技能匹配」标记或排在靠前位置'
+  },
+  {
+    id: '2.8', domain: '事件互助', title: '30 天过期',
+    steps: [
+      '查看一个创建超过 30 天且未完成的事件',
+      '或手动调整数据库 created_at 为 31 天前',
+      '触发定时任务（或等待 cron）',
+    ],
+    expected: '过期事件自动关闭/归档，状态变为「已过期」，无法再响应'
+  },
+
+  // ③ 闲置流转 (7)
+  {
+    id: '3.1', domain: '闲置流转', title: '发布闲置',
+    steps: [
+      '进入「邻里帮」→ 闲置 tab → 点击发布 market-create',
+      '填写标题、描述、价格、上传图片',
+      '选择分类（如：母婴），提交',
+    ],
+    expected: '发布成功，跳转到 market-detail，闲置列表能看到该商品'
+  },
+  {
+    id: '3.2', domain: '闲置流转', title: '买家意向',
+    steps: [
+      'B 用户进入 A 发布的闲置详情',
+      '点击「我感兴趣」提交意向',
+      'A 用户查看该闲置详情的意向列表',
+    ],
+    expected: 'B 意向提交成功；A 能看到意向列表，包含 B 的头像、昵称、留言、时间'
+  },
+  {
+    id: '3.3', domain: '闲置流转', title: '选买家已售',
+    steps: [
+      'A 在闲置详情的意向列表中选择 B',
+      '点击「标记为已售给 B」',
+      '查看闲置状态',
+    ],
+    expected: '闲置状态变为「已售」，买家 B 信息显示在详情页，其他买家意向被标记为「已结束」'
+  },
+  {
+    id: '3.4', domain: '闲置流转', title: '双方互评',
+    steps: [
+      '闲置标记已售后',
+      'A 对 B 评价：星级 + 标签 + 文字',
+      'B 对 A 评价',
+    ],
+    expected: '双方评价提交成功，闲置详情显示双向评价；「我的」评价入口能看到历史评价'
+  },
+  {
+    id: '3.5', domain: '闲置流转', title: '卖家下架',
+    steps: [
+      '进入自己发布的在售闲置详情',
+      '点击「下架」',
+      '查看闲置列表',
+    ],
+    expected: '闲置状态变为「已下架」，不再出现在公开列表，但详情页仍可访问'
+  },
+  {
+    id: '3.6', domain: '闲置流转', title: '编辑',
+    steps: [
+      '进入自己发布的闲置详情',
+      '点击编辑 market-edit',
+      '修改价格和描述，保存',
+    ],
+    expected: '编辑保存成功，详情页显示新价格和描述'
+  },
+  {
+    id: '3.7', domain: '闲置流转', title: '列表筛选分页',
+    steps: [
+      '进入闲置列表页 market',
+      '按分类筛选（如：母婴）',
+      '按价格排序',
+      '滚动加载更多',
+    ],
+    expected: '筛选结果正确；排序生效；分页加载正常，无重复无遗漏'
+  },
+
+  // ④ 议事讨论 (7)
+  {
+    id: '4.1', domain: '议事讨论', title: '创建议题',
+    steps: [
+      '进入 topic-create',
+      '填写标题、正文、选择分类',
+      '可关联一个事件（可选）',
+      '提交',
+    ],
+    expected: '议题创建成功，跳转到 topic-detail，plaza 议事榜能看到该议题'
+  },
+  {
+    id: '4.2', domain: '议事讨论', title: '赞踩评论',
+    steps: [
+      '进入一个议题详情',
+      '点击赞同（赞）和反对（踩）',
+      '发表一条评论',
+      '对别人的评论点赞',
+    ],
+    expected: '赞踩计数正确更新（切换时互斥）；评论发表成功；评论点赞数正确'
+  },
+  {
+    id: '4.3', domain: '议事讨论', title: '评分时间线',
+    steps: [
+      '进入议题详情',
+      '查看评分变化时间线',
+    ],
+    expected: '时间线展示每次评分变动（赞/踩数量变化）的时间点，按时间倒序'
+  },
+  {
+    id: '4.4', domain: '议事讨论', title: '创建投票',
+    steps: [
+      '在议题详情点击「发起投票」',
+      '填写投票问题、选项（至少 2 个）',
+      '设置是否多选、截止时间',
+      '提交',
+    ],
+    expected: '投票创建成功，议题详情显示投票卡片，其他用户可参与投票'
+  },
+  {
+    id: '4.5', domain: '议事讨论', title: '投票查看结果',
+    steps: [
+      'B 用户参与 A 创建的投票（单选）',
+      '投票后查看结果',
+      '未投票用户尝试查看结果',
+    ],
+    expected: '投票后显示各选项百分比和票数；未投票用户看不到具体票数（或提示先投票）'
+  },
+  {
+    id: '4.6', domain: '议事讨论', title: '关闭重启',
+    steps: [
+      '议题创建者进入议题详情',
+      '点击「关闭议题」',
+      '尝试评论和投票',
+      '再点击「重新开启」',
+    ],
+    expected: '关闭后无法评论和投票，显示「已关闭」标记；重启后恢复正常'
+  },
+  {
+    id: '4.7', domain: '议事讨论', title: '关联事件合并',
+    steps: [
+      '创建议题时关联一个事件',
+      '查看议题详情',
+      '查看被关联事件详情',
+    ],
+    expected: '议题详情显示关联事件卡片；事件详情反向显示关联议题入口，点击可互跳'
+  },
+
+  // ⑤ 业委会 (6)
+  {
+    id: '5.1', domain: '业委会', title: '成员认领',
+    steps: [
+      '进入「小区事」→ 业委会入口 committee',
+      '点击「认领业委会成员」',
+      '填写职务（如：主任）、联系方式',
+      '提交认领申请',
+    ],
+    expected: '认领申请提交成功，状态为「待审核」；Admin 后台能看到申请'
+  },
+  {
+    id: '5.2', domain: '业委会', title: '发布公告',
+    steps: [
+      '用已审核通过的业委会成员账号登录',
+      '进入 committee-announcement 发布公告',
+      '填写标题、正文，提交',
+    ],
+    expected: '公告发布成功，committee 页面显示该公告，小区用户能看到'
+  },
+  {
+    id: '5.3', domain: '业委会', title: '编辑隐藏',
+    steps: [
+      '业委会成员进入自己发布的公告详情',
+      '点击编辑，修改内容，保存',
+      '点击「隐藏」（仅自己可见）',
+    ],
+    expected: '编辑保存成功；隐藏后其他用户看不到该公告，但发布者仍可查看'
+  },
+  {
+    id: '5.4', domain: '业委会', title: 'Admin 管理',
+    steps: [
+      '登录 Admin 后台 → 业委会管理',
+      '审核一个成员认领申请',
+      '审核一条公告（通过/拒绝）',
+    ],
+    expected: '成员认领通过后小程序显示该成员；公告审核通过后对小区用户可见'
+  },
+  {
+    id: '5.5', domain: '业委会', title: '点赞',
+    steps: [
+      '进入业委会页面查看公告',
+      '对公告点赞',
+      '再次点击取消',
+    ],
+    expected: '点赞数正确增减，按钮状态正确切换'
+  },
+  {
+    id: '5.6', domain: '业委会', title: '权限隔离',
+    steps: [
+      '用非业委会成员账号尝试发布公告',
+      '用未审核账号尝试编辑公告',
+      '用普通用户尝试隐藏公告',
+    ],
+    expected: '所有操作被拦截，提示「仅业委会成员可操作」或按钮不显示'
+  },
+
+  // ⑥ 激励体系 (6)
+  {
+    id: '6.1', domain: '激励体系', title: '排行榜展示',
+    steps: [
+      '进入「光荣榜」ranking',
+      '查看总榜、周榜、月榜',
+      '切换不同维度',
+    ],
+    expected: '排行榜按小红花数排序，显示 Top 用户，含头像、昵称、小红花数；各维度切换正确'
+  },
+  {
+    id: '6.2', domain: '激励体系', title: '小红花发放',
+    steps: [
+      '完成一次互助流程（A 确认 B 帮忙完成）',
+      'A 给 B 发小红花',
+      '查看 B 的主页和排行榜',
+    ],
+    expected: 'B 的小红花数 +1；B 主页显示新增的小红花记录；排行榜排名上升'
+  },
+  {
+    id: '6.3', domain: '激励体系', title: '勋章颁发',
+    steps: [
+      '查看一个达到勋章条件的用户（如：帮助 10 次）',
+      '或手动在数据库给某用户添加达标记录',
+      '查看该用户「我的」→ badges',
+    ],
+    expected: '勋章自动颁发，badges 页面显示新勋章；用户主页也展示勋章'
+  },
+  {
+    id: '6.4', domain: '激励体系', title: '主页统计',
+    steps: [
+      '进入「我的」主页',
+      '查看统计数据：帮助次数、获花数、发布数、勋章数',
+    ],
+    expected: '统计数字与实际记录一致，无错算漏算'
+  },
+  {
+    id: '6.5', domain: '激励体系', title: '月榜重算',
+    steps: [
+      '等待月初 cron 触发月榜重算',
+      '或手动调用月榜重算接口',
+      '查看月榜数据',
+    ],
+    expected: '月榜按上月数据重新计算，上月数据归档，新月榜起始为空或按当前月份累计'
+  },
+  {
+    id: '6.6', domain: '激励体系', title: '积分映射',
+    steps: [
+      '查看用户积分明细',
+      '核对积分规则：发帖+X、帮助+Y、获花+Z',
+      '对比总积分与各明细之和',
+    ],
+    expected: '积分明细完整，总和与显示积分一致，规则符合配置'
+  },
+
+  // ⑦ 运营支撑 (7)
+  {
+    id: '7.1', domain: '运营支撑', title: '通知已读未读',
+    steps: [
+      '触发一条通知（如：有人响应你的求助）',
+      '进入 notifications',
+      '查看未读数量红点',
+      '点击某条通知标记已读',
+      '点击「全部已读」',
+    ],
+    expected: '未读数正确显示；单条已读后红点消失；全部已读后无红点'
+  },
+  {
+    id: '7.2', domain: '运营支撑', title: '举报',
+    steps: [
+      '进入一个事件/闲置/议题详情',
+      '点击「举报」',
+      '选择举报类型、填写描述',
+      '提交',
+    ],
+    expected: '举报提交成功，提示「已收到举报」；Admin 后台举报管理能看到该条'
+  },
+  {
+    id: '7.3', domain: '运营支撑', title: 'AI 审核 Mock',
+    steps: [
+      '创建一个含敏感词的事件（如：测试违禁词）',
+      '提交',
+    ],
+    expected: 'AI 审核拦截或标记敏感内容，提示「内容涉嫌违规，请修改」或进入待审核状态'
+  },
+  {
+    id: '7.4', domain: '运营支撑', title: '服务商',
+    steps: [
+      '进入「小区事」→ 服务商入口 service-providers',
+      '按分类筛选（如：家政）',
+      '点击进入 service-provider-detail',
+      '收藏/联系',
+    ],
+    expected: '列表筛选正确；详情页展示完整信息；收藏和联系功能正常'
+  },
+  {
+    id: '7.5', domain: '运营支撑', title: '社群入口',
+    steps: [
+      '进入「小区事」→ 社群入口 social-groups',
+      '查看社群列表',
+      '点击加入一个社群',
+    ],
+    expected: '社群列表展示正确；加入成功后显示「已加入」，可查看社群详情'
+  },
+  {
+    id: '7.6', domain: '运营支撑', title: 'Banner 分享',
+    steps: [
+      '查看首页 Banner 轮播',
+      '点击 Banner 跳转',
+      '点击分享按钮转发',
+    ],
+    expected: 'Banner 自动轮播；点击跳转到对应页面；分享卡片生成正确'
+  },
+  {
+    id: '7.7', domain: '运营支撑', title: '新手引导',
+    steps: [
+      '用一个新账号首次进入小程序',
+      '查看新手引导蒙层',
+      '点击「跳过」或滑动完成',
+    ],
+    expected: '新手引导只在首次显示；跳过后不再出现；引导步骤完整可滑'
+  },
+
+  // ⑧ Admin 后台 (8)
+  {
+    id: '8.1', domain: 'Admin 后台', title: '登录仪表盘',
+    steps: [
+      '浏览器打开 Admin 后台地址',
+      '输入管理员账号密码登录',
+      '查看仪表盘首页',
+    ],
+    expected: '登录成功跳转到仪表盘；显示关键指标卡片（用户数、事件数、闲置数、议题数等）和趋势图'
+  },
+  {
+    id: '8.2', domain: 'Admin 后台', title: '菜单完整',
+    steps: [
+      '登录后查看左侧菜单',
+      '依次点击：用户/事件/闲置/议题/小区/举报/Banner/业委会/议事/审计日志/系统设置',
+    ],
+    expected: '所有菜单项可点击，对应页面加载成功，无 404 或空白页'
+  },
+  {
+    id: '8.3', domain: 'Admin 后台', title: '内容审核',
+    steps: [
+      '进入内容审核页',
+      '查看待审核列表（事件/闲置/议题）',
+      '审核通过一条',
+      '拒绝一条并填写原因',
+    ],
+    expected: '通过的内容对用户可见；拒绝的内容隐藏并通知作者；列表实时刷新'
+  },
+  {
+    id: '8.4', domain: 'Admin 后台', title: '小区审批',
+    steps: [
+      '进入小区审批页',
+      '查看待审批的小区申请',
+      '审批通过一条（触发自动建小区）',
+      '拒绝一条并填写原因',
+    ],
+    expected: '通过的自动建小区并通知用户；拒绝的通知用户附原因；列表状态正确更新'
+  },
+  {
+    id: '8.5', domain: 'Admin 后台', title: '举报管理',
+    steps: [
+      '进入举报管理页',
+      '查看举报列表',
+      '处理一条举报：下架内容 / 忽略举报',
+    ],
+    expected: '处理后被举报内容按操作生效（下架或保留）；举报状态变为「已处理」'
+  },
+  {
+    id: '8.6', domain: 'Admin 后台', title: 'Banner 管理',
+    steps: [
+      '进入 Banner 管理页',
+      '新增一个 Banner（上传图、链接、排序）',
+      '编辑现有 Banner',
+      '上下架切换',
+    ],
+    expected: '新增/编辑保存成功；上架 Banner 在小程序首页显示；下架后不显示'
+  },
+  {
+    id: '8.7', domain: 'Admin 后台', title: '议事管理',
+    steps: [
+      '进入议事管理页',
+      '查看议题列表',
+      '强制关闭一个议题',
+      '置顶一个议题',
+    ],
+    expected: '强制关闭后小程序该议题不可评论；置顶后排在 plaza 议事榜首位'
+  },
+  {
+    id: '8.8', domain: 'Admin 后台', title: '审计日志系统设置',
+    steps: [
+      '进入审计日志页，查看操作记录',
+      '进入系统设置页',
+      '修改一个配置项（如：积分规则）',
+      '保存',
+    ],
+    expected: '审计日志记录关键操作（谁、何时、做了什么）；系统设置修改保存成功并生效'
+  },
+];
+
+// ===== 存储层 =====
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    // ponytail: 用例 id 不变，新增用例旧数据自动 fallback 为 pending
+    return (parsed && typeof parsed === 'object') ? parsed : {};
+  } catch (e) {
+    console.warn('loadState failed, starting fresh:', e);
+    return {};
+  }
+}
+
+function saveState(state) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.error('saveState failed:', e);
+    alert('保存失败，可能是浏览器存储空间不足');
+  }
+}
+
+function getCaseState(caseId) {
+  const state = loadState();
+  return state[caseId] || { status: 'pending', bugDesc: '', updatedAt: null };
+}
+
+function setCaseState(caseId, data) {
+  const state = loadState();
+  state[caseId] = { ...state[caseId], ...data, updatedAt: new Date().toISOString() };
+  saveState(state);
+}
+
+// ===== 渲染层 =====
+const STATUS_CONFIG = {
+  pending: { icon: '⏳', label: '待测', rowClass: '', btnClass: '' },
+  pass:    { icon: '✅', label: '通过', rowClass: 'pass', btnClass: 'active-pass' },
+  fail:    { icon: '❌', label: 'Bug',  rowClass: 'fail', btnClass: 'active-fail' },
+  skip:    { icon: '⏸',  label: '跳过', rowClass: 'skip', btnClass: 'active-skip' },
+};
+
+let currentFilter = '全部';
+
+function renderFilterBar() {
+  const bar = document.getElementById('filter-bar');
+  const allBtn = `<button class="filter-btn ${currentFilter === '全部' ? 'active' : ''}" onclick="filterByDomain('全部')">全部 (57)</button>`;
+  const domainBtns = DOMAINS.map(d => {
+    const count = TEST_CASES.filter(t => t.domain === d.id).length;
+    const active = currentFilter === d.id ? 'active' : '';
+    return `<button class="filter-btn ${active}" onclick="filterByDomain('${d.id}')">${d.icon} ${d.label} (${count})</button>`;
+  }).join('');
+  bar.innerHTML = allBtn + domainBtns;
+}
+
+function renderCase(testCase) {
+  const st = getCaseState(testCase.id);
+  const cfg = STATUS_CONFIG[st.status] || STATUS_CONFIG.pending;
+  const bugVisible = st.status === 'fail' ? 'visible' : '';
+  const bugDesc = st.bugDesc || '';
+
+  const stepsHtml = testCase.steps.map(s => `<li>${s}</li>`).join('');
+
+  return `
+    <div class="test-row ${cfg.rowClass}" data-case-id="${testCase.id}" data-domain="${testCase.domain}">
+      <div class="test-header">
+        <span class="test-id">${testCase.id}</span>
+        <span class="test-title">${testCase.title}</span>
+        <span class="test-status-icon">${cfg.icon}</span>
+      </div>
+      <div class="test-body">
+        <div class="test-section">
+          <div class="test-section-label">操作步骤</div>
+          <ol class="test-steps">${stepsHtml}</ol>
+        </div>
+        <div class="test-section">
+          <div class="test-section-label">预期结果</div>
+          <div class="test-expected">${testCase.expected}</div>
+        </div>
+        <div class="test-actions">
+          <button class="btn-action btn-pass ${st.status === 'pass' ? 'active-pass' : ''}" onclick="setStatus('${testCase.id}', 'pass')">✅ 通过</button>
+          <button class="btn-action btn-fail ${st.status === 'fail' ? 'active-fail' : ''}" onclick="setStatus('${testCase.id}', 'fail')">❌ Bug</button>
+          <button class="btn-action btn-skip ${st.status === 'skip' ? 'active-skip' : ''}" onclick="setStatus('${testCase.id}', 'skip')">⏸ 跳过</button>
+          <button class="btn-action btn-reset" onclick="resetCase('${testCase.id}')">↺ 重置</button>
+        </div>
+        <textarea class="bug-desc-area ${bugVisible}" placeholder="Bug 描述：复现步骤、实际结果、严重程度..." onblur="saveBugDesc('${testCase.id}', this.value)">${bugDesc}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function renderAll() {
+  const container = document.getElementById('test-container');
+  const html = DOMAINS.map(domain => {
+    const cases = TEST_CASES.filter(t => t.domain === domain.id);
+    const domainHtml = cases.map(renderCase).join('');
+    return `
+      <div class="domain-section" data-domain="${domain.id}">
+        <div class="domain-header has-body" onclick="toggleDomain(this)">
+          <span class="domain-icon">${domain.icon}</span>
+          <span class="domain-name">${domain.label}</span>
+          <span class="domain-progress" id="domain-progress-${domain.id}">0 / ${cases.length}</span>
+          <span class="domain-toggle">▼</span>
+        </div>
+        <div class="domain-body">
+          ${domainHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+  container.innerHTML = html;
+  updateAllStats();
+}
+
+function updateAllStats() {
+  const stats = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(t => {
+    const st = getCaseState(t.id);
+    stats[st.status] = (stats[st.status] || 0) + 1;
+  });
+  const total = TEST_CASES.length;
+  const done = stats.pass + stats.fail + stats.skip;
+  const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('stat-pass').textContent = stats.pass;
+  document.getElementById('stat-fail').textContent = stats.fail;
+  document.getElementById('stat-skip').textContent = stats.skip;
+  document.getElementById('stat-pending').textContent = stats.pending;
+  document.getElementById('stat-rate').textContent = rate + '%';
+  document.getElementById('progress-text').textContent = `${done} / ${total}`;
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = rate + '%';
+  fill.textContent = rate + '%';
+  fill.style.background = rate === 100 ? 'var(--success)' : 'var(--primary)';
+
+  // 更新每个板块的进度
+  DOMAINS.forEach(d => {
+    const cases = TEST_CASES.filter(t => t.domain === d.id);
+    const domainDone = cases.filter(t => {
+      const st = getCaseState(t.id);
+      return st.status === 'pass' || st.status === 'fail' || st.status === 'skip';
+    }).length;
+    const el = document.getElementById('domain-progress-' + d.id);
+    if (el) el.textContent = `${domainDone} / ${cases.length}`;
+  });
+}
+
+// ===== 交互层 =====
+function setStatus(caseId, status) {
+  setCaseState(caseId, { status });
+  rerenderCase(caseId);
+  updateAllStats();
+}
+
+function saveBugDesc(caseId, desc) {
+  const cur = getCaseState(caseId);
+  if (cur.bugDesc !== desc) {
+    setCaseState(caseId, { bugDesc: desc });
+  }
+}
+
+function resetCase(caseId) {
+  const state = loadState();
+  delete state[caseId];
+  saveState(state);
+  rerenderCase(caseId);
+  updateAllStats();
+}
+
+function rerenderCase(caseId) {
+  const testCase = TEST_CASES.find(t => t.id === caseId);
+  if (!testCase) return;
+  const oldRow = document.querySelector(`.test-row[data-case-id="${caseId}"]`);
+  if (!oldRow) return;
+  const newHtml = renderCase(testCase);
+  const tmp = document.createElement('div');
+  tmp.innerHTML = newHtml;
+  oldRow.replaceWith(tmp.firstElementChild);
+}
+
+function toggleDomain(headerEl) {
+  const body = headerEl.nextElementSibling;
+  headerEl.classList.toggle('collapsed');
+  body.classList.toggle('collapsed');
+}
+
+function filterByDomain(domain) {
+  currentFilter = domain;
+  renderFilterBar();
+  document.querySelectorAll('.domain-section').forEach(sec => {
+    if (domain === '全部' || sec.dataset.domain === domain) {
+      sec.style.display = '';
+    } else {
+      sec.style.display = 'none';
+    }
+  });
+}
+
+// ===== 导出层 =====
+function exportBugList() {
+  const bugs = TEST_CASES
+    .map(t => ({ ...t, state: getCaseState(t.id) }))
+    .filter(t => t.state.status === 'fail');
+
+  if (bugs.length === 0) {
+    showExport('🎉 当前没有标记为 Bug 的用例。\n\n请先在测试中标记有问题的用例并填写 Bug 描述，再导出。');
+    return;
+  }
+
+  let out = `# 小区帮榜棒 E2E 测试 Bug 清单\n\n`;
+  out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
+  out += `Bug 总数: ${bugs.length}\n`;
+  out += `按板块分布:\n`;
+  DOMAINS.forEach(d => {
+    const cnt = bugs.filter(b => b.domain === d.id).length;
+    if (cnt > 0) out += `  ${d.icon} ${d.label}: ${cnt} 个\n`;
+  });
+  out += `\n${'='.repeat(60)}\n\n`;
+
+  DOMAINS.forEach(d => {
+    const domainBugs = bugs.filter(b => b.domain === d.id);
+    if (domainBugs.length === 0) return;
+    out += `## ${d.icon} ${d.label} (${domainBugs.length} 个)\n\n`;
+    domainBugs.forEach((b, i) => {
+      out += `### Bug ${i + 1} — [${b.id}] ${b.title}\n`;
+      out += `- 用例 ID: ${b.id}\n`;
+      out += `- 板块: ${b.domain}\n`;
+      out += `- 操作步骤:\n`;
+      b.steps.forEach((s, j) => { out += `  ${j + 1}. ${s}\n`; });
+      out += `- 预期结果: ${b.expected}\n`;
+      out += `- Bug 描述:\n`;
+      const desc = (b.state.bugDesc || '').trim();
+      out += desc ? `  ${desc.replace(/\n/g, '\n  ')}\n` : `  (未填写描述，请补充复现步骤和实际结果)\n`;
+      out += `- 更新时间: ${b.state.updatedAt ? new Date(b.state.updatedAt).toLocaleString('zh-CN') : '-'}\n`;
+      out += `\n`;
+    });
+    out += `${'='.repeat(60)}\n\n`;
+  });
+
+  out += `## 修复建议\n\n`;
+  out += `按板块逐个修复，每个板块独立 commit。修复后跑 /review + /verify。\n`;
+  out += `优先级建议: ① 认证与小区 > ② 事件互助 > ③ 闲置流转 > 其他（按业务核心度）。\n`;
+
+  showExport(out);
+}
+
+function exportFullReport() {
+  let out = `# 小区帮榜棒 E2E 测试完整报告\n\n`;
+  out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
+  out += `总用例数: ${TEST_CASES.length}\n\n`;
+
+  const stats = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(t => {
+    const st = getCaseState(t.id);
+    stats[st.status] = (stats[st.status] || 0) + 1;
+  });
+  out += `## 统计概览\n\n`;
+  out += `- ✅ 通过: ${stats.pass}\n`;
+  out += `- ❌ Bug: ${stats.fail}\n`;
+  out += `- ⏸ 跳过: ${stats.skip}\n`;
+  out += `- ⏳ 待测: ${stats.pending}\n`;
+  out += `- 📊 完成率: ${Math.round(((stats.pass + stats.fail + stats.skip) / TEST_CASES.length) * 100)}%\n\n`;
+  out += `${'='.repeat(60)}\n\n`;
+
+  DOMAINS.forEach(d => {
+    const cases = TEST_CASES.filter(t => t.domain === d.id);
+    out += `## ${d.icon} ${d.label}\n\n`;
+    cases.forEach(t => {
+      const st = getCaseState(t.id);
+      const cfg = STATUS_CONFIG[st.status] || STATUS_CONFIG.pending;
+      out += `### [${t.id}] ${t.title} — ${cfg.icon} ${cfg.label}\n`;
+      if (st.status === 'fail' && st.bugDesc) {
+        out += `Bug 描述: ${st.bugDesc}\n`;
+      }
+      out += `\n`;
+    });
+    out += `${'='.repeat(60)}\n\n`;
+  });
+
+  showExport(out);
+}
+
+function resetAll() {
+  if (!confirm('确定清空所有测试记录并重新开始吗？此操作不可撤销。')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  renderAll();
+  showExport('✅ 已清空所有测试记录，状态重置为待测。');
+}
+
+function showExport(text) {
+  const pre = document.getElementById('export-output');
+  pre.textContent = text;
+  pre.classList.add('visible');
+  document.getElementById('copy-hint').style.display = 'block';
+  pre.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ===== 初始化 =====
+function init() {
+  renderFilterBar();
+  renderAll();
+  // 更新 hero 日期
+  const today = new Date();
+  const dateStr = today.getFullYear() + '-' +
+    String(today.getMonth() + 1).padStart(2, '0') + '-' +
+    String(today.getDate()).padStart(2, '0');
+  document.getElementById('hero-meta').textContent = `日期: ${dateStr} · 数据保存在本地浏览器`;
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
