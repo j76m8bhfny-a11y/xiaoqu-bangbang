@@ -112,6 +112,9 @@ describe('Feature: 认证审核', () => {
           communityId,
           materialType: 'property_cert',
           fileUrl: 'https://example.com/material.jpg',
+          buildingNo: '1',
+          unitNo: '2',
+          roomNo: '303',
           consentAccepted: true,
           consentVersion: 'v1.0',
         })
@@ -132,6 +135,9 @@ describe('Feature: 认证审核', () => {
           communityId,
           materialType: 'property_cert',
           fileUrl: 'https://example.com/material.jpg',
+          buildingNo: '1',
+          unitNo: '2',
+          roomNo: '303',
           consentAccepted: false,
           consentVersion: 'v1.0',
         })
@@ -149,6 +155,9 @@ describe('Feature: 认证审核', () => {
           communityId,
           materialType: 'property_cert',
           fileUrl: 'https://x.com/a.jpg',
+          buildingNo: '1',
+          unitNo: '2',
+          roomNo: '303',
           consentAccepted: true,
           consentVersion: 'v1.0',
         })
@@ -246,7 +255,7 @@ describe('Feature: 认证审核', () => {
           ocrResultJson: { name: '张三', idNumber: '320***1234' },
           aiResultJson: { score: 0.95, labels: ['property_cert'] },
           consentSnapshot: { consentAccepted: true, consentVersion: 'v1.0' },
-          status: 'pending',
+          status: 'pending_review',
         },
       });
       verificationBId = verificationB.id;

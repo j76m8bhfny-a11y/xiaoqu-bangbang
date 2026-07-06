@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Image } from '@tarojs/components';
 import Taro, { useShareAppMessage } from '@tarojs/taro';
-import { useAuthStore, useCommunityStore } from '@/store';
+import { useAuthStore, useCommunityStore, useNotificationStore } from '@/store';
 import { rankingService } from '@/services';
 import { useRequest } from '@/hooks';
 import './index.scss';
@@ -52,6 +52,7 @@ const MENU_ROUTES: Record<string, string> = {
 export default function Mine() {
   const user = useAuthStore((s) => s.user);
   const communityName = useCommunityStore((s) => s.currentCommunityName);
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   const { data: myRanking } = useRequest(() => rankingService.getMyRanking(), [], {
     enabled: !!user,
@@ -175,22 +176,29 @@ export default function Mine() {
         {/* 菜单列表 */}
         {MENU_ITEMS.map((group, gi) => (
           <View key={gi} className="mine__menu-group">
-            {group.map((item) => (
-              <View key={item.id} className="mine__menu-item" onClick={() => handleMenuClick(item)}>
-                <View className="mine__menu-left">
-                  <Text className="mine__menu-icon">{item.icon}</Text>
-                  <Text className="mine__menu-label">{item.label}</Text>
+            {group.map((item) => {
+              const count = item.id === 'notifications' ? unreadCount : item.count;
+              return (
+                <View
+                  key={item.id}
+                  className="mine__menu-item"
+                  onClick={() => handleMenuClick(item)}
+                >
+                  <View className="mine__menu-left">
+                    <Text className="mine__menu-icon">{item.icon}</Text>
+                    <Text className="mine__menu-label">{item.label}</Text>
+                  </View>
+                  <View className="mine__menu-right">
+                    {count !== undefined && count > 0 && (
+                      <View className="mine__menu-badge">
+                        <Text className="mine__menu-badge-text">{count}</Text>
+                      </View>
+                    )}
+                    <Text className="mine__menu-arrow">›</Text>
+                  </View>
                 </View>
-                <View className="mine__menu-right">
-                  {item.count !== undefined && item.count > 0 && (
-                    <View className="mine__menu-badge">
-                      <Text className="mine__menu-badge-text">{item.count}</Text>
-                    </View>
-                  )}
-                  <Text className="mine__menu-arrow">›</Text>
-                </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
         ))}
 

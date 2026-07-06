@@ -4,6 +4,9 @@ export interface OcrResult {
   communityName: string;
   address: string;
   ownerName: string;
+  buildingNo: string;
+  unitNo: string;
+  roomNo: string;
   confidence: number;
 }
 
@@ -15,15 +18,16 @@ export interface CommunityMatchResult {
 
 @Injectable()
 export class OcrService {
-  async recognizeMaterial(
-    _fileUrl: string,
-    materialType: string,
-  ): Promise<OcrResult> {
-    // Mock: 根据材料类型返回模拟识别结果
+  // ponytail: 上线前替换为真实 OCR API（百度/阿里房产证识别），接口签名不变
+  async recognizeMaterial(_fileUrl: string, _materialType: string): Promise<OcrResult> {
+    // Mock: 返回固定的房产证识别结果，用于和用户输入对比
     return {
       communityName: '阳光花园小区',
       address: '南京市鼓楼区阳光路88号',
       ownerName: '张**',
+      buildingNo: '1',
+      unitNo: '2',
+      roomNo: '303',
       confidence: 0.85,
     };
   }

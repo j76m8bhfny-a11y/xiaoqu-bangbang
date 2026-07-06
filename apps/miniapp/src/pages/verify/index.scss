@@ -8,7 +8,7 @@
 
   &__body {
     flex: 1;
-    padding: $spacing-md;
+    padding: $spacing-md 0;
     padding-bottom: calc(#{$spacing-xl} + env(safe-area-inset-bottom));
   }
 
@@ -17,7 +17,7 @@
     border-radius: $radius-md;
     padding: $spacing-lg $spacing-md;
     box-shadow: $shadow-card;
-    margin-bottom: $spacing-lg;
+    margin: 0 $spacing-md $spacing-lg;
   }
 
   &__section-title {
@@ -68,14 +68,63 @@
     }
   }
 
+  // ===== Address inputs (楼栋/单元/房号) =====
+  &__address-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-md;
+  }
+
+  &__address-input {
+    flex: 1;
+    height: 72px;
+    border-radius: $radius-sm;
+    background: $color-bg;
+    padding: 0 $spacing-sm;
+    font-size: $font-size-sm;
+    text-align: center;
+    border: 1px solid $color-border;
+    box-sizing: border-box;
+  }
+
+  &__address-sep {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    flex-shrink: 0;
+  }
+
   // ===== Consent row =====
   &__consent-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: $spacing-md 0;
     margin-top: $spacing-md;
     border-top: 1px solid $color-border;
+  }
+
+  &__checkbox {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-sm;
+    border: 2px solid $color-border;
+    margin-right: $spacing-sm;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &--checked {
+      background: $color-primary;
+      border-color: $color-primary;
+    }
+  }
+
+  &__checkbox-icon {
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
   }
 
   &__consent-text {
@@ -83,7 +132,6 @@
     font-size: $font-size-xs;
     color: $color-text-secondary;
     line-height: 1.5;
-    margin-right: $spacing-sm;
   }
 
   // ===== Submit button =====
@@ -114,6 +162,7 @@
     border-radius: $radius-md;
     padding: $spacing-lg $spacing-md;
     box-shadow: $shadow-card;
+    margin: 0 $spacing-md;
   }
 
   &__record-list {

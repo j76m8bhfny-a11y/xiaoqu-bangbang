@@ -161,6 +161,9 @@ export interface SubmitVerificationRequest {
   communityId: string;
   materialType: MaterialType;
   fileUrl: string;
+  buildingNo: string;
+  unitNo?: string;
+  roomNo: string;
   consentAccepted: boolean;
   consentVersion: string;
 }
@@ -183,6 +186,9 @@ export interface SubmitVerificationResponse {
     communityName: string;
     address: string;
     ownerName: string;
+    buildingNo: string;
+    unitNo: string;
+    roomNo: string;
     confidence: number;
   } | null;
   matchResult: { matched: boolean; confidence: number } | null;

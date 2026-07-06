@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Taro from '@tarojs/taro';
-import { View, Text, Switch, ScrollView } from '@tarojs/components';
+import { View, Text, ScrollView, Input } from '@tarojs/components';
 import { verificationService } from '@/services';
 import { useCommunityStore } from '@/store';
 import { useRequest } from '@/hooks';
@@ -19,7 +19,7 @@ const MATERIAL_OPTIONS: { key: MaterialType; label: string }[] = [
   { key: MaterialType.OTHER, label: '📋 其他' },
 ];
 
-const STATUS_MAP: Record<VerificationStatus, { label: string; color: string }> = {
+const STATUS_MAP: Record<string, { label: string; color: string }> = {
   [VerificationStatus.PENDING]: { label: '审核中', color: 'orange' },
   [VerificationStatus.APPROVED]: { label: '已通过', color: 'green' },
   [VerificationStatus.REJECTED]: { label: '已拒绝', color: 'red' },
@@ -38,6 +38,9 @@ export default function Verify() {
 
   const [materialType, setMaterialType] = useState<MaterialType>(MaterialType.PROPERTY_CERT);
   const [images, setImages] = useState<string[]>([]);
+  const [buildingNo, setBuildingNo] = useState('');
+  const [unitNo, setUnitNo] = useState('');
+  const [roomNo, setRoomNo] = useState('');
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -51,6 +54,10 @@ export default function Verify() {
   const handleSubmit = async () => {
     if (images.length === 0) {
       Taro.showToast({ title: '请上传认证材料照片', icon: 'none' });
+      return;
+    }
+    if (!buildingNo.trim() || !roomNo.trim()) {
+      Taro.showToast({ title: '请填写楼栋号和房号', icon: 'none' });
       return;
     }
     if (!consentAccepted) {
@@ -68,36 +75,40 @@ export default function Verify() {
         communityId,
         materialType,
         fileUrl: images[0],
+        buildingNo: buildingNo.trim(),
+        unitNo: unitNo.trim(),
+        roomNo: roomNo.trim(),
         consentAccepted: true,
         consentVersion: '1.0',
       });
 
-      // Show OCR + match result
+      // 展示 OCR 识别 + 匹配结果
       const parts: string[] = [];
       if (result.ocrSummary) {
         parts.push(
           `识别小区: ${result.ocrSummary.communityName}`,
-          `地址: ${result.ocrSummary.address}`,
-          `业主: ${result.ocrSummary.ownerName}`,
+          `识别房号: ${result.ocrSummary.buildingNo}栋${result.ocrSummary.unitNo}单元${result.ocrSummary.roomNo}室`,
           `置信度: ${Math.round(result.ocrSummary.confidence * 100)}%`,
         );
       }
-      if (result.matchResult) {
-        parts.push(
-          `匹配结果: ${result.matchResult.matched ? '匹配成功' : '未匹配'}`,
-          `匹配度: ${Math.round(result.matchResult.confidence * 100)}%`,
-        );
-      }
+
+      const statusMsg =
+        result.status === 'approved'
+          ? '✅ OCR 识别与您输入一致，已自动通过认证'
+          : '⏳ OCR 识别与您输入不一致，已转入人工审核，请等待 Admin 审批';
 
       Taro.showModal({
-        title: '认证提交成功',
-        content: parts.length > 0 ? parts.join('\n') : '您的认证申请已提交，请等待审核',
+        title: result.status === 'approved' ? '认证已通过' : '认证审核中',
+        content: parts.length > 0 ? `${parts.join('\n')}\n\n${statusMsg}` : statusMsg,
         showCancel: false,
         confirmText: '知道了',
       });
 
       // Reset form & refresh records
       setImages([]);
+      setBuildingNo('');
+      setUnitNo('');
+      setRoomNo('');
       setConsentAccepted(false);
       refreshRecords();
     } catch (err) {
@@ -136,16 +147,47 @@ export default function Verify() {
             ))}
           </View>
 
+          <Text className="verify__section-title">楼栋 / 单元 / 房号</Text>
+          <View className="verify__address-row">
+            <Input
+              className="verify__address-input"
+              type="number"
+              placeholder="楼栋号"
+              value={buildingNo}
+              onInput={(e) => setBuildingNo(e.detail.value)}
+            />
+            <Text className="verify__address-sep">栋</Text>
+            <Input
+              className="verify__address-input"
+              type="number"
+              placeholder="单元号(选填)"
+              value={unitNo}
+              onInput={(e) => setUnitNo(e.detail.value)}
+            />
+            <Text className="verify__address-sep">单元</Text>
+            <Input
+              className="verify__address-input"
+              type="number"
+              placeholder="房号"
+              value={roomNo}
+              onInput={(e) => setRoomNo(e.detail.value)}
+            />
+            <Text className="verify__address-sep">室</Text>
+          </View>
+
           <Text className="verify__section-title">上传材料照片</Text>
           <ImagePicker images={images} maxCount={1} onChange={setImages} />
 
-          <View className="verify__consent-row">
+          <View
+            className="verify__consent-row"
+            onClick={() => setConsentAccepted(!consentAccepted)}
+          >
+            <View
+              className={`verify__checkbox ${consentAccepted ? 'verify__checkbox--checked' : ''}`}
+            >
+              {consentAccepted && <Text className="verify__checkbox-icon">✓</Text>}
+            </View>
             <Text className="verify__consent-text">我同意授权认证，并确认所提供信息真实有效</Text>
-            <Switch
-              checked={consentAccepted}
-              onChange={(e) => setConsentAccepted(e.detail.value)}
-              color="#5b9e6f"
-            />
           </View>
 
           <View

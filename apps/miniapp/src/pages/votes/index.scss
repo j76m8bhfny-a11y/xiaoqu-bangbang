@@ -24,14 +24,13 @@
 
   &__list {
     height: calc(100vh - 160px);
-    padding: 0 $spacing-lg;
   }
 
   &__card {
     background: #fff;
     border-radius: $radius-md;
     padding: $spacing-md;
-    margin-bottom: $spacing-sm;
+    margin: 0 $spacing-lg $spacing-sm;
     box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
     transition: transform 0.2s;
 

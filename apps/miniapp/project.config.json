@@ -13,10 +13,11 @@
       "outputPath": ""
     },
     "useCompilerPlugins": false,
-    "urlCheck": false
+    "urlCheck": false,
+    "minifyWXML": true
   },
   "compileType": "miniprogram",
-  "simulatorPluginLibVersion": {},
+  "simulatorPluginLibVersion": "",
   "packOptions": {
     "ignore": [],
     "include": []

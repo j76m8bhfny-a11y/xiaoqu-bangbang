@@ -127,7 +127,6 @@
 
   &__list {
     height: calc(100vh - 320px);
-    padding: 0 $spacing-lg;
     box-sizing: border-box;
   }
 
@@ -229,7 +228,7 @@
     background: #fff;
     border-radius: 16px;
     padding: 12px;
-    margin-bottom: 12px;
+    margin: 0 $spacing-lg 12px;
     box-shadow: $shadow-card;
     box-sizing: border-box;
     overflow: hidden;

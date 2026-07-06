@@ -39,7 +39,7 @@ export enum MaterialType {
 
 /** 认证审核状态 */
 export enum VerificationStatus {
-  PENDING = 'pending',
+  PENDING = 'pending_review',
   APPROVED = 'approved',
   REJECTED = 'rejected',
   MANUAL_REVIEW = 'manual_review',

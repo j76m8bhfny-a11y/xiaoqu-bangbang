@@ -8,7 +8,7 @@
 
   &__body {
     flex: 1;
-    padding: $spacing-md;
+    padding: $spacing-md 0;
     padding-bottom: 160px;
   }
 
@@ -17,6 +17,7 @@
     border-radius: $radius-md;
     padding: $spacing-lg $spacing-md;
     box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
+    margin: 0 $spacing-md;
   }
 
   &__field {

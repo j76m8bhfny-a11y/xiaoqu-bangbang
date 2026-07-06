@@ -3,7 +3,7 @@
 .profile-edit {
   min-height: 100vh;
   background: $color-bg;
-  padding: $spacing-md;
+  padding: $spacing-md 0;
   padding-bottom: calc(#{$spacing-xl} + env(safe-area-inset-bottom));
 
   &__avatar-section {
@@ -32,6 +32,7 @@
     border-radius: $radius-md;
     padding: $spacing-md;
     box-shadow: $shadow-card;
+    margin: 0 $spacing-md;
   }
 
   &__field {
@@ -69,7 +70,7 @@
   }
 
   &__submit {
-    margin-top: $spacing-xl;
+    margin: $spacing-xl $spacing-md 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -91,7 +92,7 @@
 
   // 技能管理
   &__skills {
-    margin-top: $spacing-md;
+    margin: $spacing-md $spacing-md 0;
     background: #fff;
     border-radius: $radius-md;
     padding: $spacing-md;

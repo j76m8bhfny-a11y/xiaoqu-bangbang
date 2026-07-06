@@ -129,7 +129,7 @@
   &__list {
     flex: 1;
     height: calc(100vh - 360px);
-    padding: $spacing-md $spacing-md 140px;
+    padding: $spacing-md 0 140px;
   }
 
   // ===== 卡片 =====
@@ -139,7 +139,7 @@
     padding: $spacing-md;
     background: #fff;
     border-radius: $radius-md;
-    margin-bottom: $spacing-sm;
+    margin: 0 $spacing-md $spacing-sm;
     box-shadow: 0 2px 12px rgba(23, 23, 23, 0.05);
     transition:
       transform 0.15s ease,

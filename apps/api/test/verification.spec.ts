@@ -63,6 +63,9 @@ describe('Feature: 小区认证', () => {
           communityId,
           materialType: 'property_cert',
           fileUrl: 'https://example.com/cert.jpg',
+          buildingNo: '1',
+          unitNo: '2',
+          roomNo: '303',
           consentAccepted: true,
           consentVersion: '2026-05-privacy-v1',
         })
@@ -86,13 +89,16 @@ describe('Feature: 小区认证', () => {
           communityId,
           materialType: 'property_cert',
           fileUrl: 'https://example.com/cert2.jpg',
+          buildingNo: '1',
+          unitNo: '2',
+          roomNo: '303',
           consentAccepted: true,
           consentVersion: '2026-05-privacy-v1',
         })
         .expect(201);
 
-      // Mock OCR 返回"阳光花园小区"，与数据库小区名匹配
-      expect(['approved', 'manual_review']).toContain(res.body.data.status);
+      // Mock OCR 返回"阳光花园小区" + buildingNo=1/unitNo=2/roomNo=303，与用户输入一致 → 自动通过
+      expect(res.body.data.status).toBe('approved');
     });
   });
 
@@ -122,6 +128,9 @@ describe('Feature: 小区认证', () => {
           communityId,
           materialType: 'property_cert',
           fileUrl: 'https://example.com/p216-approved.jpg',
+          buildingNo: '1',
+          unitNo: '2',
+          roomNo: '303',
           consentAccepted: true,
           consentVersion: '2026-05-privacy-v1',
         })
@@ -135,8 +144,8 @@ describe('Feature: 小区认证', () => {
       expect(verification.originalFileDeletedAt).not.toBeNull();
     });
 
-    it('manual_review 认证不应标记 originalFileDeletedAt', async () => {
-      // 创建名字不匹配 OCR 结果的小区 → manual_review
+    it('pending_review 认证不应标记 originalFileDeletedAt', async () => {
+      // 创建名字不匹配 OCR 结果的小区 + 楼栋房号也不匹配 → pending_review
       const mismatchCommunity = await prisma.community.create({
         data: { name: 'P216测试小区', city: '南京', district: '鼓楼区', address: 'P216路1号' },
       });
@@ -149,6 +158,9 @@ describe('Feature: 小区认证', () => {
             communityId: mismatchCommunity.id,
             materialType: 'property_cert',
             fileUrl: 'https://example.com/p216-manual.jpg',
+            buildingNo: '9',
+            unitNo: '9',
+            roomNo: '999',
             consentAccepted: true,
             consentVersion: '2026-05-privacy-v1',
           })
@@ -157,8 +169,8 @@ describe('Feature: 小区认证', () => {
         const verification = await prisma.verification.findUnique({
           where: { id: res.body.data.id },
         });
-        // R5 红线: manual_review 不应标记原图删除
-        expect(verification.status).toBe('manual_review');
+        // R5 红线: pending_review 不应标记原图删除
+        expect(verification.status).toBe('pending_review');
         expect(verification.originalFileDeletedAt).toBeNull();
       } finally {
         await prisma.verification.deleteMany({ where: { communityId: mismatchCommunity.id } });

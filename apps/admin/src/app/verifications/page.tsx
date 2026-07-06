@@ -29,17 +29,18 @@ interface VerificationItem {
   status: string;
   createdAt: string;
   user?: { id: string; nickname: string };
+  community?: { id: string; name: string };
 }
 
 const statusLabels: Record<string, string> = {
-  pending: '待审核',
+  pending_review: '待审核',
   approved: '已通过',
   rejected: '已拒绝',
   manual_review: '人工审核',
 };
 
 const statusColors: Record<string, string> = {
-  pending: 'orange',
+  pending_review: 'orange',
   approved: 'green',
   rejected: 'red',
   manual_review: 'blue',
@@ -103,7 +104,7 @@ export default function VerificationsPage() {
 
   const columns: ColumnsType<VerificationItem> = [
     { title: '用户', dataIndex: ['user', 'nickname'], width: 120 },
-    { title: '小区ID', dataIndex: 'communityId', width: 120, ellipsis: true },
+    { title: '小区', dataIndex: ['community', 'name'], width: 140 },
     {
       title: '材料类型',
       dataIndex: 'materialType',
@@ -132,7 +133,7 @@ export default function VerificationsPage() {
           >
             详情
           </Button>
-          {record.status === 'pending' || record.status === 'manual_review' ? (
+          {record.status === 'pending_review' || record.status === 'manual_review' ? (
             <>
               <Button size="small" type="link" onClick={() => approveMutation.mutate(record.id)}>
                 通过

@@ -60,7 +60,6 @@
 
   &__list {
     height: calc(100vh - 260px);
-    padding: 0 $spacing-md;
   }
 
   &__card {
@@ -69,7 +68,7 @@
     padding: $spacing-md;
     background: #fff;
     border-radius: $radius-md;
-    margin-bottom: $spacing-sm;
+    margin: 0 $spacing-md $spacing-sm;
     box-shadow: 0 2px 8px rgba(23, 23, 23, 0.04);
 
     &:active {

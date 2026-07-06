@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsBoolean, IsUrl } from 'class-validator';
+import { IsString, IsEnum, IsBoolean, IsUrl, IsOptional } from 'class-validator';
 
 export class SubmitVerificationDto {
   @IsString()
@@ -9,6 +9,16 @@ export class SubmitVerificationDto {
 
   @IsUrl()
   fileUrl: string;
+
+  @IsString()
+  buildingNo: string;
+
+  @IsOptional()
+  @IsString()
+  unitNo?: string;
+
+  @IsString()
+  roomNo: string;
 
   @IsBoolean()
   consentAccepted: boolean;

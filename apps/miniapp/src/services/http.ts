@@ -20,6 +20,8 @@ interface RequestOptions {
   skipAuth?: boolean;
 }
 
+let isRelaunching = false;
+
 async function request<T>(options: RequestOptions): Promise<T> {
   const { url, method = 'GET', data, header = {}, skipAuth = false } = options;
 
@@ -59,7 +61,12 @@ async function request<T>(options: RequestOptions): Promise<T> {
   if (body.code !== 0) {
     if (body.code === ErrorCodes.UNAUTHORIZED) {
       removeToken();
-      Taro.reLaunch({ url: '/pages/login/index' });
+      if (!isRelaunching) {
+        isRelaunching = true;
+        Taro.reLaunch({ url: '/pages/login/index' }).finally(() => {
+          isRelaunching = false;
+        });
+      }
     }
 
     if (body.code === 40301) {

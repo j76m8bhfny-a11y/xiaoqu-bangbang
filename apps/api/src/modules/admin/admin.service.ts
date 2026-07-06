@@ -525,6 +525,7 @@ export class AdminService {
         status: true,
         createdAt: true,
         user: { select: { id: true, nickname: true } },
+        community: { select: { id: true, name: true } },
       },
       skip: pagination?.skip,
       take: pagination?.take,

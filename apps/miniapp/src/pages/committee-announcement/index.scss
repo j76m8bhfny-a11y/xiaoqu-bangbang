@@ -6,7 +6,7 @@
 
   &__scroll {
     height: 100vh;
-    padding: $spacing-md;
+    padding: $spacing-md 0;
     box-sizing: border-box;
   }
 
@@ -15,6 +15,7 @@
     background: $color-card;
     border-radius: $radius-lg;
     padding: $spacing-lg $spacing-md;
+    margin: 0 $spacing-md;
     box-shadow: $shadow-card;
   }
 

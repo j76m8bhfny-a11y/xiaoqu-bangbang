@@ -58,6 +58,9 @@ export class VerificationsService {
       communityId: string;
       materialType: string;
       fileUrl: string;
+      buildingNo: string;
+      unitNo?: string;
+      roomNo: string;
       consentAccepted: boolean;
       consentVersion: string;
     },
@@ -96,14 +99,19 @@ export class VerificationsService {
         )
       : { matched: false, confidence: 0, status: 'rejected' as const };
 
-    // 确定认证状态
+    // 核心逻辑：OCR 识别的楼栋/单元/房号与用户输入对比
+    // 一致且小区匹配 → 自动通过；不一致 → 人工审核
+    // unitNo 为选填，用户不填时跳过单元号对比
+    const ocrMatchesInput =
+      ocrResult.buildingNo === dto.buildingNo &&
+      ocrResult.roomNo === dto.roomNo &&
+      (!dto.unitNo || ocrResult.unitNo === dto.unitNo);
+
     let verificationStatus: string;
-    if (matchResult.status === 'approved') {
+    if (matchResult.status === 'approved' && ocrMatchesInput) {
       verificationStatus = 'approved';
-    } else if (matchResult.status === 'manual_review') {
-      verificationStatus = 'manual_review';
     } else {
-      verificationStatus = 'rejected';
+      verificationStatus = 'pending_review';
     }
 
     // 创建认证记录
@@ -151,6 +159,9 @@ export class VerificationsService {
         communityName: ocrResult.communityName,
         address: ocrResult.address,
         ownerName: ocrResult.ownerName,
+        buildingNo: ocrResult.buildingNo,
+        unitNo: ocrResult.unitNo,
+        roomNo: ocrResult.roomNo,
         confidence: ocrResult.confidence,
       },
       matchResult: {
