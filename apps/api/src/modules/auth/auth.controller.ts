@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { WechatLoginDto } from './dto/wechat-login.dto';
+import { DevLoginDto } from './dto/dev-login.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -22,6 +23,13 @@ export class AuthController {
   @Post('wechat-login')
   async wechatLogin(@Body() dto: WechatLoginDto) {
     const result = await this.authService.wechatLogin(dto.code, dto.phoneCode);
+    return { code: 0, message: 'ok', data: result };
+  }
+
+  // ponytail: 临时调试登录入口，发布前删除（输入 userId 直接签 JWT，跳过微信授权）
+  @Post('dev-login')
+  async devLogin(@Body() dto: DevLoginDto) {
+    const result = await this.authService.devLogin(dto.userId);
     return { code: 0, message: 'ok', data: result };
   }
 }

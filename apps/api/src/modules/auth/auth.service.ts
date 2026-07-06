@@ -36,6 +36,19 @@ export class AuthService {
     return { token, user: { ...userDto, openid: user.openid } };
   }
 
+  // ponytail: 临时调试登录，按 userId 直接签 JWT，发布前删除
+  async devLogin(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('用户不存在');
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+    const token = this.jwtService.sign({ sub: user.id, openid: user.openid });
+    const userDto = await this.getMe(user.id);
+    return { token, user: { ...userDto, openid: user.openid } };
+  }
+
   async getMe(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
