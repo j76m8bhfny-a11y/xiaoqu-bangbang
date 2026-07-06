@@ -1,6 +1,6 @@
 import { View, Text, Input, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
-import { useState } from 'react';
+import Taro, { useRouter } from '@tarojs/taro';
+import { useState, useEffect } from 'react';
 import { communityService } from '@/services';
 import { useCommunityStore, useAuthStore } from '@/store';
 import { useRequest } from '@/hooks';
@@ -8,9 +8,18 @@ import type { CommunityDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
 export default function CommunitySelect() {
+  const router = useRouter();
   const [keyword, setKeyword] = useState('');
   const selectCommunity = useCommunityStore((s) => s.selectCommunity);
   const updateUser = useAuthStore((s) => s.updateUser);
+
+  // 启动/登录时带 pendingAppId 参数 → 自动跳转到申请详情页
+  useEffect(() => {
+    const { pendingAppId } = router.params;
+    if (pendingAppId) {
+      Taro.navigateTo({ url: `/pages/community-application-detail/index?id=${pendingAppId}` });
+    }
+  }, [router.params]);
 
   const { data, loading, error } = useRequest(
     () => communityService.list({ keyword: keyword || undefined }),

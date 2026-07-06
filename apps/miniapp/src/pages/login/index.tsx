@@ -1,11 +1,11 @@
 import { View, Text, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState } from 'react';
-import { authService } from '@/services';
+import { authService, communityApplicationService } from '@/services';
 import { useAuthStore, useCommunityStore } from '@/store';
 import './index.scss';
 
-const handleLoginSuccess = (
+const handleLoginSuccess = async (
   result: { token: string; user: any },
   setAuth: (t: string, u: any) => void,
   selectCommunity: (c: any) => void,
@@ -19,6 +19,19 @@ const handleLoginSuccess = (
     } as any);
     Taro.switchTab({ url: '/pages/home/index' });
   } else {
+    // 无小区 — 检查是否有 pending/approved 申请
+    try {
+      const apps = await communityApplicationService.listMine();
+      const activeApp = apps.items.find((a) => a.status === 'pending' || a.status === 'approved');
+      if (activeApp) {
+        Taro.redirectTo({
+          url: `/pages/community-select/index?pendingAppId=${activeApp.id}`,
+        });
+        return;
+      }
+    } catch {
+      // 拉取申请失败，走默认选小区
+    }
     Taro.redirectTo({ url: '/pages/community-select/index' });
   }
 };

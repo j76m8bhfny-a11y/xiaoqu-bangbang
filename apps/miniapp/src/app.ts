@@ -1,8 +1,7 @@
 import { PropsWithChildren, useEffect } from 'react';
 import Taro from '@tarojs/taro';
 import { useAuthStore, useCommunityStore, useNotificationStore } from '@/store';
-import { authService, notificationService } from '@/services';
-import { getCachedCommunityId } from '@/utils/storage';
+import { authService, notificationService, communityApplicationService } from '@/services';
 import './styles/tokens.scss';
 import './app.scss';
 
@@ -27,8 +26,24 @@ function App({ children }: PropsWithChildren) {
             id: user.currentCommunityId,
             name: user.currentCommunityName,
           } as any);
-        } else if (!getCachedCommunityId()) {
+        } else {
+          // 无小区 — 检查是否有 pending/approved 申请
+          try {
+            const apps = await communityApplicationService.listMine();
+            const activeApp = apps.items.find(
+              (a) => a.status === 'pending' || a.status === 'approved',
+            );
+            if (activeApp) {
+              Taro.redirectTo({
+                url: `/pages/community-select/index?pendingAppId=${activeApp.id}`,
+              });
+              return;
+            }
+          } catch {
+            // 拉取申请失败，走默认选小区
+          }
           Taro.redirectTo({ url: '/pages/community-select/index' });
+          return;
         }
 
         // 拉取未读通知

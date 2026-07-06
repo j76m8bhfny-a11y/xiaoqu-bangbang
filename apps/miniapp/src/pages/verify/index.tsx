@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Taro from '@tarojs/taro';
 import { View, Text, ScrollView, Input } from '@tarojs/components';
 import { verificationService } from '@/services';
-import { useCommunityStore } from '@/store';
+import { useCommunityStore, useAuthStore } from '@/store';
 import { useRequest } from '@/hooks';
 import ImagePicker from '@/components/image-picker';
 import Loading from '@/components/loading';
@@ -35,6 +35,7 @@ const MATERIAL_LABEL_MAP: Record<MaterialType, string> = {
 
 export default function Verify() {
   const communityId = useCommunityStore((s) => s.currentCommunityId);
+  const updateUser = useAuthStore((s) => s.updateUser);
 
   const [materialType, setMaterialType] = useState<MaterialType>(MaterialType.PROPERTY_CERT);
   const [images, setImages] = useState<string[]>([]);
@@ -111,6 +112,11 @@ export default function Verify() {
       setRoomNo('');
       setConsentAccepted(false);
       refreshRecords();
+
+      // 认证通过 → 立即更新 store，避免发帖时被前端拦截
+      if (result.status === 'approved') {
+        updateUser({ verifyStatus: 'verified' });
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : '提交失败';
       Taro.showToast({ title: message, icon: 'none' });
