@@ -16,6 +16,7 @@ import { VerifiedMemberGuard } from '../../common/guards/verified-member.guard';
 import { CurrentCommunityId } from '../../common/decorators/current-community.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { getPaginationParams } from '../../common/helpers/pagination';
+import type { CreateTopicRequest } from '@xiaoqu-bangbang/shared';
 
 @Controller('topics')
 @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
@@ -71,7 +72,7 @@ export class TopicsController {
   async create(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
-    @Body() body: { title: string; description?: string },
+    @Body() body: CreateTopicRequest,
   ) {
     const topic = await this.topicsService.create(userId, communityId, body);
     return { code: 0, message: 'ok', data: topic };

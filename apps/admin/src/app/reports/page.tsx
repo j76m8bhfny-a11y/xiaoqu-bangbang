@@ -25,12 +25,20 @@ const statusLabels: Record<string, string> = {
   pending: '待处理',
   processed: '已处理',
   rejected: '已驳回',
+  dismissed: '已驳回',
+  takedown: '已下架',
+  warned: '已警告',
+  banned: '已封禁',
 };
 
 const statusColors: Record<string, string> = {
   pending: 'orange',
   processed: 'green',
   rejected: 'default',
+  dismissed: 'default',
+  takedown: 'red',
+  warned: 'gold',
+  banned: 'red',
 };
 
 const reasonLabels: Record<string, string> = {

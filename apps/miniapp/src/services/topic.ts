@@ -18,6 +18,8 @@ export const topicService = {
 
   create: (data: CreateTopicRequest) => http.post<TopicDto>('/topics', data),
 
+  // P-117/P-118/P-121: like/dislike/rate/comment 返回完整 TopicDto，
+  // 前端用窄类型 Pick<TopicDto, ...> 结构兼容，只取需要的字段
   like: (id: string, scope: 'open' | 'closed') =>
     http.post<{ likeCount: number; dislikeCount: number }>(`/topics/${id}/like`, { scope }),
 

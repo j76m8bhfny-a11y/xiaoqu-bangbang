@@ -31,4 +31,8 @@ export class CreateMarketItemDto {
   @IsString()
   @IsEnum(['new', 'like_new', 'good', 'used', 'old'])
   conditionLevel?: string;
+
+  @IsOptional()
+  @IsString()
+  contactText?: string;
 }

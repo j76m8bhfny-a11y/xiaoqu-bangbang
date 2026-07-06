@@ -124,11 +124,13 @@ export default function EventDetail() {
   const applications = applicationsData?.items;
 
   // Feedback logs for public_feedback type
-  const { data: feedbackLogs } = useRequest<FeedbackLogDto[]>(
+  // P-104: 后端返回 { items: FeedbackLogDto[] }
+  const { data: feedbackLogsData } = useRequest<{ items: FeedbackLogDto[] }>(
     () => eventService.getFeedbackLogs(id!),
     [id],
     { enabled: !!id && event?.type === EventType.PUBLIC_FEEDBACK },
   );
+  const feedbackLogs = feedbackLogsData?.items;
 
   // Matched skills for help_request type
   const { data: matchedSkillsData } = useRequest<{ items: MatchedSkillDto[] }>(

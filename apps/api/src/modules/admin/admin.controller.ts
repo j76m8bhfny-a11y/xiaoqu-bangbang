@@ -22,6 +22,7 @@ import { UpdateShareTemplateDto } from './dto/update-share-template.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { getPaginationParams } from '../../common/helpers/pagination';
 import { Public, PlatformAdminOnly } from '../../common/constants';
+import { ErrorCodes } from '@xiaoqu-bangbang/shared';
 import { JwtService } from '@nestjs/jwt';
 
 @Controller('admin')
@@ -38,14 +39,14 @@ export class AdminController {
   async login(@Body() body: { username: string; password: string }) {
     const admin = await this.adminService.login(body.username, body.password);
     if (!admin) {
-      return { code: 40101, message: '用户名或密码错误', data: null };
+      return { code: ErrorCodes.UNAUTHORIZED, message: '用户名或密码错误', data: null };
     }
     const token = this.jwtService.sign({
       sub: admin.userId ?? admin.id,
       openid: `admin_${admin.id}`,
     });
     return {
-      code: 0,
+      code: ErrorCodes.SUCCESS,
       message: 'ok',
       data: {
         token,
@@ -65,7 +66,7 @@ export class AdminController {
   @Get('dashboard')
   async getDashboard(@CurrentCommunityId() communityId: string) {
     const data = await this.adminService.getDashboard(communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Content Review ===
@@ -81,7 +82,11 @@ export class AdminController {
       this.adminService.getReviews(communityId, query, { skip, take }),
       this.adminService.countReviews(communityId, query),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('reviews/:id/approve')
@@ -91,7 +96,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.approveReview(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('reviews/:id/reject')
@@ -99,10 +104,10 @@ export class AdminController {
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
-    @Body() body: { reason?: string },
+    @Body() body: { rejectReason?: string },
   ) {
-    const data = await this.adminService.rejectReview(userId, id, communityId, body.reason);
-    return { code: 0, message: 'ok', data };
+    const data = await this.adminService.rejectReview(userId, id, communityId, body.rejectReason);
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('reviews/:id/manual-visible-admin-only')
@@ -112,7 +117,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.manualVisibleAdminOnly(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Verification Review ===
@@ -128,13 +133,17 @@ export class AdminController {
       this.adminService.getVerifications(communityId, query, { skip, take }),
       this.adminService.countVerifications(communityId, query),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Get('verifications/:id')
   async getVerificationDetail(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
     const data = await this.adminService.getVerificationDetail(id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('verifications/:id/approve')
@@ -144,7 +153,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.approveVerification(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('verifications/:id/reject')
@@ -152,10 +161,15 @@ export class AdminController {
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
-    @Body() body: { reason: string },
+    @Body() body: { rejectReason?: string },
   ) {
-    const data = await this.adminService.rejectVerification(userId, id, communityId, body.reason);
-    return { code: 0, message: 'ok', data };
+    const data = await this.adminService.rejectVerification(
+      userId,
+      id,
+      communityId,
+      body.rejectReason,
+    );
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Event Management ===
@@ -171,7 +185,11 @@ export class AdminController {
       this.adminService.getEvents(communityId, query, { skip, take }),
       this.adminService.countEvents(communityId, query),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('events/:id/hide')
@@ -181,7 +199,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.hideEvent(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('events/:id/restore')
@@ -191,7 +209,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.restoreEvent(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('events/:id/feedback-logs')
@@ -199,10 +217,10 @@ export class AdminController {
     @Param('id') eventId: string,
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
-    @Body() body: { status: string; content: string; images?: string[]; visibleToPublic?: boolean },
+    @Body() body: { status: string; content: string; images?: string[]; visibleToPublic: boolean },
   ) {
     const data = await this.adminService.addFeedbackLog(userId, eventId, communityId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Committee Management ===
@@ -217,17 +235,29 @@ export class AdminController {
       this.adminService.getCommitteeMembers(communityId, { skip, take }),
       this.adminService.countCommitteeMembers(communityId),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('committee/members')
   async createCommitteeMember(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
-    @Body() body: { name: string; position: string; avatarUrl?: string; responsibility?: string },
+    @Body()
+    body: {
+      name: string;
+      position: string;
+      avatarUrl?: string;
+      responsibility?: string;
+      termStart?: string;
+      termEnd?: string;
+    },
   ) {
     const data = await this.adminService.createCommitteeMember(userId, communityId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Patch('committee/members/:id')
@@ -235,11 +265,19 @@ export class AdminController {
     @CurrentUser('userId') userId: string,
     @Param('id') id: string,
     @Body()
-    body: Partial<{ name: string; position: string; avatarUrl: string; responsibility: string }>,
+    body: Partial<{
+      name: string;
+      position: string;
+      avatarUrl: string;
+      responsibility: string;
+      termStart: string;
+      termEnd: string;
+      status: 'active' | 'inactive';
+    }>,
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.updateCommitteeMember(userId, id, body, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Delete('committee/members/:id')
@@ -249,7 +287,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.deleteCommitteeMember(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Get('committee-claims')
@@ -263,7 +301,11 @@ export class AdminController {
       this.adminService.getCommitteeClaims(communityId, { skip, take }),
       this.adminService.countCommitteeClaims(communityId),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('committee-claims/:id/approve')
@@ -273,18 +315,18 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.approveClaim(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('committee-claims/:id/reject')
   async rejectClaim(
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,
-    @Body() body: { reason: string },
+    @Body() body: { action: 'approve' | 'reject'; rejectReason?: string },
     @CurrentCommunityId() communityId: string,
   ) {
-    const data = await this.adminService.rejectClaim(userId, id, body.reason, communityId);
-    return { code: 0, message: 'ok', data };
+    const data = await this.adminService.rejectClaim(userId, id, body.rejectReason, communityId);
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Announcements ===
@@ -299,28 +341,46 @@ export class AdminController {
       this.adminService.getAnnouncements(communityId, { skip, take }),
       this.adminService.countAnnouncements(communityId),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('committee/announcements')
   async createAnnouncement(
     @CurrentCommunityId() communityId: string,
     @CurrentUser('userId') userId: string,
-    @Body() body: { title: string; content: string; images?: string[] },
+    @Body()
+    body: {
+      title: string;
+      content: string;
+      images?: string[];
+      isPinned?: boolean;
+      status?: 'draft' | 'published';
+    },
   ) {
     const data = await this.adminService.createAnnouncement(communityId, userId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Patch('committee/announcements/:id')
   async updateAnnouncement(
     @CurrentUser('userId') userId: string,
     @Param('id') id: string,
-    @Body() body: Partial<{ title: string; content: string; isPinned: boolean; status: string }>,
+    @Body()
+    body: Partial<{
+      title: string;
+      content: string;
+      images: string[];
+      isPinned: boolean;
+      status: 'draft' | 'published' | 'hidden';
+    }>,
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.updateAnnouncement(userId, id, body, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Vote Management ===
@@ -335,7 +395,11 @@ export class AdminController {
       this.adminService.getVotes(communityId, { skip, take }),
       this.adminService.countVotes(communityId),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('votes')
@@ -356,7 +420,7 @@ export class AdminController {
     },
   ) {
     const data = await this.adminService.createVote(communityId, userId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Patch('votes/:id')
@@ -378,7 +442,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.updateVote(userId, id, body, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('votes/:id/publish')
@@ -388,7 +452,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.publishVote(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('votes/:id/close')
@@ -398,13 +462,13 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.closeVote(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Get('votes/:id/results')
   async getVoteResults(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
     const data = await this.adminService.getVoteResults(id, communityId);
-    return { code: 0, message: 'ok', data: { items: data } };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data: { items: data } };
   }
 
   // === Banner Management ===
@@ -419,7 +483,11 @@ export class AdminController {
       this.adminService.getBanners(communityId, { skip, take }),
       this.adminService.countBanners(communityId),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('banners')
@@ -442,7 +510,7 @@ export class AdminController {
     },
   ) {
     const data = await this.adminService.createBanner(userId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Patch('banners/:id')
@@ -450,24 +518,37 @@ export class AdminController {
   async updateBanner(
     @CurrentUser('userId') userId: string,
     @Param('id') id: string,
-    @Body() body: Partial<{ title: string; subtitle: string; imageUrl: string; sortOrder: number }>,
+    @Body()
+    body: Partial<{
+      title: string;
+      subtitle: string;
+      imageUrl: string;
+      linkType: 'event' | 'market' | 'announcement' | 'service_provider' | 'url' | 'none';
+      linkId: string;
+      linkUrl: string;
+      position: 'home_top' | 'event_list' | 'market_list';
+      sortOrder: number;
+      status: 'draft' | 'published' | 'offline';
+      startAt: string;
+      endAt: string;
+    }>,
   ) {
     const data = await this.adminService.updateBanner(userId, id, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('banners/:id/publish')
   @PlatformAdminOnly()
   async publishBanner(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     const data = await this.adminService.publishBanner(userId, id);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('banners/:id/offline')
   @PlatformAdminOnly()
   async offlineBanner(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     const data = await this.adminService.offlineBanner(userId, id);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Service Provider Management ===
@@ -482,7 +563,11 @@ export class AdminController {
       this.adminService.getServiceProviders(communityId, { skip, take }),
       this.adminService.countServiceProviders(communityId),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('service-providers')
@@ -504,7 +589,7 @@ export class AdminController {
     },
   ) {
     const data = await this.adminService.createServiceProvider(userId, communityId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Patch('service-providers/:id')
@@ -516,21 +601,21 @@ export class AdminController {
     body: Partial<{ name: string; category: string; description: string; sortOrder: number }>,
   ) {
     const data = await this.adminService.updateServiceProvider(userId, id, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('service-providers/:id/publish')
   @PlatformAdminOnly()
   async publishServiceProvider(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     const data = await this.adminService.publishServiceProvider(userId, id);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('service-providers/:id/offline')
   @PlatformAdminOnly()
   async offlineServiceProvider(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     const data = await this.adminService.offlineServiceProvider(userId, id);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('service-providers/:id/reject')
@@ -541,7 +626,7 @@ export class AdminController {
     @Body() body: { reason: string },
   ) {
     const data = await this.adminService.rejectServiceProvider(userId, id, body.reason);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Rankings ===
@@ -556,13 +641,17 @@ export class AdminController {
       this.adminService.getContributions(communityId, { skip, take }),
       this.adminService.countContributions(communityId),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Get('badges')
   async getBadges() {
     const data = await this.adminService.getBadges();
-    return { code: 0, message: 'ok', data: { items: data } };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data: { items: data } };
   }
 
   @Post('badges')
@@ -578,7 +667,7 @@ export class AdminController {
     },
   ) {
     const data = await this.adminService.createBadge(userId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // P-332: 补全 badge PATCH（更新）
@@ -596,20 +685,20 @@ export class AdminController {
     },
   ) {
     const data = await this.adminService.updateBadge(userId, id, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // P-332: 补全 badge DELETE（停用）
   @Delete('badges/:id')
   async deleteBadge(@CurrentUser('userId') userId: string, @Param('id') id: string) {
     const data = await this.adminService.deleteBadge(userId, id);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('users/:userId/badges')
   async awardBadge(
     @Param('userId') userId: string,
-    @Body() body: { badgeId: string; reason?: string },
+    @Body() body: { badgeId: string; reason: string; sourceType?: 'manual' },
     @CurrentCommunityId() communityId: string,
     @CurrentUser('userId') adminId: string,
   ) {
@@ -620,7 +709,7 @@ export class AdminController {
       adminId,
       body.reason,
     );
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('rankings/recalculate')
@@ -629,7 +718,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.recalculateRankings(userId, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Audit Logs ===
@@ -644,7 +733,11 @@ export class AdminController {
       this.adminService.getAuditLogs(query, { skip, take }),
       this.adminService.countAuditLogs(query),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   // === Share ===
@@ -659,13 +752,17 @@ export class AdminController {
       this.adminService.getShareLogs(communityId, { skip, take }),
       this.adminService.countShareLogs(communityId),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Get('share-templates')
   async getShareTemplates() {
     const data = await this.adminService.getShareTemplates();
-    return { code: 0, message: 'ok', data: { items: data } };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data: { items: data } };
   }
 
   // P-337: 补全 share template POST（创建）
@@ -675,7 +772,7 @@ export class AdminController {
     @Body() body: { targetType: string; titleTemplate: string; defaultImageUrl?: string },
   ) {
     const data = await this.adminService.createShareTemplate(userId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Patch('share-templates/:id')
@@ -685,14 +782,14 @@ export class AdminController {
     @Body() dto: UpdateShareTemplateDto,
   ) {
     const data = await this.adminService.updateShareTemplate(userId, id, dto);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // P-337: 补全 share template DELETE（停用）
   @Delete('share-templates/:id')
   async deleteShareTemplate(@CurrentUser('userId') userId: string, @Param('id') id: string) {
     const data = await this.adminService.deleteShareTemplate(userId, id);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Social Groups ===
@@ -707,7 +804,11 @@ export class AdminController {
       this.adminService.getSocialGroups(communityId, { skip, take }),
       this.adminService.countSocialGroups(communityId),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('community-social-groups')
@@ -725,7 +826,7 @@ export class AdminController {
     },
   ) {
     const data = await this.adminService.createSocialGroup(userId, communityId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Patch('community-social-groups/:id')
@@ -745,7 +846,7 @@ export class AdminController {
     }>,
   ) {
     const data = await this.adminService.updateSocialGroup(userId, id, communityId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Delete('community-social-groups/:id')
@@ -755,7 +856,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.deleteSocialGroup(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Reports ===
@@ -771,7 +872,11 @@ export class AdminController {
       this.adminService.getReports(communityId, status, { skip, take }),
       this.adminService.countReports(communityId, status),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('reports/:id/dismiss')
@@ -781,7 +886,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.dismissReport(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('reports/:id/takedown')
@@ -792,7 +897,7 @@ export class AdminController {
     @Body() body?: { reason?: string },
   ) {
     const data = await this.adminService.takedownReport(userId, id, communityId, body?.reason);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('reports/:id/warn')
@@ -803,7 +908,7 @@ export class AdminController {
     @Body() body?: { reason?: string },
   ) {
     const data = await this.adminService.warnReport(userId, id, communityId, body?.reason);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('reports/:id/ban')
@@ -814,7 +919,7 @@ export class AdminController {
     @Body() body?: { reason?: string },
   ) {
     const data = await this.adminService.banReport(userId, id, communityId, body?.reason);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Market Items ===
@@ -831,7 +936,11 @@ export class AdminController {
       this.adminService.getMarketItems(communityId, status, category, { skip, take }),
       this.adminService.countMarketItems(communityId, status, category),
     ]);
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Post('market/:id/hide')
@@ -841,7 +950,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.hideMarketItem(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('market/:id/restore')
@@ -851,7 +960,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.restoreMarketItem(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('market/:id/reject')
@@ -862,27 +971,27 @@ export class AdminController {
     @Body('reason') reason?: string,
   ) {
     const data = await this.adminService.rejectMarketItem(userId, id, communityId, reason);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === System Settings ===
   @Get('settings')
   async getSettings() {
     const data = await this.adminService.getSettings();
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Patch('settings')
   async updateSettings(@CurrentUser('userId') userId: string, @Body() dto: UpdateSettingsDto) {
     const data = await this.adminService.updateSettings(userId, dto);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === AI 功能开关 ===
   @Get('settings/ai')
   async getAiSettings() {
     const data = await this.adminService.getAiSettings();
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Patch('settings/ai')
@@ -897,7 +1006,7 @@ export class AdminController {
     }>,
   ) {
     const data = await this.adminService.updateAiSettings(userId, body);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === Topics 议事管理 ===
@@ -908,13 +1017,13 @@ export class AdminController {
     @Query('status') status?: string,
   ) {
     const data = await this.adminService.listMergeSuggestions(communityId, status);
-    return { code: 0, message: 'ok', data: { items: data } };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data: { items: data } };
   }
 
   @Post('topics/merge-suggestions/scan')
   async scanTopicMergeSuggestions(@CurrentCommunityId() communityId: string) {
     const created = await this.topicsService.scanMergeSuggestions(communityId);
-    return { code: 0, message: 'ok', data: { created } };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data: { created } };
   }
 
   @Post('topics/merge-suggestions/:id/approve')
@@ -924,7 +1033,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.approveMergeSuggestion(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('topics/merge-suggestions/:id/reject')
@@ -934,7 +1043,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.rejectMergeSuggestion(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('topics/merge')
@@ -949,7 +1058,7 @@ export class AdminController {
       body.targetTopicId,
       communityId,
     );
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Get('topics')
@@ -967,13 +1076,17 @@ export class AdminController {
       { skip, take },
       search,
     );
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Get('topics/:id')
   async getAdminTopicById(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
     const data = await this.adminService.getTopicById(id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('topics/:id/close')
@@ -984,7 +1097,7 @@ export class AdminController {
     @Body() body: { summary: string },
   ) {
     const data = await this.adminService.closeTopic(userId, id, communityId, body.summary);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('topics/:id/reopen')
@@ -994,7 +1107,7 @@ export class AdminController {
     @CurrentCommunityId() communityId: string,
   ) {
     const data = await this.adminService.reopenTopic(userId, id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('topics/:id/reject')
@@ -1005,7 +1118,7 @@ export class AdminController {
     @Body('reason') reason?: string,
   ) {
     const data = await this.adminService.rejectTopic(userId, id, communityId, reason);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('topics/:id/events/:eventId/move')
@@ -1023,7 +1136,7 @@ export class AdminController {
       body.targetTopicId,
       communityId,
     );
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   // === 小区申请审批 ===
@@ -1040,14 +1153,18 @@ export class AdminController {
       { status },
       { skip, take },
     );
-    return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
   }
 
   @Get('community-applications/:id')
   @SkipCurrentCommunity()
   async getCommunityApplication(@Param('id') id: string) {
     const data = await this.adminService.getCommunityApplicationDetail(id);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('community-applications/:id/approve')
@@ -1057,7 +1174,7 @@ export class AdminController {
     @CurrentUser('userId') adminUserId: string,
   ) {
     const data = await this.adminService.approveCommunityApplication(id, adminUserId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
   @Post('community-applications/:id/reject')
@@ -1068,6 +1185,6 @@ export class AdminController {
     @Body() body: { reason: string },
   ) {
     const data = await this.adminService.rejectCommunityApplication(id, adminUserId, body.reason);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 }

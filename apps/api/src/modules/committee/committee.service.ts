@@ -40,7 +40,9 @@ export class CommitteeService {
         termStart: true,
         termEnd: true,
         claimStatus: true,
+        claimedUserId: true,
       },
+      // ponytail: schema 无 sortOrder 字段，按 createdAt 排序。升级路径: 加 sortOrder 字段 + 迁移。
       orderBy: { createdAt: 'asc' },
       skip: pagination?.skip,
       take: pagination?.take,
@@ -137,11 +139,14 @@ export class CommitteeService {
   }
 
   async getAnnouncements(communityId: string, pagination?: { skip: number; take: number }) {
-    return this.prisma.committeeAnnouncement.findMany({
+    const items = await this.prisma.committeeAnnouncement.findMany({
       where: { communityId, status: 'published', deletedAt: null },
       select: {
         id: true,
         title: true,
+        content: true,
+        images: true,
+        publisherId: true,
         isPinned: true,
         publishedAt: true,
         createdAt: true,
@@ -150,6 +155,19 @@ export class CommitteeService {
       skip: pagination?.skip,
       take: pagination?.take,
     });
+
+    // P-134: 批量获取 publisherNickname
+    const publisherIds = [...new Set(items.map((i) => i.publisherId))];
+    const publishers = await this.prisma.user.findMany({
+      where: { id: { in: publisherIds } },
+      select: { id: true, nickname: true },
+    });
+    const publisherMap = new Map(publishers.map((p) => [p.id, p.nickname]));
+
+    return items.map(({ publisherId, ...item }) => ({
+      ...item,
+      publisherNickname: publisherMap.get(publisherId) ?? '',
+    }));
   }
 
   async countAnnouncements(communityId: string) {
@@ -167,6 +185,12 @@ export class CommitteeService {
       throw new NotFoundException('公告不存在');
     }
 
+    // P-136: 获取 publisherNickname
+    const publisher = await this.prisma.user.findUnique({
+      where: { id: announcement.publisherId },
+      select: { nickname: true },
+    });
+
     // 当前浏览者是否已点赞
     let isLiked = false;
     if (viewerUserId) {
@@ -176,7 +200,7 @@ export class CommitteeService {
       isLiked = !!like;
     }
 
-    return { ...announcement, isLiked };
+    return { ...announcement, publisherNickname: publisher?.nickname ?? '', isLiked };
   }
 
   async toggleAnnouncementLike(userId: string, announcementId: string, communityId: string) {

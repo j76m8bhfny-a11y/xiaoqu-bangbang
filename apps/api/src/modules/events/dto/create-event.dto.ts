@@ -26,6 +26,11 @@ export class CreateEventDto {
   images?: string[];
 
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  videos?: string[];
+
+  @IsOptional()
   @IsString()
   rewardType?: string;
 
@@ -44,8 +49,17 @@ export class CreateEventDto {
   expectedTime?: string;
 
   @IsOptional()
+  @IsString()
+  eventTime?: string;
+
+  @IsOptional()
   @IsBoolean()
   isAnonymous?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(['public', 'admin_only'])
+  visibility?: string;
 
   @IsOptional()
   @IsString()

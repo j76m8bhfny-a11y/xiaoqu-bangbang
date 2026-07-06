@@ -19,7 +19,12 @@ interface CommentDto {
   userId: string;
   userNickname: string;
   userAvatarUrl: string;
+  eventId: string;
+  parentId: string | null;
+  status: string;
+  aiReviewStatus: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 interface FeedbackLogDto {
@@ -29,6 +34,17 @@ interface FeedbackLogDto {
   images: string[];
   visibleToPublic: boolean;
   createdAt: string;
+}
+
+// P-101: requestCompletion 返回 EventCompletionConfirmation 记录，非 EventDto
+interface CompletionConfirmationDto {
+  id: string;
+  eventId: string;
+  userId: string;
+  role: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const eventService = {
@@ -45,10 +61,12 @@ export const eventService = {
     http.post<EventApplicationDto>(`/events/${eventId}/applications`, data),
 
   selectHelper: (eventId: string, applicationId: string) =>
-    http.post<EventApplicationDto>(`/events/${eventId}/applications/${applicationId}/select`),
+    // P-102: 后端返回完整 EventDto（含 include），非 EventApplicationDto
+    http.post<EventDto>(`/events/${eventId}/applications/${applicationId}/select`),
 
   requestCompletion: (eventId: string) =>
-    http.post<EventDto>(`/events/${eventId}/complete/request`),
+    // P-101: 返回 EventCompletionConfirmation 记录
+    http.post<CompletionConfirmationDto>(`/events/${eventId}/complete/request`),
 
   confirmCompletion: (eventId: string) =>
     http.post<EventDto | { confirmed: string; waitingFor: string }>(
@@ -75,7 +93,8 @@ export const eventService = {
     http.get<{ items: EventApplicationDto[] }>(`/events/${eventId}/applications`),
 
   getFeedbackLogs: (eventId: string) =>
-    http.get<FeedbackLogDto[]>(`/events/${eventId}/feedback-logs`),
+    // P-104: 后端返回 { items: FeedbackLogDto[] }
+    http.get<{ items: FeedbackLogDto[] }>(`/events/${eventId}/feedback-logs`),
 
   rateEvent: (eventId: string, data: EventRateRequest) =>
     http.post<EventRateDto>(`/events/${eventId}/rate`, data),

@@ -3,6 +3,7 @@ import { ServiceProvidersService } from './service-providers.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
 import { CurrentCommunityId } from '../../common/decorators/current-community.decorator';
+import { ErrorCodes } from '@xiaoqu-bangbang/shared';
 
 @Controller('service-providers')
 @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
@@ -14,12 +15,17 @@ export class ServiceProvidersController {
   @Get()
   async list(@CurrentCommunityId() communityId: string, @Query() query?: { category?: string }) {
     const items = await this.serviceProvidersService.list(communityId, query);
-    return { code: 0, message: 'ok', data: { items } };
+    // P-153: ponytail: 返回静态分页字段满足前端 usePaginatedList，service-providers 无分页需求
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: 1, pageSize: items.length, total: items.length },
+    };
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
     const data = await this.serviceProvidersService.findOne(id, communityId);
-    return { code: 0, message: 'ok', data };
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 }

@@ -4,6 +4,7 @@ import type {
   LoginResponse,
   UserDto,
   UpdateMeRequest,
+  UpdateMeResponse,
   MyDashboardDto,
 } from '@xiaoqu-bangbang/shared';
 
@@ -13,7 +14,8 @@ export const authService = {
 
   getMe: () => http.get<UserDto>('/me'),
 
-  updateMe: (data: UpdateMeRequest) => http.patch<UserDto>('/me', data),
+  // P-91: updateMe 返回 5 字段子集，非完整 UserDto
+  updateMe: (data: UpdateMeRequest) => http.patch<UpdateMeResponse>('/me', data),
 
   getDashboard: () => http.get<MyDashboardDto>('/me/dashboard'),
 };

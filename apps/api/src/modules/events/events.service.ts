@@ -60,6 +60,8 @@ export class EventsService {
             applications: { where: { deletedAt: null } },
             comments: { where: { deletedAt: null, status: 'visible' } },
             likes: true,
+            thanks: true,
+            favorites: true,
           },
         },
       },
@@ -511,6 +513,10 @@ export class EventsService {
     if (!event) {
       throw new NotFoundException('事件不存在');
     }
+    // P-03: ponytail: 议事类事件守卫，3处重复但逻辑简单，升级路径: 提取 isTopicEvent() 辅助函数
+    if (event.type === 'public_feedback' || event.type === 'discussion') {
+      throw new BadRequestException('议事类事件不支持此操作');
+    }
     if (event.communityId !== communityId) {
       throw new ForbiddenException('无权操作该事件');
     }
@@ -598,6 +604,10 @@ export class EventsService {
 
     if (!event) {
       throw new NotFoundException('事件不存在');
+    }
+    // P-03: ponytail: 议事类事件守卫，3处重复但逻辑简单，升级路径: 提取 isTopicEvent() 辅助函数
+    if (event.type === 'public_feedback' || event.type === 'discussion') {
+      throw new BadRequestException('议事类事件不支持此操作');
     }
     if (event.communityId !== communityId) {
       throw new ForbiddenException('无权操作该事件');
@@ -691,6 +701,10 @@ export class EventsService {
 
     if (!event) {
       throw new NotFoundException('事件不存在');
+    }
+    // P-03: ponytail: 议事类事件守卫，3处重复但逻辑简单，升级路径: 提取 isTopicEvent() 辅助函数
+    if (event.type === 'public_feedback' || event.type === 'discussion') {
+      throw new BadRequestException('议事类事件不支持此操作');
     }
     if (event.communityId !== communityId) {
       throw new ForbiddenException('无权操作该事件');

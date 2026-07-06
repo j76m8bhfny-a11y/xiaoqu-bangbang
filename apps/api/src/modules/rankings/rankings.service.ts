@@ -448,6 +448,7 @@ export class RankingsService {
   async recalculateRankings(communityId: string) {
     // Get current month key and bounds
     const now = new Date();
+    // ponytail: periodKey 生成逻辑重复但一致，低优先级。升级路径: 提取共享函数。
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);

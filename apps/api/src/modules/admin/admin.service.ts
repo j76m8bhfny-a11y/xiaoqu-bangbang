@@ -79,6 +79,7 @@ export class AdminService {
     return result;
   }
 
+  // ponytail: 双重徽章逻辑可正常工作，重构风险 > 收益。上限: N 个徽章时需提取共享函数。
   async awardBadge(
     userId: string,
     badgeId: string,
@@ -593,7 +594,7 @@ export class AdminService {
     return { id, status: 'approved' };
   }
 
-  async rejectVerification(adminId: string, id: string, communityId: string, reason: string) {
+  async rejectVerification(adminId: string, id: string, communityId: string, reason?: string) {
     const v = await this.prisma.verification.findUnique({ where: { id } });
     if (!v || v.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
     // P-309: 已处理的认证不可重复操作
@@ -608,7 +609,7 @@ export class AdminService {
       communityId: v.communityId,
       type: 'review_result',
       title: '认证审核未通过',
-      content: `您的业主认证未通过审核，原因：${reason}`,
+      content: `您的业主认证未通过审核${reason ? `，原因：${reason}` : ''}`,
       targetType: 'verification',
       targetId: id,
     });
@@ -696,7 +697,7 @@ export class AdminService {
     adminId: string,
     eventId: string,
     communityId: string,
-    dto: { status: string; content: string; images?: string[]; visibleToPublic?: boolean },
+    dto: { status: string; content: string; images?: string[]; visibleToPublic: boolean },
   ) {
     // P-310/P-312: event 不存在返回 404，不属于当前小区返回 403
     const event = await this.prisma.event.findUnique({
@@ -816,7 +817,12 @@ export class AdminService {
     return { id: claimId, status: 'approved' };
   }
 
-  async rejectClaim(adminId: string, claimId: string, reason: string, communityId: string) {
+  async rejectClaim(
+    adminId: string,
+    claimId: string,
+    rejectReason: string | undefined,
+    communityId: string,
+  ) {
     const claim = await this.prisma.committeeMemberClaim.findUnique({
       where: { id: claimId },
       select: { communityId: true, status: true, userId: true },
@@ -826,7 +832,7 @@ export class AdminService {
     if (claim.status !== 'pending') throw new BadRequestException('该认领申请已处理');
     await this.prisma.committeeMemberClaim.update({
       where: { id: claimId },
-      data: { status: 'rejected', rejectReason: reason, reviewedBy: adminId },
+      data: { status: 'rejected', rejectReason: rejectReason ?? null, reviewedBy: adminId },
     });
     await this.logAudit(adminId, 'reject_claim', 'committee_member_claim', claimId);
     // P-317: 通知申请人认领申请被驳回
@@ -835,7 +841,7 @@ export class AdminService {
       communityId: claim.communityId,
       type: 'system',
       title: '认领申请被驳回',
-      content: `您的业委会成员认领申请被驳回${reason ? `，原因：${reason}` : ''}`,
+      content: `您的业委会成员认领申请被驳回${rejectReason ? `，原因：${rejectReason}` : ''}`,
       targetType: 'committee_member_claim',
       targetId: claimId,
     });
@@ -846,6 +852,12 @@ export class AdminService {
   async getVotes(communityId: string, pagination?: { skip: number; take: number }) {
     return this.prisma.vote.findMany({
       where: { communityId },
+      include: {
+        options: {
+          orderBy: { sortOrder: 'asc' },
+          select: { id: true, content: true, sortOrder: true },
+        },
+      },
       orderBy: { createdAt: 'desc' },
       skip: pagination?.skip,
       take: pagination?.take,
@@ -1976,15 +1988,16 @@ export class AdminService {
     return result;
   }
 
-  async updateSettings(userId: string, dto: Record<string, string | undefined>) {
+  async updateSettings(userId: string, dto: Record<string, string | number | undefined>) {
     const updates: Promise<any>[] = [];
     for (const [key, value] of Object.entries(dto)) {
       if (value === undefined) continue;
+      const strValue = String(value);
       updates.push(
         this.prisma.systemSetting.upsert({
           where: { key },
-          update: { value, updatedBy: userId },
-          create: { key, value, updatedBy: userId },
+          update: { value: strValue, updatedBy: userId },
+          create: { key, value: strValue, updatedBy: userId },
         }),
       );
     }
@@ -2014,7 +2027,14 @@ export class AdminService {
       }),
       this.prisma.topic.count({ where }),
     ]);
-    return { items, total };
+    // P-200: 补 avgRating 计算字段
+    const itemsWithAvg = items.map(({ ratingSum, ratingCount, ...item }) => ({
+      ...item,
+      ratingSum,
+      ratingCount,
+      avgRating: ratingCount > 0 ? ratingSum / ratingCount : 0,
+    }));
+    return { items: itemsWithAvg, total };
   }
 
   async getTopicById(id: string, communityId: string) {

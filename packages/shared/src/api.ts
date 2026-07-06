@@ -108,6 +108,15 @@ export interface UpdateMeRequest {
   wechatId?: string;
 }
 
+// P-91: updateMe 返回的字段子集
+export interface UpdateMeResponse {
+  id: string;
+  nickname: string;
+  avatarUrl: string;
+  bio: string | null;
+  wechatId: string | null;
+}
+
 // home tab 看板。currentCommunityId 为 null 时其余字段均为零值/空数组。
 export interface MyDashboardDto {
   communityId: string | null;
@@ -142,6 +151,8 @@ export interface SocialGroupDto {
   qrImageUrl: string | null;
   contactText: string | null;
   visibleTo: string;
+  status: string;
+  sortOrder: number;
 }
 
 // ===== 认证 =====
@@ -365,7 +376,7 @@ export interface CommitteeMemberDto {
 
 export interface ClaimCommitteeMemberRequest {
   statement: string;
-  materialUrls: string[];
+  materialUrls?: string[];
 }
 
 export interface CommitteeAnnouncementDto {
@@ -391,6 +402,7 @@ export interface VoteDto {
   startAt: string;
   endAt: string;
   status: VoteStatus;
+  createdAt: string;
   options: VoteOptionDto[];
 }
 
@@ -414,6 +426,9 @@ export interface BannerDto {
   linkType: BannerLinkType;
   linkId: string | null;
   linkUrl: string | null;
+  position: string;
+  status: string;
+  sortOrder: number;
 }
 
 export interface ServiceProviderDto {
@@ -426,6 +441,8 @@ export interface ServiceProviderDto {
   serviceArea: string | null;
   recommendationSource: RecommendationSource;
   verifyStatus: string;
+  status: string;
+  sortOrder: number;
 }
 
 // ===== 通知 =====

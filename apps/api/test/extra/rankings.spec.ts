@@ -134,6 +134,15 @@ describe('P-143: 排行榜列表返回扁平结构', () => {
   });
 
   afterAll(async () => {
+    // ponytail: 清理测试数据，避免残留数据触发 FK 报错
+    await prisma.rankingSnapshot.deleteMany({ where: { communityId } }).catch(() => {});
+    await prisma.notification.deleteMany({ where: { userId } }).catch(() => {});
+    await prisma.communityMember.deleteMany({ where: { userId } }).catch(() => {});
+    await prisma.user
+      .update({ where: { id: userId }, data: { currentCommunityId: null } })
+      .catch(() => {});
+    await prisma.community.deleteMany({ where: { id: communityId } }).catch(() => {});
+    await prisma.user.deleteMany({ where: { id: userId } }).catch(() => {});
     await app.close();
   });
 

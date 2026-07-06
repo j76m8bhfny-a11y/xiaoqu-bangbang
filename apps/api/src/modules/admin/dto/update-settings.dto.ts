@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class UpdateSettingsDto {
   @IsOptional()
@@ -14,12 +14,12 @@ export class UpdateSettingsDto {
   defaultShareImage?: string;
 
   @IsOptional()
-  @IsString()
-  bannerDisplayCount?: string;
+  @IsNumber()
+  bannerDisplayCount?: number;
 
   @IsOptional()
-  @IsString()
-  providerDisplayCount?: string;
+  @IsNumber()
+  providerDisplayCount?: number;
 
   @IsOptional()
   @IsString()
@@ -30,5 +30,5 @@ export class UpdateSettingsDto {
   defaultReviewPolicy?: string;
 
   // Allow any additional key-value pairs
-  [key: string]: string | undefined;
+  [key: string]: string | number | undefined;
 }
