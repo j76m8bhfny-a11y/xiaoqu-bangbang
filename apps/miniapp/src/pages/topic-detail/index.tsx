@@ -1,5 +1,5 @@
 import { View, Text, Input, Image } from '@tarojs/components';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Taro from '@tarojs/taro';
 import { topicService, eventService, reportService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
@@ -85,7 +85,7 @@ export default function TopicDetail() {
     }
   };
 
-  const handleReport = async () => {
+  const handleReport = useCallback(async () => {
     if (!topic) return;
     try {
       const res = await Taro.showActionSheet({
@@ -101,7 +101,7 @@ export default function TopicDetail() {
     } catch {
       // cancelled or failed
     }
-  };
+  }, [topic?.id]);
 
   // FAB 弹窗引导：说明后再跳转新建事件页
   const handleFabAddEvent = async () => {

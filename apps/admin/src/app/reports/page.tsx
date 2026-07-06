@@ -48,6 +48,9 @@ const targetTypeLabels: Record<string, string> = {
   market_item: '闲置',
   market_comment: '闲置评论',
   user: '用户',
+  topic: '议题',
+  topic_comment: '议题评论',
+  vote: '投票',
 };
 
 export default function ReportsPage() {

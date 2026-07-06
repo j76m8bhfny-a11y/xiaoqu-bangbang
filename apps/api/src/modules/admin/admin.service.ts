@@ -1625,6 +1625,21 @@ export class AdminService {
         where: { id: report.targetId },
         data: { status: 'hidden' },
       });
+    } else if (report.targetType === 'topic') {
+      await this.prisma.topic.update({
+        where: { id: report.targetId },
+        data: { status: 'closed' },
+      });
+    } else if (report.targetType === 'topic_comment') {
+      await this.prisma.topicComment.update({
+        where: { id: report.targetId },
+        data: { status: 'hidden' },
+      });
+    } else if (report.targetType === 'vote') {
+      await this.prisma.vote.update({
+        where: { id: report.targetId },
+        data: { status: 'closed' },
+      });
     }
     const updated = await this.prisma.report.update({
       where: { id: reportId },
@@ -1656,6 +1671,24 @@ export class AdminService {
         select: { userId: true },
       });
       contentOwnerId = comment?.userId ?? null;
+    } else if (report.targetType === 'topic') {
+      const topic = await this.prisma.topic.findUnique({
+        where: { id: report.targetId },
+        select: { createdBy: true },
+      });
+      contentOwnerId = topic?.createdBy ?? null;
+    } else if (report.targetType === 'topic_comment') {
+      const comment = await this.prisma.topicComment.findUnique({
+        where: { id: report.targetId },
+        select: { userId: true },
+      });
+      contentOwnerId = comment?.userId ?? null;
+    } else if (report.targetType === 'vote') {
+      const vote = await this.prisma.vote.findUnique({
+        where: { id: report.targetId },
+        select: { createdBy: true },
+      });
+      contentOwnerId = vote?.createdBy ?? null;
     }
     if (contentOwnerId) {
       await this.notificationsService.create({
@@ -1721,6 +1754,24 @@ export class AdminService {
         select: { userId: true },
       });
       reportedUserId = comment?.userId ?? null;
+    } else if (report.targetType === 'topic') {
+      const topic = await this.prisma.topic.findUnique({
+        where: { id: report.targetId },
+        select: { createdBy: true },
+      });
+      reportedUserId = topic?.createdBy ?? null;
+    } else if (report.targetType === 'topic_comment') {
+      const comment = await this.prisma.topicComment.findUnique({
+        where: { id: report.targetId },
+        select: { userId: true },
+      });
+      reportedUserId = comment?.userId ?? null;
+    } else if (report.targetType === 'vote') {
+      const vote = await this.prisma.vote.findUnique({
+        where: { id: report.targetId },
+        select: { createdBy: true },
+      });
+      reportedUserId = vote?.createdBy ?? null;
     } else if (report.targetType === 'user') {
       reportedUserId = report.targetId;
     }
@@ -1779,6 +1830,24 @@ export class AdminService {
         select: { userId: true },
       });
       reportedUserId = comment?.userId ?? null;
+    } else if (report.targetType === 'topic') {
+      const topic = await this.prisma.topic.findUnique({
+        where: { id: report.targetId },
+        select: { createdBy: true },
+      });
+      reportedUserId = topic?.createdBy ?? null;
+    } else if (report.targetType === 'topic_comment') {
+      const comment = await this.prisma.topicComment.findUnique({
+        where: { id: report.targetId },
+        select: { userId: true },
+      });
+      reportedUserId = comment?.userId ?? null;
+    } else if (report.targetType === 'vote') {
+      const vote = await this.prisma.vote.findUnique({
+        where: { id: report.targetId },
+        select: { createdBy: true },
+      });
+      reportedUserId = vote?.createdBy ?? null;
     } else if (report.targetType === 'user') {
       reportedUserId = report.targetId;
     }
