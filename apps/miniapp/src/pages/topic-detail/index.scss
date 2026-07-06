@@ -609,4 +609,22 @@
 
   // ── 热评"查看全部"链接 ───────────────────────────
   // 已移除：评论统一到议题讨论 Tab，事件卡片不再展示评论
+
+  // ── 举报入口 ──────────────────────────────────────
+  &__report-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-sm 0;
+    margin-top: $spacing-xs;
+
+    &:active {
+      opacity: 0.6;
+    }
+  }
+
+  &__report-link-text {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
 }

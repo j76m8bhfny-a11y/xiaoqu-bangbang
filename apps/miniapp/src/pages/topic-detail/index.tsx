@@ -1,7 +1,7 @@
 import { View, Text, Input, Image } from '@tarojs/components';
 import { useState } from 'react';
 import Taro from '@tarojs/taro';
-import { topicService, eventService } from '@/services';
+import { topicService, eventService, reportService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
 import EmptyState from '@/components/empty-state';
 import type { TopicTimelineItem, TopicCommentDto } from '@xiaoqu-bangbang/shared';
@@ -13,6 +13,7 @@ const ICON_THUMB_DOWN = '\u{1f44e}';
 const ICON_HEART = '\u{1f90d}';
 const ICON_HEART_FILLED = '\u{2764}\u{fe0f}';
 const ICON_PLUS = '\uff0b';
+const ICON_REPORT = '\u{1f6ab}';
 
 export default function TopicDetail() {
   useAuthGuard();
@@ -81,6 +82,24 @@ export default function TopicDetail() {
       Taro.showToast({ title: '评分成功', icon: 'success' });
     } catch (e: any) {
       Taro.showToast({ title: e.message || '评分失败', icon: 'none' });
+    }
+  };
+
+  const handleReport = async () => {
+    if (!topic) return;
+    try {
+      const res = await Taro.showActionSheet({
+        itemList: ['隐私泄露', '虚假信息', '骚扰辱骂', '违法违规', '其他'],
+      });
+      const reasons = ['privacy', 'false_info', 'harassment', 'illegal', 'other'];
+      await reportService.submit({
+        targetType: 'topic',
+        targetId: topic.id,
+        reason: reasons[res.tapIndex],
+      });
+      Taro.showToast({ title: '举报成功', icon: 'success' });
+    } catch {
+      // cancelled or failed
     }
   };
 
@@ -277,6 +296,10 @@ export default function TopicDetail() {
               <View className="topic-detail__summary-text">{topic.closedSummary}</View>
             </View>
           )}
+
+          <View className="topic-detail__report-link" onClick={handleReport}>
+            <Text className="topic-detail__report-link-text">{ICON_REPORT} 举报该议题</Text>
+          </View>
         </View>
 
         {/* Tab 切换：下划线式 + 粘性吸顶 */}

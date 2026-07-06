@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import Taro, { useShareAppMessage } from '@tarojs/taro';
 import { View, Text, ScrollView } from '@tarojs/components';
 import { useRequest } from '@/hooks';
-import { voteService, shareService } from '@/services';
+import { voteService, shareService, reportService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import { VoteType, VoteStatus, ResultVisibility } from '@xiaoqu-bangbang/shared';
@@ -149,6 +149,24 @@ export default function VoteDetail() {
     }
   }, [id]);
 
+  const handleReport = useCallback(async () => {
+    if (!id) return;
+    try {
+      const res = await Taro.showActionSheet({
+        itemList: ['隐私泄露', '虚假信息', '骚扰辱骂', '违法违规', '其他'],
+      });
+      const reasons = ['privacy', 'false_info', 'harassment', 'illegal', 'other'];
+      await reportService.submit({
+        targetType: 'vote',
+        targetId: id,
+        reason: reasons[res.tapIndex],
+      });
+      Taro.showToast({ title: '举报成功', icon: 'success' });
+    } catch {
+      // cancelled or failed
+    }
+  }, [id]);
+
   if (loading) {
     return <Loading text="加载投票详情..." />;
   }
@@ -246,6 +264,10 @@ export default function VoteDetail() {
             ))}
           </View>
         )}
+
+        <View className="vote-detail__report-link" onClick={handleReport}>
+          <Text className="vote-detail__report-link-text">{'\u{1f6ab}'} 举报该投票</Text>
+        </View>
 
         <View className="vote-detail__bottom-spacer" />
       </ScrollView>

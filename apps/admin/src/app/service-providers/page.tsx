@@ -232,9 +232,6 @@ export default function ServiceProvidersPage() {
           width={600}
         >
           <Form form={createForm} layout="vertical">
-            <Form.Item name="communityId" label="小区ID" rules={[{ required: true }]}>
-              <Input placeholder="输入小区 UUID" />
-            </Form.Item>
             <Form.Item name="name" label="名称" rules={[{ required: true }]}>
               <Input />
             </Form.Item>

@@ -153,6 +153,9 @@ export enum ReportTargetType {
   MARKET_ITEM = 'market_item',
   MARKET_COMMENT = 'market_comment',
   USER = 'user',
+  TOPIC = 'topic',
+  TOPIC_COMMENT = 'topic_comment',
+  VOTE = 'vote',
 }
 
 /** 反馈处理状态 */
