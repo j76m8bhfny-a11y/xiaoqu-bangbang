@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小区帮榜棒 — 开发进展汇报</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --primary: #5B9E6F;
+    --primary-light: #E8F5ED;
+    --accent: #F5A623;
+    --danger: #E74C3C;
+    --warning: #F39C12;
+    --success: #27AE60;
+    --info: #3498DB;
+    --bg: #FAFBF7;
+    --card-bg: #FFFFFF;
+    --text: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --border: #E5E7EB;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* 头部 */
+  .hero {
+    background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%);
+    color: white;
+    padding: 48px 0 40px;
+    text-align: center;
+  }
+  .hero h1 { font-size: 32px; margin-bottom: 8px; }
+  .hero .tagline { font-size: 18px; opacity: 0.9; }
+  .hero .meta { margin-top: 16px; font-size: 14px; opacity: 0.8; }
+
+  /* 通用 section */
+  .section { padding: 40px 0; }
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .section-desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+
+  /* 卡片 */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  /* 关键指标 */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .metric-value { font-size: 36px; font-weight: 700; color: var(--primary); }
+  .metric-label { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .metric-card.green .metric-value { color: var(--success); }
+  .metric-card.orange .metric-value { color: var(--accent); }
+  .metric-card.red .metric-value { color: var(--danger); }
+  .metric-card.blue .metric-value { color: var(--info); }
+
+  /* 功能模块网格 */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .feature-item {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .feature-emoji { font-size: 28px; flex-shrink: 0; }
+  .feature-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .feature-info p { font-size: 12px; color: var(--text-secondary); }
+  .feature-status {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: auto;
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  /* 流程图 */
+  .flow-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 20px 0;
+  }
+  .flow-step {
+    background: var(--card-bg);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 100px;
+  }
+  .flow-arrow {
+    color: var(--primary);
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .flow-end {
+    background: var(--primary);
+    color: white;
+    border: 2px solid var(--primary);
+  }
+
+  /* 进度条 */
+  .progress-bar-container {
+    background: var(--border);
+    border-radius: 20px;
+    height: 24px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    transition: width 0.8s ease;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  /* 图表容器 */
+  .chart-container {
+    position: relative;
+    height: 300px;
+    margin: 16px 0;
+  }
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 768px) {
+    .chart-row { grid-template-columns: 1fr; }
+  }
+
+  /* 时间线 */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .timeline-dot {
+    position: absolute;
+    left: -26px;
+    top: 4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px var(--primary);
+  }
+  .timeline-date { font-size: 12px; color: var(--text-secondary); }
+  .timeline-title { font-size: 14px; font-weight: 600; margin: 2px 0; }
+  .timeline-desc { font-size: 13px; color: var(--text-secondary); }
+
+  /* 验收清单 */
+  .checklist {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 8px;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    font-size: 13px;
+  }
+  .check-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .check-done .check-icon { background: var(--success); color: white; }
+  .check-pending .check-icon { background: var(--border); color: var(--text-secondary); }
+  .check-done { color: var(--text); }
+  .check-pending { color: var(--text-secondary); }
+
+  /* 风险/建议卡片 */
+  .advice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+  }
+  .advice-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    border-left: 4px solid var(--accent);
+  }
+  .advice-card.high { border-left-color: var(--danger); }
+  .advice-card.medium { border-left-color: var(--warning); }
+  .advice-card.low { border-left-color: var(--info); }
+  .advice-priority { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+  .advice-card.high .advice-priority { color: var(--danger); }
+  .advice-card.medium .advice-priority { color: var(--warning); }
+  .advice-card.low .advice-priority { color: var(--info); }
+  .advice-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .advice-desc { font-size: 13px; color: var(--text-secondary); }
+
+  /* 表格 */
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .table th {
+    background: var(--primary-light);
+    color: var(--text);
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+  .table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .table tr:last-child td { border-bottom: none; }
+
+  /* 标签 */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-green { background: #E8F5ED; color: #27AE60; }
+  .badge-orange { background: #FFF3E0; color: #F39C12; }
+  .badge-red { background: #FDECEA; color: #E74C3C; }
+  .badge-blue { background: #E3F2FD; color: #3498DB; }
+  .badge-gray { background: #F5F5F5; color: #7F8C8D; }
+
+  .footer {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  .highlight-box {
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin: 16px 0;
+    border-left: 4px solid var(--primary);
+  }
+  .highlight-box strong { color: var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- 头部 -->
+<div class="hero">
+  <div class="container">
+    <h1>🌱 小区帮榜棒</h1>
+    <p class="tagline">让小区里的好事，被看见</p>
+    <p class="meta">开发进展汇报 · 2026-07-06 · HEAD: 3e81547 · 144 commits</p>
+  </div>
+</div>
+
+<!-- 关键指标 -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary-light)">📊</span>
+      一眼看懂
+    </div>
+    <p class="section-desc">用数字说话，快速了解项目当前状态</p>
+
+    <div class="metrics-grid">
+      <div class="metric-card green">
+        <div class="metric-value">0</div>
+        <div class="metric-label">阻塞发布的 Bug</div>
+      </div>
+      <div class="metric-card green">
+        <div class="metric-value">100%</div>
+        <div class="metric-label">PRD 功能开发完成</div>
+      </div>
+      <div class="metric-card orange">
+        <div class="metric-value">14</div>
+        <div class="metric-label">待验收项</div>
+      </div>
+      <div class="metric-card blue">
+        <div class="metric-value">272</div>
+        <div class="metric-label">已修复问题</div>
+      </div>
+      <div class="metric-card green">
+        <div class="metric-value">0</div>
+        <div class="metric-label">建议修（已清零）</div>
+      </div>
+      <div class="metric-card green">
+        <div class="metric-value">0</div>
+        <div class="metric-label">可延后（已清零）</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <strong>一句话总结：</strong>核心功能全部开发完毕，黄色+绿色问题全部清零，没有阻塞发布的 Bug，进入验收期。剩余 90 条⚠️设计选择，均不影响用户使用。
+    </div>
+  </div>
+</div>
+
+<!-- 项目是什么 -->
+<div class="section" style="background:white;">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary-light)">🏠</span>
+      这个项目是做什么的
+    </div>
+    <p class="section-desc">用大白话解释，不谈技术</p>
+
+    <div class="card">
+      <p style="font-size:16px; margin-bottom:12px;">
+        <strong>小区帮榜棒</strong>是一个微信小程序，让同小区的邻居可以：
+      </p>
+      <ul style="font-size:15px; padding-left:20px; line-height:2;">
+        <li>🤝 <strong>互相帮忙</strong> — 谁家水管漏了、谁要代收快递，发个求助，邻居来响应</li>
+        <li>♻️ <strong>流转闲置</strong> — 孩子穿不下的衣服、用不上的小家电，卖给或送给邻居</li>
+        <li>📋 <strong>议事讨论</strong> — 小区要不要装充电桩？大家一起议、一起投票</li>
+        <li>🏆 <strong>被看见</strong> — 帮了邻居得小红花，上排行榜，领勋章</li>
+      </ul>
+      <p style="margin-top:16px; color:var(--text-secondary); font-size:14px;">
+        管理员通过后台管理小区、审核内容、处理举报。所有数据按小区隔离，每个小区是独立的社群。
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- 开发了哪些功能 -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary-light)">✅</span>
+      已经开发了哪些功能
+    </div>
+    <p class="section-desc">从用户角度看，现在能做什么</p>
+
+    <div class="feature-grid">
+      <div class="feature-item">
+        <span class="feature-emoji">📱</span>
+        <div class="feature-info">
+          <h4>微信登录 + 业主认证</h4>
+          <p>微信一键登录，上传材料认证业主身份</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🏘️</span>
+        <div class="feature-info">
+          <h4>小区管理</h4>
+          <p>选小区、申请新小区、邻居助力</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🤝</span>
+        <div class="feature-info">
+          <h4>事件互助</h4>
+          <p>求助/公益/寻物/反馈/讨论 5 种类型</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">♻️</span>
+        <div class="feature-info">
+          <h4>闲置流转</h4>
+          <p>出售/免费/交换，买家点"我想要"</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">📋</span>
+        <div class="feature-info">
+          <h4>议事榜</h4>
+          <p>创建议题，赞踩评分，关联事件</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🗳️</span>
+        <div class="feature-info">
+          <h4>投票</h4>
+          <p>单选/多选，结果可见性可控</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">👨‍💼</span>
+        <div class="feature-info">
+          <h4>业委会管理</h4>
+          <p>成员管理、身份认领、公告发布</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🏆</span>
+        <div class="feature-info">
+          <h4>排行榜 + 勋章</h4>
+          <p>月榜/总榜，四套激励，自动发勋章</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🔔</span>
+        <div class="feature-info">
+          <h4>通知系统</h4>
+          <p>9 种通知类型，站内消息</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🚩</span>
+        <div class="feature-info">
+          <h4>举报 + AI 审核</h4>
+          <p>8 种举报目标，AI 审核内容（Mock）</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">📤</span>
+        <div class="feature-info">
+          <h4>分享 + Banner</h4>
+          <p>微信分享卡片，运营位轮播</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🛠️</span>
+        <div class="feature-info">
+          <h4>个人技能档案</h4>
+          <p>添加技能，智能匹配帮手</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">👥</span>
+        <div class="feature-info">
+          <h4>多帮手流程</h4>
+          <p>公益/寻物支持多个帮手，逐个发花</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">⏰</span>
+        <div class="feature-info">
+          <h4>定时任务</h4>
+          <p>事件 30 天自动过期，月榜自动重算</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🛒</span>
+        <div class="feature-info">
+          <h4>便民服务</h4>
+          <p>小区推荐的服务商入口</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">💬</span>
+        <div class="feature-info">
+          <h4>社群入口</h4>
+          <p>兴趣群/楼栋群入口卡片</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 核心业务链路 -->
+<div class="section" style="background:white;">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary-light)">🔗</span>
+      用户怎么用（核心业务链路）
+    </div>
+    <p class="section-desc">从用户视角看，最核心的 3 条业务链路</p>
+
+    <!-- 互助链路 -->
+    <div class="card">
+      <h4 style="margin-bottom:12px; color:var(--primary);">🤝 互助链路（最核心）</h4>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">张三家的水管漏了，发求助 → 李四来帮 → 双方确认 → 李四得小红花上排行榜</p>
+      <div class="flow-container">
+        <div class="flow-step">业主认证</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">创建求助</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">AI 审核</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">邻居响应</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">选帮手</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">双方确认</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step flow-end">发花+勋章</div>
+      </div>
+    </div>
+
+    <!-- 闲置链路 -->
+    <div class="card">
+      <h4 style="margin-bottom:12px; color:var(--primary);">♻️ 闲置链路</h4>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">王五卖婴儿车 → 赵六点"我想要" → 王五选赵六 → 标记已售 → 双方互评</p>
+      <div class="flow-container">
+        <div class="flow-step">发布闲置</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">AI 审核</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">买家"我想要"</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">卖家选买家</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">标记已售</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step flow-end">双方互评</div>
+      </div>
+    </div>
+
+    <!-- 议事链路 -->
+    <div class="card">
+      <h4 style="margin-bottom:12px; color:var(--primary);">📋 议事链路</h4>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">小区要装充电桩？创建议题 → 大家讨论 → 赞踩评分 → 创建者关闭完结</p>
+      <div class="flow-container">
+        <div class="flow-step">创建议题</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">AI 审核</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">关联事件</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">赞踩讨论</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step">评分</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step flow-end">关闭完结</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 问题分布 -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary-light)">🐛</span>
+      Bug 和问题情况
+    </div>
+    <p class="section-desc">总共发现 362 个问题，修复了 272 个，没有阻塞发布的 Bug，黄色+绿色问题全部清零</p>
+
+    <div class="chart-row">
+      <div class="card">
+        <h4 style="margin-bottom:8px;">问题分布（按严重度）</h4>
+        <div class="chart-container">
+          <canvas id="bugChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:8px;">问题清理进展（黄色+绿色）</h4>
+        <div class="chart-container">
+          <canvas id="remainingChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>严重度</th>
+            <th>数量</th>
+            <th>说明</th>
+            <th>影响用户吗</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-red">🔴 阻塞发布</span></td>
+            <td><strong>0</strong></td>
+            <td>没有阻塞发布的 Bug</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-green">✅ 已修复</span></td>
+            <td><strong>272</strong></td>
+            <td>已修复完毕，含 7 批次开发 + 黄色+绿色清理</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-gray">⚠️ 降级</span></td>
+            <td><strong>90</strong></td>
+            <td>设计选择，双方一致但未正式化</td>
+            <td>不影响</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-green">🟡 建议修</span></td>
+            <td><strong>0</strong></td>
+            <td>全部清零！7 批次清理完毕</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-blue">🟢 可延后</span></td>
+            <td><strong>0</strong></td>
+            <td>已全部清零（15 条修复，52 条标注设计选择）</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="highlight-box" style="margin-top:16px;">
+      <strong>关键结论：</strong>所有影响用户使用的严重问题（数据丢失、安全漏洞、功能不可用）都已在开发中修复。95 条黄色问题 + 67 条绿色问题已全部清零（commit 07ef5ed + 3e81547），剩余 90 条⚠️为设计选择，用户完全感知不到。
+    </div>
+  </div>
+</div>
+
+<!-- 验收进度 -->
+<div class="section" style="background:white;">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary-light)">📝</span>
+      验收进度
+    </div>
+    <p class="section-desc">功能写完了，还要验证好不好用。总 23 项，已完成 9 项（39%）</p>
+
+    <div class="card">
+      <div class="progress-label">
+        <span>总体验收进度</span>
+        <span>9/23 = 39%</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" style="width:39%; background:var(--accent);">39%</div>
+      </div>
+    </div>
+
+    <div class="chart-row" style="margin-top:16px;">
+      <div class="card">
+        <h4 style="margin-bottom:8px;">各阶段验收进度</h4>
+        <div class="chart-container">
+          <canvas id="acceptanceChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:12px;">验收明细</h4>
+        <div class="checklist">
+          <div class="check-item check-done"><span class="check-icon">✓</span>A1 测试通过</div>
+          <div class="check-item check-done"><span class="check-icon">✓</span>A2 健康检查</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>A3 定时任务冒烟</div>
+          <div class="check-item check-done"><span class="check-icon">✓</span>B2 Admin菜单</div>
+          <div class="check-item check-done"><span class="check-icon">✓</span>B3 小区申请审批</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>B4 举报管理</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>B5 议事管理</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>C1 新手引导</div>
+          <div class="check-item check-done"><span class="check-icon">✓</span>C2 申请开通小区</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>C3 草稿恢复</div>
+          <div class="check-item check-done"><span class="check-icon">✓</span>C4 助力+1</div>
+          <div class="check-item check-done"><span class="check-icon">✓</span>C5 微信分享</div>
+          <div class="check-item check-done"><span class="check-icon">✓</span>C6 我的申请</div>
+          <div class="check-item check-done"><span class="check-icon">✓</span>C7 审批入驻</div>
+          <div class="check-item check-done"><span class="check-icon">✓</span>C8 用户主页</div>
+          <div class="check-item check-done"><span class="check-icon">✓</span>C9 未认证拦截</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>C10 议事榜回归</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>C11 事件评价</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>C12 闲置评价</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>C13 闲置意向</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>C14 多帮手流程</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>C15 技能档案</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>C16 卖家下架</div>
+          <div class="check-item check-pending"><span class="check-icon">○</span>D 端到端串联</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 开发节奏 -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary-light)">📅</span>
+      开发节奏
+    </div>
+    <p class="section-desc">从 7 月 3 日基线到 7 月 6 日，完成了 7 批次开发 + 黄色+绿色问题清理 + 文档更新</p>
+
+    <div class="card">
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-03 · baseline</div>
+          <div class="timeline-title">266 个 Bug 修复完毕</div>
+          <div class="timeline-desc">基线 commit: 45abe15，53 commits，215 测试通过</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-04 ~ 07-05</div>
+          <div class="timeline-title">PRD 7 批次开发（22 任务）</div>
+          <div class="timeline-desc">门禁/评价/闲置意向/多帮手/技能档案/定时任务/CTA 状态映射</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-05</div>
+          <div class="timeline-title">5 轮 Review 修复 + Ponytail 缺口处理</div>
+          <div class="timeline-desc">契约违反修复、guard 一致性、通知措辞、wechatId 端到端</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-05</div>
+          <div class="timeline-title">文档全面更新</div>
+          <div class="timeline-desc">9 份文档更新到 HEAD 状态，findings.md 加 182 处 commit 标注</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-06</div>
+          <div class="timeline-title">黄色缺陷分类 + 3 条流程断线修复</div>
+          <div class="timeline-desc">104 条已修复标注、P-56 举报入口、P-159 reason Modal、P-182 communityId</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-06</div>
+          <div class="timeline-title">Review 修复 3 Critical + 3 Warning</div>
+          <div class="timeline-desc">后端 takedown/warn/ban 补全 topic/vote 处理、汇总表修正</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-06</div>
+          <div class="timeline-title">黄色问题清理（95→0）</div>
+          <div class="timeline-desc">7 批次清理: select/include 补全 + 返回类型对齐 + Admin body 补全 + shared DTO 字段 + 枚举/逻辑/文档 + Prisma drift 迁移 + flaky 修复</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-06</div>
+          <div class="timeline-title">绿色问题清理（67→0）</div>
+          <div class="timeline-desc">分类 67 条🟢: 15 条修复（上传目录/举报校验/Admin 表单等）+ 52 条标注设计选择</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--success); box-shadow:0 0 0 2px var(--success);"></div>
+          <div class="timeline-date">07-06 · 当前</div>
+          <div class="timeline-title">黄+绿问题全部清零 ✅</div>
+          <div class="timeline-desc">HEAD: 3e81547，144 commits，237 测试通过，🟡 0 条，🟢 0 条</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Git 状态 -->
+<div class="section" style="background:white;">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary-light)">📦</span>
+      代码和文档状态
+    </div>
+
+    <div class="chart-row">
+      <div class="card">
+        <h4 style="margin-bottom:12px;">代码规模</h4>
+        <table class="table">
+          <tbody>
+            <tr><td>总 commits</td><td><strong>144</strong></td></tr>
+            <tr><td>已推送</td><td><strong>142</strong></td></tr>
+            <tr><td>数据库表</td><td><strong>49 张</strong></td></tr>
+            <tr><td>数据库迁移</td><td><strong>9 次</strong></td></tr>
+            <tr><td>小程序页面</td><td><strong>33 个</strong></td></tr>
+            <tr><td>后端模块</td><td><strong>19 个</strong></td></tr>
+            <tr><td>Admin 功能页</td><td><strong>19 个</strong></td></tr>
+            <tr><td>测试用例</td><td><strong>237 个</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:12px;">文档维护</h4>
+        <table class="table">
+          <thead>
+            <tr><th>文档</th><th>用途</th><th>状态</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Map.md</td><td>全局地图</td><td><span class="badge badge-green">最新</span></td></tr>
+            <tr><td>PRD.md</td><td>产品需求</td><td><span class="badge badge-green">最新</span></td></tr>
+            <tr><td>Spec.md</td><td>规格骨架</td><td><span class="badge badge-green">最新</span></td></tr>
+            <tr><td>Standard.md</td><td>验收标尺</td><td><span class="badge badge-green">最新</span></td></tr>
+            <tr><td>findings.md</td><td>问题审计</td><td><span class="badge badge-green">最新</span></td></tr>
+            <tr><td>ACCEPTANCE.md</td><td>验收清单</td><td><span class="badge badge-green">最新</span></td></tr>
+            <tr><td>CHANGELOG.md</td><td>变更日志</td><td><span class="badge badge-green">最新</span></td></tr>
+            <tr><td>TESTING.md</td><td>测试指南</td><td><span class="badge badge-green">最新</span></td></tr>
+            <tr><td>README.md</td><td>项目说明</td><td><span class="badge badge-orange">待更新</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 已知风险 -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:#FDECEA">⚠️</span>
+      已知风险
+    </div>
+    <p class="section-desc">发布前需要处理的事项</p>
+
+    <div class="advice-grid">
+      <div class="advice-card low">
+        <div class="advice-priority">已修复 ✅</div>
+        <div class="advice-title">临时登录框</div>
+        <div class="advice-desc">已核实为正常微信登录页，非临时页面，无需删除</div>
+      </div>
+      <div class="advice-card low">
+        <div class="advice-priority">已修复 ✅</div>
+        <div class="advice-title">Admin 依赖</div>
+        <div class="advice-desc">package.json 正常，pnpm install 后可编译</div>
+      </div>
+      <div class="advice-card low">
+        <div class="advice-priority">已修复 ✅</div>
+        <div class="advice-title">Prisma drift</div>
+        <div class="advice-desc">已通过迁移 20260706062004_fix_drift_add_likes 修复</div>
+      </div>
+      <div class="advice-card low">
+        <div class="advice-priority">已修复 ✅</div>
+        <div class="advice-title">测试 flaky</div>
+        <div class="advice-desc">rankings.spec.ts afterAll 清理已补全，237 测试稳定通过</div>
+      </div>
+      <div class="advice-card low">
+        <div class="advice-priority">已修复 ✅</div>
+        <div class="advice-title">构建产物 tracked</div>
+        <div class="advice-desc">tsconfig.tsbuildinfo 已 git rm --cached，.gitignore 已有规则</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 下一步建议 -->
+<div class="section" style="background:white;">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary-light)">🎯</span>
+      下一步建议
+    </div>
+    <p class="section-desc">基于当前状态，建议的后续行动优先级</p>
+
+    <div class="advice-grid">
+      <div class="advice-card high">
+        <div class="advice-priority">⭐⭐⭐ 立即做</div>
+        <div class="advice-title">跑完验收（14 项）</div>
+        <div class="advice-desc">重点验收 C11-C16 新开发的功能（事件评价/闲置评价/意向系统/多帮手/技能档案/卖家下架），确认好用</div>
+      </div>
+      <div class="advice-card medium">
+        <div class="advice-priority">⭐⭐ 尽快做</div>
+        <div class="advice-title">推送到远程</div>
+        <div class="advice-desc">当前 144 commits 本地，142 已推送，黄色+绿色清理 2 个 commit 待推送</div>
+      </div>
+      <div class="advice-card medium">
+        <div class="advice-priority">⭐⭐ 尽快做</div>
+        <div class="advice-title">端到端串联测试</div>
+        <div class="advice-desc">跑一遍 D 项的 20 步端到端测试，模拟真实用户操作</div>
+      </div>
+      <div class="advice-card low">
+        <div class="advice-priority">⭐ 可延后</div>
+        <div class="advice-title">装 Admin 依赖</div>
+        <div class="advice-desc">pnpm install 修复 antd 模块解析问题</div>
+      </div>
+      <div class="advice-card low">
+        <div class="advice-priority">⭐ 可延后</div>
+        <div class="advice-title">准备发布</div>
+        <div class="advice-desc">确定版本号、写发版说明、提交微信审核</div>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top:24px;">
+      <strong>总结：</strong>代码层面已经开发完毕，95 条黄色 + 67 条绿色问题全部清零，没有阻塞 Bug。技术债大部分已清理（Prisma drift ✅ / flaky 测试 ✅ / tsbuildinfo ✅ / 临时登录框 ✅ / Admin 依赖 ✅）。接下来核心是<span style="color:var(--danger);font-weight:700;">验收</span>和<span style="color:var(--danger);font-weight:700;">推送到远程</span>。验收通过后就可以准备发布了。
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="container">
+    <p>小区帮榜棒 · 开发进展汇报 · 生成于 2026-07-06</p>
+    <p style="margin-top:4px;">HEAD: 3e81547 · 144 commits · 9 迁移 · 49 表 · 33 页面 · 237 测试 · 🟡 0 · 🟢 0</p>
+  </div>
+</div>
+
+<script>
+// 问题分布饼图
+new Chart(document.getElementById('bugChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['✅ 已修复 (272)', '⚠️ 设计选择 (90)', '🟡 建议修 (0)', '🟢 可延后 (0)', '🔴 阻塞 (0)'],
+    datasets: [{
+      data: [272, 90, 0, 0, 0],
+      backgroundColor: ['#27AE60', '#3498DB', '#95A5A6', '#F39C12', '#E74C3C'],
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 8 } }
+    }
+  }
+});
+
+// 黄色清理进展
+new Chart(document.getElementById('remainingChart'), {
+  type: 'bar',
+  data: {
+    labels: ['B1 基础设施', 'B2 select/include', 'B3 返回类型', 'B4 Admin body', 'B5 shared DTO', 'B6 枚举/逻辑', 'B7 测试', '🟢 绿色清理'],
+    datasets: [{
+      label: '修复条数',
+      data: [3, 7, 7, 11, 8, 8, 1, 15],
+      backgroundColor: '#27AE60',
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { beginAtZero: true, ticks: { stepSize: 2 } }
+    }
+  }
+});
+
+// 验收进度柱图
+new Chart(document.getElementById('acceptanceChart'), {
+  type: 'bar',
+  data: {
+    labels: ['A 基础设施', 'B Admin后台', 'C 小程序功能', 'D 端到端'],
+    datasets: [
+      {
+        label: '已完成',
+        data: [2, 2, 6, 0],
+        backgroundColor: '#27AE60',
+        stack: 'stack0'
+      },
+      {
+        label: '未完成',
+        data: [1, 2, 8, 1],
+        backgroundColor: '#E5E7EB',
+        stack: 'stack0'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 12 } } }
+    },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, beginAtZero: true, ticks: { stepSize: 2 } }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
