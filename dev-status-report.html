@@ -703,6 +703,9 @@
         <summary style="cursor:pointer; color:var(--info); font-size:13px; margin-bottom:12px;">展开/收起明细表</summary>
 
         <h5 style="margin:16px 0 8px; color:var(--text);">A. PRD 文档需补充说明（22 条）— 代码正确，PRD 未明确写出</h5>
+        <div style="background:#FEF3C7; border-left:3px solid #F59E0B; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#92400E; border-radius:4px;">
+          <strong>举例 P-11：</strong>代码里有关闭议题时发 <code>topic_closed</code> 通知的逻辑，功能正常运行。但 PRD 文档的通知类型列表里漏写了这个类型。审计时发现文档和代码对不上，但<strong>不是代码 bug</strong>，是文档该补。
+        </div>
         <table class="table" style="margin-bottom:16px;">
           <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
           <tbody>
@@ -732,6 +735,9 @@
         </table>
 
         <h5 style="margin:16px 0 8px; color:var(--text);">B. 设计选择/无需修复（8 条）— 有意为之</h5>
+        <div style="background:#DBEAFE; border-left:3px solid #3B82F6; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#1E40AF; border-radius:4px;">
+          <strong>举例 P-26：</strong>议题的"赞"和"踩"不区分公开/闭门作用域，所有用户看到的赞踩数一样。这是<strong>设计决定</strong>（议题本身是公开讨论），不是遗漏。审计标记是因为可以做得更细，但当前设计满足需求。
+        </div>
         <table class="table" style="margin-bottom:16px;">
           <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
           <tbody>
@@ -747,6 +753,9 @@
         </table>
 
         <h5 style="margin:16px 0 8px; color:var(--text);">C. 业务逻辑简化（7 条）— ponytail 简化，有注释</h5>
+        <div style="background:#D1FAE5; border-left:3px solid #10B981; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#065F46; border-radius:4px;">
+          <strong>举例 P-41：</strong>后端有事件评价的 API 接口（<code>GET /events/:id/reviews</code>），但小程序没有对应的 UI 入口。也就是接口写好了但前端没接上。功能"断线"但<strong>不影响用户</strong>——用户只是看不到这个入口，事件互助主流程完全正常。
+        </div>
         <table class="table" style="margin-bottom:16px;">
           <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
           <tbody>
@@ -761,6 +770,9 @@
         </table>
 
         <h5 style="margin:16px 0 8px; color:var(--text);">D. ponytail 可接受 — 类型/契约（13 条）— 缺 shared DTO 但运行时正常</h5>
+        <div style="background:#EDE9FE; border-left:3px solid #8B5CF6; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#5B21B6; border-radius:4px;">
+          <strong>举例 P-128：</strong>小程序本地定义了 <code>VoteResultDto</code> 类型来接收投票结果，后端返回的数据和这个类型完全匹配。但这个类型<strong>没放到 shared 包</strong>（共享类型库）。运行时数据完全正确，只是类型定义放错了位置——应该放 shared 里让前后端共用。
+        </div>
         <table class="table" style="margin-bottom:16px;">
           <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
           <tbody>
@@ -781,6 +793,9 @@
         </table>
 
         <h5 style="margin:16px 0 8px; color:var(--text);">E. 保留 ⚠️（2 条）— 已标注 ponytail，暂不修</h5>
+        <div style="background:#FEE2E2; border-left:3px solid #EF4444; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#991B1B; border-radius:4px;">
+          <strong>举例 P-184：</strong>后端"编辑服务商"接口只允许更新 4 个字段（名称/分类/描述/排序），但 shared 类型声明了 10 个可更新字段。多出的 6 个字段（logo/封面/联系方式等）<strong>永远传不进去</strong>。暂不修是因为当前前端表单也只提供 4 个字段，功能够用。升级路径：前端表单加更多字段 + controller 放开限制。
+        </div>
         <table class="table" style="margin-bottom:16px;">
           <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
           <tbody>
@@ -790,6 +805,9 @@
         </table>
 
         <h5 style="margin:16px 0 8px; color:var(--text);">F. ponytail 可接受 — 逻辑/边界（13 条）— 边界情况不影响主流程</h5>
+        <div style="background:#FEF3C7; border-left:3px solid #F59E0B; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#92400E; border-radius:4px;">
+          <strong>举例 P-233：</strong>用户打开事件详情页时，后端先返回浏览量数字、再执行 +1 更新。所以用户看到的浏览量<strong>比实际少 1</strong>（比如实际 42 次，显示 41）。下次刷新就对了。属于"先读后写"的边界问题，不影响功能使用，修的话需要改事务顺序。
+        </div>
         <table class="table" style="margin-bottom:16px;">
           <thead><tr><th style="width:60px;">ID</th><th>说明</th></tr></thead>
           <tbody>
