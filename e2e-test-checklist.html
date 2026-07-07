@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小区帮榜棒 — E2E 交互式测试单</title>
+<title>小区帮榜棒 — E2E 二轮测试单</title>
 <style>
   :root {
     --primary: #5B9E6F;
@@ -112,54 +112,36 @@
   }
   .highlight-box strong { color: var(--primary); }
 
-  /* Badge */
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .badge-green { background: #E8F5ED; color: #27AE60; }
-  .badge-orange { background: #FFF3E0; color: #F39C12; }
-  .badge-red { background: #FDECEA; color: #E74C3C; }
-  .badge-blue { background: #E3F2FD; color: #3498DB; }
-  .badge-gray { background: #F5F5F5; color: #7F8C8D; }
-
-  /* Filter bar */
-  .filter-bar {
+  /* Global actions */
+  .global-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 12px;
+    margin: 16px 0;
   }
-  .filter-btn {
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    background: var(--card-bg);
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 500;
+  .btn-export {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
   }
-  .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
-  .filter-btn.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-  }
+  .btn-export-full { background: var(--info); color: white; }
+  .btn-export-full:hover { background: #2980B9; }
+  .btn-reset-all { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); }
+  .btn-reset-all:hover { background: var(--danger); color: white; }
 
-  /* Domain section */
-  .domain-section {
+  /* Module section */
+  .module-section {
     background: var(--card-bg);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     margin-bottom: 16px;
     overflow: hidden;
   }
-  .domain-header {
+  .module-header {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -169,22 +151,48 @@
     border-bottom: 1px solid transparent;
     transition: background 0.2s;
   }
-  .domain-header:hover { background: var(--primary-light); }
-  .domain-header.has-body { border-bottom-color: var(--border); }
-  .domain-icon { font-size: 24px; flex-shrink: 0; }
-  .domain-name { font-size: 18px; font-weight: 700; flex: 1; }
-  .domain-progress {
-    font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 600;
-    background: var(--bg);
-    padding: 4px 10px;
-    border-radius: 12px;
+  .module-header:hover { background: var(--primary-light); }
+  .module-header.has-body { border-bottom-color: var(--border); }
+  .module-icon { font-size: 24px; flex-shrink: 0; }
+  .module-name { font-size: 18px; font-weight: 700; flex: 1; }
+  .module-metrics {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
   }
-  .domain-toggle { font-size: 14px; color: var(--text-secondary); transition: transform 0.2s; }
-  .domain-header.collapsed .domain-toggle { transform: rotate(-90deg); }
-  .domain-body { padding: 4px 0; }
-  .domain-body.collapsed { display: none; }
+  .module-metric {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--bg);
+  }
+  .module-metric.pass { color: var(--success); }
+  .module-metric.fail { color: var(--danger); }
+  .module-metric.skip { color: var(--warning); }
+  .module-metric.pending { color: var(--text-secondary); }
+  .module-export-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--primary);
+    border-radius: 6px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+  .module-export-btn:hover {
+    background: var(--primary);
+    color: white;
+  }
+  .module-toggle { font-size: 14px; color: var(--text-secondary); transition: transform 0.2s; }
+  .module-header.collapsed .module-toggle { transform: rotate(-90deg); }
+  .module-body { padding: 0; }
+  .module-body.collapsed { display: none; }
 
   /* Test row */
   .test-row {
@@ -193,9 +201,6 @@
     transition: background 0.2s;
   }
   .test-row:last-child { border-bottom: none; }
-  .test-row.pass { background: #F8FCF9; }
-  .test-row.fail { background: #FEF5F4; }
-  .test-row.skip { background: #FFF9F0; }
 
   .test-header {
     display: flex;
@@ -213,7 +218,6 @@
     flex-shrink: 0;
   }
   .test-title { font-size: 15px; font-weight: 600; flex: 1; }
-  .test-status-icon { font-size: 18px; flex-shrink: 0; }
 
   .test-body { padding: 8px 0 0; }
   .test-section { margin-bottom: 8px; }
@@ -241,11 +245,58 @@
     border-left: 3px solid var(--primary);
   }
 
+  /* Round sections */
+  .round-section {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .round-section--r1 {
+    background: #F5F7FA;
+    border-left: 3px solid #B0BEC5;
+  }
+  .round-section--fix {
+    background: #FFF8E1;
+    border-left: 3px solid #FFB300;
+  }
+  .round-section--r2 {
+    background: #E8F5ED;
+    border-left: 3px solid var(--primary);
+  }
+  .round-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .round-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .round-badge--pass { background: #E8F5ED; color: #27AE60; }
+  .round-badge--fail { background: #FDECEA; color: #E74C3C; }
+  .round-badge--skip { background: #FFF3E0; color: #F39C12; }
+  .round-badge--pending { background: #F5F5F5; color: #7F8C8D; }
+  .round-desc {
+    margin-top: 4px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* Test actions (round 2) */
   .test-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 12px;
+    margin-top: 8px;
   }
   .btn-action {
     padding: 6px 14px;
@@ -269,7 +320,7 @@
 
   .bug-desc-area {
     width: 100%;
-    margin-top: 12px;
+    margin-top: 8px;
     padding: 10px 12px;
     border: 1px solid var(--danger);
     border-radius: 8px;
@@ -284,36 +335,6 @@
   .bug-desc-area:focus { outline: none; box-shadow: 0 0 0 2px rgba(231,76,60,0.15); }
 
   /* Export area */
-  .export-section {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 24px;
-    margin-bottom: 16px;
-  }
-  .export-section h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-  .export-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  .btn-export {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-export-bug { background: var(--danger); color: white; }
-  .btn-export-bug:hover { background: #C0392B; }
-  .btn-export-full { background: var(--info); color: white; }
-  .btn-export-full:hover { background: #2980B9; }
-  .btn-reset-all { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); }
-  .btn-reset-all:hover { background: var(--danger); color: white; }
-
   .export-output {
     background: #1E2A32;
     color: #D4E6D4;
@@ -348,9 +369,10 @@
     .hero .tagline { font-size: 15px; }
     .test-header { flex-wrap: wrap; }
     .test-title { font-size: 14px; width: 100%; }
-    .export-actions { flex-direction: column; }
+    .global-actions { flex-direction: column; }
     .btn-export { width: 100%; }
-    .domain-header { padding: 14px 16px; }
+    .module-header { padding: 14px 16px; flex-wrap: wrap; }
+    .module-metrics { width: 100%; }
     .test-row { padding: 14px 16px; }
   }
 </style>
@@ -360,23 +382,23 @@
 <!-- Hero -->
 <div class="hero">
   <div class="container">
-    <h1>🧪 小区帮榜棒 — E2E 交互式测试单</h1>
-    <p class="tagline">全业务模块端到端验收 · 8 板块 57 用例</p>
-    <p class="meta" id="hero-meta">日期: 2026-07-06 · 数据保存在本地浏览器</p>
+    <h1>🧪 小区帮榜棒 — E2E 二轮测试单</h1>
+    <p class="tagline">8 板块 57 用例 · 按模块独立测试 · 一轮结果+修复情况参考</p>
+    <p class="meta" id="hero-meta">日期: 2026-07-07 · 数据保存在本地浏览器</p>
   </div>
 </div>
 
-<!-- 进度统计 -->
+<!-- 全局统计 -->
 <div class="section">
   <div class="container">
     <div class="metrics-grid">
       <div class="metric-card green">
         <div class="metric-value" id="stat-pass">0</div>
-        <div class="metric-label">✅ 已通过</div>
+        <div class="metric-label">✅ 二轮通过</div>
       </div>
       <div class="metric-card red">
         <div class="metric-value" id="stat-fail">0</div>
-        <div class="metric-label">❌ 有 Bug</div>
+        <div class="metric-label">❌ 二轮 Bug</div>
       </div>
       <div class="metric-card orange">
         <div class="metric-value" id="stat-skip">0</div>
@@ -393,7 +415,7 @@
     </div>
 
     <div class="progress-label">
-      <span>总体进度</span>
+      <span>二轮总进度</span>
       <span id="progress-text">0 / 57</span>
     </div>
     <div class="progress-bar-container">
@@ -402,8 +424,8 @@
 
     <div class="highlight-box">
       <strong>使用说明：</strong>
-      逐项操作小程序 / Admin 后台，点击对应按钮标记结果。Bug 描述框在标记"❌ Bug"时自动展开，填写复现步骤。
-      数据自动保存到 localStorage，刷新不丢失。测完点击"导出 Bug 清单"交给 agent 分板块修复。
+      每个板块独立展开测试，包含一轮结果和修复情况供参考。二轮测试操作小程序 / Admin 后台后，
+      点击对应按钮标记二轮结果。数据自动保存到 localStorage。
       <br><br>
       <strong>调试登录：</strong>登录页底部有调试入口，输入用户 ID 直接登录（不走微信授权）。
       <br><br>
@@ -413,50 +435,40 @@
       • 王五 <code>b0000000-0000-0000-0000-000000000003</code> — 另一小区，已认证<br>
       • 未认证用户 <code>2cb983d9-6705-450f-8699-1d6e137c3ba3</code> — 有小区未认证，测 1.3 拦截
     </div>
-  </div>
-</div>
 
-<!-- 板块筛选 -->
-<div class="section" style="padding-top: 0;">
-  <div class="container">
-    <div class="filter-bar" id="filter-bar"></div>
-  </div>
-</div>
-
-<!-- 测试用例容器 -->
-<div class="section" style="padding-top: 0;">
-  <div class="container">
-    <div id="test-container"></div>
-  </div>
-</div>
-
-<!-- 导出区 -->
-<div class="section" style="padding-top: 0;">
-  <div class="container">
-    <div class="export-section">
-      <h3>📤 导出测试结果</h3>
-      <div class="export-actions">
-        <button class="btn-export btn-export-bug" onclick="exportBugList()">📋 导出 Bug 清单</button>
-        <button class="btn-export btn-export-full" onclick="exportFullReport()">📄 导出完整报告</button>
-        <button class="btn-export btn-reset-all" onclick="resetAll()">🗑 清空重测</button>
-      </div>
-      <pre class="export-output" id="export-output"></pre>
-      <p class="copy-hint" id="copy-hint" style="display:none;">点击上方按钮后，文本展示在此处，可全选复制。</p>
+    <div class="global-actions">
+      <button class="btn-export btn-export-full" onclick="exportAll()">📄 导出全部二轮结果</button>
+      <button class="btn-export btn-reset-all" onclick="resetAll()">🗑 清空二轮结果</button>
     </div>
+  </div>
+</div>
+
+<!-- 模块容器 -->
+<div class="section" style="padding-top: 0;">
+  <div class="container">
+    <div id="modules-container"></div>
+  </div>
+</div>
+
+<!-- 导出输出区 -->
+<div class="section" style="padding-top: 0;">
+  <div class="container">
+    <pre class="export-output" id="export-output"></pre>
+    <p class="copy-hint" id="copy-hint" style="display:none;">点击上方导出按钮后，文本展示在此处，可全选复制。</p>
   </div>
 </div>
 
 <!-- Footer -->
 <div class="footer">
   <div class="container">
-    <p>小区帮榜棒 E2E 测试单 · v1.0 · 2026-07-06 · 57 用例 / 8 板块</p>
-    <p class="ponytail-note">ponytail: 折叠状态不存 localStorage，刷新恢复全展开 · 导出文本展示在 pre 区手动复制 · 用例 id 不变，新增用例旧数据自动 fallback 为 pending</p>
+    <p>小区帮榜棒 E2E 二轮测试单 · v2.0 · 2026-07-07 · 57 用例 / 8 板块</p>
+    <p class="ponytail-note">每个板块独立导出 · 一轮结果只读 · 二轮结果存 localStorage · 清空重测不影响一轮数据</p>
   </div>
 </div>
 
 <script>
 // ===== 数据层 =====
-const STORAGE_KEY = 'xbb_e2e_checklist_v1';
+const STORAGE_KEY = 'xbb_e2e_round2_v1';
 
 const DOMAINS = [
   { id: '认证与小区', icon: '🔐', label: '① 认证与小区' },
@@ -465,8 +477,8 @@ const DOMAINS = [
   { id: '议事讨论', icon: '💬', label: '④ 议事讨论' },
   { id: '业委会', icon: '🏛️', label: '⑤ 业委会' },
   { id: '激励体系', icon: '🏆', label: '⑥ 激励体系' },
-  { id: '运营支撑', icon: '🛠️', label: '⑦ 运营支撑' },
-  { id: 'Admin 后台', icon: '⚙️', label: '⑧ Admin 后台' },
+  { id: '运营支撑', icon: '📢', label: '⑦ 运营支撑' },
+  { id: 'Admin 后台', icon: '🖥️', label: '⑧ Admin 后台' },
 ];
 
 const TEST_CASES = [
@@ -1017,81 +1029,106 @@ const TEST_CASES = [
     steps: [
       '进入审计日志页，查看操作记录',
       '进入系统设置页',
-      '修改一个配置项（如：积分规则）',
-      '保存',
+      '查看审计日志页，查看操作记录',
     ],
-    expected: '审计日志记录关键操作（谁、何时、做了什么）；系统设置修改保存成功并生效'
+    expected: '审计日志完整记录操作；系统设置可编辑'
   },
 ];
 
-// ===== 自动化测试结果（首次打开自动播种，清空重测后不重现）=====
-const DEFAULT_RESULTS = {
-  '1.1': { status: 'pass', bugDesc: '', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '1.2': { status: 'pass', bugDesc: 'OCR 一致自动通过', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '1.3': { status: 'pass', bugDesc: '前端表单已加 verifyStatus 拦截，未认证用户提交时弹 modal 跳转 verify 页面。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '1.4': { status: 'pass', bugDesc: '', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '1.5': { status: 'pass', bugDesc: 'event-create/market-create/topic-create 已接入 useDraft，退出后自动恢复草稿。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '1.6': { status: 'pass', bugDesc: 'API POST /communities/select 切换正常（阳光花园→碧水湾→阳光花园）。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '1.7': { status: 'pass', bugDesc: 'Admin 小区申请列表/详情/审批功能完整。2 条待审核申请，通过/驳回按钮正常。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '1.8': { status: 'fail', bugDesc: 'user-profile 页面缺"发布历史"区（事件/闲置/议题），仅展示头像/昵称/标签/简介/统计/徽章。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '2.1': { status: 'pass', bugDesc: '前端已加认证拦截，未认证用户提交时弹 modal 跳转 verify。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '2.2': { status: 'pass', bugDesc: 'API 接单流程通过：创建 help_request 事件 → 李四 apply → 张三 select → 成功。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '2.3': { status: 'pass', bugDesc: 'API 完成确认通过：张三 complete/request → 李四 complete/confirm → 成功。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '2.4': { status: 'pass', bugDesc: 'API 评论嵌套通过：李四评论 → 张三回复（parentId 正确关联）。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '2.5': { status: 'pass', bugDesc: 'DB 修复后（seed 恢复 verifyStatus=verified）点赞 API 通过。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '2.6': { status: 'pass', bugDesc: 'API 事件筛选通过：按 type=help_request 返回 2 条，按 status=open 返回 11 条。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '2.7': { status: 'pass', bugDesc: 'API 分页通过：total=13, page=1 返回 2 条, page=2 返回 2 条不同数据。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '2.8': { status: 'pass', bugDesc: '设计如此：无 DELETE 端点，有 POST /events/:id/close 关闭功能（测试通过）。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '3.1': { status: 'pass', bugDesc: '同 2.1，market-create 已加认证拦截。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '3.2': { status: 'pass', bugDesc: 'API 闲置意向通过：李四对张三的书桌 POST /market/items/:id/interest 成功。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '3.3': { status: 'pass', bugDesc: 'API 闲置评论通过：李四评论张三的闲置成功。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '3.4': { status: 'pass', bugDesc: 'API 闲置搜索通过：搜索"书桌"返回 1 条，搜索"Kindle"返回 1 条。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '3.5': { status: 'pass', bugDesc: '复查确认：代码正确，isSeller 判断无误，测试时因用户切换导致 user.id 不匹配。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '3.6': { status: 'pass', bugDesc: '同 3.5，复查确认代码正确。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '3.7': { status: 'fail', bugDesc: '¥null 已修复（price 为 null 时显示「面议」）。仍缺分类筛选和价格排序（功能缺失，非 bug）。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '4.1': { status: 'pass', bugDesc: '同 2.1，topic-create 已加认证拦截。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '4.2': { status: 'pass', bugDesc: 'DB 修复后赞踩 API 通过。POST /topics/:id/like 成功。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '4.3': { status: 'fail', bugDesc: 'timeline 只显示事件列表，无评分变化时间线。设计如此还是 bug 待确认。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '4.4': { status: 'pass', bugDesc: 'DB 修复后议题评论 API 通过。POST /topics/:id/comments 成功。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '4.5': { status: 'pass', bugDesc: 'API 议题评分通过：议题 closed 后 POST /topics/:id/rating rating=4 成功。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '4.6': { status: 'pass', bugDesc: 'API 议题评论通过：POST /topics/:id/comments 成功。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '4.7': { status: 'pass', bugDesc: '议题详情显示"相关事件 3"及事件卡片。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '5.1': { status: 'pass', bugDesc: '复查确认：committee 页有认领入口，点击进入 claim 表单。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '5.2': { status: 'pass', bugDesc: 'API 公告详情通过：GET /committee/announcements/:id 返回完整内容。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '5.3': { status: 'pass', bugDesc: 'API 公告点赞通过：POST /committee/announcements/:id/like 成功。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '5.4': { status: 'pass', bugDesc: 'Admin 公告管理已补状态列+删除功能（含小区隔离校验）。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '5.5': { status: 'pass', bugDesc: 'DB 修复后公告点赞 API 通过。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '5.6': { status: 'pass', bugDesc: 'API 业委会成员列表通过：3 名成员（claimed/unclaimed/pending），claimStatus 正确。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '6.1': { status: 'skip', bugDesc: '用户决定跳过。前端 period 参数与 API periodType 不匹配，需统一参数名。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '6.2': { status: 'pass', bugDesc: 'API 徽章展示通过：170 个徽章，张三有 2 个（社区守护者/热心邻居）。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '6.3': { status: 'skip', bugDesc: '用户决定跳过。seed 数据 UUID 版本字段为 0，需修复 seed 脚本。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '6.4': { status: 'pass', bugDesc: 'home 页统计展示正常。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '6.5': { status: 'skip', bugDesc: '需月初 cron 或手动调月榜重算接口，无法自动测试。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '6.6': { status: 'fail', bugDesc: '无积分明细页。user-profile 仅展示贡献分总数，无积分规则明细/历史记录。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '7.1': { status: 'pass', bugDesc: 'API 通知已读通过：GET /notifications 返回 1 条通知，POST /notifications/:id/read 标记成功，isRead=True。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '7.2': { status: 'pass', bugDesc: 'Banner 删除功能已补齐（原 bugDesc 误记于此）。举报功能本身需后续验证。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '7.3': { status: 'pass', bugDesc: 'API 服务商列表通过：3 个服务商（老王维修/张阿姨保洁/小李开锁）。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '7.4': { status: 'pass', bugDesc: '分类筛选展示正常（全部/维修/保洁/开锁/家电/搬家/宠物/其他）。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '7.5': { status: 'pass', bugDesc: '社群列表展示正常（3 群）。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '7.6': { status: 'pass', bugDesc: '已改为启动广告弹窗，集成到 plaza 页面，每次启动仅弹一次。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '7.7': { status: 'pass', bugDesc: '新手引导蒙层显示+跳过按钮正常。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '8.1': { status: 'pass', bugDesc: 'Admin 登录/登出流程正常。用户名 zhangsan_admin 密码 admin123。小问题：header 显示 communityId 而非"(平台)"。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '8.2': { status: 'pass', bugDesc: '仪表盘统计数据展示正常（9 个卡片）。小问题：缺闲置数统计。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '8.3': { status: 'fail', bugDesc: '功能缺失：无用户管理页面。/verifications 只显示认证审核，无用户列表/搜索/详情。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '8.4': { status: 'fail', bugDesc: '功能缺失：无小区管理页面。/community-applications 只显示新申请，无已有小区列表。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '8.5': { status: 'fail', bugDesc: '部分功能缺失：事件/闲置/议题有隐藏(下架)/恢复功能，但无永久删除。内容审核页无数据。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '8.6': { status: 'pass', bugDesc: 'Banner 管理页功能完整：新增/编辑/上下架/删除。小程序端改为启动弹窗展示。', updatedAt: '2026-07-07T12:00:00.000Z' },
-  '8.7': { status: 'fail', bugDesc: '部分功能缺失：有举报管理(/reports)但无数据。无独立反馈页面（反馈≠举报）。', updatedAt: '2026-07-07T01:30:00.000Z' },
-  '8.8': { status: 'pass', bugDesc: '系统设置页面正常：基础设置可编辑，AI 功能开关 4 个可用。', updatedAt: '2026-07-07T01:30:00.000Z' },
+// ===== 一轮测试结果（只读，来自 2026-07-07 首轮 E2E 测试）=====
+const ROUND1_RESULTS = {
+  '1.1': { status: 'pass', bugDesc: '' },
+  '1.2': { status: 'pass', bugDesc: 'OCR 一致自动通过' },
+  '1.3': { status: 'pass', bugDesc: '' },
+  '1.4': { status: 'pass', bugDesc: '' },
+  '1.5': { status: 'fail', bugDesc: '发布表单（事件/闲置/议题）无 storage 持久化，退出后数据丢失。' },
+  '1.6': { status: 'pass', bugDesc: 'API POST /communities/select 切换正常。' },
+  '1.7': { status: 'pass', bugDesc: 'Admin 小区申请列表/详情/审批功能完整。' },
+  '1.8': { status: 'fail', bugDesc: 'user-profile 页面缺"发布历史"区（事件/闲置/议题），仅展示头像/昵称/标签/简介/统计/徽章。' },
+  '2.1': { status: 'fail', bugDesc: 'UnverifiedFormBanner 仅提示不拦截，未认证用户可进入表单页面（后端 VerifiedMemberGuard 拒绝）。' },
+  '2.2': { status: 'pass', bugDesc: 'API 接单流程通过。' },
+  '2.3': { status: 'pass', bugDesc: 'API 完成确认通过。' },
+  '2.4': { status: 'pass', bugDesc: 'API 评论嵌套通过。' },
+  '2.5': { status: 'pass', bugDesc: 'DB 修复后点赞 API 通过。' },
+  '2.6': { status: 'pass', bugDesc: 'API 事件筛选通过。' },
+  '2.7': { status: 'pass', bugDesc: 'API 分页通过。' },
+  '2.8': { status: 'pass', bugDesc: '设计如此：无 DELETE 端点，有 POST /events/:id/close 关闭功能。' },
+  '3.1': { status: 'fail', bugDesc: '同 2.1，market-create 也有 UnverifiedFormBanner 仅提示不拦截。' },
+  '3.2': { status: 'pass', bugDesc: 'API 闲置意向通过。' },
+  '3.3': { status: 'pass', bugDesc: 'API 闲置评论通过。' },
+  '3.4': { status: 'pass', bugDesc: 'API 闲置搜索通过。' },
+  '3.5': { status: 'fail', bugDesc: 'isSeller=false（user.id 与 sellerId 不匹配），编辑/下架/标记已售按钮未显示。' },
+  '3.6': { status: 'fail', bugDesc: '同 3.5，isSeller=false，编辑按钮未显示。' },
+  '3.7': { status: 'fail', bugDesc: '缺分类筛选、缺价格排序、Kindle 价格显示"¥null"（应为交换/面议）。' },
+  '4.1': { status: 'fail', bugDesc: '同 2.1，topic-create 也有 UnverifiedFormBanner 仅提示不拦截。' },
+  '4.2': { status: 'pass', bugDesc: 'DB 修复后赞踩 API 通过。' },
+  '4.3': { status: 'fail', bugDesc: 'timeline 只显示事件列表，无评分变化时间线。设计如此还是 bug 待确认。' },
+  '4.4': { status: 'pass', bugDesc: 'DB 修复后议题评论 API 通过。' },
+  '4.5': { status: 'pass', bugDesc: 'API 议题评分通过。' },
+  '4.6': { status: 'pass', bugDesc: 'API 议题评论通过。' },
+  '4.7': { status: 'pass', bugDesc: '议题详情显示"相关事件 3"及事件卡片。' },
+  '5.1': { status: 'fail', bugDesc: '前端无认领入口。API POST /committee/members/:id/claim 正常，但 committee 页无认领按钮。' },
+  '5.2': { status: 'pass', bugDesc: 'API 公告详情通过。' },
+  '5.3': { status: 'pass', bugDesc: 'API 公告点赞通过。' },
+  '5.4': { status: 'fail', bugDesc: 'Admin 公告管理：状态列为空(bug)、发布者显示"未知"、无删除功能(缺失)。' },
+  '5.5': { status: 'pass', bugDesc: 'DB 修复后公告点赞 API 通过。' },
+  '5.6': { status: 'pass', bugDesc: 'API 业委会成员列表通过：3 名成员，claimStatus 正确。' },
+  '6.1': { status: 'fail', bugDesc: '前端默认用错误 period 参数（应用 periodType=total）。前端传 period=TOTAL 无数据。' },
+  '6.2': { status: 'pass', bugDesc: 'API 徽章展示通过：170 个徽章，张三有 2 个。' },
+  '6.3': { status: 'fail', bugDesc: 'seed 数据 UUID 版本字段为 0（b0000000-...），@IsUUID 验证不通过。' },
+  '6.4': { status: 'pass', bugDesc: 'home 页统计展示正常。' },
+  '6.5': { status: 'skip', bugDesc: '需月初 cron 或手动调月榜重算接口，无法自动测试。' },
+  '6.6': { status: 'fail', bugDesc: '无积分明细页。user-profile 仅展示贡献分总数，无积分规则明细/历史记录。' },
+  '7.1': { status: 'pass', bugDesc: 'API 通知已读通过。' },
+  '7.2': { status: 'fail', bugDesc: 'Admin Banner 管理：无删除功能(缺失)、无拖拽排序。' },
+  '7.3': { status: 'pass', bugDesc: 'API 服务商列表通过：3 个服务商。' },
+  '7.4': { status: 'pass', bugDesc: '分类筛选展示正常。' },
+  '7.5': { status: 'pass', bugDesc: '社群列表展示正常（3 群）。' },
+  '7.6': { status: 'fail', bugDesc: 'BannerCarousel 组件已开发但未集成到任何页面（plaza/home 均无 import）。' },
+  '7.7': { status: 'pass', bugDesc: '新手引导蒙层显示+跳过按钮正常。' },
+  '8.1': { status: 'pass', bugDesc: 'Admin 登录/登出流程正常。用户名 zhangsan_admin 密码 admin123。' },
+  '8.2': { status: 'pass', bugDesc: '仪表盘统计数据展示正常（9 个卡片）。' },
+  '8.3': { status: 'fail', bugDesc: '功能缺失：无用户管理页面。/verifications 只显示认证审核，无用户列表/搜索/详情。' },
+  '8.4': { status: 'fail', bugDesc: '功能缺失：无小区管理页面。/community-applications 只显示新申请，无已有小区列表。' },
+  '8.5': { status: 'fail', bugDesc: '部分功能缺失：事件/闲置/议题有隐藏(下架)/恢复功能，但无永久删除。内容审核页无数据。' },
+  '8.6': { status: 'pass', bugDesc: '认证审核页面正常：6 条记录，状态筛选/详情/审批功能完整。' },
+  '8.7': { status: 'fail', bugDesc: '部分功能缺失：有举报管理(/reports)但无数据。无独立反馈页面。' },
+  '8.8': { status: 'pass', bugDesc: '系统设置页面正常：基础设置可编辑，AI 功能开关 4 个可用。' },
 };
 
-// ===== 存储层 =====
+// ===== 修复情况（一轮 → 二轮之间的修复说明）=====
+const FIX_NOTES = {
+  '1.3': '✅ 已增强：前端表单已加 verifyStatus 拦截，未认证用户提交时弹 modal 跳转 verify',
+  '1.5': '✅ 已修复：event-create/market-create/topic-create 已接入 useDraft，退出后自动恢复草稿',
+  '1.8': '⏳ 未修复：功能缺失（user-profile 缺发布历史区），留待后续批次',
+  '2.1': '✅ 已修复：前端已加认证拦截，未认证用户提交时弹 modal 跳转 verify',
+  '3.1': '✅ 已修复：同 2.1，market-create 已加认证拦截',
+  '3.5': '✅ 非 Bug：复查确认代码正确，isSeller 判断无误，测试时因用户切换导致 user.id 不匹配',
+  '3.6': '✅ 非 Bug：同 3.5，复查确认代码正确',
+  '3.7': '⚠️ 部分修复：¥null 已修复（price 为 null 时显示「面议」）。分类筛选和价格排序仍缺（功能缺失）',
+  '4.1': '✅ 已修复：同 2.1，topic-create 已加认证拦截',
+  '4.3': '⏳ 未修复：timeline 只显示事件列表，设计待确认',
+  '5.1': '✅ 非 Bug：复查确认 committee 页有认领入口，点击进入 claim 表单',
+  '5.4': '✅ 已修复：Admin 公告管理已补状态列+删除功能（含小区隔离校验）',
+  '6.1': '⏸ 已跳过：用户决定本轮不处理。前端 period 参数与 API periodType 不匹配',
+  '6.3': '⏸ 已跳过：用户决定本轮不处理。seed 数据 UUID 版本字段为 0',
+  '6.5': '⏸ 仍跳过：需月初 cron 触发',
+  '6.6': '⏳ 未修复：功能缺失（无积分明细页）',
+  '7.2': '✅ 已修复：Banner 删除功能已补齐。举报功能本身需后续验证',
+  '7.6': '✅ 已修复：已改为启动广告弹窗，集成到 plaza 页面，每次启动仅弹一次',
+  '8.3': '⏳ 未修复：功能缺失（无用户管理页面）',
+  '8.4': '⏳ 未修复：功能缺失（无小区管理页面）',
+  '8.5': '⏳ 未修复：部分功能缺失（无永久删除）',
+  '8.6': '✅ 已增强：已补删除功能。小程序端改为启动弹窗展示',
+  '8.7': '⏳ 未修复：部分功能缺失',
+};
+
+// ===== 存储层（二轮结果）=====
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw);
-    // ponytail: 用例 id 不变，新增用例旧数据自动 fallback 为 pending
     return (parsed && typeof parsed === 'object') ? parsed : {};
   } catch (e) {
     console.warn('loadState failed, starting fresh:', e);
@@ -1121,39 +1158,64 @@ function setCaseState(caseId, data) {
 
 // ===== 渲染层 =====
 const STATUS_CONFIG = {
-  pending: { icon: '⏳', label: '待测', rowClass: '', btnClass: '' },
-  pass:    { icon: '✅', label: '通过', rowClass: 'pass', btnClass: 'active-pass' },
-  fail:    { icon: '❌', label: 'Bug',  rowClass: 'fail', btnClass: 'active-fail' },
-  skip:    { icon: '⏸',  label: '跳过', rowClass: 'skip', btnClass: 'active-skip' },
+  pending: { icon: '⏳', label: '待测', badgeClass: 'round-badge--pending' },
+  pass:    { icon: '✅', label: '通过', badgeClass: 'round-badge--pass' },
+  fail:    { icon: '❌', label: 'Bug',  badgeClass: 'round-badge--fail' },
+  skip:    { icon: '⏸',  label: '跳过', badgeClass: 'round-badge--skip' },
 };
 
-let currentFilter = '全部';
+function renderCase(tc) {
+  const r1 = ROUND1_RESULTS[tc.id] || { status: 'pending', bugDesc: '' };
+  const r1cfg = STATUS_CONFIG[r1.status] || STATUS_CONFIG.pending;
+  const fixNote = FIX_NOTES[tc.id];
+  const r2 = getCaseState(tc.id);
+  const r2cfg = STATUS_CONFIG[r2.status] || STATUS_CONFIG.pending;
+  const bugVisible = r2.status === 'fail' ? 'visible' : '';
+  const bugDesc = r2.bugDesc || '';
 
-function renderFilterBar() {
-  const bar = document.getElementById('filter-bar');
-  const allBtn = `<button class="filter-btn ${currentFilter === '全部' ? 'active' : ''}" onclick="filterByDomain('全部')">全部 (57)</button>`;
-  const domainBtns = DOMAINS.map(d => {
-    const count = TEST_CASES.filter(t => t.domain === d.id).length;
-    const active = currentFilter === d.id ? 'active' : '';
-    return `<button class="filter-btn ${active}" onclick="filterByDomain('${d.id}')">${d.icon} ${d.label} (${count})</button>`;
-  }).join('');
-  bar.innerHTML = allBtn + domainBtns;
-}
+  const stepsHtml = tc.steps.map(s => `<li>${s}</li>`).join('');
 
-function renderCase(testCase) {
-  const st = getCaseState(testCase.id);
-  const cfg = STATUS_CONFIG[st.status] || STATUS_CONFIG.pending;
-  const bugVisible = st.status === 'fail' ? 'visible' : '';
-  const bugDesc = st.bugDesc || '';
+  // Round 1 section
+  let r1Html = `
+    <div class="round-section round-section--r1">
+      <div class="round-label">
+        <span>一轮结果</span>
+        <span class="round-badge ${r1cfg.badgeClass}">${r1cfg.icon} ${r1cfg.label}</span>
+      </div>
+      ${r1.bugDesc ? `<div class="round-desc">${r1.bugDesc}</div>` : ''}
+    </div>
+  `;
 
-  const stepsHtml = testCase.steps.map(s => `<li>${s}</li>`).join('');
+  // Fix note section (only if exists)
+  let fixHtml = fixNote ? `
+    <div class="round-section round-section--fix">
+      <div class="round-label"><span>🔧 修复情况</span></div>
+      <div class="round-desc">${fixNote}</div>
+    </div>
+  ` : '';
+
+  // Round 2 section
+  let r2Html = `
+    <div class="round-section round-section--r2">
+      <div class="round-label">
+        <span>二轮测试</span>
+        <span class="round-badge ${r2cfg.badgeClass}">${r2cfg.icon} ${r2cfg.label}</span>
+      </div>
+      <div class="test-actions">
+        <button class="btn-action btn-pass ${r2.status === 'pass' ? 'active-pass' : ''}" onclick="setStatus('${tc.id}', 'pass')">✅ 通过</button>
+        <button class="btn-action btn-fail ${r2.status === 'fail' ? 'active-fail' : ''}" onclick="setStatus('${tc.id}', 'fail')">❌ Bug</button>
+        <button class="btn-action btn-skip ${r2.status === 'skip' ? 'active-skip' : ''}" onclick="setStatus('${tc.id}', 'skip')">⏸ 跳过</button>
+        <button class="btn-action btn-reset" onclick="resetCase('${tc.id}')">↺ 重置</button>
+      </div>
+      <textarea class="bug-desc-area ${bugVisible}" placeholder="二轮 Bug 描述：复现步骤、实际结果、严重程度..." onblur="saveBugDesc('${tc.id}', this.value)">${bugDesc}</textarea>
+    </div>
+  `;
 
   return `
-    <div class="test-row ${cfg.rowClass}" data-case-id="${testCase.id}" data-domain="${testCase.domain}">
+    <div class="test-row" data-case-id="${tc.id}" data-domain="${tc.domain}">
       <div class="test-header">
-        <span class="test-id">${testCase.id}</span>
-        <span class="test-title">${testCase.title}</span>
-        <span class="test-status-icon">${cfg.icon}</span>
+        <span class="test-id">${tc.id}</span>
+        <span class="test-title">${tc.title}</span>
       </div>
       <div class="test-body">
         <div class="test-section">
@@ -1162,40 +1224,51 @@ function renderCase(testCase) {
         </div>
         <div class="test-section">
           <div class="test-section-label">预期结果</div>
-          <div class="test-expected">${testCase.expected}</div>
+          <div class="test-expected">${tc.expected}</div>
         </div>
-        <div class="test-actions">
-          <button class="btn-action btn-pass ${st.status === 'pass' ? 'active-pass' : ''}" onclick="setStatus('${testCase.id}', 'pass')">✅ 通过</button>
-          <button class="btn-action btn-fail ${st.status === 'fail' ? 'active-fail' : ''}" onclick="setStatus('${testCase.id}', 'fail')">❌ Bug</button>
-          <button class="btn-action btn-skip ${st.status === 'skip' ? 'active-skip' : ''}" onclick="setStatus('${testCase.id}', 'skip')">⏸ 跳过</button>
-          <button class="btn-action btn-reset" onclick="resetCase('${testCase.id}')">↺ 重置</button>
-        </div>
-        <textarea class="bug-desc-area ${bugVisible}" placeholder="Bug 描述：复现步骤、实际结果、严重程度..." onblur="saveBugDesc('${testCase.id}', this.value)">${bugDesc}</textarea>
+        ${r1Html}
+        ${fixHtml}
+        ${r2Html}
+      </div>
+    </div>
+  `;
+}
+
+function renderModule(domain) {
+  const cases = TEST_CASES.filter(t => t.domain === domain.id);
+  const casesHtml = cases.map(renderCase).join('');
+
+  // Module metrics (round 2)
+  const stats = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  cases.forEach(t => {
+    const st = getCaseState(t.id);
+    stats[st.status] = (stats[st.status] || 0) + 1;
+  });
+
+  return `
+    <div class="module-section" data-domain="${domain.id}">
+      <div class="module-header has-body" onclick="toggleModule(this)">
+        <span class="module-icon">${domain.icon}</span>
+        <span class="module-name">${domain.label}</span>
+        <span class="module-metrics">
+          <span class="module-metric pass">✅ ${stats.pass}</span>
+          <span class="module-metric fail">❌ ${stats.fail}</span>
+          <span class="module-metric skip">⏸ ${stats.skip}</span>
+          <span class="module-metric pending">⏳ ${stats.pending}</span>
+          <button class="module-export-btn" onclick="event.stopPropagation(); exportModule('${domain.id}')">📋 导出</button>
+        </span>
+        <span class="module-toggle">▼</span>
+      </div>
+      <div class="module-body">
+        ${casesHtml}
       </div>
     </div>
   `;
 }
 
 function renderAll() {
-  const container = document.getElementById('test-container');
-  const html = DOMAINS.map(domain => {
-    const cases = TEST_CASES.filter(t => t.domain === domain.id);
-    const domainHtml = cases.map(renderCase).join('');
-    return `
-      <div class="domain-section" data-domain="${domain.id}">
-        <div class="domain-header has-body" onclick="toggleDomain(this)">
-          <span class="domain-icon">${domain.icon}</span>
-          <span class="domain-name">${domain.label}</span>
-          <span class="domain-progress" id="domain-progress-${domain.id}">0 / ${cases.length}</span>
-          <span class="domain-toggle">▼</span>
-        </div>
-        <div class="domain-body">
-          ${domainHtml}
-        </div>
-      </div>
-    `;
-  }).join('');
-  container.innerHTML = html;
+  const container = document.getElementById('modules-container');
+  container.innerHTML = DOMAINS.map(renderModule).join('');
   updateAllStats();
 }
 
@@ -1220,15 +1293,28 @@ function updateAllStats() {
   fill.textContent = rate + '%';
   fill.style.background = rate === 100 ? 'var(--success)' : 'var(--primary)';
 
-  // 更新每个板块的进度
+  // Update per-module metrics
   DOMAINS.forEach(d => {
     const cases = TEST_CASES.filter(t => t.domain === d.id);
-    const domainDone = cases.filter(t => {
+    const moduleStats = { pass: 0, fail: 0, skip: 0, pending: 0 };
+    cases.forEach(t => {
       const st = getCaseState(t.id);
-      return st.status === 'pass' || st.status === 'fail' || st.status === 'skip';
-    }).length;
-    const el = document.getElementById('domain-progress-' + d.id);
-    if (el) el.textContent = `${domainDone} / ${cases.length}`;
+      moduleStats[st.status] = (moduleStats[st.status] || 0) + 1;
+    });
+    const section = document.querySelector(`.module-section[data-domain="${d.id}"]`);
+    if (section) {
+      const metricsEl = section.querySelector('.module-metrics');
+      if (metricsEl) {
+        const exportBtn = metricsEl.querySelector('.module-export-btn').outerHTML;
+        metricsEl.innerHTML = `
+          <span class="module-metric pass">✅ ${moduleStats.pass}</span>
+          <span class="module-metric fail">❌ ${moduleStats.fail}</span>
+          <span class="module-metric skip">⏸ ${moduleStats.skip}</span>
+          <span class="module-metric pending">⏳ ${moduleStats.pending}</span>
+          ${exportBtn}
+        `;
+      }
+    }
   });
 }
 
@@ -1265,74 +1351,50 @@ function rerenderCase(caseId) {
   oldRow.replaceWith(tmp.firstElementChild);
 }
 
-function toggleDomain(headerEl) {
+function toggleModule(headerEl) {
   const body = headerEl.nextElementSibling;
   headerEl.classList.toggle('collapsed');
   body.classList.toggle('collapsed');
 }
 
-function filterByDomain(domain) {
-  currentFilter = domain;
-  renderFilterBar();
-  document.querySelectorAll('.domain-section').forEach(sec => {
-    if (domain === '全部' || sec.dataset.domain === domain) {
-      sec.style.display = '';
-    } else {
-      sec.style.display = 'none';
-    }
-  });
-}
-
 // ===== 导出层 =====
-function exportBugList() {
-  const bugs = TEST_CASES
-    .map(t => ({ ...t, state: getCaseState(t.id) }))
-    .filter(t => t.state.status === 'fail');
+function exportModule(domainId) {
+  const domain = DOMAINS.find(d => d.id === domainId);
+  const cases = TEST_CASES.filter(t => t.domain === domainId);
 
-  if (bugs.length === 0) {
-    showExport('🎉 当前没有标记为 Bug 的用例。\n\n请先在测试中标记有问题的用例并填写 Bug 描述，再导出。');
-    return;
-  }
-
-  let out = `# 小区帮榜棒 E2E 测试 Bug 清单\n\n`;
+  let out = `# ${domain.icon} ${domain.label} — 二轮测试结果\n\n`;
   out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
-  out += `Bug 总数: ${bugs.length}\n`;
-  out += `按板块分布:\n`;
-  DOMAINS.forEach(d => {
-    const cnt = bugs.filter(b => b.domain === d.id).length;
-    if (cnt > 0) out += `  ${d.icon} ${d.label}: ${cnt} 个\n`;
+
+  // Module stats
+  const stats = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  cases.forEach(t => {
+    const st = getCaseState(t.id);
+    stats[st.status] = (stats[st.status] || 0) + 1;
   });
+  out += `二轮统计: ✅ ${stats.pass} 通过 / ❌ ${stats.fail} Bug / ⏸ ${stats.skip} 跳过 / ⏳ ${stats.pending} 待测\n`;
   out += `\n${'='.repeat(60)}\n\n`;
 
-  DOMAINS.forEach(d => {
-    const domainBugs = bugs.filter(b => b.domain === d.id);
-    if (domainBugs.length === 0) return;
-    out += `## ${d.icon} ${d.label} (${domainBugs.length} 个)\n\n`;
-    domainBugs.forEach((b, i) => {
-      out += `### Bug ${i + 1} — [${b.id}] ${b.title}\n`;
-      out += `- 用例 ID: ${b.id}\n`;
-      out += `- 板块: ${b.domain}\n`;
-      out += `- 操作步骤:\n`;
-      b.steps.forEach((s, j) => { out += `  ${j + 1}. ${s}\n`; });
-      out += `- 预期结果: ${b.expected}\n`;
-      out += `- Bug 描述:\n`;
-      const desc = (b.state.bugDesc || '').trim();
-      out += desc ? `  ${desc.replace(/\n/g, '\n  ')}\n` : `  (未填写描述，请补充复现步骤和实际结果)\n`;
-      out += `- 更新时间: ${b.state.updatedAt ? new Date(b.state.updatedAt).toLocaleString('zh-CN') : '-'}\n`;
-      out += `\n`;
-    });
-    out += `${'='.repeat(60)}\n\n`;
-  });
+  cases.forEach(t => {
+    const r1 = ROUND1_RESULTS[t.id] || { status: 'pending', bugDesc: '' };
+    const r1cfg = STATUS_CONFIG[r1.status] || STATUS_CONFIG.pending;
+    const fixNote = FIX_NOTES[t.id] || '（无需修复）';
+    const r2 = getCaseState(t.id);
+    const r2cfg = STATUS_CONFIG[r2.status] || STATUS_CONFIG.pending;
 
-  out += `## 修复建议\n\n`;
-  out += `按板块逐个修复，每个板块独立 commit。修复后跑 /review + /verify。\n`;
-  out += `优先级建议: ① 认证与小区 > ② 事件互助 > ③ 闲置流转 > 其他（按业务核心度）。\n`;
+    out += `## [${t.id}] ${t.title}\n`;
+    out += `- 一轮结果: ${r1cfg.icon} ${r1cfg.label}\n`;
+    if (r1.bugDesc) out += `- 一轮备注: ${r1.bugDesc}\n`;
+    out += `- 修复情况: ${fixNote}\n`;
+    out += `- 二轮结果: ${r2cfg.icon} ${r2cfg.label}\n`;
+    if (r2.bugDesc) out += `- 二轮备注: ${r2.bugDesc}\n`;
+    out += `\n`;
+  });
 
   showExport(out);
 }
 
-function exportFullReport() {
-  let out = `# 小区帮榜棒 E2E 测试完整报告\n\n`;
+function exportAll() {
+  let out = `# 小区帮榜棒 E2E 二轮测试完整报告\n\n`;
   out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
   out += `总用例数: ${TEST_CASES.length}\n\n`;
 
@@ -1341,25 +1403,46 @@ function exportFullReport() {
     const st = getCaseState(t.id);
     stats[st.status] = (stats[st.status] || 0) + 1;
   });
-  out += `## 统计概览\n\n`;
+  out += `## 二轮统计概览\n\n`;
   out += `- ✅ 通过: ${stats.pass}\n`;
   out += `- ❌ Bug: ${stats.fail}\n`;
   out += `- ⏸ 跳过: ${stats.skip}\n`;
   out += `- ⏳ 待测: ${stats.pending}\n`;
   out += `- 📊 完成率: ${Math.round(((stats.pass + stats.fail + stats.skip) / TEST_CASES.length) * 100)}%\n\n`;
+
+  // 一轮 vs 二轮对比
+  const r1Stats = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(t => {
+    const r1 = ROUND1_RESULTS[t.id] || { status: 'pending' };
+    r1Stats[r1.status] = (r1Stats[r1.status] || 0) + 1;
+  });
+  out += `## 一轮 vs 二轮对比\n\n`;
+  out += `| 维度 | 一轮 | 二轮 |\n`;
+  out += `|------|------|------|\n`;
+  out += `| ✅ 通过 | ${r1Stats.pass} | ${stats.pass} |\n`;
+  out += `| ❌ Bug | ${r1Stats.fail} | ${stats.fail} |\n`;
+  out += `| ⏸ 跳过 | ${r1Stats.skip} | ${stats.skip} |\n`;
+  out += `| ⏳ 待测 | ${r1Stats.pending} | ${stats.pending} |\n\n`;
   out += `${'='.repeat(60)}\n\n`;
 
   DOMAINS.forEach(d => {
     const cases = TEST_CASES.filter(t => t.domain === d.id);
     out += `## ${d.icon} ${d.label}\n\n`;
     cases.forEach(t => {
-      const st = getCaseState(t.id);
-      const cfg = STATUS_CONFIG[st.status] || STATUS_CONFIG.pending;
-      out += `### [${t.id}] ${t.title} — ${cfg.icon} ${cfg.label}\n`;
-      if (st.status === 'fail' && st.bugDesc) {
-        out += `Bug 描述: ${st.bugDesc}\n`;
-      }
+      const r1 = ROUND1_RESULTS[t.id] || { status: 'pending', bugDesc: '' };
+      const r1cfg = STATUS_CONFIG[r1.status] || STATUS_CONFIG.pending;
+      const fixNote = FIX_NOTES[t.id] || '';
+      const r2 = getCaseState(t.id);
+      const r2cfg = STATUS_CONFIG[r2.status] || STATUS_CONFIG.pending;
+
+      out += `### [${t.id}] ${t.title}\n`;
+      out += `- 一轮: ${r1cfg.icon} ${r1cfg.label}`;
+      if (r1.bugDesc) out += ` — ${r1.bugDesc}`;
       out += `\n`;
+      if (fixNote) out += `- 修复: ${fixNote}\n`;
+      out += `- 二轮: ${r2cfg.icon} ${r2cfg.label}`;
+      if (r2.bugDesc) out += ` — ${r2.bugDesc}`;
+      out += `\n\n`;
     });
     out += `${'='.repeat(60)}\n\n`;
   });
@@ -1368,10 +1451,10 @@ function exportFullReport() {
 }
 
 function resetAll() {
-  if (!confirm('确定清空所有测试记录并重新开始吗？此操作不可撤销。')) return;
+  if (!confirm('确定清空所有二轮测试记录并重新开始吗？此操作不影响一轮数据。')) return;
   localStorage.removeItem(STORAGE_KEY);
   renderAll();
-  showExport('✅ 已清空所有测试记录，状态重置为待测。');
+  showExport('✅ 已清空所有二轮测试记录，状态重置为待测。一轮数据不受影响。');
 }
 
 function showExport(text) {
@@ -1384,19 +1467,12 @@ function showExport(text) {
 
 // ===== 初始化 =====
 function init() {
-  // 播种 E2E 自动化测试结果（仅首次，resetAll 清空后不重现）
-  if (!localStorage.getItem('xbb_e2e_seeded_v3')) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_RESULTS));
-    localStorage.setItem('xbb_e2e_seeded_v3', '1');
-  }
-  renderFilterBar();
   renderAll();
-  // 更新 hero 日期
   const today = new Date();
   const dateStr = today.getFullYear() + '-' +
     String(today.getMonth() + 1).padStart(2, '0') + '-' +
     String(today.getDate()).padStart(2, '0');
-  document.getElementById('hero-meta').textContent = `日期: ${dateStr} · 自动化测试结果已播种（Weapp Dev MCP · 2026-07-07 修复批次）· 数据保存在本地浏览器`;
+  document.getElementById('hero-meta').textContent = `日期: ${dateStr} · 一轮测试 2026-07-07 · 修复批次 2026-07-07 · 数据保存在本地浏览器`;
 }
 
 document.addEventListener('DOMContentLoaded', init);
