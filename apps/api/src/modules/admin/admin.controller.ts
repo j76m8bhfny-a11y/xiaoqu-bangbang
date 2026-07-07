@@ -385,6 +385,12 @@ export class AdminController {
     return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
+  @Delete('committee/announcements/:id')
+  async deleteAnnouncement(@CurrentUser('userId') userId: string, @Param('id') id: string) {
+    const data = await this.adminService.deleteAnnouncement(userId, id);
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
+  }
+
   // === Vote Management ===
   @Get('votes')
   async getVotes(
@@ -550,6 +556,13 @@ export class AdminController {
   @PlatformAdminOnly()
   async offlineBanner(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     const data = await this.adminService.offlineBanner(userId, id);
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
+  }
+
+  @Delete('banners/:id')
+  @PlatformAdminOnly()
+  async deleteBanner(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    const data = await this.adminService.deleteBanner(userId, id);
     return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 

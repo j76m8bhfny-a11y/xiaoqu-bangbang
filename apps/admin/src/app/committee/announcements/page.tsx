@@ -3,7 +3,17 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Table, Card, Tag, Space, Button, Modal, Form, Input, Upload, message,
+  Table,
+  Card,
+  Tag,
+  Space,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Upload,
+  Popconfirm,
+  message,
 } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -13,11 +23,15 @@ import api from '@/lib/api';
 import type { ApiResponse, PaginatedData } from '@xiaoqu-bangbang/shared';
 
 const statusLabels: Record<string, string> = {
-  draft: '草稿', published: '已发布', hidden: '已隐藏',
+  draft: '草稿',
+  published: '已发布',
+  hidden: '已隐藏',
 };
 
 const statusColors: Record<string, string> = {
-  draft: 'default', published: 'green', hidden: 'red',
+  draft: 'default',
+  published: 'green',
+  hidden: 'red',
 };
 
 export default function AnnouncementsPage() {
@@ -42,47 +56,118 @@ export default function AnnouncementsPage() {
 
   const createMutation = useMutation({
     mutationFn: (values: any) => api.post('/admin/committee/announcements', values),
-    onSuccess: () => { message.success('公告已创建'); setCreateModalOpen(false); createForm.resetFields(); queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] }); },
+    onSuccess: () => {
+      message.success('公告已创建');
+      setCreateModalOpen(false);
+      createForm.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] });
+    },
     onError: () => message.error('创建失败'),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, ...values }: any) => api.patch(`/admin/committee/announcements/${id}`, values),
-    onSuccess: () => { message.success('公告已更新'); setEditModalOpen(false); queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] }); },
+    mutationFn: ({ id, ...values }: any) =>
+      api.patch(`/admin/committee/announcements/${id}`, values),
+    onSuccess: () => {
+      message.success('公告已更新');
+      setEditModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] });
+    },
     onError: () => message.error('更新失败'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/admin/committee/announcements/${id}`),
+    onSuccess: () => {
+      message.success('公告已删除');
+      queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] });
+    },
+    onError: () => message.error('删除失败'),
   });
 
   const columns: ColumnsType<any> = [
     { title: '标题', dataIndex: 'title', ellipsis: true, width: 200 },
     {
-      title: '状态', dataIndex: 'status', width: 80,
+      title: '状态',
+      dataIndex: 'status',
+      width: 80,
       render: (v: string) => <Tag color={statusColors[v]}>{statusLabels[v] || v}</Tag>,
     },
     {
-      title: '置顶', dataIndex: 'isPinned', width: 60,
-      render: (v: boolean) => v ? <Tag color="blue">是</Tag> : '否',
+      title: '置顶',
+      dataIndex: 'isPinned',
+      width: 60,
+      render: (v: boolean) => (v ? <Tag color="blue">是</Tag> : '否'),
     },
     { title: '发布者', dataIndex: 'publisherNickname', width: 100 },
     { title: '发布时间', dataIndex: 'publishedAt', width: 180 },
     {
-      title: '操作', width: 250, render: (_, record) => (
+      title: '操作',
+      width: 250,
+      render: (_, record) => (
         <Space size="small" wrap>
-          <Button size="small" type="link" onClick={() => { setEditingItem(record); editForm.setFieldsValue(record); setEditModalOpen(true); }}>编辑</Button>
+          <Button
+            size="small"
+            type="link"
+            onClick={() => {
+              setEditingItem(record);
+              editForm.setFieldsValue(record);
+              setEditModalOpen(true);
+            }}
+          >
+            编辑
+          </Button>
           {record.status === 'draft' && (
-            <Button size="small" type="link" onClick={() => updateMutation.mutate({ id: record.id, status: 'published' })}>发布</Button>
+            <Button
+              size="small"
+              type="link"
+              onClick={() => updateMutation.mutate({ id: record.id, status: 'published' })}
+            >
+              发布
+            </Button>
           )}
           {!record.isPinned && record.status === 'published' && (
-            <Button size="small" type="link" onClick={() => updateMutation.mutate({ id: record.id, isPinned: true })}>置顶</Button>
+            <Button
+              size="small"
+              type="link"
+              onClick={() => updateMutation.mutate({ id: record.id, isPinned: true })}
+            >
+              置顶
+            </Button>
           )}
           {record.isPinned && (
-            <Button size="small" type="link" onClick={() => updateMutation.mutate({ id: record.id, isPinned: false })}>取消置顶</Button>
+            <Button
+              size="small"
+              type="link"
+              onClick={() => updateMutation.mutate({ id: record.id, isPinned: false })}
+            >
+              取消置顶
+            </Button>
           )}
           {record.status === 'published' && (
-            <Button size="small" type="link" danger onClick={() => updateMutation.mutate({ id: record.id, status: 'hidden' })}>隐藏</Button>
+            <Button
+              size="small"
+              type="link"
+              danger
+              onClick={() => updateMutation.mutate({ id: record.id, status: 'hidden' })}
+            >
+              隐藏
+            </Button>
           )}
           {record.status === 'hidden' && (
-            <Button size="small" type="link" onClick={() => updateMutation.mutate({ id: record.id, status: 'published' })}>恢复</Button>
+            <Button
+              size="small"
+              type="link"
+              onClick={() => updateMutation.mutate({ id: record.id, status: 'published' })}
+            >
+              恢复
+            </Button>
           )}
+          <Popconfirm title="确定删除此公告？" onConfirm={() => deleteMutation.mutate(record.id)}>
+            <Button size="small" type="link" danger>
+              删除
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
@@ -92,21 +177,42 @@ export default function AnnouncementsPage() {
     <AuthGuard>
       <AdminLayout>
         <Card title="公告管理">
-          <Button type="primary" style={{ marginBottom: 16 }} onClick={() => setCreateModalOpen(true)}>
+          <Button
+            type="primary"
+            style={{ marginBottom: 16 }}
+            onClick={() => setCreateModalOpen(true)}
+          >
             新增公告
           </Button>
           <Table
-            rowKey="id" columns={columns} dataSource={data?.data?.items ?? []} loading={isLoading}
+            rowKey="id"
+            columns={columns}
+            dataSource={data?.data?.items ?? []}
+            loading={isLoading}
             pagination={{
-              current: page, pageSize, total: data?.data?.total ?? 0, showSizeChanger: true,
-              onChange: (p, ps) => { setPage(p); setPageSize(ps); },
+              current: page,
+              pageSize,
+              total: data?.data?.total ?? 0,
+              showSizeChanger: true,
+              onChange: (p, ps) => {
+                setPage(p);
+                setPageSize(ps);
+              },
             }}
           />
         </Card>
 
-        <Modal title="新增公告" open={createModalOpen} onCancel={() => setCreateModalOpen(false)}
-          onOk={() => createForm.validateFields().then((v) => createMutation.mutate({ ...v, images: imageUrls }))}
-          confirmLoading={createMutation.isPending} width={600}
+        <Modal
+          title="新增公告"
+          open={createModalOpen}
+          onCancel={() => setCreateModalOpen(false)}
+          onOk={() =>
+            createForm
+              .validateFields()
+              .then((v) => createMutation.mutate({ ...v, images: imageUrls }))
+          }
+          confirmLoading={createMutation.isPending}
+          width={600}
         >
           <Form form={createForm} layout="vertical">
             <Form.Item name="title" label="标题" rules={[{ required: true }]}>
@@ -121,7 +227,12 @@ export default function AnnouncementsPage() {
                 listType="picture-card"
                 maxCount={9}
                 onChange={({ fileList }) => {
-                  setImageUrls(fileList.filter((f) => f.status === 'done').map((f) => f.response?.data?.url || f.url).filter(Boolean) as string[]);
+                  setImageUrls(
+                    fileList
+                      .filter((f) => f.status === 'done')
+                      .map((f) => f.response?.data?.url || f.url)
+                      .filter(Boolean) as string[],
+                  );
                 }}
               >
                 <UploadOutlined />
@@ -130,9 +241,19 @@ export default function AnnouncementsPage() {
           </Form>
         </Modal>
 
-        <Modal title="编辑公告" open={editModalOpen} onCancel={() => setEditModalOpen(false)}
-          onOk={() => editForm.validateFields().then((v) => updateMutation.mutate({ id: editingItem.id, ...v, images: editImageUrls }))}
-          confirmLoading={updateMutation.isPending} width={600}
+        <Modal
+          title="编辑公告"
+          open={editModalOpen}
+          onCancel={() => setEditModalOpen(false)}
+          onOk={() =>
+            editForm
+              .validateFields()
+              .then((v) =>
+                updateMutation.mutate({ id: editingItem.id, ...v, images: editImageUrls }),
+              )
+          }
+          confirmLoading={updateMutation.isPending}
+          width={600}
         >
           <Form form={editForm} layout="vertical">
             <Form.Item name="title" label="标题" rules={[{ required: true }]}>

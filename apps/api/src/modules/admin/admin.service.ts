@@ -1104,6 +1104,14 @@ export class AdminService {
     return { id, status: 'offline' };
   }
 
+  async deleteBanner(adminId: string, id: string) {
+    const banner = await this.prisma.banner.findUnique({ where: { id } });
+    if (!banner) throw new ForbiddenException('无权操作该资源');
+    await this.prisma.banner.delete({ where: { id } });
+    await this.logAudit(adminId, 'delete_banner', 'banner', id);
+    return { id };
+  }
+
   // === Service Provider Management ===
   async getServiceProviders(communityId: string, pagination?: { skip: number; take: number }) {
     return this.prisma.serviceProvider.findMany({
@@ -1318,12 +1326,21 @@ export class AdminService {
       images: a.images as string[],
       publisherNickname: nicknameMap.get(a.publisherId) ?? '未知',
       isPinned: a.isPinned,
+      status: a.status,
       publishedAt: a.publishedAt?.toISOString() ?? '',
     }));
   }
 
   async countAnnouncements(communityId: string) {
     return this.prisma.committeeAnnouncement.count({ where: { communityId } });
+  }
+
+  async deleteAnnouncement(adminId: string, id: string) {
+    const announcement = await this.prisma.committeeAnnouncement.findUnique({ where: { id } });
+    if (!announcement) throw new ForbiddenException('无权操作该资源');
+    await this.prisma.committeeAnnouncement.delete({ where: { id } });
+    await this.logAudit(adminId, 'delete_announcement', 'committee_announcement', id);
+    return { id };
   }
 
   async createAnnouncement(

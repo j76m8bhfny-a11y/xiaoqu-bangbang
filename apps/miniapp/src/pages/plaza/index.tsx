@@ -6,6 +6,7 @@ import { useAuthGuard } from '@/hooks';
 import { useCommunityStore } from '@/store';
 import Loading from '@/components/loading';
 import EmptyState from '@/components/empty-state';
+import BannerCarousel from '@/components/banner-carousel';
 import type { TopicDto, VoteDto, CommitteeAnnouncementDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
@@ -103,6 +104,9 @@ export default function Plaza() {
           <Text className="plaza__community-name">🏠 {communityName ?? '我的小区'}</Text>
           <Text className="plaza__community-switch">切换 ›</Text>
         </View>
+
+        {/* ponytail: Banner 轮播先用默认数据，后续需接公开 banner API 获取 Admin 管理的 banner */}
+        <BannerCarousel />
 
         {/* 业委会公告 */}
         <View className="plaza__card plaza__committee">
