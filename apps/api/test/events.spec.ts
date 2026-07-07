@@ -687,4 +687,60 @@ describe('Feature: 事件系统', () => {
       expect(res.body.data).not.toHaveProperty('ratingTags');
     });
   });
+
+  // [1.8.5] 用户主页发布历史 — 按 creatorId 过滤
+  describe('Scenario: 按 creatorId 过滤事件列表', () => {
+    it('GET /events?creatorId=xxx 只返回该用户的事件', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/events?creatorId=${userId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.code).toBe(0);
+      expect(res.body.data.items).toBeInstanceOf(Array);
+      expect(res.body.data.items.length).toBeGreaterThan(0);
+      // 非匿名事件的 creatorId 应等于 userId
+      for (const item of res.body.data.items) {
+        if (item.creatorId) {
+          expect(item.creatorId).toBe(userId);
+        }
+      }
+    });
+
+    it('GET /events?creatorId=xxx 别人看不到我的匿名事件', async () => {
+      // userId 创建一个匿名事件
+      const createRes = await request(app.getHttpServer())
+        .post('/api/v1/events')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          type: 'help_request',
+          title: 'creatorId 过滤匿名测试',
+          description: '别人不应看到此事件',
+          isAnonymous: true,
+        })
+        .expect(201);
+      const anonEventId = createRes.body.data.id;
+
+      // userId2 查询 userId 的发布历史，不应包含匿名事件
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/events?creatorId=${userId}`)
+        .set('Authorization', `Bearer ${token2}`)
+        .expect(200);
+
+      const found = res.body.data.items.find((e: any) => e.id === anonEventId);
+      expect(found).toBeUndefined();
+
+      // 本人查询应包含匿名事件
+      const res2 = await request(app.getHttpServer())
+        .get(`/api/v1/events?creatorId=${userId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const found2 = res2.body.data.items.find((e: any) => e.id === anonEventId);
+      expect(found2).toBeDefined();
+
+      // 清理
+      await prisma.event.delete({ where: { id: anonEventId } }).catch(() => {});
+    });
+  });
 });

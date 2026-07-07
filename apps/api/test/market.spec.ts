@@ -328,4 +328,59 @@ describe('Feature: 闲置模块', () => {
       expect(res.body.data).not.toHaveProperty('seller');
     });
   });
+
+  // [1.8.5] 用户主页发布历史 — 按 sellerId 过滤
+  describe('Scenario: 按 sellerId 过滤闲置列表', () => {
+    let myItemId: string;
+    let otherItemId: string;
+
+    beforeAll(async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/market/items')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          category: 'free',
+          title: 'sellerId 过滤测试闲置',
+          description: '测试按卖家过滤',
+          tradeType: 'free',
+        })
+        .expect(201);
+      myItemId = res.body.data.id;
+
+      // userId2 也发布一个闲置，验证 sellerId 过滤只返回 userId 的
+      const res2 = await request(app.getHttpServer())
+        .post('/api/v1/market/items')
+        .set('Authorization', `Bearer ${token2}`)
+        .send({
+          category: 'free',
+          title: '别人家的闲置',
+          description: '不应出现在 sellerId=userId 的结果中',
+          tradeType: 'free',
+        })
+        .expect(201);
+      otherItemId = res2.body.data.id;
+    });
+
+    afterAll(async () => {
+      await prisma.marketItem
+        .deleteMany({ where: { id: { in: [myItemId, otherItemId] } } })
+        .catch(() => {});
+    });
+
+    it('GET /market/items?sellerId=xxx 只返回该用户的闲置', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/market/items?sellerId=${userId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.code).toBe(0);
+      expect(res.body.data.items).toBeInstanceOf(Array);
+      expect(res.body.data.items.length).toBeGreaterThan(0);
+      // 所有返回的闲置都应是 userId 发布的（不含 otherItemId）
+      for (const item of res.body.data.items) {
+        expect(item.sellerId).toBe(userId);
+      }
+      expect(res.body.data.items.find((i: any) => i.id === otherItemId)).toBeUndefined();
+    });
+  });
 });

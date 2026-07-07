@@ -19,7 +19,7 @@ export class MarketService {
 
   async list(
     communityId: string,
-    query?: { category?: string; status?: string; keyword?: string },
+    query?: { category?: string; status?: string; keyword?: string; sellerId?: string },
     pagination?: { skip: number; take: number },
   ) {
     const where: any = {
@@ -33,6 +33,10 @@ export class MarketService {
 
     if (query?.status) {
       where.status = query.status;
+    }
+
+    if (query?.sellerId) {
+      where.sellerId = query.sellerId;
     }
 
     if (query?.keyword) {
@@ -80,7 +84,7 @@ export class MarketService {
 
   async count(
     communityId: string,
-    query?: { category?: string; status?: string; keyword?: string },
+    query?: { category?: string; status?: string; keyword?: string; sellerId?: string },
   ) {
     const where: any = {
       communityId,
@@ -89,6 +93,7 @@ export class MarketService {
 
     if (query?.category) where.category = query.category;
     if (query?.status) where.status = query.status;
+    if (query?.sellerId) where.sellerId = query.sellerId;
     if (query?.keyword) {
       where.OR = [
         { title: { contains: query.keyword, mode: 'insensitive' } },

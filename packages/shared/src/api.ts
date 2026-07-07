@@ -267,6 +267,7 @@ export interface EventListQuery {
   status?: EventStatus;
   keyword?: string;
   excludeTypes?: string; // 逗号分隔的 EventType 列表
+  creatorId?: string;
   page?: number;
   pageSize?: number;
 }

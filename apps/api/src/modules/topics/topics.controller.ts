@@ -28,13 +28,14 @@ export class TopicsController {
     @CurrentCommunityId() communityId: string,
     @Query('status') status?: string,
     @Query('keyword') keyword?: string,
+    @Query('createdBy') createdBy?: string,
     @Query('page') page?: number,
     @Query('pageSize') pageSize?: number,
   ) {
     const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
     const { items, total } = await this.topicsService.list(
       communityId,
-      { status, keyword },
+      { status, keyword, createdBy },
       { skip, take },
     );
     return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };

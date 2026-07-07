@@ -188,6 +188,77 @@
     line-height: 1.3;
   }
 
+  &__tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  &__tab {
+    flex: 1;
+    padding: 16px 0;
+    text-align: center;
+    background: $color-bg;
+    border-radius: 12px;
+
+    &--active {
+      background: $color-primary;
+    }
+  }
+
+  &__tab-text {
+    font-size: 26px;
+    color: $color-text;
+    font-weight: 500;
+  }
+
+  &__tab--active &__tab-text {
+    color: #fff;
+  }
+
+  &__history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__history-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px 24px;
+    background: $color-bg;
+    border-radius: 12px;
+  }
+
+  &__history-title {
+    font-size: 28px;
+    color: $color-text;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__history-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__history-status {
+    font-size: 22px;
+    color: $color-primary;
+    padding: 4px 12px;
+    background: rgba(91, 158, 111, 0.1);
+    border-radius: 8px;
+  }
+
+  &__history-time {
+    font-size: 22px;
+    color: $color-text-secondary;
+  }
+
   &__footer-tip {
     margin-top: 32px;
     text-align: center;

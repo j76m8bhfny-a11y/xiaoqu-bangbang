@@ -22,7 +22,13 @@ export class EventsService {
 
   async list(
     communityId: string,
-    query?: { type?: string; status?: string; keyword?: string; excludeTypes?: string[] },
+    query?: {
+      type?: string;
+      status?: string;
+      keyword?: string;
+      excludeTypes?: string[];
+      creatorId?: string;
+    },
     pagination?: { skip: number; take: number },
     viewerUserId?: string,
   ) {
@@ -44,6 +50,13 @@ export class EventsService {
         { title: { contains: query.keyword, mode: 'insensitive' } },
         { description: { contains: query.keyword, mode: 'insensitive' } },
       ];
+    }
+    if (query?.creatorId) {
+      where.creatorId = query.creatorId;
+      // [1.8.5] 别人查看发布历史时，匿名事件不可见（隐私保护）
+      if (viewerUserId !== query.creatorId) {
+        where.isAnonymous = false;
+      }
     }
 
     const items = await this.prisma.event.findMany({
@@ -92,7 +105,14 @@ export class EventsService {
 
   async count(
     communityId: string,
-    query?: { type?: string; status?: string; keyword?: string; excludeTypes?: string[] },
+    query?: {
+      type?: string;
+      status?: string;
+      keyword?: string;
+      excludeTypes?: string[];
+      creatorId?: string;
+    },
+    viewerUserId?: string,
   ) {
     const where: any = {
       communityId,
@@ -108,6 +128,12 @@ export class EventsService {
         { title: { contains: query.keyword, mode: 'insensitive' } },
         { description: { contains: query.keyword, mode: 'insensitive' } },
       ];
+    }
+    if (query?.creatorId) {
+      where.creatorId = query.creatorId;
+      if (viewerUserId !== query.creatorId) {
+        where.isAnonymous = false;
+      }
     }
 
     return this.prisma.event.count({ where });

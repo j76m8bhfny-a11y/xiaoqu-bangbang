@@ -27,6 +27,7 @@ export const marketService = {
     category?: string;
     status?: string;
     keyword?: string;
+    sellerId?: string;
     page?: number;
     pageSize?: number;
   }) => http.get<PaginatedData<MarketItemDto>>('/market/items', params),

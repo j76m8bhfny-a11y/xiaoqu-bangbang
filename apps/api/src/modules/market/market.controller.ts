@@ -29,7 +29,7 @@ export class MarketController {
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
   async list(
     @CurrentCommunityId() communityId: string,
-    @Query() query: { category?: string; status?: string; keyword?: string },
+    @Query() query: { category?: string; status?: string; keyword?: string; sellerId?: string },
     @Query('page') page?: number,
     @Query('pageSize') pageSize?: number,
   ) {

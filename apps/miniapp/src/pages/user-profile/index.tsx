@@ -1,12 +1,46 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Taro from '@tarojs/taro';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
-import { userService } from '@/services';
+import { userService, eventService, marketService, topicService } from '@/services';
 import { useAuthStore } from '@/store';
 import Loading from '@/components/loading';
 import EmptyState from '@/components/empty-state';
 import type { UserProfileDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+
+type TabKey = 'event' | 'market' | 'topic';
+
+const TABS: { key: TabKey; label: string; icon: string }[] = [
+  { key: 'event', label: '互助', icon: '🤝' },
+  { key: 'market', label: '闲置', icon: '♻️' },
+  { key: 'topic', label: '议题', icon: '📋' },
+];
+
+const EVENT_STATUS_LABEL: Record<string, string> = {
+  open: '进行中',
+  in_progress: '进行中',
+  completed: '已完成',
+  closed: '已关闭',
+};
+
+const MARKET_STATUS_LABEL: Record<string, string> = {
+  on_sale: '在售',
+  sold: '已售',
+  closed: '已下架',
+  pending_review: '审核中',
+  rejected: '已拒',
+};
+
+const TOPIC_STATUS_LABEL: Record<string, string> = {
+  open: '讨论中',
+  closed: '已完结',
+};
+
+const DETAIL_ROUTES: Record<TabKey, string> = {
+  event: '/pages/event-detail/index?id=',
+  market: '/pages/market-detail/index?id=',
+  topic: '/pages/topic-detail/index?id=',
+};
 
 export default function UserProfile() {
   const userId = Taro.getCurrentInstance().router?.params?.id;
@@ -14,6 +48,9 @@ export default function UserProfile() {
   const [profile, setProfile] = useState<UserProfileDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabKey>('event');
+  const [historyItems, setHistoryItems] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   useEffect(() => {
     if (!userId) {
@@ -40,6 +77,36 @@ export default function UserProfile() {
     };
   }, [userId]);
 
+  const fetchHistory = useCallback(
+    async (tab: TabKey) => {
+      if (!userId) return;
+      setHistoryLoading(true);
+      try {
+        let items: any[] = [];
+        if (tab === 'event') {
+          const res = await eventService.list({ creatorId: userId, pageSize: 5 });
+          items = res.items;
+        } else if (tab === 'market') {
+          const res = await marketService.list({ sellerId: userId, pageSize: 5 });
+          items = res.items;
+        } else {
+          const res = await topicService.list({ createdBy: userId, pageSize: 5 });
+          items = res.items;
+        }
+        setHistoryItems(items);
+      } catch {
+        setHistoryItems([]);
+      } finally {
+        setHistoryLoading(false);
+      }
+    },
+    [userId],
+  );
+
+  useEffect(() => {
+    if (profile) fetchHistory(activeTab);
+  }, [activeTab, profile, fetchHistory]);
+
   if (loading) {
     return (
       <View className="up">
@@ -58,6 +125,15 @@ export default function UserProfile() {
 
   const initial = profile.nickname?.slice(0, 1) || '邻';
   const isMe = currentUserId === profile.id;
+
+  const getStatusLabel = (tab: TabKey, status: string) => {
+    const labels = {
+      event: EVENT_STATUS_LABEL,
+      market: MARKET_STATUS_LABEL,
+      topic: TOPIC_STATUS_LABEL,
+    }[tab];
+    return labels[status] || status;
+  };
 
   return (
     <ScrollView scrollY className="up">
@@ -136,6 +212,46 @@ export default function UserProfile() {
                   <Text className="up__badge-emoji">🏅</Text>
                 )}
                 <Text className="up__badge-name">{b.name}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+
+      <View className="up__section">
+        <Text className="up__section-title">📦 发布历史</Text>
+        <View className="up__tabs">
+          {TABS.map((t) => (
+            <View
+              key={t.key}
+              className={`up__tab ${activeTab === t.key ? 'up__tab--active' : ''}`}
+              onClick={() => setActiveTab(t.key)}
+            >
+              <Text className="up__tab-text">
+                {t.icon} {t.label}
+              </Text>
+            </View>
+          ))}
+        </View>
+        {historyLoading ? (
+          <Loading />
+        ) : historyItems.length === 0 ? (
+          <EmptyState icon="📦" text="暂无发布记录" />
+        ) : (
+          <View className="up__history-list">
+            {historyItems.map((item) => (
+              <View
+                key={item.id}
+                className="up__history-item"
+                onClick={() => Taro.navigateTo({ url: DETAIL_ROUTES[activeTab] + item.id })}
+              >
+                <Text className="up__history-title">{item.title}</Text>
+                <View className="up__history-meta">
+                  <Text className="up__history-status">
+                    {getStatusLabel(activeTab, item.status)}
+                  </Text>
+                  <Text className="up__history-time">{item.createdAt?.slice(0, 10)}</Text>
+                </View>
               </View>
             ))}
           </View>

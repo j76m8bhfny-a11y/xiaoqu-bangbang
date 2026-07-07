@@ -11,8 +11,13 @@ import type {
 } from '@xiaoqu-bangbang/shared';
 
 export const topicService = {
-  list: (params: { status?: string; keyword?: string; page?: number; pageSize?: number }) =>
-    http.get<PaginatedData<TopicDto>>('/topics', params),
+  list: (params: {
+    status?: string;
+    keyword?: string;
+    createdBy?: string;
+    page?: number;
+    pageSize?: number;
+  }) => http.get<PaginatedData<TopicDto>>('/topics', params),
 
   getById: (id: string) => http.get<TopicDetailDto>(`/topics/${id}`),
 

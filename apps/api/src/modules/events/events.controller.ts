@@ -36,6 +36,7 @@ export class EventsController {
     @Query('status') status?: string,
     @Query('keyword') keyword?: string,
     @Query('excludeTypes') excludeTypesRaw?: string,
+    @Query('creatorId') creatorId?: string,
     @Query('page') page?: number,
     @Query('pageSize') pageSize?: number,
   ) {
@@ -44,11 +45,15 @@ export class EventsController {
     const [items, total] = await Promise.all([
       this.eventsService.list(
         communityId,
-        { type, status, keyword, excludeTypes },
+        { type, status, keyword, excludeTypes, creatorId },
         { skip, take },
         userId,
       ),
-      this.eventsService.count(communityId, { type, status, keyword, excludeTypes }),
+      this.eventsService.count(
+        communityId,
+        { type, status, keyword, excludeTypes, creatorId },
+        userId,
+      ),
     ]);
     return { code: 0, message: 'ok', data: { items, page: p, pageSize: ps, total } };
   }

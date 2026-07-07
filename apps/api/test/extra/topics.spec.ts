@@ -652,4 +652,48 @@ describe('Feature: 议事榜', () => {
       expect(cr).toBeNull();
     });
   });
+
+  // [1.8.5] 用户主页发布历史 — 按 createdBy 过滤（含已关闭议题）
+  describe('Scenario: 按 createdBy 过滤议题列表', () => {
+    let closedTopicId: string;
+
+    beforeAll(async () => {
+      // 用户 A 创建一个已关闭的议题
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/topics')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ title: '已关闭的发布历史测试议题', description: '验证 createdBy 过滤含已关闭' });
+      closedTopicId = res.body.data.id;
+
+      await prisma.topic.update({
+        where: { id: closedTopicId },
+        data: {
+          status: 'closed',
+          closedSummary: '已处理',
+          closedAt: new Date(),
+          closedBy: userIdA,
+        },
+      });
+    });
+
+    afterAll(async () => {
+      await prisma.topic.delete({ where: { id: closedTopicId } }).catch(() => {});
+    });
+
+    it('GET /topics?createdBy=xxx 返回该用户的议题（含已关闭）', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/topics?createdBy=${userIdA}`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .expect(200);
+
+      expect(res.body.code).toBe(0);
+      expect(res.body.data.items).toBeInstanceOf(Array);
+      expect(res.body.data.items.length).toBeGreaterThan(0);
+
+      // 应包含刚创建的已关闭议题
+      const found = res.body.data.items.find((t: any) => t.id === closedTopicId);
+      expect(found).toBeDefined();
+      expect(found.status).toBe('closed');
+    });
+  });
 });

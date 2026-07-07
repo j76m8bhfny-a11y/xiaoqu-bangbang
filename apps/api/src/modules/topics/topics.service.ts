@@ -14,6 +14,7 @@ import { RankingsService } from '../rankings/rankings.service';
 interface TopicListQuery {
   status?: string;
   keyword?: string;
+  createdBy?: string;
 }
 
 interface PaginationParams {
@@ -45,8 +46,11 @@ export class TopicsService {
   // ===== 议题 CRUD =====
 
   async list(communityId: string, query: TopicListQuery, pagination: PaginationParams) {
-    const status = query.status ?? 'open';
-    const where: any = { communityId, status };
+    // [1.8.5] 按 createdBy 查询发布历史时，展示全部状态（含已关闭）；否则默认 open
+    const status = query.status ?? (query.createdBy ? undefined : 'open');
+    const where: any = { communityId };
+    if (status) where.status = status;
+    if (query.createdBy) where.createdBy = query.createdBy;
     if (query.keyword) {
       where.title = { contains: query.keyword, mode: 'insensitive' };
     }
