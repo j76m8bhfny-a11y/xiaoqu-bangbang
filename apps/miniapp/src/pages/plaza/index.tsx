@@ -6,7 +6,7 @@ import { useAuthGuard } from '@/hooks';
 import { useCommunityStore } from '@/store';
 import Loading from '@/components/loading';
 import EmptyState from '@/components/empty-state';
-import BannerCarousel from '@/components/banner-carousel';
+import AdPopup from '@/components/ad-popup';
 import type { TopicDto, VoteDto, CommitteeAnnouncementDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
@@ -14,10 +14,23 @@ import './index.scss';
 // 入口分层：业委会卡片（公告/入口）→ 待投票 → 议题列表 → 发起议题 CTA。
 // 闲置（market）下沉到 events tab；议题（topic）取代旧 event-type=public_feedback/discussion。
 
+// 启动广告弹窗：模块级变量保证每次启动只弹一次
+let adPopupShown = false;
+
 export default function Plaza() {
   useAuthGuard();
   const communityId = useCommunityStore((s) => s.currentCommunityId);
   const communityName = useCommunityStore((s) => s.currentCommunityName);
+
+  // 启动广告弹窗
+  const [adVisible, setAdVisible] = useState(false);
+  useEffect(() => {
+    if (!adPopupShown) {
+      adPopupShown = true;
+      const timer = setTimeout(() => setAdVisible(true), 300);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const [topics, setTopics] = useState<TopicDto[]>([]);
   const [topicStatus, setTopicStatus] = useState<'open' | 'closed'>('open');
@@ -104,9 +117,6 @@ export default function Plaza() {
           <Text className="plaza__community-name">🏠 {communityName ?? '我的小区'}</Text>
           <Text className="plaza__community-switch">切换 ›</Text>
         </View>
-
-        {/* ponytail: Banner 轮播先用默认数据，后续需接公开 banner API 获取 Admin 管理的 banner */}
-        <BannerCarousel />
 
         {/* 业委会公告 */}
         <View className="plaza__card plaza__committee">
@@ -246,6 +256,7 @@ export default function Plaza() {
 
         <View className="plaza__bottom-spacer" />
       </ScrollView>
+      <AdPopup visible={adVisible} onClose={() => setAdVisible(false)} />
     </View>
   );
 }
