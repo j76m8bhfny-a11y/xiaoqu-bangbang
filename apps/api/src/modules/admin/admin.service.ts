@@ -1335,8 +1335,10 @@ export class AdminService {
     return this.prisma.committeeAnnouncement.count({ where: { communityId } });
   }
 
-  async deleteAnnouncement(adminId: string, id: string) {
-    const announcement = await this.prisma.committeeAnnouncement.findUnique({ where: { id } });
+  async deleteAnnouncement(adminId: string, id: string, communityId: string) {
+    const announcement = await this.prisma.committeeAnnouncement.findFirst({
+      where: { id, communityId },
+    });
     if (!announcement) throw new ForbiddenException('无权操作该资源');
     await this.prisma.committeeAnnouncement.delete({ where: { id } });
     await this.logAudit(adminId, 'delete_announcement', 'committee_announcement', id);

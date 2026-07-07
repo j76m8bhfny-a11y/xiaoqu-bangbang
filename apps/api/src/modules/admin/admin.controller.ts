@@ -386,8 +386,12 @@ export class AdminController {
   }
 
   @Delete('committee/announcements/:id')
-  async deleteAnnouncement(@CurrentUser('userId') userId: string, @Param('id') id: string) {
-    const data = await this.adminService.deleteAnnouncement(userId, id);
+  async deleteAnnouncement(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.deleteAnnouncement(userId, id, communityId);
     return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
