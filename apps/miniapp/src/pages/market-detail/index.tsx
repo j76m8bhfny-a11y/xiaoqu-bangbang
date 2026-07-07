@@ -298,8 +298,10 @@ export default function MarketDetail() {
         <View className="market-detail__price-row">
           {item.tradeType === TradeType.FREE ? (
             <Text className="market-detail__price market-detail__price--free">免费</Text>
-          ) : (
+          ) : item.price != null ? (
             <Text className="market-detail__price">¥{item.price}</Text>
+          ) : (
+            <Text className="market-detail__price market-detail__price--free">面议</Text>
           )}
           <View className="market-detail__tag" style={{ background: condConfig.color }}>
             <Text className="market-detail__tag-text">{condConfig.label}</Text>
