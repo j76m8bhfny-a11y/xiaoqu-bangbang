@@ -335,6 +335,25 @@
   .bug-desc-area:focus { outline: none; box-shadow: 0 0 0 2px rgba(231,76,60,0.15); }
 
   /* Export area */
+  .export-toolbar {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .btn-copy {
+    padding: 8px 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-copy:hover { background: #4A8B5E; transform: translateY(-1px); }
+  .btn-copy:active { transform: translateY(0); }
   .export-output {
     background: #1E2A32;
     color: #D4E6D4;
@@ -383,7 +402,7 @@
 <div class="hero">
   <div class="container">
     <h1>🧪 小区帮榜棒 — E2E 二轮测试单</h1>
-    <p class="tagline">8 板块 57 用例 · 按模块独立测试 · 一轮结果+修复情况参考</p>
+    <p class="tagline">8 板块 57 用例 · 按模块独立测试 · 一键导出可复制 Bug 清单</p>
     <p class="meta" id="hero-meta">日期: 2026-07-07 · 数据保存在本地浏览器</p>
   </div>
 </div>
@@ -437,7 +456,8 @@
     </div>
 
     <div class="global-actions">
-      <button class="btn-export btn-export-full" onclick="exportAll()">📄 导出全部二轮结果</button>
+      <button class="btn-export btn-export-full" onclick="exportAllBugs()">📋 导出全部 Bug 清单</button>
+      <button class="btn-export btn-export-full" onclick="exportFullReport()">📄 导出完整报告</button>
       <button class="btn-export btn-reset-all" onclick="resetAll()">🗑 清空二轮结果</button>
     </div>
   </div>
@@ -453,16 +473,19 @@
 <!-- 导出输出区 -->
 <div class="section" style="padding-top: 0;">
   <div class="container">
+    <div class="export-toolbar" id="export-toolbar" style="display:none;">
+      <button class="btn-copy" onclick="copyToClipboard()">📋 复制到剪贴板</button>
+    </div>
     <pre class="export-output" id="export-output"></pre>
-    <p class="copy-hint" id="copy-hint" style="display:none;">点击上方导出按钮后，文本展示在此处，可全选复制。</p>
+    <p class="copy-hint" id="copy-hint" style="display:none;">点击「复制到剪贴板」一键复制，或直接在文本框内全选复制。</p>
   </div>
 </div>
 
 <!-- Footer -->
 <div class="footer">
   <div class="container">
-    <p>小区帮榜棒 E2E 二轮测试单 · v2.0 · 2026-07-07 · 57 用例 / 8 板块</p>
-    <p class="ponytail-note">每个板块独立导出 · 一轮结果只读 · 二轮结果存 localStorage · 清空重测不影响一轮数据</p>
+    <p>小区帮榜棒 E2E 二轮测试单 · v2.1 · 2026-07-07 · 57 用例 / 8 板块</p>
+    <p class="ponytail-note">每个板块独立 Bug 清单导出 · 一键复制到剪贴板 · 一轮结果只读 · 二轮结果存 localStorage</p>
   </div>
 </div>
 
@@ -1255,7 +1278,7 @@ function renderModule(domain) {
           <span class="module-metric fail">❌ ${stats.fail}</span>
           <span class="module-metric skip">⏸ ${stats.skip}</span>
           <span class="module-metric pending">⏳ ${stats.pending}</span>
-          <button class="module-export-btn" onclick="event.stopPropagation(); exportModule('${domain.id}')">📋 导出</button>
+          <button class="module-export-btn" onclick="event.stopPropagation(); exportModule('${domain.id}')">📋 Bug清单</button>
         </span>
         <span class="module-toggle">▼</span>
       </div>
@@ -1362,38 +1385,101 @@ function exportModule(domainId) {
   const domain = DOMAINS.find(d => d.id === domainId);
   const cases = TEST_CASES.filter(t => t.domain === domainId);
 
-  let out = `# ${domain.icon} ${domain.label} — 二轮测试结果\n\n`;
-  out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
-
   // Module stats
   const stats = { pass: 0, fail: 0, skip: 0, pending: 0 };
   cases.forEach(t => {
     const st = getCaseState(t.id);
     stats[st.status] = (stats[st.status] || 0) + 1;
   });
+
+  // Only export bugs (round 2 fail) + unresolved round 1 bugs (still pending)
+  const bugs = cases.filter(t => {
+    const r2 = getCaseState(t.id);
+    if (r2.status === 'fail') return true;
+    // Round 1 bug not yet re-tested
+    const r1 = ROUND1_RESULTS[t.id];
+    return r1 && r1.status === 'fail' && r2.status === 'pending';
+  });
+
+  let out = `# ${domain.icon} ${domain.label} — Bug 清单\n\n`;
+  out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
   out += `二轮统计: ✅ ${stats.pass} 通过 / ❌ ${stats.fail} Bug / ⏸ ${stats.skip} 跳过 / ⏳ ${stats.pending} 待测\n`;
+  out += `Bug 数: ${bugs.length}\n`;
   out += `\n${'='.repeat(60)}\n\n`;
 
-  cases.forEach(t => {
-    const r1 = ROUND1_RESULTS[t.id] || { status: 'pending', bugDesc: '' };
-    const r1cfg = STATUS_CONFIG[r1.status] || STATUS_CONFIG.pending;
-    const fixNote = FIX_NOTES[t.id] || '（无需修复）';
-    const r2 = getCaseState(t.id);
-    const r2cfg = STATUS_CONFIG[r2.status] || STATUS_CONFIG.pending;
+  if (bugs.length === 0) {
+    out += `🎉 本模块暂无 Bug（二轮未发现新 Bug，一轮 Bug 已全部修复或无未测项）\n`;
+  } else {
+    bugs.forEach((t, i) => {
+      const r1 = ROUND1_RESULTS[t.id] || { status: 'pending', bugDesc: '' };
+      const fixNote = FIX_NOTES[t.id] || '';
+      const r2 = getCaseState(t.id);
+      const isRetest = r2.status === 'fail';
 
-    out += `## [${t.id}] ${t.title}\n`;
-    out += `- 一轮结果: ${r1cfg.icon} ${r1cfg.label}\n`;
-    if (r1.bugDesc) out += `- 一轮备注: ${r1.bugDesc}\n`;
-    out += `- 修复情况: ${fixNote}\n`;
-    out += `- 二轮结果: ${r2cfg.icon} ${r2cfg.label}\n`;
-    if (r2.bugDesc) out += `- 二轮备注: ${r2.bugDesc}\n`;
-    out += `\n`;
-  });
+      out += `### Bug ${i + 1}: [${t.id}] ${t.title}\n`;
+      out += `**状态:** ${isRetest ? '❌ 二轮确认 Bug' : '⏳ 一轮 Bug 待二轮复测'}\n`;
+      out += `**操作步骤:**\n`;
+      t.steps.forEach(s => { out += `  - ${s}\n`; });
+      out += `**预期结果:** ${t.expected}\n`;
+      if (r1.bugDesc) out += `**一轮 Bug 描述:** ${r1.bugDesc}\n`;
+      if (fixNote) out += `**修复情况:** ${fixNote}\n`;
+      if (isRetest && r2.bugDesc) out += `**二轮 Bug 描述:** ${r2.bugDesc}\n`;
+      out += `\n`;
+    });
+  }
 
   showExport(out);
 }
 
-function exportAll() {
+function exportAllBugs() {
+  // Collect all bugs across all modules
+  const allBugs = [];
+  DOMAINS.forEach(d => {
+    const cases = TEST_CASES.filter(t => t.domain === d.id);
+    cases.forEach(t => {
+      const r2 = getCaseState(t.id);
+      const r1 = ROUND1_RESULTS[t.id];
+      if (r2.status === 'fail' || (r1 && r1.status === 'fail' && r2.status === 'pending')) {
+        allBugs.push({ tc: t, domain: d, r1, r2, fixNote: FIX_NOTES[t.id] || '' });
+      }
+    });
+  });
+
+  let out = `# 小区帮榜棒 E2E — 全部 Bug 清单\n\n`;
+  out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
+  out += `总 Bug 数: ${allBugs.length}\n\n`;
+
+  // Global stats
+  const stats = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(t => {
+    const st = getCaseState(t.id);
+    stats[st.status] = (stats[st.status] || 0) + 1;
+  });
+  out += `二轮统计: ✅ ${stats.pass} 通过 / ❌ ${stats.fail} Bug / ⏸ ${stats.skip} 跳过 / ⏳ ${stats.pending} 待测\n`;
+  out += `\n${'='.repeat(60)}\n\n`;
+
+  if (allBugs.length === 0) {
+    out += `🎉 暂无 Bug\n`;
+  } else {
+    allBugs.forEach((item, i) => {
+      const { tc: t, domain: d, r1, r2, fixNote } = item;
+      const isRetest = r2.status === 'fail';
+      out += `### Bug ${i + 1}: [${t.id}] ${t.title} (${d.icon} ${d.label})\n`;
+      out += `**状态:** ${isRetest ? '❌ 二轮确认 Bug' : '⏳ 一轮 Bug 待二轮复测'}\n`;
+      out += `**操作步骤:**\n`;
+      t.steps.forEach(s => { out += `  - ${s}\n`; });
+      out += `**预期结果:** ${t.expected}\n`;
+      if (r1 && r1.bugDesc) out += `**一轮 Bug 描述:** ${r1.bugDesc}\n`;
+      if (fixNote) out += `**修复情况:** ${fixNote}\n`;
+      if (isRetest && r2.bugDesc) out += `**二轮 Bug 描述:** ${r2.bugDesc}\n`;
+      out += `\n`;
+    });
+  }
+
+  showExport(out);
+}
+
+function exportFullReport() {
   let out = `# 小区帮榜棒 E2E 二轮测试完整报告\n\n`;
   out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
   out += `总用例数: ${TEST_CASES.length}\n\n`;
@@ -1461,8 +1547,43 @@ function showExport(text) {
   const pre = document.getElementById('export-output');
   pre.textContent = text;
   pre.classList.add('visible');
+  document.getElementById('export-toolbar').style.display = 'flex';
   document.getElementById('copy-hint').style.display = 'block';
   pre.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyToClipboard() {
+  const text = document.getElementById('export-output').textContent;
+  if (!text) return;
+  const btn = document.querySelector('.btn-copy');
+  const orig = btn.textContent;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✅ 已复制';
+      setTimeout(() => { btn.textContent = orig; }, 2000);
+    }).catch(() => {
+      fallbackCopy(text, btn, orig);
+    });
+  } else {
+    fallbackCopy(text, btn, orig);
+  }
+}
+
+function fallbackCopy(text, btn, orig) {
+  const pre = document.getElementById('export-output');
+  const range = document.createRange();
+  range.selectNodeContents(pre);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try {
+    document.execCommand('copy');
+    btn.textContent = '✅ 已复制';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  } catch (e) {
+    alert('复制失败，请手动全选文本复制');
+  }
+  sel.removeAllRanges();
 }
 
 // ===== 初始化 =====
