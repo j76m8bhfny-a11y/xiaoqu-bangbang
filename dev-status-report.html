@@ -339,7 +339,7 @@
   <div class="container">
     <h1>🌱 小区帮榜棒</h1>
     <p class="tagline">让小区里的好事，被看见</p>
-    <p class="meta">开发进展汇报 · 2026-07-06 · HEAD: 6554dd0 · 146 commits</p>
+    <p class="meta">开发进展汇报 · 2026-07-07 · HEAD: 18ce73b · 161 commits · 领先 origin 19</p>
   </div>
 </div>
 
@@ -380,7 +380,7 @@
     </div>
 
     <div class="highlight-box">
-      <strong>一句话总结：</strong>核心功能全部开发完毕，黄+绿+契约对齐问题全部清零，没有阻塞发布的 Bug，进入验收期。剩余 65 条⚠️设计选择，均不影响用户使用。
+      <strong>一句话总结：</strong>核心功能 100% 开发完毕，黄+绿+契约对齐问题全部清零，没有阻塞发布的 Bug。E2E 交互式测试单已发布（二轮模式，8 模块独立板块），首轮修复批次完成 5 个 bug。剩余 65 条⚠️设计选择均不影响用户使用。后续 <span style="color:var(--info);font-weight:700;">E2E 测试</span> 与 <span style="color:var(--primary);font-weight:700;">项目开发</span> 分开处理。
     </div>
   </div>
 </div>
@@ -897,7 +897,7 @@
       <span class="icon" style="background:var(--primary-light)">📅</span>
       开发节奏
     </div>
-    <p class="section-desc">从 7 月 3 日基线到 7 月 6 日，完成了 7 批次开发 + 黄色+绿色问题清理 + 文档更新</p>
+    <p class="section-desc">7 月 3 日基线 → 7 月 6 日 7 批次开发 + 问题清零 → 7 月 6-7 日 E2E 测试单发布 + 首轮修复批次</p>
 
     <div class="card">
       <div class="timeline">
@@ -956,10 +956,40 @@
           <div class="timeline-desc">shared DTO 正式化 + 类型对齐: VerificationResponse/CommitteeOverview/BadgeDto/ContributionDto/MergeSuggestion 等</div>
         </div>
         <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-06</div>
+          <div class="timeline-title">E2E 交互式测试单发布</div>
+          <div class="timeline-desc">8b4efb1: e2e-test-checklist.html，8 板块 57 用例，浏览器可交互勾选+导出</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-06</div>
+          <div class="timeline-title">测试环境配置 + 测试用户清单</div>
+          <div class="timeline-desc">e285f84 + e9623d0: 测试环境修复、调试登录入口、测试单加测试用户清单 + 未认证用户标注</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--accent); box-shadow:0 0 0 2px var(--accent);"></div>
+          <div class="timeline-date">07-07</div>
+          <div class="timeline-title">E2E 首轮修复批次（5 个 bug）</div>
+          <div class="timeline-desc">7bd9cd0/832944c/a95992f/5f6628b/8719b87/f6c70a7: 业主认证流程重构、无小区用户跳转、表单认证拦截+草稿恢复、闲置价格 ¥null、admin 公告状态+删除、deleteAnnouncement 小区隔离</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-07</div>
+          <div class="timeline-title">启动广告弹窗替代 banner 轮播</div>
+          <div class="timeline-desc">2952c70: 用启动广告弹窗替代旧 banner 轮播，体验更贴近真实小程序</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-07</div>
+          <div class="timeline-title">E2E 测试单二轮模式重构</div>
+          <div class="timeline-desc">b98e94d: 8 模块独立板块+独立导出，一轮结果+修复情况+二轮可编辑</div>
+        </div>
+        <div class="timeline-item">
           <div class="timeline-dot" style="background:var(--success); box-shadow:0 0 0 2px var(--success);"></div>
-          <div class="timeline-date">07-06 · 当前</div>
-          <div class="timeline-title">问题清单全部定性 ✅</div>
-          <div class="timeline-desc">297 已修复 / 65 设计选择 / 0 阻塞 / 0 黄 / 0 绿，237 测试通过</div>
+          <div class="timeline-date">07-07 · 当前</div>
+          <div class="timeline-title">E2E 测试单模块级 bug 清单导出</div>
+          <div class="timeline-desc">18ce73b: 每个模块可独立导出 bug 清单+一键复制，方便分工执行。297 已修复 / 65 设计选择 / 0 阻塞 / 0 黄 / 0 绿，237 测试通过</div>
         </div>
       </div>
     </div>
@@ -979,8 +1009,8 @@
         <h4 style="margin-bottom:12px;">代码规模</h4>
         <table class="table">
           <tbody>
-            <tr><td>总 commits</td><td><strong>146</strong></td></tr>
-            <tr><td>已推送</td><td><strong>142</strong></td></tr>
+            <tr><td>总 commits</td><td><strong>161</strong></td></tr>
+            <tr><td>已推送</td><td><strong>142</strong>（本地领先 19）</td></tr>
             <tr><td>数据库表</td><td><strong>49 张</strong></td></tr>
             <tr><td>数据库迁移</td><td><strong>9 次</strong></td></tr>
             <tr><td>小程序页面</td><td><strong>33 个</strong></td></tr>
@@ -1008,6 +1038,52 @@
             <tr><td>README.md</td><td>项目说明</td><td><span class="badge badge-orange">待更新</span></td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E2E 测试单 -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary-light)">🧪</span>
+      E2E 测试单（e2e-test-checklist.html）
+    </div>
+    <p class="section-desc">独立的交互式端到端测试清单，与项目开发分开维护</p>
+
+    <div class="card">
+      <h4 style="margin-bottom:12px;">这是什么</h4>
+      <p style="font-size:15px; margin-bottom:16px;">
+        <code style="background:var(--primary-light); padding:2px 6px; border-radius:4px; font-size:13px;">e2e-test-checklist.html</code>
+        是一份在浏览器里打开就能用的交互式测试清单，独立于本报告。它把小程序所有端到端测试用例拆成 8 个模块，每个模块可以单独勾选、单独导出 bug 清单，方便分工执行。
+      </p>
+
+      <h4 style="margin-bottom:12px;">当前状态（HEAD: 18ce73b）</h4>
+      <table class="table" style="margin-bottom:16px;">
+        <tbody>
+          <tr><td>测试用例总数</td><td><strong>57 个</strong>（8 模块）</td></tr>
+          <tr><td>模式</td><td><strong>二轮测试模式</strong>（b98e94d 重构）</td></tr>
+          <tr><td>首轮修复</td><td><strong>5 个 bug 已修复</strong>（认证流程/草稿恢复/¥null/admin 删除/小区隔离）</td></tr>
+          <tr><td>导出能力</td><td>每模块独立导出 bug 清单 + 一键复制（18ce73b）</td></tr>
+          <tr><td>测试用户</td><td>已内置测试用户清单 + 未认证用户标注</td></tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-bottom:12px;">8 个模块</h4>
+      <div class="feature-grid" style="margin-bottom:16px;">
+        <div class="feature-item"><span class="feature-emoji">🔐</span><div class="feature-info"><h4>认证</h4><p>登录/业主认证/权限</p></div></div>
+        <div class="feature-item"><span class="feature-emoji">📢</span><div class="feature-info"><h4>公告</h4><p>banner/广告弹窗/列表</p></div></div>
+        <div class="feature-item"><span class="feature-emoji">🤝</span><div class="feature-info"><h4>互助事件</h4><p>发求助/响应/评价</p></div></div>
+        <div class="feature-item"><span class="feature-emoji">♻️</span><div class="feature-info"><h4>闲置流转</h4><p>发布/意向/成交/评价</p></div></div>
+        <div class="feature-item"><span class="feature-emoji">📋</span><div class="feature-info"><h4>议事投票</h4><p>议题/评论/投票</p></div></div>
+        <div class="feature-item"><span class="feature-emoji">🏆</span><div class="feature-info"><h4>排行勋章</h4><p>月榜/小红花/勋章</p></div></div>
+        <div class="feature-item"><span class="feature-emoji">👤</span><div class="feature-info"><h4>个人中心</h4><p>资料/技能档案/我的</p></div></div>
+        <div class="feature-item"><span class="feature-emoji">🛡️</span><div class="feature-info"><h4>Admin</h4><p>后台管理/审核/举报</p></div></div>
+      </div>
+
+      <div class="highlight-box" style="background:#E8F4FD; border-left-color:var(--info);">
+        <strong>后续处理原则：</strong>E2E 测试与项目开发<strong>分开处理</strong>。测试单的 bug 修复走独立的 commit 批次（如首轮修复批次的 5 个 commit），不与功能开发混在一起。每轮测试完成后导出 bug 清单，修复后再进入下一轮，直到全部通过。
       </div>
     </div>
   </div>
@@ -1059,23 +1135,23 @@
       <span class="icon" style="background:var(--primary-light)">🎯</span>
       下一步建议
     </div>
-    <p class="section-desc">基于当前状态，建议的后续行动优先级</p>
+    <p class="section-desc">E2E 测试与项目开发分开推进，两条线并行</p>
 
     <div class="advice-grid">
       <div class="advice-card high">
-        <div class="advice-priority">⭐⭐⭐ 立即做</div>
+        <div class="advice-priority">⭐⭐⭐ E2E 测试线</div>
+        <div class="advice-title">按 e2e-test-checklist.html 执行二轮测试</div>
+        <div class="advice-desc">打开 e2e-test-checklist.html，逐模块执行 57 个用例，发现 bug 用「一键导出」生成清单，修复后进入下一轮</div>
+      </div>
+      <div class="advice-card high">
+        <div class="advice-priority">⭐⭐⭐ 项目开发线</div>
         <div class="advice-title">跑完验收（14 项）</div>
         <div class="advice-desc">重点验收 C11-C16 新开发的功能（事件评价/闲置评价/意向系统/多帮手/技能档案/卖家下架），确认好用</div>
       </div>
       <div class="advice-card medium">
         <div class="advice-priority">⭐⭐ 尽快做</div>
         <div class="advice-title">推送到远程</div>
-        <div class="advice-desc">当前多个 commit 待推送（黄+绿+契约对齐清理）</div>
-      </div>
-      <div class="advice-card medium">
-        <div class="advice-priority">⭐⭐ 尽快做</div>
-        <div class="advice-title">端到端串联测试</div>
-        <div class="advice-desc">跑一遍 D 项的 20 步端到端测试，模拟真实用户操作</div>
+        <div class="advice-desc">本地领先 origin 19 个 commit（含 E2E 测试单 + 首轮修复批次），需尽快推送备份</div>
       </div>
       <div class="advice-card low">
         <div class="advice-priority">⭐ 可延后</div>
@@ -1085,20 +1161,20 @@
       <div class="advice-card low">
         <div class="advice-priority">⭐ 可延后</div>
         <div class="advice-title">准备发布</div>
-        <div class="advice-desc">确定版本号、写发版说明、提交微信审核</div>
+        <div class="advice-desc">E2E 测试全绿 + 验收通过后，确定版本号、写发版说明、提交微信审核</div>
       </div>
     </div>
 
     <div class="highlight-box" style="margin-top:24px;">
-      <strong>总结：</strong>代码层面已经开发完毕，95 条黄色 + 67 条绿色 + 25 条契约对齐问题全部清零，没有阻塞 Bug。剩余 65 条⚠️为设计选择/ponytail 可接受，均不影响用户使用。接下来核心是<span style="color:var(--danger);font-weight:700;">验收</span>和<span style="color:var(--danger);font-weight:700;">推送到远程</span>。验收通过后就可以准备发布了。
+      <strong>总结：</strong>代码层面已 100% 开发完毕，95 条黄色 + 67 条绿色 + 25 条契约对齐问题全部清零，没有阻塞 Bug。剩余 65 条⚠️为设计选择/ponytail 可接受，均不影响用户使用。后续分两条线并行：<span style="color:var(--info);font-weight:700;">E2E 测试线</span>按 e2e-test-checklist.html 执行二轮测试（57 用例，首轮 5 bug 已修），<span style="color:var(--primary);font-weight:700;">项目开发线</span>跑完 14 项验收。两条线都绿了就可以推送到远程 + 准备发布。
     </div>
   </div>
 </div>
 
 <div class="footer">
   <div class="container">
-    <p>小区帮榜棒 · 开发进展汇报 · 生成于 2026-07-06</p>
-    <p style="margin-top:4px;">HEAD: 6554dd0 · 146 commits · 9 迁移 · 49 表 · 33 页面 · 237 测试 · 🟡 0 · 🟢 0</p>
+    <p>小区帮榜棒 · 开发进展汇报 · 生成于 2026-07-07</p>
+    <p style="margin-top:4px;">HEAD: 18ce73b · 161 commits · 9 迁移 · 49 表 · 33 页面 · 237 测试 · 🟡 0 · 🟢 0 · E2E 测试单二轮模式</p>
   </div>
 </div>
 
