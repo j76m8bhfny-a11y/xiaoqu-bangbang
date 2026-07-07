@@ -2,7 +2,8 @@ import { View, Text, Input, Textarea, Switch } from '@tarojs/components';
 import { useState, useEffect, useRef } from 'react';
 import Taro from '@tarojs/taro';
 import { eventService, topicService } from '@/services';
-import { useCommunityStore } from '@/store';
+import { useAuthStore, useCommunityStore } from '@/store';
+import { useDraft } from '@/hooks';
 import { EventType, RewardType } from '@xiaoqu-bangbang/shared';
 import { EVENT_TYPE_CONFIG } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
@@ -44,6 +45,59 @@ export default function EventCreate() {
   const [newTopicTitle, setNewTopicTitle] = useState('');
   const debounceRef = useRef<any>(null);
 
+  const verifyStatus = useAuthStore((s) => s.user?.verifyStatus);
+
+  // 草稿恢复：挂载时检查是否有未提交的草稿
+  const [draftReady, setDraftReady] = useState(false);
+  const draftState = {
+    title,
+    description,
+    locationText,
+    expectedTime,
+    rewardType,
+    rewardAmount,
+    capacity,
+    isAnonymous,
+    images,
+    topicId,
+  };
+  const { restore, clear, has } = useDraft('event_create', draftState, { enabled: draftReady });
+
+  useEffect(() => {
+    if (!has()) {
+      setDraftReady(true);
+      return;
+    }
+    Taro.showModal({
+      title: '恢复草稿？',
+      content: '上次填写的互助内容未提交，是否恢复？',
+      confirmText: '恢复',
+      cancelText: '丢弃',
+      success: (res) => {
+        if (res.confirm) {
+          const d = restore();
+          if (d) {
+            setTitle(d.title ?? '');
+            setDescription(d.description ?? '');
+            setLocationText(d.locationText ?? '');
+            setExpectedTime(d.expectedTime ?? '');
+            setRewardType(d.rewardType ?? RewardType.FREE);
+            setRewardAmount(d.rewardAmount ?? '');
+            setCapacity(d.capacity ?? '');
+            setIsAnonymous(d.isAnonymous ?? false);
+            setImages(Array.isArray(d.images) ? d.images : []);
+            if (!preselectedTopicId) setTopicId(d.topicId ?? '');
+          }
+        } else {
+          clear();
+        }
+        setDraftReady(true);
+      },
+      fail: () => setDraftReady(true),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // 标题/描述变化时 debounce 获取议题推荐
   useEffect(() => {
     if (!isTopicType || preselectedTopicId || !title.trim()) return;
@@ -75,6 +129,18 @@ export default function EventCreate() {
   };
 
   const handleSubmit = async () => {
+    if (verifyStatus !== 'verified') {
+      Taro.showModal({
+        title: '需要业主认证',
+        content: '完成业主认证后才能发布互助内容，是否前往认证？',
+        confirmText: '去认证',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) Taro.navigateTo({ url: '/pages/verify/index' });
+        },
+      });
+      return;
+    }
     if (!title.trim()) {
       Taro.showToast({ title: '请填写标题', icon: 'none' });
       return;
@@ -107,6 +173,7 @@ export default function EventCreate() {
         isAnonymous,
         topicId: isTopicType ? topicId : undefined,
       });
+      clear();
       Taro.showToast({ title: '发布成功', icon: 'success' });
       setTimeout(() => {
         Taro.navigateBack();

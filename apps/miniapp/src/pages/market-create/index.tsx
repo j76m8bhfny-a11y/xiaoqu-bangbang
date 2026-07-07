@@ -1,8 +1,9 @@
 import { View, Text, Input, Textarea, ScrollView } from '@tarojs/components';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Taro from '@tarojs/taro';
 import { marketService } from '@/services';
-import { useCommunityStore } from '@/store';
+import { useAuthStore, useCommunityStore } from '@/store';
+import { useDraft } from '@/hooks';
 import { MarketCategory, TradeType, ConditionLevel } from '@xiaoqu-bangbang/shared';
 import { MARKET_CATEGORY_CONFIG, CONDITION_LABELS } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
@@ -36,7 +37,68 @@ export default function MarketCreate() {
   const [images, setImages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
+  const verifyStatus = useAuthStore((s) => s.user?.verifyStatus);
+
+  // 草稿恢复：挂载时检查是否有未提交的草稿
+  const [draftReady, setDraftReady] = useState(false);
+  const draftState = {
+    category,
+    title,
+    description,
+    price,
+    tradeType,
+    conditionLevel,
+    contactText,
+    images,
+  };
+  const { restore, clear, has } = useDraft('market_create', draftState, { enabled: draftReady });
+
+  useEffect(() => {
+    if (!has()) {
+      setDraftReady(true);
+      return;
+    }
+    Taro.showModal({
+      title: '恢复草稿？',
+      content: '上次填写的闲置物品未提交，是否恢复？',
+      confirmText: '恢复',
+      cancelText: '丢弃',
+      success: (res) => {
+        if (res.confirm) {
+          const d = restore();
+          if (d) {
+            setCategory(d.category ?? MarketCategory.OTHER);
+            setTitle(d.title ?? '');
+            setDescription(d.description ?? '');
+            setPrice(d.price ?? '');
+            setTradeType(d.tradeType ?? TradeType.SELL);
+            setConditionLevel(d.conditionLevel ?? ConditionLevel.GOOD);
+            setContactText(d.contactText ?? '');
+            setImages(Array.isArray(d.images) ? d.images : []);
+          }
+        } else {
+          clear();
+        }
+        setDraftReady(true);
+      },
+      fail: () => setDraftReady(true),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSubmit = async () => {
+    if (verifyStatus !== 'verified') {
+      Taro.showModal({
+        title: '需要业主认证',
+        content: '完成业主认证后才能发布闲置物品，是否前往认证？',
+        confirmText: '去认证',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) Taro.navigateTo({ url: '/pages/verify/index' });
+        },
+      });
+      return;
+    }
     if (!title.trim()) {
       Taro.showToast({ title: '请填写标题', icon: 'none' });
       return;
@@ -62,6 +124,7 @@ export default function MarketCreate() {
         conditionLevel,
         contactText: contactText.trim() || undefined,
       });
+      clear();
       Taro.showToast({ title: '发布成功', icon: 'success' });
       setTimeout(() => {
         Taro.navigateBack();
