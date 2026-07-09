@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小区帮榜棒 · 我的页 · 晨光暖设计稿</title>
+<style>
+/* ═══ Design Tokens · 晨光暖 · 轻手绘 ═══ */
+:root {
+  --color-bg: #FFF8EE;
+  --color-card: #FFFFFF;
+  --color-primary: #5B9E6F;
+  --color-primary-deep: #4A8C5E;
+  --color-primary-soft: #A8D5B5;
+  --color-accent: #E89B6C;
+  --color-accent-soft: #FBF0DD;
+  --color-cream: #FFF3D6;
+  --color-cream-deep: #F3EAD0;
+  --color-text: #2C3A2E;
+  --color-text-secondary: #6B7A6E;
+  --color-border: #E8E0D0;
+  --color-bg-green: #EAF4EC;
+  --color-bg-orange: #FBF0DD;
+  --radius-sm: 16px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+  --shadow-card: 0 4px 20px rgba(91, 158, 111, 0.08);
+  --shadow-card-warm: 0 4px 16px rgba(232, 155, 108, 0.10);
+  --shadow-btn: 0 6px 16px rgba(74, 140, 94, 0.24);
+  --font-size-xs: 13px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+  background: #EDE6D6;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Phone frame for desktop preview */
+.phone-frame {
+  width: 375px;
+  min-height: 100vh;
+  background: var(--color-bg);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0,0,0,0.08);
+}
+
+/* Paper texture overlay */
+.phone-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.015' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home {
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══ Header: User Card ═══ */
+.home__header {
+  margin: 24px 24px 0;
+  background: linear-gradient(135deg, #5B9E6F 0%, #4A8C5E 100%);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hand-drawn sun decoration in header corner */
+.header-sun {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+/* Hand-drawn cloud decoration */
+.header-cloud {
+  position: absolute;
+  bottom: 60px;
+  right: 20px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.home__user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.home__avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.home__avatar-text {
+  font-size: 26px;
+  color: var(--color-primary-deep);
+  font-weight: 700;
+}
+
+.home__user-detail { flex: 1; min-width: 0; }
+
+.home__user-name {
+  display: block;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.home__tags { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.home__tag {
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.home__tag--community { background: rgba(255, 255, 255, 0.18); }
+.home__tag-text { font-size: var(--font-size-xs); color: #fff; }
+
+.home__user-arrow {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.7);
+  flex-shrink: 0;
+}
+
+/* Stats row */
+.home__stats {
+  display: flex;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 1;
+}
+
+.home__stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.home__stat-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.home__stat-value {
+  font-size: var(--font-size-xxl);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.home__stat-label {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ═══ Feature Grid 2x2 ═══ */
+.home__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 20px 24px 0;
+}
+
+.home__grid-item {
+  width: calc(50% - 7px);
+  background: var(--color-cream);
+  border-radius: var(--radius-md);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+  border: 1.5px solid var(--color-cream-deep);
+}
+
+/* Subtle corner decoration on grid items */
+.home__grid-item::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(232, 155, 108, 0.06);
+}
+
+.home__grid-item:nth-child(2)::after { background: rgba(91, 158, 111, 0.06); }
+.home__grid-item:nth-child(3)::after { background: rgba(232, 155, 108, 0.06); }
+.home__grid-item:nth-child(4)::after { background: rgba(91, 158, 111, 0.06); }
+
+.home__grid-icon-wrap {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.home__grid-label {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  position: relative;
+  z-index: 1;
+}
+
+.home__grid-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══ Todo Section ═══ */
+.home__todos {
+  margin: 28px 24px 0;
+}
+
+.home__section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.home__section-title {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.home__todo-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.home__todo {
+  flex: 1;
+  min-width: 0;
+  background: var(--color-bg-green);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home__todo-icon-wrap {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.home__todo-detail { display: flex; flex-direction: column; }
+
+.home__todo-value {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-primary-deep);
+  line-height: 1.1;
+}
+
+.home__todo-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* ═══ Menu List ═══ */
+.home__menu-group {
+  margin: 16px 24px 0;
+  background: var(--color-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.home__menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  min-height: 52px;
+  background: var(--color-card);
+}
+
+.home__menu-item + .home__menu-item {
+  border-top: 1.5px solid var(--color-border);
+}
+
+.home__menu-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home__menu-icon-wrap {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.home__menu-label {
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.home__menu-arrow {
+  font-size: 20px;
+  color: var(--color-text-secondary);
+}
+
+.home__bottom-spacer { height: 32px; }
+
+/* ═══ Design notes panel ═══ */
+.design-notes {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 280px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  z-index: 100;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.design-notes h3 {
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: var(--color-primary-deep);
+}
+
+.design-notes .note-item {
+  margin-bottom: 8px;
+  padding-left: 12px;
+  border-left: 2px solid var(--color-primary-soft);
+}
+
+.design-notes .color-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 2px 0;
+}
+
+.design-notes .swatch-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+@media (max-width: 900px) {
+  .design-notes { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="design-notes">
+  <h3>晨光暖 · 轻手绘 设计说明</h3>
+  <div class="note-item"><b>色调</b>：奶油黄 + 草木绿 + 蜜桃橙</div>
+  <div class="color-swatch"><span class="swatch-dot" style="background:#FFF3D6"></span> 奶油黄 #FFF3D6</div>
+  <div class="color-swatch"><span class="swatch-dot" style="background:#5B9E6F"></span> 草木绿 #5B9E6F</div>
+  <div class="color-swatch"><span class="swatch-dot" style="background:#E89B6C"></span> 蜜桃橙 #E89B6C</div>
+  <div class="note-item"><b>手绘浓度</b>：轻手绘 - 克制点缀，干净为主</div>
+  <div class="note-item"><b>图标</b>：手绘 SVG 插画替代 emoji</div>
+  <div class="note-item"><b>卡片</b>：奶油底功能宫格 + 白卡菜单列表 材质区分</div>
+  <div class="note-item"><b>背景</b>：全局极淡纸纹</div>
+  <div class="note-item"><b>字体</b>：纯系统字体</div>
+  <div class="note-item" style="border-color:#E89B6C;color:#E89B6c"><b>功能零改动</b>：仅美化样式</div>
+</div>
+
+<div class="phone-frame">
+  <div class="home">
+
+    <!-- ═══ Header: User Card ═══ -->
+    <div class="home__header">
+      <!-- Hand-drawn sun decoration -->
+      <svg class="header-sun" width="100" height="100" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="20" fill="white"/>
+        <path d="M50 15 L50 8 M50 92 L50 85 M15 50 L8 50 M92 50 L85 50 M25 25 L20 20 M75 75 L80 80 M25 75 L20 80 M75 25 L80 20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <!-- Hand-drawn cloud -->
+      <svg class="header-cloud" width="60" height="40" viewBox="0 0 60 40" fill="none">
+        <path d="M12 28 C8 28 5 25 5 21 C5 17 8 14 12 14 C13 9 18 5 24 6 C29 3 36 4 39 9 C45 8 50 12 50 18 C50 24 45 28 40 28 Z" fill="white"/>
+      </svg>
+
+      <div class="home__user">
+        <div class="home__avatar">
+          <span class="home__avatar-text">李</span>
+        </div>
+        <div class="home__user-detail">
+          <span class="home__user-name">李奶奶</span>
+          <div class="home__tags">
+            <div class="home__tag">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8 L6.5 11.5 L13 4.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="home__tag-text">已认证</span>
+            </div>
+            <div class="home__tag home__tag--community">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <path d="M2 7 L8 2 L14 7 V13 H10 V9 H6 V13 H2 Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+              <span class="home__tag-text">阳光花园小区</span>
+            </div>
+          </div>
+        </div>
+        <span class="home__user-arrow">›</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="home__stats">
+        <div class="home__stat">
+          <div class="home__stat-icon-row">
+            <span class="home__stat-value">12</span>
+          </div>
+          <span class="home__stat-label">帮助次数</span>
+        </div>
+        <div class="home__stat">
+          <div class="home__stat-icon-row">
+            <span class="home__stat-value">36</span>
+          </div>
+          <span class="home__stat-label">小红花</span>
+        </div>
+        <div class="home__stat">
+          <div class="home__stat-icon-row">
+            <span class="home__stat-value">3</span>
+          </div>
+          <span class="home__stat-label">勋章</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Feature Grid 2x2 ═══ -->
+    <div class="home__grid">
+      <!-- 发布求助 -->
+      <div class="home__grid-item">
+        <div class="home__grid-icon-wrap">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <!-- Hand-drawn helping hands -->
+            <path d="M14 20 C12 22 12 26 14 28 L18 32 C20 34 24 34 26 32 L34 24" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M34 28 C36 26 36 22 34 20 L30 16 C28 14 24 14 22 16 L14 24" stroke="#5B9E6F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Small heart -->
+            <path d="M24 18 C23 16 20 16 20 18.5 C20 21 24 24 24 24 C24 24 28 21 28 18.5 C28 16 25 16 24 18 Z" fill="#E89B6C" opacity="0.8"/>
+            <circle cx="14" cy="24" r="3" stroke="#E89B6C" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="34" cy="24" r="3" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="home__grid-label">发布求助</span>
+        <span class="home__grid-desc">找邻居搭把手</span>
+      </div>
+
+      <!-- 发起议题 -->
+      <div class="home__grid-item">
+        <div class="home__grid-icon-wrap">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <!-- Hand-drawn speech bubble -->
+            <path d="M10 10 C8 10 6 12 6 14 V28 C6 30 8 32 10 32 H18 L24 38 V32 H38 C40 32 42 30 42 28 V14 C42 12 40 10 38 10 Z" stroke="#5B9E6F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/>
+            <circle cx="16" cy="21" r="2" fill="#E89B6C"/>
+            <circle cx="24" cy="21" r="2" fill="#E89B6C"/>
+            <circle cx="32" cy="21" r="2" fill="#E89B6C"/>
+          </svg>
+        </div>
+        <span class="home__grid-label">发起议题</span>
+        <span class="home__grid-desc">大家一起议</span>
+      </div>
+
+      <!-- 我的排名 -->
+      <div class="home__grid-item">
+        <div class="home__grid-icon-wrap">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <!-- Hand-drawn trophy -->
+            <path d="M16 10 H32 V18 C32 22 28 26 24 26 C20 26 16 22 16 18 Z" stroke="#E89B6C" stroke-width="2.5" stroke-linejoin="round" fill="rgba(232,155,108,0.1)"/>
+            <path d="M12 12 C10 12 8 14 8 16 C8 19 10 21 12 21" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M36 12 C38 12 40 14 40 16 C40 19 38 21 36 21" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M24 26 V32" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M18 36 H30" stroke="#5B9E6F" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M20 32 V36 M28 32 V36" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Star on trophy -->
+            <path d="M24 14 L25 16 L27 16.5 L25.5 17.5 L26 19.5 L24 18.5 L22 19.5 L22.5 17.5 L21 16.5 L23 16 Z" fill="#FFF3D6"/>
+          </svg>
+        </div>
+        <span class="home__grid-label">我的排名</span>
+        <span class="home__grid-desc">看看贡献值</span>
+      </div>
+
+      <!-- 业主认证 -->
+      <div class="home__grid-item">
+        <div class="home__grid-icon-wrap">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <!-- Hand-drawn badge -->
+            <path d="M24 6 L30 10 L38 10 L36 18 L40 24 L36 30 L38 38 L30 38 L24 42 L18 38 L10 38 L12 30 L8 24 L12 18 L10 10 L18 10 Z" stroke="#5B9E6F" stroke-width="2.5" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/>
+            <path d="M17 24 L22 29 L31 18" stroke="#E89B6C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="home__grid-label">业主认证</span>
+        <span class="home__grid-desc">认证享更多</span>
+      </div>
+    </div>
+
+    <!-- ═══ Todo Reminders ═══ -->
+    <div class="home__todos">
+      <div class="home__section-title-row">
+        <!-- Small flower decoration -->
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="9" cy="9" r="3" fill="#E89B6C"/>
+          <ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/>
+          <ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/>
+          <ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/>
+          <ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/>
+        </svg>
+        <span class="home__section-title">待办提醒</span>
+      </div>
+      <div class="home__todo-row">
+        <div class="home__todo">
+          <div class="home__todo-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <rect x="5" y="4" width="14" height="17" rx="2" stroke="#5B9E6F" stroke-width="2"/>
+              <path d="M9 4 V2 H15 V4" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/>
+              <path d="M8 10 H16 M8 14 H13" stroke="#5B9E6F" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="home__todo-detail">
+            <span class="home__todo-value">2</span>
+            <span class="home__todo-label">进行中互助</span>
+          </div>
+        </div>
+        <div class="home__todo">
+          <div class="home__todo-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M4 8 L12 4 L20 8 V18 L12 22 L4 18 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/>
+              <path d="M4 8 L12 12 L20 8 M12 12 V22" stroke="#5B9E6F" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="home__todo-detail">
+            <span class="home__todo-value">1</span>
+            <span class="home__todo-label">待投票</span>
+          </div>
+        </div>
+        <div class="home__todo">
+          <div class="home__todo-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M6 4 C5 4 4 5 4 6 V8 H20 V6 C20 5 19 4 18 4 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M5 8 V18 C5 19 6 20 7 20 H17 C18 20 19 19 19 18 V8" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M10 4 V2 H14 V4" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="12" cy="14" r="2.5" fill="#E89B6C"/>
+            </svg>
+          </div>
+          <div class="home__todo-detail">
+            <span class="home__todo-value">3</span>
+            <span class="home__todo-label">未读消息</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Menu List Group 1 ═══ -->
+    <div class="home__menu-group">
+      <div class="home__menu-item">
+        <div class="home__menu-left">
+          <div class="home__menu-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M6 4 C5 4 4 5 4 6 V14 C4 15 5 16 6 16 H10 L12 20 L14 16 H18 C19 16 20 15 20 14 V6 C20 5 19 4 18 4 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/>
+              <path d="M8 8 H16 M8 12 H13" stroke="#5B9E6F" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="home__menu-label">消息通知</span>
+        </div>
+        <span class="home__menu-arrow">›</span>
+      </div>
+      <div class="home__menu-item">
+        <div class="home__menu-left">
+          <div class="home__menu-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="9" r="6" stroke="#E89B6C" stroke-width="2" fill="rgba(232,155,108,0.08)"/>
+              <path d="M12 6 L13.2 8.4 L16 8.8 L14 10.6 L14.5 13.4 L12 12.2 L9.5 13.4 L10 10.6 L8 8.8 L10.8 8.4 Z" fill="#E89B6C"/>
+              <path d="M9 15 L8 22 L12 20 L16 22 L15 15" stroke="#E89B6C" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="home__menu-label">我的勋章</span>
+        </div>
+        <span class="home__menu-arrow">›</span>
+      </div>
+      <div class="home__menu-item">
+        <div class="home__menu-left">
+          <div class="home__menu-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M14 4 L20 10 L10 20 L4 20 L4 14 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/>
+              <path d="M14 4 L20 10" stroke="#5B9E6F" stroke-width="2"/>
+              <path d="M4 20 L10 14" stroke="#5B9E6F" stroke-width="1.5" stroke-dasharray="2 2"/>
+            </svg>
+          </div>
+          <span class="home__menu-label">我的服务</span>
+        </div>
+        <span class="home__menu-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- ═══ Menu List Group 2 ═══ -->
+    <div class="home__menu-group">
+      <div class="home__menu-item">
+        <div class="home__menu-left">
+          <div class="home__menu-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M4 11 L12 4 L20 11 V20 H15 V14 H9 V20 H4 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/>
+              <path d="M10 20 V16 H14 V20" stroke="#5B9E6F" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="home__menu-label">申请开通小区</span>
+        </div>
+        <span class="home__menu-arrow">›</span>
+      </div>
+      <div class="home__menu-item">
+        <div class="home__menu-left">
+          <div class="home__menu-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M6 3 C5 3 4 4 4 5 V21 L8 19 L12 21 L16 19 L20 21 V5 C20 4 19 3 18 3 Z" stroke="#E89B6C" stroke-width="2" stroke-linejoin="round" fill="rgba(232,155,108,0.06)"/>
+              <path d="M8 8 H16 M8 12 H14" stroke="#E89B6C" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="home__menu-label">我的小区申请</span>
+        </div>
+        <span class="home__menu-arrow">›</span>
+      </div>
+      <div class="home__menu-item">
+        <div class="home__menu-left">
+          <div class="home__menu-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M4 6 C4 5 5 4 6 4 H18 C19 4 20 5 20 6 V14 C20 15 19 16 18 16 H12 L8 20 V16 H6 C5 16 4 15 4 14 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/>
+              <path d="M8 8 H16 M8 12 H13" stroke="#5B9E6F" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="home__menu-label">邀请邻居</span>
+        </div>
+        <span class="home__menu-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- ═══ Menu List Group 3 ═══ -->
+    <div class="home__menu-group">
+      <div class="home__menu-item">
+        <div class="home__menu-left">
+          <div class="home__menu-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="8" stroke="#6B7A6E" stroke-width="2"/>
+              <path d="M12 8 V13 M12 16 V16.5" stroke="#6B7A6E" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="home__menu-label">设置</span>
+        </div>
+        <span class="home__menu-arrow">›</span>
+      </div>
+      <div class="home__menu-item">
+        <div class="home__menu-left">
+          <div class="home__menu-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 3 C8 3 5 6 5 10 C5 14 9 17 12 21 C15 17 19 14 19 10 C19 6 16 3 12 3 Z" stroke="#E89B6C" stroke-width="2" stroke-linejoin="round" fill="rgba(232,155,108,0.08)"/>
+              <circle cx="12" cy="10" r="3" stroke="#E89B6C" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <span class="home__menu-label">关于我们</span>
+        </div>
+        <span class="home__menu-arrow">›</span>
+      </div>
+    </div>
+
+    <div class="home__bottom-spacer"></div>
+  </div>
+</div>
+
+</body>
+</html>
