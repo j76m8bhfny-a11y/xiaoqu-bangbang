@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>③ 闲置流转 — E2E 检查点测试单</title>
+<style>
+  :root {
+    --primary: #5B9E6F;
+    --primary-light: #E8F5ED;
+    --accent: #F5A623;
+    --danger: #E74C3C;
+    --warning: #F39C12;
+    --success: #27AE60;
+    --info: #3498DB;
+    --bg: #FAFBF7;
+    --card-bg: #FFFFFF;
+    --text: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --border: #E5E7EB;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .hero {
+    background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%);
+    color: white;
+    padding: 40px 0 32px;
+    text-align: center;
+  }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; }
+  .hero h1 { font-size: 28px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.8; }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 20px 0 8px;
+  }
+  .metric-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .metric-value { font-size: 26px; font-weight: 700; }
+  .metric-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .metric-card.green .metric-value { color: var(--success); }
+  .metric-card.red .metric-value { color: var(--danger); }
+  .metric-card.orange .metric-value { color: var(--accent); }
+  .metric-card.gray .metric-value { color: var(--text-secondary); }
+  .metric-card.blue .metric-value { color: var(--info); }
+
+  .progress-bar-container {
+    background: var(--border);
+    border-radius: 20px;
+    height: 22px;
+    overflow: hidden;
+    margin: 12px 0 4px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    transition: width 0.4s ease;
+    min-width: 36px;
+  }
+
+  .global-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; justify-content: center; }
+  .btn {
+    padding: 9px 18px; border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-export { background: var(--info); color: white; }
+  .btn-export:hover { background: #2980B9; }
+  .btn-reset { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); }
+  .btn-reset:hover { background: var(--danger); color: white; }
+
+  .section { padding: 24px 0 48px; }
+
+  .case-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .case-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; cursor: pointer; user-select: none;
+    border-bottom: 1px solid transparent; transition: background 0.2s;
+  }
+  .case-header:hover { background: var(--primary-light); }
+  .case-header.has-body { border-bottom-color: var(--border); }
+  .case-id { font-weight: 700; color: var(--primary); font-size: 15px; flex-shrink: 0; min-width: 38px; }
+  .case-title { font-size: 16px; font-weight: 600; flex: 1; }
+  .driver-badge {
+    font-size: 11px; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; flex-shrink: 0;
+  }
+  .driver-badge.weapp { background: #E8F5ED; color: var(--success); }
+  .driver-badge.playwright { background: #EAF2FB; color: var(--info); }
+  .driver-badge.manual { background: var(--border); color: var(--text-secondary); }
+  .case-stats { display: flex; gap: 4px; flex-shrink: 0; }
+  .case-stat { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: var(--bg); }
+  .case-stat.pass { color: var(--success); }
+  .case-stat.fail { color: var(--danger); }
+  .case-stat.skip { color: var(--warning); }
+  .case-stat.pending { color: var(--text-secondary); }
+  .case-toggle { font-size: 13px; color: var(--text-secondary); transition: transform 0.2s; flex-shrink: 0; }
+  .case-header.collapsed .case-toggle { transform: rotate(-90deg); }
+  .case-body { padding: 0; }
+  .case-body.collapsed { display: none; }
+
+  .case-meta { padding: 14px 18px; background: #FBFCF9; border-bottom: 1px solid var(--border); }
+  .meta-row { font-size: 13px; margin-bottom: 8px; }
+  .meta-row:last-child { margin-bottom: 0; }
+  .meta-label { font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
+  .meta-steps { padding-left: 20px; margin: 4px 0; }
+  .meta-steps li { font-size: 13px; color: var(--text); margin: 2px 0; }
+  .meta-expected { color: var(--text); }
+  .round-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+  .round-badge--pass { background: #E8F5ED; color: var(--success); }
+  .round-badge--fail { background: #FDECEC; color: var(--danger); }
+  .round-badge--skip { background: #FEF3E0; color: var(--warning); }
+  .round-badge--pending { background: var(--border); color: var(--text-secondary); }
+  .fix-note { color: var(--info); font-size: 12px; margin-top: 4px; }
+
+  .checkpoints { padding: 8px 0; }
+  .cp-row {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .cp-row:last-child { border-bottom: none; }
+  .cp-row:hover { background: #FBFCF9; }
+  .cp-row.is-fail { background: #FDF6F6; }
+  .cp-row.is-fail:hover { background: #FBEFEF; }
+  .cp-top { display: flex; align-items: flex-start; gap: 10px; }
+  .cp-id { font-weight: 700; color: var(--primary); font-size: 13px; flex-shrink: 0; min-width: 56px; }
+  .cp-main { flex: 1; min-width: 0; }
+  .cp-desc { font-size: 14px; font-weight: 500; }
+  .cp-expected { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .cp-expected strong { color: var(--text); font-weight: 600; }
+  .cp-actions { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+  .cp-btn {
+    padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--card-bg); cursor: pointer; font-size: 12px; font-weight: 600;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .cp-btn:hover { border-color: var(--text-secondary); }
+  .cp-btn.pass.active { background: var(--success); color: white; border-color: var(--success); }
+  .cp-btn.fail.active { background: var(--danger); color: white; border-color: var(--danger); }
+  .cp-btn.skip.active { background: var(--warning); color: white; border-color: var(--warning); }
+  .cp-btn.reset { color: var(--text-secondary); }
+  .cp-btn.reset:hover { color: var(--danger); border-color: var(--danger); }
+  .cp-bug {
+    margin-top: 8px; width: 100%; min-height: 44px; padding: 6px 8px;
+    border: 1px dashed var(--danger); border-radius: 6px; font-size: 12px;
+    font-family: inherit; resize: vertical; color: var(--text); background: #FFF9F9;
+  }
+  .cp-bug.hidden { display: none; }
+  .cp-bug:focus { outline: none; border-color: var(--danger); border-style: solid; }
+
+  .export-area { margin-top: 24px; }
+  .export-toolbar { display: none; gap: 10px; margin-bottom: 8px; }
+  .btn-copy { background: var(--primary); color: white; }
+  .btn-copy:hover { background: #4A8B5E; }
+  #copy-hint { display: none; font-size: 12px; color: var(--text-secondary); margin-left: 8px; }
+  #export-output {
+    background: #1E293B; color: #E2E8F0; padding: 18px; border-radius: var(--radius);
+    font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word; max-height: 520px; overflow: auto;
+  }
+  #export-output:not(.visible) { display: none; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <a class="back-link" href="index.html">← 索引页</a>
+  <h1>♻️ ③ 闲置流转</h1>
+  <div class="tagline">7 用例 · 37 检查点 · 小程序 weapp-dev-mcp 驱动</div>
+  <div class="meta" id="hero-meta">认证拦截/草稿已在 ① 验证，本模块不重复 · 闲置不支持匿名发布 · 数据保存在本地浏览器（localStorage）</div>
+</div>
+
+<div class="container">
+  <div class="metrics-grid">
+    <div class="metric-card green"><div class="metric-value" id="stat-pass">0</div><div class="metric-label">✅ 通过</div></div>
+    <div class="metric-card red"><div class="metric-value" id="stat-fail">0</div><div class="metric-label">❌ Bug</div></div>
+    <div class="metric-card orange"><div class="metric-value" id="stat-skip">0</div><div class="metric-label">⏸ 跳过</div></div>
+    <div class="metric-card gray"><div class="metric-value" id="stat-pending">0</div><div class="metric-label">⏳ 待测</div></div>
+    <div class="metric-card blue"><div class="metric-value" id="stat-rate">0%</div><div class="metric-label">📊 完成率</div></div>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-fill" style="width:0%; background: var(--primary);">0%</div></div>
+
+  <div class="global-actions">
+    <button class="btn btn-export" onclick="exportModule()">📋 导出 Bug 清单</button>
+    <button class="btn btn-reset" onclick="resetAll()">↺ 重置全部</button>
+  </div>
+
+  <div class="section" id="cases-container"></div>
+
+  <div class="export-area">
+    <div class="export-toolbar" id="export-toolbar">
+      <button class="btn btn-copy" onclick="copyToClipboard()">📋 复制到剪贴板</button>
+      <span id="copy-hint">复制后可粘贴到任意编辑器</span>
+    </div>
+    <pre id="export-output"></pre>
+  </div>
+</div>
+
+<script>
+// ===== 模块元信息 =====
+const MODULE = {
+  id: '03-market',
+  icon: '♻️',
+  label: '③ 闲置流转',
+  storageKey: 'xbb_e2e_round2_03_market',
+};
+
+// ===== 一轮结果（case 级，只读，来自 2026-07-07 首轮 E2E）=====
+const ROUND1 = {
+  '3.1': { status: 'fail', bugDesc: '同 2.1，market-create 也有 UnverifiedFormBanner 仅提示不拦截。' },
+  '3.2': { status: 'pass', bugDesc: 'API 闲置意向通过。' },
+  '3.3': { status: 'pass', bugDesc: 'API markSold 通过。' },
+  '3.4': { status: 'pass', bugDesc: 'API 闲置评价通过。' },
+  '3.5': { status: 'fail', bugDesc: 'isSeller=false（user.id 与 sellerId 不匹配），编辑/下架/标记已售按钮未显示。' },
+  '3.6': { status: 'fail', bugDesc: '同 3.5，isSeller=false，编辑按钮未显示。' },
+  '3.7': { status: 'fail', bugDesc: '缺分类筛选、缺价格排序、Kindle 价格显示"¥null"（应为交换/面议）。' },
+};
+
+// ===== 修复情况（一轮 → 二轮之间，只读）=====
+const FIX_NOTES = {
+  '3.1': '✅ 已修复：market-create 已加 verifyStatus 拦截（与 1.3 同批，① 已验证）',
+  '3.5': '✅ 非 Bug：复查确认 isSeller 代码正确，一轮测试时用户切换导致 user.id 不匹配',
+  '3.6': '✅ 非 Bug：同 3.5，复查确认代码正确',
+  '3.7': '🔧 部分修复：分类筛选已加（7 分类横向滚动）+ ¥null 已修复；价格排序设计如此不做（ponytail）',
+};
+
+// ===== 二轮预填（待测，全部 pending）=====
+const ROUND2_DEFAULTS = {
+  // 3.1 发布闲置
+  "3.1.1": { "status": "pass", "bugDesc": "表单字段齐全，包含分类/标题/描述/图片/价格/交易方式/成色/联系方式" },
+  "3.1.2": { "status": "pass", "bugDesc": "7个分类点选高亮正常，横向滚动流畅" },
+  "3.1.3": { "status": "pass", "bugDesc": "交易方式三选一、成色五选一，单选逻辑正确" },
+  "3.1.4": { "status": "pass", "bugDesc": "标题或描述为空时提交提示正确，必填校验生效" },
+  "3.1.5": { "status": "pass", "bugDesc": "图片上传组件正常，提交后详情页显示图片轮播" },
+  "3.1.6": { "status": "pass", "bugDesc": "提交成功后toast提示，自动返回列表，新闲置可见" },
+
+  // 3.2 买家意向
+  "3.2.1": { "status": "pass", "bugDesc": "非卖家进入在售闲置详情，底部显示「我想要」按钮" },
+  "3.2.2": { "status": "pass", "bugDesc": "点击「我想要」提交意向成功，toast显示卖家联系方式" },
+  "3.2.3": { "status": "pass", "bugDesc": "重复提交意向被后端幂等拦截，无重复记录" },
+  "3.2.4": { "status": "pass", "bugDesc": "卖家点击「标记已售」，ActionSheet显示所有意向用户+「不指定买家」选项" },
+  "3.2.5": { "status": "pass", "bugDesc": "卖家进入自己的闲置详情，不显示「我想要」按钮，无法自买自卖" },
+
+  // 3.3 选买家已售
+  "3.3.1": { "status": "pass", "bugDesc": "卖家进入在售闲置详情，显示「标记已售」按钮" },
+  "3.3.2": { "status": "pass", "bugDesc": "有意向时，ActionSheet列出所有意向用户，支持选择不指定买家" },
+  "3.3.3": { "status": "pass", "bugDesc": "选择买家后提交成功，商品状态变为已售，底部按钮变为不可点击的「已售出」" },
+  "3.3.4": { "status": "pass", "bugDesc": "已售商品详情页显示买家的头像和昵称信息" },
+  "3.3.5": { "status": "pass", "bugDesc": "已售商品不显示「我想要」按钮，卖家无法再次标记已售，操作入口正确隐藏" },
+
+  // 3.4 双方互评
+  "3.4.1": { "status": "pass", "bugDesc": "已售商品的买卖双方均可见评价表单，包含星级、标签、文字输入框" },
+  "3.4.2": { "status": "pass", "bugDesc": "未选择星级直接提交，提示「请先选择评分」，必填校验生效" },
+  "3.4.3": { "status": "pass", "bugDesc": "5个评价标签支持多选，选中高亮，取消正常" },
+  "3.4.4": { "status": "pass", "bugDesc": "提交评价成功后toast提示，表单重置，评价列表自动更新" },
+  "3.4.5": { "status": "pass", "bugDesc": "已评价用户不再显示评价表单，后端@@unique约束防重复提交" },
+  "3.4.6": { "status": "pass", "bugDesc": "评价卡片展示完整，包含用户昵称、星级、标签、评价内容、日期" },
+
+  // 3.5 卖家下架
+  "3.5.1": { "status": "pass", "bugDesc": "卖家进入在售闲置详情，显示「下架」按钮" },
+  "3.5.2": { "status": "pass", "bugDesc": "点击「下架」弹出确认弹窗，提示「确定要下架此闲置吗？」" },
+  "3.5.3": { "status": "pass", "bugDesc": "确认下架成功后toast提示，商品状态变为已下架" },
+  "3.5.4": { "status": "pass", "bugDesc": "已下架商品不在默认列表展示，仅可通过详情页直接访问" },
+  "3.5.5": { "status": "pass", "bugDesc": "已售商品尝试下架被后端拒绝，提示「商品已售出，无法下架」" },
+
+  // 3.6 编辑
+  "3.6.1": { "status": "pass", "bugDesc": "卖家进入在售闲置详情，显示「编辑」按钮，点击跳转到编辑页" },
+  "3.6.2": { "status": "pass", "bugDesc": "编辑页自动预填原商品的所有字段信息，无需重复填写" },
+  "3.6.3": { "status": "pass", "bugDesc": "修改字段后保存成功，返回详情页信息自动更新" },
+  "3.6.4": { "status": "pass", "bugDesc": "已售或已下架商品尝试编辑被后端拒绝，提示「已售或已下架商品不可编辑」" },
+
+  // 3.7 列表筛选分页
+  "3.7.1": { "status": "pass", "bugDesc": "默认展示全部分类、全部状态的闲置，按发布时间倒序排列" },
+  "3.7.2": { "status": "pass", "bugDesc": "点击分类标签可按分类筛选，结果正确" },
+  "3.7.3": { "status": "pass", "bugDesc": "点击状态标签可按在售/已出筛选，结果正确" },
+  "3.7.4": { "status": "pass", "bugDesc": "关键词搜索可匹配标题和描述，大小写不敏感" },
+  "3.7.5": { "status": "skip", "bugDesc": "测试数据不足（仅2条闲置），无法验证分页加载功能，可后续补充数据后验证" },
+  "3.7.6": { "status": "pass", "bugDesc": "无匹配结果时显示空态页面，提示「暂无相关闲置」" }
+};
+// ===== 测试用例 + 检查点（37 个）=====
+const TEST_CASES = [
+  {
+    id: '3.1', title: '发布闲置', driver: 'weapp',
+    steps: [
+      '调试登录认证用户 A（如张三 b0000000-...001）',
+      '进入「邻里帮」→ 闲置 tab → 点「+ 发布闲置」→ market-create',
+      '选择分类（免费/家具/母婴/书籍/宠物/数码/其他）',
+      '填写标题、描述，选择交易方式（出售/免费/交换）和成色（全新/九成新/八成新/七成新/旧物）',
+      '可选上传图片、填价格、联系方式',
+      '点击发布',
+    ],
+    expected: '发布成功，toast 提示，返回列表可见该闲置，状态为「在售」(on_sale)',
+    checkpoints: [
+      { id: '3.1.1', desc: '表单渲染', expected: 'market-create 显示分类/标题/描述/图片/价格/交易方式/成色/联系方式字段' },
+      { id: '3.1.2', desc: '分类选择', expected: '7 个分类点选高亮（免费/家具/母婴/书籍/宠物/数码/其他）' },
+      { id: '3.1.3', desc: '交易方式与成色', expected: '出售/免费/交换 三选一；全新/九成新/八成新/七成新/旧物 五选一' },
+      { id: '3.1.4', desc: '必填校验', expected: '标题或描述为空 → 提交时提示「请填写标题」/「请填写描述」' },
+      { id: '3.1.5', desc: '图片上传', expected: '上传 1-2 张图 → 提交 → market-detail 显示图片轮播' },
+      { id: '3.1.6', desc: '提交成功跳转', expected: '提交 → toast「发布成功」→ navigateBack → 列表含该闲置，状态 on_sale' },
+    ],
+  },
+  {
+    id: '3.2', title: '买家意向', driver: 'weapp',
+    steps: [
+      '用户 A 发布一个闲置商品',
+      '用户 B 调试登录，进入该闲置详情',
+      'B 点击底部「我想要」按钮',
+      'A 进入该闲置详情，点击「标记已售」',
+    ],
+    expected: 'B 意向提交成功，toast 显示卖家联系方式；A 点标记已售时弹出意向列表含 B',
+    checkpoints: [
+      { id: '3.2.1', desc: '意向按钮可见', expected: 'B 进 A 的在售闲置 → 底部显示「我想要」按钮' },
+      { id: '3.2.2', desc: '提交意向', expected: '点「我想要」→ toast 显示卖家联系方式（contactText）' },
+      { id: '3.2.3', desc: '意向幂等', expected: '再次点「我想要」→ 不重复创建（后端 @@unique 幂等）' },
+      { id: '3.2.4', desc: '卖家查看意向列表', expected: 'A 进详情 → 点「标记已售」→ 弹 ActionSheet 含 B 昵称 + 「不指定买家」' },
+      { id: '3.2.5', desc: '不能对自己意向', expected: 'A 进自己闲置 → 点「我想要」→ 后端拒绝（不能对自己商品表达意向）' },
+    ],
+  },
+  {
+    id: '3.3', title: '选买家已售', driver: 'weapp',
+    steps: [
+      'A 在闲置详情点击「标记已售」',
+      'ActionSheet 中选择买家 B',
+      '查看闲置状态和买家信息',
+      '其他买家 C 再次进入该闲置详情',
+    ],
+    expected: '闲置状态变「已售」(sold)；详情显示买家 B；其他买家看到「已售出」不可再意向',
+    checkpoints: [
+      { id: '3.3.1', desc: '标记已售入口', expected: 'A 进在售闲置详情 → 显示「标记已售」按钮' },
+      { id: '3.3.2', desc: '选买家 ActionSheet', expected: '有意向时 → ActionSheet 列出意向用户 + 「不指定买家」选项' },
+      { id: '3.3.3', desc: '确认已售', expected: '选 B → 状态 sold → 底部变「已售出」灰色不可点击' },
+      { id: '3.3.4', desc: '买家信息展示', expected: '详情页显示买家 B 的头像/昵称信息' },
+      { id: '3.3.5', desc: '已售不可再操作', expected: '已售商品 → 「我想要」按钮消失；不可再次标记已售' },
+    ],
+  },
+  {
+    id: '3.4', title: '双方互评', driver: 'weapp',
+    steps: [
+      '完成一次闲置交易（A 卖给 B，标记已售）',
+      'A 在闲置详情对 B 评价：选星级 + 选标签 + 写文字',
+      'B 在闲置详情对 A 评价',
+    ],
+    expected: '双方评价提交成功，详情显示评价列表（含星级/标签/文字）',
+    checkpoints: [
+      { id: '3.4.1', desc: '评价入口', expected: '已售商品 → 买卖双方看到评价表单（1-5 星 + 标签 + 文字）' },
+      { id: '3.4.2', desc: '星级必填', expected: '未选星 → 提交提示「请先选择评分」' },
+      { id: '3.4.3', desc: '标签选择', expected: '5 个标签（沟通顺畅/描述相符/发货迅速/物超所值/态度友好）多选高亮' },
+      { id: '3.4.4', desc: '提交评价', expected: '选星+标签+文字 → 提交 → 评价列表更新，表单重置' },
+      { id: '3.4.5', desc: '防重复', expected: '已评价用户（@@unique 约束）→ 不再显示评价表单' },
+      { id: '3.4.6', desc: '评价卡片展示', expected: '评价列表显示 昵称/星级/标签/内容/日期' },
+    ],
+  },
+  {
+    id: '3.5', title: '卖家下架', driver: 'weapp',
+    steps: [
+      '用户 A 进入自己发布的在售闲置详情',
+      '点击「下架」按钮',
+      '确认弹窗',
+      '查看闲置列表和详情',
+    ],
+    expected: '闲置状态变「已下架」(closed)；默认列表不显示；详情仍可访问',
+    checkpoints: [
+      { id: '3.5.1', desc: '下架入口', expected: '卖家进在售闲置详情 → 显示「下架」按钮' },
+      { id: '3.5.2', desc: '确认弹窗', expected: '点下架 → 弹「确定要下架此闲置吗？」' },
+      { id: '3.5.3', desc: '下架成功', expected: '确认 → toast「已下架」→ 状态 closed' },
+      { id: '3.5.4', desc: '列表不可见', expected: 'closed 商品不在默认列表（全部/在售/已出）显示' },
+      { id: '3.5.5', desc: '已售不可下架', expected: '已售商品 → 下架被拒（后端抛「商品已售出，无法下架」）' },
+    ],
+  },
+  {
+    id: '3.6', title: '编辑', driver: 'weapp',
+    steps: [
+      '用户 A 进入自己发布的在售闲置详情',
+      '点击「编辑」→ market-edit',
+      '修改价格和描述，保存',
+      '尝试编辑已售/已下架商品',
+    ],
+    expected: '编辑保存成功，详情显示新内容；已售/已下架不可编辑',
+    checkpoints: [
+      { id: '3.6.1', desc: '编辑入口', expected: '卖家进在售闲置 → 显示「编辑」按钮 → 跳 market-edit' },
+      { id: '3.6.2', desc: '预填字段', expected: 'market-edit 预填原字段值（分类/标题/描述/图片/价格/交易方式/成色/联系方式）' },
+      { id: '3.6.3', desc: '保存成功', expected: '改价格/描述 → 保存 → 返回详情 → 内容已更新' },
+      { id: '3.6.4', desc: '已售/已下架不可编辑', expected: 'sold/closed 商品 → 编辑被拒（后端抛「已售或已下架商品不可编辑」）' },
+    ],
+  },
+  {
+    id: '3.7', title: '列表筛选分页', driver: 'weapp',
+    steps: [
+      '进入闲置列表页（闲置市集）',
+      '切换分类筛选（如：母婴）',
+      '切换状态标签（全部/在售/已出）',
+      '输入关键词搜索',
+      '滚动到底触发分页加载',
+    ],
+    expected: '筛选/搜索结果正确；分页加载正常；空数据显示 EmptyState',
+    checkpoints: [
+      { id: '3.7.1', desc: '默认列表', expected: '进入闲置列表 → 显示全部 + 全部状态，按 createdAt desc 排序' },
+      { id: '3.7.2', desc: '分类筛选', expected: '点分类（如母婴）→ 列表只显示该分类商品' },
+      { id: '3.7.3', desc: '状态筛选', expected: '点「在售」/「已出」→ 列表按状态筛选' },
+      { id: '3.7.4', desc: '关键词搜索', expected: '输入关键词 → 搜索 title 和 description（case-insensitive）' },
+      { id: '3.7.5', desc: '分页加载', expected: '滚动到底 → onScrollToLower 触发 loadMore → 加载下一页，无重复无遗漏' },
+      { id: '3.7.6', desc: '空态', expected: '无匹配商品 → EmptyState 📦「暂无相关闲置」' },
+    ],
+  },
+];
+
+// ===== 存储层（检查点级）=====
+function loadState() {
+  try {
+    const raw = localStorage.getItem(MODULE.storageKey);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === 'object') ? parsed : {};
+  } catch (e) {
+    console.warn('loadState failed:', e);
+    return {};
+  }
+}
+function saveState(state) {
+  try {
+    localStorage.setItem(MODULE.storageKey, JSON.stringify(state));
+  } catch (e) {
+    alert('保存失败，浏览器存储空间不足');
+  }
+}
+function getCpState(cpId) {
+  const state = loadState();
+  if (state[cpId]) return state[cpId];
+  return ROUND2_DEFAULTS[cpId] || { status: 'pending', bugDesc: '', updatedAt: null };
+}
+function setCpState(cpId, data) {
+  const state = loadState();
+  state[cpId] = { ...state[cpId], ...data, updatedAt: new Date().toISOString() };
+  saveState(state);
+}
+function clearCpState(cpId) {
+  const state = loadState();
+  delete state[cpId];
+  saveState(state);
+}
+
+// ===== 渲染层 =====
+const STATUS = {
+  pending: { icon: '⏳', label: '待测' },
+  pass:    { icon: '✅', label: '通过' },
+  fail:    { icon: '❌', label: 'Bug' },
+  skip:    { icon: '⏸', label: '跳过' },
+};
+const R1_BADGE = {
+  pass: 'round-badge--pass', fail: 'round-badge--fail',
+  skip: 'round-badge--skip', pending: 'round-badge--pending',
+};
+
+function caseStats(tc) {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  tc.checkpoints.forEach(cp => {
+    const st = getCpState(cp.id).status;
+    s[st] = (s[st] || 0) + 1;
+  });
+  return s;
+}
+
+function renderCheckpoint(cp) {
+  const st = getCpState(cp.id);
+  const failClass = st.status === 'fail' ? 'is-fail' : '';
+  const showBug = st.status === 'fail' || st.status === 'skip';
+  const bugHidden = showBug ? '' : 'hidden';
+  const bugPh = st.status === 'skip' ? '跳过原因 / 备注...' : 'Bug 描述：复现步骤、实际结果、严重程度...';
+  return `
+    <div class="cp-row ${failClass}" data-cp-id="${cp.id}">
+      <div class="cp-top">
+        <span class="cp-id">${cp.id}</span>
+        <div class="cp-main">
+          <div class="cp-desc">${cp.desc}</div>
+          <div class="cp-expected"><strong>预期:</strong> ${cp.expected}</div>
+        </div>
+        <div class="cp-actions">
+          <button class="cp-btn pass ${st.status === 'pass' ? 'active' : ''}" onclick="setCp('${cp.id}','pass')">✅</button>
+          <button class="cp-btn fail ${st.status === 'fail' ? 'active' : ''}" onclick="setCp('${cp.id}','fail')">❌</button>
+          <button class="cp-btn skip ${st.status === 'skip' ? 'active' : ''}" onclick="setCp('${cp.id}','skip')">⏸</button>
+          <button class="cp-btn reset" onclick="resetCp('${cp.id}')">↺</button>
+        </div>
+      </div>
+      <textarea class="cp-bug ${bugHidden}" placeholder="${bugPh}" onblur="saveBug('${cp.id}', this.value)">${st.bugDesc || ''}</textarea>
+    </div>
+  `;
+}
+
+function renderCase(tc) {
+  const r1 = ROUND1[tc.id] || { status: 'pending', bugDesc: '' };
+  const r1cfg = STATUS[r1.status] || STATUS.pending;
+  const fixNote = FIX_NOTES[tc.id];
+  const stats = caseStats(tc);
+
+  const stepsHtml = tc.steps.map(s => `<li>${s}</li>`).join('');
+  const cpsHtml = tc.checkpoints.map(renderCheckpoint).join('');
+
+  return `
+    <div class="case-card" data-case-id="${tc.id}">
+      <div class="case-header has-body" onclick="toggleCase(this)">
+        <span class="case-id">${tc.id}</span>
+        <span class="case-title">${tc.title}</span>
+        <span class="driver-badge ${tc.driver}">${tc.driver === 'weapp' ? '小程序' : tc.driver === 'playwright' ? 'Playwright' : '手动'}</span>
+        <span class="case-stats">
+          <span class="case-stat pass">✅${stats.pass}</span>
+          <span class="case-stat fail">❌${stats.fail}</span>
+          <span class="case-stat skip">⏸${stats.skip}</span>
+          <span class="case-stat pending">⏳${stats.pending}</span>
+        </span>
+        <span class="case-toggle">▼</span>
+      </div>
+      <div class="case-body">
+        <div class="case-meta">
+          <div class="meta-row"><span class="meta-label">操作步骤:</span></div>
+          <ol class="meta-steps">${stepsHtml}</ol>
+          <div class="meta-row"><span class="meta-label">预期:</span><span class="meta-expected">${tc.expected}</span></div>
+          <div class="meta-row">
+            <span class="meta-label">一轮:</span>${r1cfg.icon} ${r1cfg.label}
+            <span class="round-badge ${R1_BADGE[r1.status]}">${r1.bugDesc || ''}</span>
+          </div>
+          ${fixNote ? `<div class="meta-row fix-note">🔧 修复: ${fixNote}</div>` : ''}
+        </div>
+        <div class="checkpoints">${cpsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAll() {
+  document.getElementById('cases-container').innerHTML = TEST_CASES.map(renderCase).join('');
+  updateStats();
+}
+
+function updateStats() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => {
+    const cs = caseStats(tc);
+    Object.keys(s).forEach(k => { s[k] += cs[k]; });
+  });
+  const total = TEST_CASES.reduce((n, tc) => n + tc.checkpoints.length, 0);
+  const done = s.pass + s.fail + s.skip;
+  const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('stat-pass').textContent = s.pass;
+  document.getElementById('stat-fail').textContent = s.fail;
+  document.getElementById('stat-skip').textContent = s.skip;
+  document.getElementById('stat-pending').textContent = s.pending;
+  document.getElementById('stat-rate').textContent = rate + '%';
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = rate + '%';
+  fill.textContent = rate + '%';
+  fill.style.background = rate === 100 ? 'var(--success)' : 'var(--primary)';
+
+  TEST_CASES.forEach(tc => {
+    const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`);
+    if (!card) return;
+    const stats = caseStats(tc);
+    const el = card.querySelector('.case-stats');
+    if (el) {
+      el.innerHTML = `
+        <span class="case-stat pass">✅${stats.pass}</span>
+        <span class="case-stat fail">❌${stats.fail}</span>
+        <span class="case-stat skip">⏸${stats.skip}</span>
+        <span class="case-stat pending">⏳${stats.pending}</span>
+      `;
+    }
+  });
+}
+
+// ===== 交互层 =====
+function setCp(cpId, status) {
+  setCpState(cpId, { status });
+  rerenderCaseByCp(cpId);
+  updateStats();
+}
+function saveBug(cpId, desc) {
+  const cur = getCpState(cpId);
+  if (cur.bugDesc !== desc) setCpState(cpId, { bugDesc: desc });
+}
+function resetCp(cpId) {
+  clearCpState(cpId);
+  rerenderCaseByCp(cpId);
+  updateStats();
+}
+function rerenderCaseByCp(cpId) {
+  const tc = TEST_CASES.find(t => t.checkpoints.some(c => c.id === cpId));
+  if (!tc) return;
+  const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`);
+  if (!card) return;
+  const cpsContainer = card.querySelector('.checkpoints');
+  if (cpsContainer) cpsContainer.innerHTML = tc.checkpoints.map(renderCheckpoint).join('');
+}
+function toggleCase(headerEl) {
+  const body = headerEl.nextElementSibling;
+  headerEl.classList.toggle('collapsed');
+  body.classList.toggle('collapsed');
+}
+
+// ===== 导出层 =====
+function exportModule() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => {
+    const cs = caseStats(tc);
+    Object.keys(s).forEach(k => { s[k] += cs[k]; });
+  });
+  const total = s.pass + s.fail + s.skip + s.pending;
+
+  let out = `# ${MODULE.icon} ${MODULE.label} — Bug 清单\n\n`;
+  out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
+  out += `检查点统计: ✅ ${s.pass} / ❌ ${s.fail} / ⏸ ${s.skip} / ⏳ ${s.pending} （共 ${total}）\n`;
+  out += `\n${'='.repeat(60)}\n\n`;
+
+  const failedCps = [];
+  TEST_CASES.forEach(tc => {
+    tc.checkpoints.forEach(cp => {
+      if (getCpState(cp.id).status === 'fail') failedCps.push({ tc, cp });
+    });
+  });
+
+  if (failedCps.length === 0) {
+    out += `🎉 本模块暂无 Bug（无检查点标记为 ❌）\n\n`;
+    const r1Open = TEST_CASES.filter(t => ROUND1[t.id]?.status === 'fail');
+    if (r1Open.length > 0) {
+      out += `⚠️ 一轮遗留（case 级，待二轮复测）:\n`;
+      r1Open.forEach(t => {
+        out += `  - [${t.id}] ${t.title}: ${ROUND1[t.id].bugDesc}\n`;
+        if (FIX_NOTES[t.id]) out += `      ${FIX_NOTES[t.id]}\n`;
+      });
+    }
+  } else {
+    out += `## Bug 清单（检查点级，共 ${failedCps.length} 条）\n\n`;
+    failedCps.forEach((item, i) => {
+      const { tc, cp } = item;
+      const st = getCpState(cp.id);
+      out += `### Bug ${i + 1}: [${cp.id}] ${cp.desc}\n`;
+      out += `所属用例: [${tc.id}] ${tc.title} (${tc.driver})\n`;
+      out += `预期: ${cp.expected}\n`;
+      out += `状态: ❌ Bug\n`;
+      if (st.bugDesc) out += `Bug 描述: ${st.bugDesc}\n`;
+      out += `更新时间: ${st.updatedAt || '-'}\n\n`;
+    });
+  }
+
+  showExport(out);
+}
+
+function resetAll() {
+  if (!confirm('确定清空本模块用户标记的检查点记录吗？所有标记重置为待测。')) return;
+  localStorage.removeItem(MODULE.storageKey);
+  renderAll();
+  showExport('✅ 已清空用户标记的检查点记录，全部重置为待测。');
+}
+
+function showExport(text) {
+  const pre = document.getElementById('export-output');
+  pre.textContent = text;
+  pre.classList.add('visible');
+  document.getElementById('export-toolbar').style.display = 'flex';
+  document.getElementById('copy-hint').style.display = 'block';
+  pre.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyToClipboard() {
+  const text = document.getElementById('export-output').textContent;
+  if (!text) return;
+  const btn = document.querySelector('.btn-copy');
+  const orig = btn.textContent;
+  const done = () => { btn.textContent = '✅ 已复制'; setTimeout(() => { btn.textContent = orig; }, 2000); };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+function fallbackCopy(text, done) {
+  const pre = document.getElementById('export-output');
+  const range = document.createRange();
+  range.selectNodeContents(pre);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败，请手动全选复制'); }
+  sel.removeAllRanges();
+}
+
+// ===== 初始化 =====
+document.addEventListener('DOMContentLoaded', renderAll);
+</script>
+</body>
+</html>

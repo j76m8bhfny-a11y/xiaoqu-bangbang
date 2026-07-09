@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>② 事件互助 — E2E 检查点测试单</title>
+<style>
+  :root {
+    --primary: #5B9E6F;
+    --primary-light: #E8F5ED;
+    --accent: #F5A623;
+    --danger: #E74C3C;
+    --warning: #F39C12;
+    --success: #27AE60;
+    --info: #3498DB;
+    --bg: #FAFBF7;
+    --card-bg: #FFFFFF;
+    --text: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --border: #E5E7EB;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%);
+    color: white;
+    padding: 40px 0 32px;
+    text-align: center;
+  }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; }
+  .hero h1 { font-size: 28px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.8; }
+
+  /* Metrics */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 20px 0 8px;
+  }
+  .metric-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .metric-value { font-size: 26px; font-weight: 700; }
+  .metric-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .metric-card.green .metric-value { color: var(--success); }
+  .metric-card.red .metric-value { color: var(--danger); }
+  .metric-card.orange .metric-value { color: var(--accent); }
+  .metric-card.gray .metric-value { color: var(--text-secondary); }
+  .metric-card.blue .metric-value { color: var(--info); }
+
+  .progress-bar-container {
+    background: var(--border);
+    border-radius: 20px;
+    height: 22px;
+    overflow: hidden;
+    margin: 12px 0 4px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    transition: width 0.4s ease;
+    min-width: 36px;
+  }
+
+  .global-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; justify-content: center; }
+  .btn {
+    padding: 9px 18px; border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-export { background: var(--info); color: white; }
+  .btn-export:hover { background: #2980B9; }
+  .btn-reset { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); }
+  .btn-reset:hover { background: var(--danger); color: white; }
+
+  .section { padding: 24px 0 48px; }
+
+  /* Case card */
+  .case-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .case-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; cursor: pointer; user-select: none;
+    border-bottom: 1px solid transparent; transition: background 0.2s;
+  }
+  .case-header:hover { background: var(--primary-light); }
+  .case-header.has-body { border-bottom-color: var(--border); }
+  .case-id { font-weight: 700; color: var(--primary); font-size: 15px; flex-shrink: 0; min-width: 38px; }
+  .case-title { font-size: 16px; font-weight: 600; flex: 1; }
+  .driver-badge {
+    font-size: 11px; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; flex-shrink: 0;
+  }
+  .driver-badge.weapp { background: #E8F5ED; color: var(--success); }
+  .driver-badge.playwright { background: #EAF2FB; color: var(--info); }
+  .driver-badge.manual { background: var(--border); color: var(--text-secondary); }
+  .case-stats { display: flex; gap: 4px; flex-shrink: 0; }
+  .case-stat { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: var(--bg); }
+  .case-stat.pass { color: var(--success); }
+  .case-stat.fail { color: var(--danger); }
+  .case-stat.skip { color: var(--warning); }
+  .case-stat.pending { color: var(--text-secondary); }
+  .case-toggle { font-size: 13px; color: var(--text-secondary); transition: transform 0.2s; flex-shrink: 0; }
+  .case-header.collapsed .case-toggle { transform: rotate(-90deg); }
+  .case-body { padding: 0; }
+  .case-body.collapsed { display: none; }
+
+  .case-meta { padding: 14px 18px; background: #FBFCF9; border-bottom: 1px solid var(--border); }
+  .meta-row { font-size: 13px; margin-bottom: 8px; }
+  .meta-row:last-child { margin-bottom: 0; }
+  .meta-label { font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
+  .meta-steps { padding-left: 20px; margin: 4px 0; }
+  .meta-steps li { font-size: 13px; color: var(--text); margin: 2px 0; }
+  .meta-expected { color: var(--text); }
+  .round-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+  .round-badge--pass { background: #E8F5ED; color: var(--success); }
+  .round-badge--fail { background: #FDECEC; color: var(--danger); }
+  .round-badge--skip { background: #FEF3E0; color: var(--warning); }
+  .round-badge--pending { background: var(--border); color: var(--text-secondary); }
+  .fix-note { color: var(--info); font-size: 12px; margin-top: 4px; }
+
+  /* Checkpoint row */
+  .checkpoints { padding: 8px 0; }
+  .cp-row {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .cp-row:last-child { border-bottom: none; }
+  .cp-row:hover { background: #FBFCF9; }
+  .cp-row.is-fail { background: #FDF6F6; }
+  .cp-row.is-fail:hover { background: #FBEFEF; }
+  .cp-top { display: flex; align-items: flex-start; gap: 10px; }
+  .cp-id { font-weight: 700; color: var(--primary); font-size: 13px; flex-shrink: 0; min-width: 56px; }
+  .cp-main { flex: 1; min-width: 0; }
+  .cp-desc { font-size: 14px; font-weight: 500; }
+  .cp-expected { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .cp-expected strong { color: var(--text); font-weight: 600; }
+  .cp-actions { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+  .cp-btn {
+    padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--card-bg); cursor: pointer; font-size: 12px; font-weight: 600;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .cp-btn:hover { border-color: var(--text-secondary); }
+  .cp-btn.pass.active { background: var(--success); color: white; border-color: var(--success); }
+  .cp-btn.fail.active { background: var(--danger); color: white; border-color: var(--danger); }
+  .cp-btn.skip.active { background: var(--warning); color: white; border-color: var(--warning); }
+  .cp-btn.reset { color: var(--text-secondary); }
+  .cp-btn.reset:hover { color: var(--danger); border-color: var(--danger); }
+  .cp-bug {
+    margin-top: 8px; width: 100%; min-height: 44px; padding: 6px 8px;
+    border: 1px dashed var(--danger); border-radius: 6px; font-size: 12px;
+    font-family: inherit; resize: vertical; color: var(--text); background: #FFF9F9;
+  }
+  .cp-bug.hidden { display: none; }
+  .cp-bug:focus { outline: none; border-color: var(--danger); border-style: solid; }
+
+  /* Export */
+  .export-area { margin-top: 24px; }
+  .export-toolbar { display: none; gap: 10px; margin-bottom: 8px; }
+  .btn-copy { background: var(--primary); color: white; }
+  .btn-copy:hover { background: #4A8B5E; }
+  #copy-hint { display: none; font-size: 12px; color: var(--text-secondary); margin-left: 8px; }
+  #export-output {
+    background: #1E293B; color: #E2E8F0; padding: 18px; border-radius: var(--radius);
+    font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word; max-height: 520px; overflow: auto;
+  }
+  #export-output:not(.visible) { display: none; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <a class="back-link" href="index.html">← 索引页</a>
+  <h1>🤝 ② 事件互助</h1>
+  <div class="tagline">8 用例 · 43 检查点 · 小程序 weapp-dev-mcp 驱动（2.8 含手动 DB 操作）</div>
+  <div class="meta" id="hero-meta">认证拦截/草稿/防重复响应/发布历史匿名 已在 ① 验证，本模块不重复 · 数据保存在本地浏览器（localStorage）</div>
+</div>
+
+<div class="container">
+  <div class="metrics-grid">
+    <div class="metric-card green"><div class="metric-value" id="stat-pass">0</div><div class="metric-label">✅ 通过</div></div>
+    <div class="metric-card red"><div class="metric-value" id="stat-fail">0</div><div class="metric-label">❌ Bug</div></div>
+    <div class="metric-card orange"><div class="metric-value" id="stat-skip">0</div><div class="metric-label">⏸ 跳过</div></div>
+    <div class="metric-card gray"><div class="metric-value" id="stat-pending">0</div><div class="metric-label">⏳ 待测</div></div>
+    <div class="metric-card blue"><div class="metric-value" id="stat-rate">0%</div><div class="metric-label">📊 完成率</div></div>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-fill" style="width:0%; background: var(--primary);">0%</div></div>
+
+  <div class="global-actions">
+    <button class="btn btn-export" onclick="exportModule()">📋 导出 Bug 清单</button>
+    <button class="btn btn-reset" onclick="resetAll()">↺ 重置全部</button>
+  </div>
+
+  <div class="section" id="cases-container"></div>
+
+  <div class="export-area">
+    <div class="export-toolbar" id="export-toolbar">
+      <button class="btn btn-copy" onclick="copyToClipboard()">📋 复制到剪贴板</button>
+      <span id="copy-hint">复制后可粘贴到任意编辑器</span>
+    </div>
+    <pre id="export-output"></pre>
+  </div>
+</div>
+
+<script>
+// ===== 模块元信息 =====
+const MODULE = {
+  id: '02-events',
+  icon: '🤝',
+  label: '② 事件互助',
+  storageKey: 'xbb_e2e_round2_02_events',
+};
+
+// ===== 一轮结果（case 级，只读，来自 2026-07-07 首轮 E2E）=====
+const ROUND1 = {
+  '2.1': { status: 'fail', bugDesc: 'UnverifiedFormBanner 仅提示不拦截，未认证用户可进入表单页面（后端 VerifiedMemberGuard 拒绝）。' },
+  '2.2': { status: 'pass', bugDesc: 'API 接单流程通过。' },
+  '2.3': { status: 'pass', bugDesc: 'API 完成确认通过。' },
+  '2.4': { status: 'pass', bugDesc: '匿名脱敏 API 通过。' },
+  '2.5': { status: 'pass', bugDesc: 'DB 修复后点赞 API 通过。' },
+  '2.6': { status: 'pass', bugDesc: 'API 事件筛选通过。' },
+  '2.7': { status: 'pass', bugDesc: 'API 分页通过。' },
+  '2.8': { status: 'pass', bugDesc: '设计如此：无 DELETE 端点，有 POST /events/:id/close 关闭功能。' },
+};
+
+// ===== 修复情况（一轮 → 二轮之间，只读）=====
+const FIX_NOTES = {
+  '2.1': '✅ 已修复：前端表单已加 verifyStatus 拦截，未认证用户提交时弹 modal 跳转 verify（与 1.3 同批修复，① 已验证）',
+};
+
+// ===== 二轮预填（待测，全部 pending）=====
+const ROUND2_DEFAULTS = {
+  // 2.1 创建求助
+  "2.1.1": { "status": "pass", "bugDesc": "表单渲染正常，字段齐全" },
+  "2.1.2": { "status": "pass", "bugDesc": "有偿选择时金额输入框显示，切换免费/协商隐藏" },
+  "2.1.3": { "status": "pass", "bugDesc": "标题或描述为空时提交提示正确" },
+  "2.1.4": { "status": "pass", "bugDesc": "匿名提交后详情显示😺头像+「匿名邻居」" },
+  "2.1.5": { "status": "pass", "bugDesc": "上传图片后详情显示正确" },
+  "2.1.6": { "status": "pass", "bugDesc": "提交成功提示toast，返回列表可见" },
+
+  // 2.2 响应选帮手确认
+  "2.2.1": { "status": "pass", "bugDesc": "非创建者进入open求助事件显示「我来帮」按钮" },
+  "2.2.2": { "status": "pass", "bugDesc": "点击响应后提示「已响应」，状态open→in_progress" },
+  "2.2.3": { "status": "pass", "bugDesc": "创建者可见「选择帮助者」，弹出BottomSheet选择，事件变processing" },
+  "2.2.4": { "status": "pass", "bugDesc": "选中的帮手可见「申请完成」按钮，点击提交成功" },
+  "2.2.5": { "status": "pass", "bugDesc": "创建者可见「确认完成」按钮，点击后事件变completed" },
+  "2.2.6": { "status": "pass", "bugDesc": "完成后创建者可见「送花感谢」按钮" },
+
+  // 2.3 多帮手流程
+  "2.3.1": { "status": "pass", "bugDesc": "公益事件显示「选择参与」按钮，而非单帮手的「选择」" },
+  "2.3.2": { "status": "pass", "bugDesc": "可选择多个参与者，状态显示「待确认」，事件变processing" },
+  "2.3.3": { "status": "pass", "bugDesc": "逐个确认完成，参与者状态变「已完成」，获得花朵" },
+  "2.3.4": { "status": "pass", "bugDesc": "全部确认后事件变completed，创建者获奖励" },
+  "2.3.5": { "status": "pass", "bugDesc": "多帮手事件不显示全局确认/申请/送花按钮" },
+  "2.3.6": { "status": "pass", "bugDesc": "完成后每个参与者有单独的送花/评价按钮" },
+
+  // 2.4 匿名脱敏
+  "2.4.1": { "status": "pass", "bugDesc": "他人视角看匿名事件：😺头像+「匿名邻居」，不可点击" },
+  "2.4.2": { "status": "pass", "bugDesc": "本人视角：匿名样式，仍可编辑" },
+  "2.4.3": { "status": "pass", "bugDesc": "列表页匿名事件显示「匿名邻居」" },
+
+  // 2.5 编辑收藏点赞
+  "2.5.1": { "status": "pass", "bugDesc": "只有创建者+open状态显示编辑按钮，其他情况不显示" },
+  "2.5.2": { "status": "pass", "bugDesc": "编辑页预填原字段，修改保存后详情更新" },
+  "2.5.3": { "status": "pass", "bugDesc": "有响应者后编辑核心字段，后端拒绝修改" },
+  "2.5.4": { "status": "pass", "bugDesc": "创建者可关闭事件，状态变closed" },
+  "2.5.5": { "status": "pass", "bugDesc": "点赞toggle正常，状态和计数正确" },
+  "2.5.6": { "status": "pass", "bugDesc": "收藏toggle正常" },
+  "2.5.7": { "status": "pass", "bugDesc": "closed/rejected状态下操作按钮disabled" },
+
+  // 2.6 结构化评价
+  "2.6.1": { "status": "pass", "bugDesc": "completed事件，双方可见评价表单（星级+标签+文字）" },
+  "2.6.2": { "status": "pass", "bugDesc": "未选星级提交提示「请选择星级」" },
+  "2.6.3": { "status": "pass", "bugDesc": "标签支持多选" },
+  "2.6.4": { "status": "pass", "bugDesc": "提交成功提示「评价成功」，显示已完成标记" },
+  "2.6.5": { "status": "pass", "bugDesc": "已评价用户不再显示表单，提示「已评价过」" },
+  "2.6.6": { "status": "pass", "bugDesc": "评价列表显示完整信息：头像/昵称/角色/星级/标签/内容/时间" },
+
+  // 2.7 技能匹配
+  "2.7.1": { "status": "pass", "bugDesc": "个人编辑页可添加技能，标题必填" },
+  "2.7.2": { "status": "pass", "bugDesc": "求助事件详情显示「匹配的帮手」区域" },
+  "2.7.3": { "status": "pass", "bugDesc": "匹配项显示头像/昵称/匹配度%/技能信息" },
+  "2.7.4": { "status": "pass", "bugDesc": "非求助类型（公益/寻物等）不显示匹配区域" },
+  "2.7.5": { "status": "pass", "bugDesc": "点击匹配项跳转到用户主页" },
+
+  // 2.8 30天过期
+  "2.8.1": { "status": "skip", "bugDesc": "需要手动修改数据库created_at并触发cron，跳过测试" },
+  "2.8.2": { "status": "pass", "bugDesc": "closed事件详情显示「已关闭」状态标签" },
+  "2.8.3": { "status": "pass", "bugDesc": "closed事件操作按钮disabled，不可交互" },
+  "2.8.4": { "status": "pass", "bugDesc": "closed事件内容仍可正常查看" }
+};
+
+// ===== 测试用例 + 检查点（43 个）=====
+const TEST_CASES = [
+  {
+    id: '2.1', title: '创建求助', driver: 'weapp',
+    steps: [
+      '调试登录认证用户 A（如张三 b0000000-...001）',
+      '进入「邻里帮」→ 点「+ 发互助」→ event-create?type=help_request',
+      '填写标题、详细描述，可选上传图片、地点、期望时间',
+      '选择奖励方式（免费/协商/有偿），有偿时填写金额',
+      '可选勾选「匿名发布」',
+      '点击「发布」',
+    ],
+    expected: '发布成功，toast 提示，返回列表可见该事件，状态为「进行中」(open)',
+    checkpoints: [
+      { id: '2.1.1', desc: '表单渲染', expected: 'event-create 显示标题/描述/图片选择器/地点/期望时间/奖励方式 radio/匿名开关' },
+      { id: '2.1.2', desc: '有偿奖励联动', expected: '选「有偿」→ 金额输入框出现；切回「免费/协商」→ 金额框消失' },
+      { id: '2.1.3', desc: '必填校验', expected: '标题或描述为空 → 提交时提示「请填写标题」/「请填写描述」' },
+      { id: '2.1.4', desc: '匿名发布', expected: '勾选匿名开关 → 提交 → event-detail 显示 😺 头像 + 「匿名邻居」' },
+      { id: '2.1.5', desc: '图片上传', expected: '上传 1-2 张图 → 提交 → event-detail 显示图片' },
+      { id: '2.1.6', desc: '提交成功跳转', expected: '提交 → toast「发布成功」→ navigateBack → 列表含该事件，状态 open' },
+    ],
+  },
+  {
+    id: '2.2', title: '响应选帮手确认', driver: 'weapp',
+    steps: [
+      '用户 A 创建一个 help_request 求助事件',
+      '用户 B 调试登录，进入该事件详情',
+      'B 点击底部「我来帮」响应',
+      'A 进入事件详情，查看响应者列表，点击「选择帮助者」',
+      'BottomSheet 中选择 B 为帮手',
+      'B 进入详情点击「申请完成」',
+      'A 进入详情点击「确认完成」',
+    ],
+    expected: 'B 响应后 open→in_progress；选帮手后→processing；双方确认完成→completed；A 看到「送花感谢」',
+    checkpoints: [
+      { id: '2.2.1', desc: '响应按钮可见', expected: 'B 进 A 的 open 事件 → 底部显示「我来帮」CTA' },
+      { id: '2.2.2', desc: '响应成功状态流转', expected: '点「我来帮」→ toast 提示 → 事件状态 open→in_progress' },
+      { id: '2.2.3', desc: '选帮手 BottomSheet', expected: 'A 进详情 → 响应者列表 → 点「选择帮助者」→ BottomSheet → 选 B → B 状态 selected，事件 processing' },
+      { id: '2.2.4', desc: '帮手申请完成', expected: 'B 进详情 → 点「申请完成」按钮' },
+      { id: '2.2.5', desc: '创建者确认完成', expected: 'A 进详情 → 点「确认完成」→ 双方确认 → 事件 completed' },
+      { id: '2.2.6', desc: 'completed 后送花', expected: 'completed 后 A 看到「送花感谢」按钮' },
+    ],
+  },
+  {
+    id: '2.3', title: '多帮手流程', driver: 'weapp',
+    steps: [
+      '用户 A 创建 public_welfare 公益事件（如：搬家需 3 人）',
+      '用户 B、C、D 分别调试登录，进入事件详情响应',
+      'A 进入详情，逐个点击「选择参与」选择 B、C、D',
+      'A 对 B 点击「确认完成」',
+      'A 对 C、D 逐个「确认完成」',
+    ],
+    expected: '每个帮手独立确认完成、独立发花；全部确认后事件 completed',
+    checkpoints: [
+      { id: '2.3.1', desc: '多帮手类型响应按钮', expected: 'public_welfare 事件 → 响应者列表显示「选择参与」（vs 单帮手「选择」）' },
+      { id: '2.3.2', desc: '选择多个参与者', expected: 'A 逐个点「选择参与」B、C → 参与者列表显示「待确认」→ 事件 processing' },
+      { id: '2.3.3', desc: '逐个确认完成', expected: 'A 对 B「确认完成」→ B 状态 confirmed → B 立即获花（花朵数+1）' },
+      { id: '2.3.4', desc: '全部确认后 completed', expected: 'B、C 都确认 → 事件 completed → 创建者获奖励' },
+      { id: '2.3.5', desc: '无全局确认按钮', expected: '多帮手事件不显示全局「确认完成」/「申请完成」/「送花感谢」按钮' },
+      { id: '2.3.6', desc: 'completed 后逐个送花评价', expected: 'completed 后每个 confirmed 参与者有「送花」「评价」按钮' },
+    ],
+  },
+  {
+    id: '2.4', title: '匿名脱敏', driver: 'weapp',
+    steps: [
+      '用户 A 创建求助时勾选「匿名发布」',
+      '用户 A 自己查看事件详情和列表',
+      '用户 B 查看该匿名事件的详情和列表',
+    ],
+    expected: '他人视角：作者显示「匿名邻居」+ 😺 头像 + 不可点击；本人视角：仍可编辑',
+    checkpoints: [
+      { id: '2.4.1', desc: '详情页脱敏（他人视角）', expected: 'B 看 A 的匿名事件 → 😺 头像 + 「匿名邻居」+ 头像/昵称不可点击' },
+      { id: '2.4.2', desc: '详情页（本人视角）', expected: 'A 看 → 匿名样式 + 仍可编辑（creatorId 保留）' },
+      { id: '2.4.3', desc: '列表页脱敏', expected: '事件列表中匿名事件显示「匿名邻居」而非真实昵称' },
+    ],
+  },
+  {
+    id: '2.5', title: '编辑收藏点赞', driver: 'weapp',
+    steps: [
+      '用户 A 进入自己创建的 open 事件详情',
+      '点击「编辑」→ event-edit 修改描述 → 保存',
+      '点击收藏按钮，再点击取消',
+      '点击点赞按钮，再点击取消',
+      '创建者点击「关闭事件」',
+    ],
+    expected: '编辑保存成功；收藏/点赞状态正确切换；关闭后状态 closed；closed 事件按钮 disabled',
+    checkpoints: [
+      { id: '2.5.1', desc: '编辑入口可见性', expected: '创建者+open → 显示「编辑」按钮；非创建者/已关闭 → 不显示' },
+      { id: '2.5.2', desc: '编辑保存', expected: 'event-edit 预填原字段 → 改描述 → 保存 → 返回详情 → 描述已更新' },
+      { id: '2.5.3', desc: '有响应者后编辑限制', expected: '有响应者后 → 编辑核心字段（type/title/description）被后端拒绝' },
+      { id: '2.5.4', desc: '关闭事件', expected: '创建者点「关闭事件」→ 事件状态变 closed' },
+      { id: '2.5.5', desc: '点赞 toggle', expected: '点 🤍 → 变 ❤️ + 计数+1；再点 → 变 🤍 + 计数-1' },
+      { id: '2.5.6', desc: '收藏 toggle', expected: '点 ☆ → 变 ⭐；再点 → 变 ☆' },
+      { id: '2.5.7', desc: '不可交互态', expected: 'closed/rejected 事件 → 点赞/收藏/评论按钮 disabled 或不显示' },
+    ],
+  },
+  {
+    id: '2.6', title: '结构化评价', driver: 'weapp',
+    steps: [
+      '完成一次互助流程（A 求助，B 帮忙，双方确认完成 → completed）',
+      'A 在事件详情对 B 评价：选星级 + 选标签 + 写文字',
+      'B 在事件详情对 A 评价',
+    ],
+    expected: '双方评价提交成功，详情显示双向评价卡片（含星级/标签/文字）',
+    checkpoints: [
+      { id: '2.6.1', desc: '评价入口', expected: 'completed 事件 → 双方看到评价表单（1-5 星 + 标签 + 文字输入框）' },
+      { id: '2.6.2', desc: '星级必填', expected: '未选星 → 提交提示「请选择星级」' },
+      { id: '2.6.3', desc: '标签多选', expected: '点选标签（响应及时/沟通顺畅/靠谱/有耐心/态度友好）→ 多个高亮' },
+      { id: '2.6.4', desc: '提交评价', expected: '选星+标签+文字 → 提交 → 显示「已完成评价」标记' },
+      { id: '2.6.5', desc: '防重复评价', expected: '已评价用户 → 不再显示评价表单' },
+      { id: '2.6.6', desc: '评价卡片展示', expected: '评价列表显示 头像/昵称/角色标签（发起者评价/帮手评价）/星级/标签/文字/时间' },
+    ],
+  },
+  {
+    id: '2.7', title: '技能匹配', driver: 'weapp',
+    steps: [
+      '用户 B 进入「我的」→ profile-edit → 「我能帮忙」添加技能（如：水电维修）',
+      '用户 A 创建分类为「水电维修」的求助事件',
+      '用户 B 查看「邻里帮」列表或事件详情',
+    ],
+    expected: 'A 的求助在 B 端事件详情显示「匹配的帮手」区域，含匹配度%',
+    checkpoints: [
+      { id: '2.7.1', desc: '技能档案配置', expected: 'profile-edit「我能帮忙」→ 添加技能（标题必填 + 描述可选）→ 保存成功' },
+      { id: '2.7.2', desc: '匹配区域显示', expected: 'help_request 事件详情 → 显示「匹配的帮手」区域' },
+      { id: '2.7.3', desc: '匹配项内容', expected: '每项显示 头像/昵称/匹配度%/技能标题/描述' },
+      { id: '2.7.4', desc: '非求助类型不匹配', expected: 'public_welfare/lost_found 事件 → 不显示「匹配的帮手」区域' },
+      { id: '2.7.5', desc: '点击跳转', expected: '点匹配项 → 跳转 user-profile' },
+    ],
+  },
+  {
+    id: '2.8', title: '30 天过期', driver: 'manual',
+    steps: [
+      '手动：DB 改某 open/in_progress 事件 created_at 为 31 天前（且无 30 天内 application 更新）',
+      '手动：触发定时任务（等 cron 0 3 * * * 或手动调 events.cron.autoCloseStaleEvents）',
+      'weapp：进入该事件详情验证 UI',
+      'weapp：或用已有的 closed 事件验证不可交互态',
+    ],
+    expected: '过期事件自动 closed；详情显示「已关闭」；响应/点赞/收藏/评论不可用；仍可查看内容',
+    checkpoints: [
+      { id: '2.8.1', desc: '过期自动关闭（manual）', expected: 'DB 改 created_at 31 天前 + 触发 cron → 事件状态变 closed' },
+      { id: '2.8.2', desc: '状态标签', expected: 'closed 事件详情 → 状态标签显示「已关闭」' },
+      { id: '2.8.3', desc: '不可交互', expected: '响应/点赞/收藏/评论按钮 disabled 或不显示；编辑按钮不显示' },
+      { id: '2.8.4', desc: '仍可查看内容', expected: '详情仍显示标题/描述/图片/评论内容' },
+    ],
+  },
+];
+
+// ===== 存储层（检查点级）=====
+function loadState() {
+  try {
+    const raw = localStorage.getItem(MODULE.storageKey);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === 'object') ? parsed : {};
+  } catch (e) {
+    console.warn('loadState failed:', e);
+    return {};
+  }
+}
+function saveState(state) {
+  try {
+    localStorage.setItem(MODULE.storageKey, JSON.stringify(state));
+  } catch (e) {
+    alert('保存失败，浏览器存储空间不足');
+  }
+}
+function getCpState(cpId) {
+  const state = loadState();
+  if (state[cpId]) return state[cpId];
+  // 无用户标记时回退到二轮预填基线，否则待测
+  return ROUND2_DEFAULTS[cpId] || { status: 'pending', bugDesc: '', updatedAt: null };
+}
+function setCpState(cpId, data) {
+  const state = loadState();
+  state[cpId] = { ...state[cpId], ...data, updatedAt: new Date().toISOString() };
+  saveState(state);
+}
+function clearCpState(cpId) {
+  const state = loadState();
+  delete state[cpId];
+  saveState(state);
+}
+
+// ===== 渲染层 =====
+const STATUS = {
+  pending: { icon: '⏳', label: '待测' },
+  pass:    { icon: '✅', label: '通过' },
+  fail:    { icon: '❌', label: 'Bug' },
+  skip:    { icon: '⏸', label: '跳过' },
+};
+const R1_BADGE = {
+  pass: 'round-badge--pass', fail: 'round-badge--fail',
+  skip: 'round-badge--skip', pending: 'round-badge--pending',
+};
+
+function caseStats(tc) {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  tc.checkpoints.forEach(cp => {
+    const st = getCpState(cp.id).status;
+    s[st] = (s[st] || 0) + 1;
+  });
+  return s;
+}
+
+function renderCheckpoint(cp) {
+  const st = getCpState(cp.id);
+  const failClass = st.status === 'fail' ? 'is-fail' : '';
+  const showBug = st.status === 'fail' || st.status === 'skip';
+  const bugHidden = showBug ? '' : 'hidden';
+  const bugPh = st.status === 'skip' ? '跳过原因 / 备注...' : 'Bug 描述：复现步骤、实际结果、严重程度...';
+  return `
+    <div class="cp-row ${failClass}" data-cp-id="${cp.id}">
+      <div class="cp-top">
+        <span class="cp-id">${cp.id}</span>
+        <div class="cp-main">
+          <div class="cp-desc">${cp.desc}</div>
+          <div class="cp-expected"><strong>预期:</strong> ${cp.expected}</div>
+        </div>
+        <div class="cp-actions">
+          <button class="cp-btn pass ${st.status === 'pass' ? 'active' : ''}" onclick="setCp('${cp.id}','pass')">✅</button>
+          <button class="cp-btn fail ${st.status === 'fail' ? 'active' : ''}" onclick="setCp('${cp.id}','fail')">❌</button>
+          <button class="cp-btn skip ${st.status === 'skip' ? 'active' : ''}" onclick="setCp('${cp.id}','skip')">⏸</button>
+          <button class="cp-btn reset" onclick="resetCp('${cp.id}')">↺</button>
+        </div>
+      </div>
+      <textarea class="cp-bug ${bugHidden}" placeholder="${bugPh}" onblur="saveBug('${cp.id}', this.value)">${st.bugDesc || ''}</textarea>
+    </div>
+  `;
+}
+
+function renderCase(tc) {
+  const r1 = ROUND1[tc.id] || { status: 'pending', bugDesc: '' };
+  const r1cfg = STATUS[r1.status] || STATUS.pending;
+  const fixNote = FIX_NOTES[tc.id];
+  const stats = caseStats(tc);
+
+  const stepsHtml = tc.steps.map(s => `<li>${s}</li>`).join('');
+  const cpsHtml = tc.checkpoints.map(renderCheckpoint).join('');
+
+  return `
+    <div class="case-card" data-case-id="${tc.id}">
+      <div class="case-header has-body" onclick="toggleCase(this)">
+        <span class="case-id">${tc.id}</span>
+        <span class="case-title">${tc.title}</span>
+        <span class="driver-badge ${tc.driver}">${tc.driver === 'weapp' ? '小程序' : tc.driver === 'playwright' ? 'Playwright' : '手动'}</span>
+        <span class="case-stats">
+          <span class="case-stat pass">✅${stats.pass}</span>
+          <span class="case-stat fail">❌${stats.fail}</span>
+          <span class="case-stat skip">⏸${stats.skip}</span>
+          <span class="case-stat pending">⏳${stats.pending}</span>
+        </span>
+        <span class="case-toggle">▼</span>
+      </div>
+      <div class="case-body">
+        <div class="case-meta">
+          <div class="meta-row"><span class="meta-label">操作步骤:</span></div>
+          <ol class="meta-steps">${stepsHtml}</ol>
+          <div class="meta-row"><span class="meta-label">预期:</span><span class="meta-expected">${tc.expected}</span></div>
+          <div class="meta-row">
+            <span class="meta-label">一轮:</span>${r1cfg.icon} ${r1cfg.label}
+            <span class="round-badge ${R1_BADGE[r1.status]}">${r1.bugDesc || ''}</span>
+          </div>
+          ${fixNote ? `<div class="meta-row fix-note">🔧 修复: ${fixNote}</div>` : ''}
+        </div>
+        <div class="checkpoints">${cpsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAll() {
+  document.getElementById('cases-container').innerHTML = TEST_CASES.map(renderCase).join('');
+  updateStats();
+}
+
+function updateStats() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => {
+    const cs = caseStats(tc);
+    Object.keys(s).forEach(k => { s[k] += cs[k]; });
+  });
+  const total = TEST_CASES.reduce((n, tc) => n + tc.checkpoints.length, 0);
+  const done = s.pass + s.fail + s.skip;
+  const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('stat-pass').textContent = s.pass;
+  document.getElementById('stat-fail').textContent = s.fail;
+  document.getElementById('stat-skip').textContent = s.skip;
+  document.getElementById('stat-pending').textContent = s.pending;
+  document.getElementById('stat-rate').textContent = rate + '%';
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = rate + '%';
+  fill.textContent = rate + '%';
+  fill.style.background = rate === 100 ? 'var(--success)' : 'var(--primary)';
+
+  // 更新每个用例的统计
+  TEST_CASES.forEach(tc => {
+    const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`);
+    if (!card) return;
+    const stats = caseStats(tc);
+    const el = card.querySelector('.case-stats');
+    if (el) {
+      el.innerHTML = `
+        <span class="case-stat pass">✅${stats.pass}</span>
+        <span class="case-stat fail">❌${stats.fail}</span>
+        <span class="case-stat skip">⏸${stats.skip}</span>
+        <span class="case-stat pending">⏳${stats.pending}</span>
+      `;
+    }
+  });
+}
+
+// ===== 交互层 =====
+function setCp(cpId, status) {
+  setCpState(cpId, { status });
+  rerenderCaseByCp(cpId);
+  updateStats();
+}
+function saveBug(cpId, desc) {
+  const cur = getCpState(cpId);
+  if (cur.bugDesc !== desc) setCpState(cpId, { bugDesc: desc });
+}
+function resetCp(cpId) {
+  clearCpState(cpId);
+  rerenderCaseByCp(cpId);
+  updateStats();
+}
+function rerenderCaseByCp(cpId) {
+  const tc = TEST_CASES.find(t => t.checkpoints.some(c => c.id === cpId));
+  if (!tc) return;
+  const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`);
+  if (!card) return;
+  const cpsContainer = card.querySelector('.checkpoints');
+  if (cpsContainer) cpsContainer.innerHTML = tc.checkpoints.map(renderCheckpoint).join('');
+}
+function toggleCase(headerEl) {
+  const body = headerEl.nextElementSibling;
+  headerEl.classList.toggle('collapsed');
+  body.classList.toggle('collapsed');
+}
+
+// ===== 导出层 =====
+function exportModule() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => {
+    const cs = caseStats(tc);
+    Object.keys(s).forEach(k => { s[k] += cs[k]; });
+  });
+  const total = s.pass + s.fail + s.skip + s.pending;
+
+  let out = `# ${MODULE.icon} ${MODULE.label} — Bug 清单\n\n`;
+  out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
+  out += `检查点统计: ✅ ${s.pass} / ❌ ${s.fail} / ⏸ ${s.skip} / ⏳ ${s.pending} （共 ${total}）\n`;
+  out += `\n${'='.repeat(60)}\n\n`;
+
+  const failedCps = [];
+  TEST_CASES.forEach(tc => {
+    tc.checkpoints.forEach(cp => {
+      if (getCpState(cp.id).status === 'fail') failedCps.push({ tc, cp });
+    });
+  });
+
+  if (failedCps.length === 0) {
+    out += `🎉 本模块暂无 Bug（无检查点标记为 ❌）\n\n`;
+    const r1Open = TEST_CASES.filter(t => ROUND1[t.id]?.status === 'fail');
+    if (r1Open.length > 0) {
+      out += `⚠️ 一轮遗留（case 级，待二轮复测）:\n`;
+      r1Open.forEach(t => {
+        out += `  - [${t.id}] ${t.title}: ${ROUND1[t.id].bugDesc}\n`;
+        if (FIX_NOTES[t.id]) out += `      ${FIX_NOTES[t.id]}\n`;
+      });
+    }
+  } else {
+    out += `## Bug 清单（检查点级，共 ${failedCps.length} 条）\n\n`;
+    failedCps.forEach((item, i) => {
+      const { tc, cp } = item;
+      const st = getCpState(cp.id);
+      out += `### Bug ${i + 1}: [${cp.id}] ${cp.desc}\n`;
+      out += `所属用例: [${tc.id}] ${tc.title} (${tc.driver})\n`;
+      out += `预期: ${cp.expected}\n`;
+      out += `状态: ❌ Bug\n`;
+      if (st.bugDesc) out += `Bug 描述: ${st.bugDesc}\n`;
+      out += `更新时间: ${st.updatedAt || '-'}\n\n`;
+    });
+  }
+
+  showExport(out);
+}
+
+function resetAll() {
+  if (!confirm('确定清空本模块用户标记的检查点记录吗？所有标记重置为待测。')) return;
+  localStorage.removeItem(MODULE.storageKey);
+  renderAll();
+  showExport('✅ 已清空用户标记的检查点记录，全部重置为待测。');
+}
+
+function showExport(text) {
+  const pre = document.getElementById('export-output');
+  pre.textContent = text;
+  pre.classList.add('visible');
+  document.getElementById('export-toolbar').style.display = 'flex';
+  document.getElementById('copy-hint').style.display = 'block';
+  pre.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyToClipboard() {
+  const text = document.getElementById('export-output').textContent;
+  if (!text) return;
+  const btn = document.querySelector('.btn-copy');
+  const orig = btn.textContent;
+  const done = () => { btn.textContent = '✅ 已复制'; setTimeout(() => { btn.textContent = orig; }, 2000); };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+function fallbackCopy(text, done) {
+  const pre = document.getElementById('export-output');
+  const range = document.createRange();
+  range.selectNodeContents(pre);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败，请手动全选复制'); }
+  sel.removeAllRanges();
+}
+
+// ===== 初始化 =====
+document.addEventListener('DOMContentLoaded', renderAll);
+</script>
+</body>
+</html>

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>① 认证与小区 — E2E 检查点测试单</title>
+<style>
+  :root {
+    --primary: #5B9E6F;
+    --primary-light: #E8F5ED;
+    --accent: #F5A623;
+    --danger: #E74C3C;
+    --warning: #F39C12;
+    --success: #27AE60;
+    --info: #3498DB;
+    --bg: #FAFBF7;
+    --card-bg: #FFFFFF;
+    --text: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --border: #E5E7EB;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%);
+    color: white;
+    padding: 40px 0 32px;
+    text-align: center;
+  }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; }
+  .hero h1 { font-size: 28px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.8; }
+
+  /* Metrics */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 20px 0 8px;
+  }
+  .metric-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .metric-value { font-size: 26px; font-weight: 700; }
+  .metric-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .metric-card.green .metric-value { color: var(--success); }
+  .metric-card.red .metric-value { color: var(--danger); }
+  .metric-card.orange .metric-value { color: var(--accent); }
+  .metric-card.gray .metric-value { color: var(--text-secondary); }
+  .metric-card.blue .metric-value { color: var(--info); }
+
+  .progress-bar-container {
+    background: var(--border);
+    border-radius: 20px;
+    height: 22px;
+    overflow: hidden;
+    margin: 12px 0 4px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    transition: width 0.4s ease;
+    min-width: 36px;
+  }
+
+  .global-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; justify-content: center; }
+  .btn {
+    padding: 9px 18px; border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-export { background: var(--info); color: white; }
+  .btn-export:hover { background: #2980B9; }
+  .btn-reset { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); }
+  .btn-reset:hover { background: var(--danger); color: white; }
+
+  .section { padding: 24px 0 48px; }
+
+  /* Case card */
+  .case-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .case-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; cursor: pointer; user-select: none;
+    border-bottom: 1px solid transparent; transition: background 0.2s;
+  }
+  .case-header:hover { background: var(--primary-light); }
+  .case-header.has-body { border-bottom-color: var(--border); }
+  .case-id { font-weight: 700; color: var(--primary); font-size: 15px; flex-shrink: 0; min-width: 38px; }
+  .case-title { font-size: 16px; font-weight: 600; flex: 1; }
+  .driver-badge {
+    font-size: 11px; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; flex-shrink: 0;
+  }
+  .driver-badge.weapp { background: #E8F5ED; color: var(--success); }
+  .driver-badge.playwright { background: #EAF2FB; color: var(--info); }
+  .driver-badge.manual { background: var(--border); color: var(--text-secondary); }
+  .case-stats { display: flex; gap: 4px; flex-shrink: 0; }
+  .case-stat { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: var(--bg); }
+  .case-stat.pass { color: var(--success); }
+  .case-stat.fail { color: var(--danger); }
+  .case-stat.skip { color: var(--warning); }
+  .case-stat.pending { color: var(--text-secondary); }
+  .case-toggle { font-size: 13px; color: var(--text-secondary); transition: transform 0.2s; flex-shrink: 0; }
+  .case-header.collapsed .case-toggle { transform: rotate(-90deg); }
+  .case-body { padding: 0; }
+  .case-body.collapsed { display: none; }
+
+  .case-meta { padding: 14px 18px; background: #FBFCF9; border-bottom: 1px solid var(--border); }
+  .meta-row { font-size: 13px; margin-bottom: 8px; }
+  .meta-row:last-child { margin-bottom: 0; }
+  .meta-label { font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
+  .meta-steps { padding-left: 20px; margin: 4px 0; }
+  .meta-steps li { font-size: 13px; color: var(--text); margin: 2px 0; }
+  .meta-expected { color: var(--text); }
+  .round-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+  .round-badge--pass { background: #E8F5ED; color: var(--success); }
+  .round-badge--fail { background: #FDECEC; color: var(--danger); }
+  .round-badge--skip { background: #FEF3E0; color: var(--warning); }
+  .round-badge--pending { background: var(--border); color: var(--text-secondary); }
+  .fix-note { color: var(--info); font-size: 12px; margin-top: 4px; }
+
+  /* Checkpoint row */
+  .checkpoints { padding: 8px 0; }
+  .cp-row {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .cp-row:last-child { border-bottom: none; }
+  .cp-row:hover { background: #FBFCF9; }
+  .cp-row.is-fail { background: #FDF6F6; }
+  .cp-row.is-fail:hover { background: #FBEFEF; }
+  .cp-top { display: flex; align-items: flex-start; gap: 10px; }
+  .cp-id { font-weight: 700; color: var(--primary); font-size: 13px; flex-shrink: 0; min-width: 48px; }
+  .cp-main { flex: 1; min-width: 0; }
+  .cp-desc { font-size: 14px; font-weight: 500; }
+  .cp-expected { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .cp-expected strong { color: var(--text); font-weight: 600; }
+  .cp-actions { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+  .cp-btn {
+    padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--card-bg); cursor: pointer; font-size: 12px; font-weight: 600;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .cp-btn:hover { border-color: var(--text-secondary); }
+  .cp-btn.pass.active { background: var(--success); color: white; border-color: var(--success); }
+  .cp-btn.fail.active { background: var(--danger); color: white; border-color: var(--danger); }
+  .cp-btn.skip.active { background: var(--warning); color: white; border-color: var(--warning); }
+  .cp-btn.reset { color: var(--text-secondary); }
+  .cp-btn.reset:hover { color: var(--danger); border-color: var(--danger); }
+  .cp-bug {
+    margin-top: 8px; width: 100%; min-height: 44px; padding: 6px 8px;
+    border: 1px dashed var(--danger); border-radius: 6px; font-size: 12px;
+    font-family: inherit; resize: vertical; color: var(--text); background: #FFF9F9;
+  }
+  .cp-bug.hidden { display: none; }
+  .cp-bug:focus { outline: none; border-color: var(--danger); border-style: solid; }
+
+  /* Export */
+  .export-area { margin-top: 24px; }
+  .export-toolbar { display: none; gap: 10px; margin-bottom: 8px; }
+  .btn-copy { background: var(--primary); color: white; }
+  .btn-copy:hover { background: #4A8B5E; }
+  #copy-hint { display: none; font-size: 12px; color: var(--text-secondary); margin-left: 8px; }
+  #export-output {
+    background: #1E293B; color: #E2E8F0; padding: 18px; border-radius: var(--radius);
+    font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word; max-height: 520px; overflow: auto;
+  }
+  #export-output:not(.visible) { display: none; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <a class="back-link" href="index.html">← 索引页</a>
+  <h1>🔐 ① 认证与小区</h1>
+  <div class="tagline">8 用例 · 45 检查点（1.8.5 细化为 8 子项）· 小程序 weapp-dev-mcp + Admin Playwright</div>
+  <div class="meta" id="hero-meta">1.7 Admin 已由 Playwright 预填（1.7.1✓ 1.7.2✓ 1.7.3⏸ 1.7.4/5⏸手动）· 数据保存在本地浏览器（localStorage）</div>
+</div>
+
+<div class="container">
+  <div class="metrics-grid">
+    <div class="metric-card green"><div class="metric-value" id="stat-pass">0</div><div class="metric-label">✅ 通过</div></div>
+    <div class="metric-card red"><div class="metric-value" id="stat-fail">0</div><div class="metric-label">❌ Bug</div></div>
+    <div class="metric-card orange"><div class="metric-value" id="stat-skip">0</div><div class="metric-label">⏸ 跳过</div></div>
+    <div class="metric-card gray"><div class="metric-value" id="stat-pending">0</div><div class="metric-label">⏳ 待测</div></div>
+    <div class="metric-card blue"><div class="metric-value" id="stat-rate">0%</div><div class="metric-label">📊 完成率</div></div>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-fill" style="width:0%; background: var(--primary);">0%</div></div>
+
+  <div class="global-actions">
+    <button class="btn btn-export" onclick="exportModule()">📋 导出 Bug 清单</button>
+    <button class="btn btn-reset" onclick="resetAll()">↺ 重置全部</button>
+  </div>
+
+  <div class="section" id="cases-container"></div>
+
+  <div class="export-area">
+    <div class="export-toolbar" id="export-toolbar">
+      <button class="btn btn-copy" onclick="copyToClipboard()">📋 复制到剪贴板</button>
+      <span id="copy-hint">复制后可粘贴到任意编辑器</span>
+    </div>
+    <pre id="export-output"></pre>
+  </div>
+</div>
+
+<script>
+// ===== 模块元信息 =====
+const MODULE = {
+  id: '01-auth-community',
+  icon: '🔐',
+  label: '① 认证与小区',
+  storageKey: 'xbb_e2e_round2_01_auth',
+};
+
+// ===== 一轮结果（case 级，只读，来自 2026-07-07 首轮 E2E）=====
+const ROUND1 = {
+  '1.1': { status: 'pass', bugDesc: '' },
+  '1.2': { status: 'pass', bugDesc: 'OCR 一致自动通过' },
+  '1.3': { status: 'pass', bugDesc: '' },
+  '1.4': { status: 'pass', bugDesc: '' },
+  '1.5': { status: 'fail', bugDesc: '发布表单（事件/闲置/议题）无 storage 持久化，退出后数据丢失。' },
+  '1.6': { status: 'pass', bugDesc: 'API POST /communities/select 切换正常。' },
+  '1.7': { status: 'pass', bugDesc: 'Admin 小区申请列表/详情/审批功能完整。' },
+  '1.8': { status: 'fail', bugDesc: 'user-profile 页面缺"发布历史"区（事件/闲置/议题），仅展示头像/昵称/标签/简介/统计/徽章。' },
+};
+
+// ===== 修复情况（一轮 → 二轮之间，只读）=====
+const FIX_NOTES = {
+  '1.3': '✅ 已增强：前端表单已加 verifyStatus 拦截，未认证用户提交时弹 modal 跳转 verify',
+  '1.5': '✅ 已修复：event-create/market-create/topic-create 已接入 useDraft，退出后自动恢复草稿',
+  '1.8': '✅ 已修复（二轮）：发布历史区已实现 — 3 tab（互助/闲置/议题）+ creatorId/sellerId/createdBy 过滤 + 空状态 + 点击跳详情 + 匿名隐私',
+};
+
+// ===== 二轮预填（已实测的检查点结果，作为默认基线；用户可覆盖）=====
+// 1.7 由 Playwright 对运行中的 Admin(:3001)+API(:3000) 实测得到（2026-07-07）
+const ROUND2_DEFAULTS = {
+  "1.1.1": { "status": "pass", "bugDesc": "" },
+  "1.1.2": { "status": "pass", "bugDesc": "" },
+  "1.1.3": { "status": "pass", "bugDesc": "" },
+  "1.1.4": { "status": "pass", "bugDesc": "" },
+  "1.1.5": { "status": "pass", "bugDesc": "" },
+  "1.1.6": { "status": "pass", "bugDesc": "" },
+  "1.2.1": { "status": "pass", "bugDesc": "" },
+  "1.2.2": { "status": "pass", "bugDesc": "" },
+  "1.2.3": { "status": "pass", "bugDesc": "" },
+  "1.2.4": { "status": "pass", "bugDesc": "" },
+  "1.2.5": { "status": "skip", "bugDesc": "OCR功能未开启，跳过自动通过测试" },
+  "1.2.6": { "status": "skip", "bugDesc": "OCR功能未开启，跳过不一致待审核测试" },
+  "1.2.7": { "status": "skip", "bugDesc": "Admin审批分支需要手动操作" },
+  "1.3.1": { "status": "pass", "bugDesc": "" },
+  "1.3.2": { "status": "pass", "bugDesc": "" },
+  "1.3.3": { "status": "pass", "bugDesc": "" },
+  "1.3.4": { "status": "pass", "bugDesc": "" },
+  "1.4.1": { "status": "pass", "bugDesc": "" },
+  "1.4.2": { "status": "pass", "bugDesc": "" },
+  "1.4.3": { "status": "pass", "bugDesc": "" },
+  "1.4.4": { "status": "pass", "bugDesc": "" },
+  "1.5.1": { "status": "pass", "bugDesc": "" },
+  "1.5.2": { "status": "pass", "bugDesc": "" },
+  "1.5.3": { "status": "pass", "bugDesc": "" },
+  "1.5.4": { "status": "pass", "bugDesc": "" },
+  "1.6.1": { "status": "pass", "bugDesc": "" },
+  "1.6.2": { "status": "pass", "bugDesc": "" },
+  "1.6.3": { "status": "pass", "bugDesc": "" },
+  "1.8.1": { "status": "pass", "bugDesc": "" },
+  "1.8.2": { "status": "pass", "bugDesc": "" },
+  "1.8.3": { "status": "pass", "bugDesc": "" },
+  "1.8.4": { "status": "pass", "bugDesc": "" },
+  "1.8.5.1": { "status": "pass", "bugDesc": "代码路径验证：user-profile/index.tsx 渲染「📦 发布历史」区" },
+  "1.8.5.2": { "status": "pass", "bugDesc": "代码路径验证：TABS 三项 互助/闲置/议题" },
+  "1.8.5.3": { "status": "pass", "bugDesc": "API 实测：GET /events?creatorId=张三 → 3 条事件 + 单测通过" },
+  "1.8.5.4": { "status": "pass", "bugDesc": "API 实测：GET /market/items?sellerId=张三 → 2 条闲置" },
+  "1.8.5.5": { "status": "pass", "bugDesc": "API 实测：GET /topics?createdBy=张三 → 0 条（顺带覆盖空状态路径）" },
+  "1.8.5.6": { "status": "pass", "bugDesc": "API 返回 0 条 topics + 前端 EmptyState「暂无发布记录」代码确认" },
+  "1.8.5.7": { "status": "pass", "bugDesc": "代码路径验证：onClick → navigateTo(DETAIL_ROUTES[tab]+id)" },
+  "1.8.5.8": { "status": "pass", "bugDesc": "API+单测实测：李四查张三 events 走 isAnonymous=false 过滤分支；单测「别人看不到我的匿名事件」通过" },
+  '1.7.1': { status: 'pass', bugDesc: '' },
+  '1.7.2': { status: 'pass', bugDesc: '' },
+  '1.7.3': { status: 'skip', bugDesc: 'DB 无 pending 小区申请，Playwright test.skip 触发；需先跑 1.4 申请新小区或 seed 一条才能验证审批流' },
+  '1.7.4': { status: 'skip', bugDesc: '手动项：审批通过后查 DB communities 表或小区列表，确认新小区已建' },
+  '1.7.5': { status: 'skip', bugDesc: '手动项：切小程序视角，my-applications 状态变「已通过」+ 可切换到新小区' },
+};
+
+// ===== 测试用例 + 检查点（38 个）=====
+const TEST_CASES = [
+  {
+    id: '1.1', title: '微信登录选小区', driver: 'weapp',
+    steps: [
+      '清空小程序缓存，打开进入登录页 login',
+      '点击微信一键登录，授权手机号',
+      '首次登录跳转到小区选择页 community-select',
+      '从列表选择一个已有小区（如：阳光花园）',
+    ],
+    expected: '登录成功，tabBar 显示首屏「小区事」，顶部显示当前小区名称「阳光花园」',
+    checkpoints: [
+      { id: '1.1.1', desc: '登录页渲染', expected: 'login 页显示微信登录按钮 + 调试登录入口' },
+      { id: '1.1.2', desc: '微信登录授权', expected: '点击微信登录 → 完成手机号授权（mock）' },
+      { id: '1.1.3', desc: '首次跳转', expected: '授权后跳转 community-select' },
+      { id: '1.1.4', desc: '小区列表加载', expected: 'community-select 显示小区列表（含阳光花园）' },
+      { id: '1.1.5', desc: '选择小区', expected: '点击阳光花园 → switchTab 到 plaza' },
+      { id: '1.1.6', desc: '首屏验证', expected: 'tabBar 显示「小区事」+ 顶部显示「阳光花园」' },
+    ],
+  },
+  {
+    id: '1.2', title: '业主认证流程', driver: 'weapp',
+    steps: [
+      '调试登录未认证用户 2cb983d9-6705-450f-8699-1d6e137c3ba3（有小区未认证）',
+      '进入「我的」→ 点击「业主认证」入口 verify',
+      '选材料类型（房产证/租房合同/门禁卡/其他）',
+      '填写楼栋号、单元号、房号',
+      '上传房产证明图片（拍照或相册）',
+      '同意授权并提交认证申请',
+    ],
+    expected: 'OCR 一致 → 自动通过；不一致 → 提示「认证审核中」，Admin 后台审批通过/拒绝',
+    checkpoints: [
+      { id: '1.2.1', desc: '入口可见', expected: '未认证用户在「我的」看到「业主认证」入口' },
+      { id: '1.2.2', desc: '材料类型选择', expected: 'verify 页可选房产证/租房合同/门禁卡/其他' },
+      { id: '1.2.3', desc: '楼栋房号填写', expected: '填写楼栋号、单元号、房号' },
+      { id: '1.2.4', desc: '图片上传', expected: '上传房产证明图片' },
+      { id: '1.2.5', desc: 'OCR 一致自动通过', expected: 'OCR 识别与输入一致 → verified' },
+      { id: '1.2.6', desc: 'OCR 不一致待审', expected: 'OCR 不一致 → pending_review + 提示「审核中」' },
+      { id: '1.2.7', desc: 'Admin 审批分支', expected: 'Admin 审批通过/拒绝 → 小程序状态更新' },
+    ],
+  },
+  {
+    id: '1.3', title: '未认证拦截', driver: 'weapp',
+    steps: [
+      '调试登录未认证用户 2cb983d9-6705-450f-8699-1d6e137c3ba3（有小区未认证）',
+      '尝试创建求助事件 event-create',
+      '尝试发布闲置 market-create',
+      '尝试创建议题 topic-create',
+    ],
+    expected: '发帖类操作被拦截，提示「请先完成业主认证」并跳转到 verify 页面',
+    checkpoints: [
+      { id: '1.3.1', desc: 'event-create 拦截', expected: '未认证提交 event-create → 弹 modal 跳 verify' },
+      { id: '1.3.2', desc: 'market-create 拦截', expected: '未认证提交 market-create → 弹 modal 跳 verify' },
+      { id: '1.3.3', desc: 'topic-create 拦截', expected: '未认证提交 topic-create → 弹 modal 跳 verify' },
+      { id: '1.3.4', desc: '拦截提示文案', expected: 'modal 提示「请先完成业主认证」' },
+    ],
+  },
+  {
+    id: '1.4', title: '申请新小区', driver: 'weapp',
+    steps: [
+      '在小区选择页 community-select 点击「没找到？申请新小区」',
+      '进入 community-apply 填写小区名、城市、地址',
+      '提交申请',
+      '到「我的」→ my-applications 查看申请状态',
+    ],
+    expected: '申请提交成功，my-applications 列表显示该申请为「待审核」状态',
+    checkpoints: [
+      { id: '1.4.1', desc: '入口可见', expected: 'community-select 有「申请新小区」入口' },
+      { id: '1.4.2', desc: '表单填写', expected: 'community-apply 填小区名/城市/地址' },
+      { id: '1.4.3', desc: '提交成功', expected: '提交后提示成功 + 跳转' },
+      { id: '1.4.4', desc: 'my-applications 查看', expected: 'my-applications 显示该申请为「待审核」' },
+    ],
+  },
+  {
+    id: '1.5', title: '草稿恢复', driver: 'weapp',
+    steps: [
+      '在 event-create 页面填写标题和描述',
+      '不点发布，直接退出小程序',
+      '重新打开，再次进入 event-create',
+      '同样验证 market-create / topic-create',
+    ],
+    expected: '之前填写的标题/描述/价格/正文自动恢复（草稿保存在本地），三表单互不干扰',
+    checkpoints: [
+      { id: '1.5.1', desc: 'event-create 草稿', expected: '填标题+描述 → 退出 → 重进 → 恢复' },
+      { id: '1.5.2', desc: 'market-create 草稿', expected: '填标题+描述+价格 → 退出 → 重进 → 恢复' },
+      { id: '1.5.3', desc: 'topic-create 草稿', expected: '填标题+正文 → 退出 → 重进 → 恢复' },
+      { id: '1.5.4', desc: '草稿独立性', expected: '三个表单草稿互不干扰' },
+    ],
+  },
+  {
+    id: '1.6', title: '助力防重复', driver: 'weapp',
+    steps: [
+      '找到一个进行中的求助事件',
+      '点击「我来帮忙」响应一次',
+      '再次进入该事件详情，尝试再次响应',
+    ],
+    expected: '第二次响应被拦截，提示「您已响应过此求助」，按钮变为「已响应」状态',
+    checkpoints: [
+      { id: '1.6.1', desc: '首次响应', expected: '进行中求助事件 → 点击「我来帮忙」→ 响应成功' },
+      { id: '1.6.2', desc: '按钮变已响应', expected: '再次进入 → 按钮变「已响应」状态' },
+      { id: '1.6.3', desc: '二次拦截', expected: '尝试再次响应 → 提示「您已响应过此求助」' },
+    ],
+  },
+  {
+    id: '1.7', title: 'Admin 审批自动建小区', driver: 'playwright',
+    steps: [
+      '用户在小程序提交一个新小区申请',
+      '登录 Admin 后台 → 小区审批页 /community-applications',
+      '审批通过该申请',
+    ],
+    expected: 'Admin 审批通过后，新小区自动进入小区表；用户刷新 my-applications 看到状态「已通过」，可切换',
+    checkpoints: [
+      { id: '1.7.1', desc: 'Admin 登录', expected: 'zhangsan_admin/admin123 → 跳 /dashboard' },
+      { id: '1.7.2', desc: '进入小区审批页', expected: '/community-applications 显示待审批列表' },
+      { id: '1.7.3', desc: '审批通过', expected: '点击通过 → 提示成功' },
+      { id: '1.7.4', desc: '自动建小区验证（手动）', expected: '列表/数据库出现新小区' },
+      { id: '1.7.5', desc: '用户侧状态更新（手动）', expected: '用户刷新 my-applications → 状态「已通过」+ 可切换' },
+    ],
+  },
+  {
+    id: '1.8', title: '用户主页', driver: 'weapp',
+    steps: [
+      '在小程序任意位置点击某用户头像',
+      '进入 user-profile 用户主页',
+      '查看该用户的基本信息、小红花数、勋章、发布历史',
+    ],
+    expected: '用户主页展示头像、昵称、小区、小红花总数、勋章列表、发布过的事件/闲置/议题',
+    checkpoints: [
+      { id: '1.8.1', desc: '入口可点', expected: '点击用户头像 → 跳 user-profile' },
+      { id: '1.8.2', desc: '基本信息展示', expected: '头像/昵称/小区/简介' },
+      { id: '1.8.3', desc: '小红花数', expected: '显示总小红花数' },
+      { id: '1.8.4', desc: '勋章列表', expected: '显示勋章' },
+      { id: '1.8.5.1', desc: '区域渲染', expected: '「最近徽章」下方显示「📦 发布历史」区' },
+      { id: '1.8.5.2', desc: '三个 tab', expected: '🤝 互助 / ♻️ 闲置 / 📋 议题 三个 tab' },
+      { id: '1.8.5.3', desc: '默认互助列表', expected: '默认互助 tab 高亮，显示该用户事件（标题+状态+日期，≤5 条）' },
+      { id: '1.8.5.4', desc: '切闲置 tab', expected: '点 ♻️ 闲置 → 显示该用户闲置（sellerId 过滤）' },
+      { id: '1.8.5.5', desc: '切议题 tab', expected: '点 📋 议题 → 显示该用户议题（createdBy 过滤，含已完结）' },
+      { id: '1.8.5.6', desc: '空状态', expected: '无发布记录用户显示 EmptyState「暂无发布记录」' },
+      { id: '1.8.5.7', desc: '点击跳转详情', expected: '点列表项 → navigateTo 对应详情页（event/market/topic-detail）' },
+      { id: '1.8.5.8', desc: '匿名隐私', expected: '他人查看我主页时，我的匿名事件不显示（isAnonymous:false 过滤）' },
+    ],
+  },
+];
+
+// ===== 存储层（检查点级）=====
+function loadState() {
+  try {
+    const raw = localStorage.getItem(MODULE.storageKey);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === 'object') ? parsed : {};
+  } catch (e) {
+    console.warn('loadState failed:', e);
+    return {};
+  }
+}
+function saveState(state) {
+  try {
+    localStorage.setItem(MODULE.storageKey, JSON.stringify(state));
+  } catch (e) {
+    alert('保存失败，浏览器存储空间不足');
+  }
+}
+function getCpState(cpId) {
+  const state = loadState();
+  if (state[cpId]) return state[cpId];
+  // 无用户标记时回退到二轮预填基线（1.7），否则待测
+  return ROUND2_DEFAULTS[cpId] || { status: 'pending', bugDesc: '', updatedAt: null };
+}
+function setCpState(cpId, data) {
+  const state = loadState();
+  state[cpId] = { ...state[cpId], ...data, updatedAt: new Date().toISOString() };
+  saveState(state);
+}
+function clearCpState(cpId) {
+  const state = loadState();
+  delete state[cpId];
+  saveState(state);
+}
+
+// ===== 渲染层 =====
+const STATUS = {
+  pending: { icon: '⏳', label: '待测' },
+  pass:    { icon: '✅', label: '通过' },
+  fail:    { icon: '❌', label: 'Bug' },
+  skip:    { icon: '⏸', label: '跳过' },
+};
+const R1_BADGE = {
+  pass: 'round-badge--pass', fail: 'round-badge--fail',
+  skip: 'round-badge--skip', pending: 'round-badge--pending',
+};
+
+function caseStats(tc) {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  tc.checkpoints.forEach(cp => {
+    const st = getCpState(cp.id).status;
+    s[st] = (s[st] || 0) + 1;
+  });
+  return s;
+}
+
+function renderCheckpoint(cp) {
+  const st = getCpState(cp.id);
+  const failClass = st.status === 'fail' ? 'is-fail' : '';
+  const showBug = st.status === 'fail' || st.status === 'skip';
+  const bugHidden = showBug ? '' : 'hidden';
+  const bugPh = st.status === 'skip' ? '跳过原因 / 备注...' : 'Bug 描述：复现步骤、实际结果、严重程度...';
+  return `
+    <div class="cp-row ${failClass}" data-cp-id="${cp.id}">
+      <div class="cp-top">
+        <span class="cp-id">${cp.id}</span>
+        <div class="cp-main">
+          <div class="cp-desc">${cp.desc}</div>
+          <div class="cp-expected"><strong>预期:</strong> ${cp.expected}</div>
+        </div>
+        <div class="cp-actions">
+          <button class="cp-btn pass ${st.status === 'pass' ? 'active' : ''}" onclick="setCp('${cp.id}','pass')">✅</button>
+          <button class="cp-btn fail ${st.status === 'fail' ? 'active' : ''}" onclick="setCp('${cp.id}','fail')">❌</button>
+          <button class="cp-btn skip ${st.status === 'skip' ? 'active' : ''}" onclick="setCp('${cp.id}','skip')">⏸</button>
+          <button class="cp-btn reset" onclick="resetCp('${cp.id}')">↺</button>
+        </div>
+      </div>
+      <textarea class="cp-bug ${bugHidden}" placeholder="${bugPh}" onblur="saveBug('${cp.id}', this.value)">${st.bugDesc || ''}</textarea>
+    </div>
+  `;
+}
+
+function renderCase(tc) {
+  const r1 = ROUND1[tc.id] || { status: 'pending', bugDesc: '' };
+  const r1cfg = STATUS[r1.status] || STATUS.pending;
+  const fixNote = FIX_NOTES[tc.id];
+  const stats = caseStats(tc);
+
+  const stepsHtml = tc.steps.map(s => `<li>${s}</li>`).join('');
+  const cpsHtml = tc.checkpoints.map(renderCheckpoint).join('');
+
+  return `
+    <div class="case-card" data-case-id="${tc.id}">
+      <div class="case-header has-body" onclick="toggleCase(this)">
+        <span class="case-id">${tc.id}</span>
+        <span class="case-title">${tc.title}</span>
+        <span class="driver-badge ${tc.driver}">${tc.driver === 'weapp' ? '小程序' : tc.driver === 'playwright' ? 'Playwright' : '手动'}</span>
+        <span class="case-stats">
+          <span class="case-stat pass">✅${stats.pass}</span>
+          <span class="case-stat fail">❌${stats.fail}</span>
+          <span class="case-stat skip">⏸${stats.skip}</span>
+          <span class="case-stat pending">⏳${stats.pending}</span>
+        </span>
+        <span class="case-toggle">▼</span>
+      </div>
+      <div class="case-body">
+        <div class="case-meta">
+          <div class="meta-row"><span class="meta-label">操作步骤:</span></div>
+          <ol class="meta-steps">${stepsHtml}</ol>
+          <div class="meta-row"><span class="meta-label">预期:</span><span class="meta-expected">${tc.expected}</span></div>
+          <div class="meta-row">
+            <span class="meta-label">一轮:</span>${r1cfg.icon} ${r1cfg.label}
+            <span class="round-badge ${R1_BADGE[r1.status]}">${r1.bugDesc || ''}</span>
+          </div>
+          ${fixNote ? `<div class="meta-row fix-note">🔧 修复: ${fixNote}</div>` : ''}
+        </div>
+        <div class="checkpoints">${cpsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAll() {
+  document.getElementById('cases-container').innerHTML = TEST_CASES.map(renderCase).join('');
+  updateStats();
+}
+
+function updateStats() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => {
+    const cs = caseStats(tc);
+    Object.keys(s).forEach(k => { s[k] += cs[k]; });
+  });
+  const total = TEST_CASES.reduce((n, tc) => n + tc.checkpoints.length, 0);
+  const done = s.pass + s.fail + s.skip;
+  const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('stat-pass').textContent = s.pass;
+  document.getElementById('stat-fail').textContent = s.fail;
+  document.getElementById('stat-skip').textContent = s.skip;
+  document.getElementById('stat-pending').textContent = s.pending;
+  document.getElementById('stat-rate').textContent = rate + '%';
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = rate + '%';
+  fill.textContent = rate + '%';
+  fill.style.background = rate === 100 ? 'var(--success)' : 'var(--primary)';
+
+  // 更新每个用例的统计
+  TEST_CASES.forEach(tc => {
+    const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`);
+    if (!card) return;
+    const stats = caseStats(tc);
+    const el = card.querySelector('.case-stats');
+    if (el) {
+      el.innerHTML = `
+        <span class="case-stat pass">✅${stats.pass}</span>
+        <span class="case-stat fail">❌${stats.fail}</span>
+        <span class="case-stat skip">⏸${stats.skip}</span>
+        <span class="case-stat pending">⏳${stats.pending}</span>
+      `;
+    }
+  });
+}
+
+// ===== 交互层 =====
+function setCp(cpId, status) {
+  setCpState(cpId, { status });
+  rerenderCaseByCp(cpId);
+  updateStats();
+}
+function saveBug(cpId, desc) {
+  const cur = getCpState(cpId);
+  if (cur.bugDesc !== desc) setCpState(cpId, { bugDesc: desc });
+}
+function resetCp(cpId) {
+  clearCpState(cpId);
+  rerenderCaseByCp(cpId);
+  updateStats();
+}
+function rerenderCaseByCp(cpId) {
+  const tc = TEST_CASES.find(t => t.checkpoints.some(c => c.id === cpId));
+  if (!tc) return;
+  const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`);
+  if (!card) return;
+  const cpsContainer = card.querySelector('.checkpoints');
+  if (cpsContainer) cpsContainer.innerHTML = tc.checkpoints.map(renderCheckpoint).join('');
+}
+function toggleCase(headerEl) {
+  const body = headerEl.nextElementSibling;
+  headerEl.classList.toggle('collapsed');
+  body.classList.toggle('collapsed');
+}
+
+// ===== 导出层 =====
+function exportModule() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => {
+    const cs = caseStats(tc);
+    Object.keys(s).forEach(k => { s[k] += cs[k]; });
+  });
+  const total = s.pass + s.fail + s.skip + s.pending;
+
+  let out = `# ${MODULE.icon} ${MODULE.label} — Bug 清单\n\n`;
+  out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
+  out += `检查点统计: ✅ ${s.pass} / ❌ ${s.fail} / ⏸ ${s.skip} / ⏳ ${s.pending} （共 ${total}）\n`;
+  out += `\n${'='.repeat(60)}\n\n`;
+
+  const failedCps = [];
+  TEST_CASES.forEach(tc => {
+    tc.checkpoints.forEach(cp => {
+      if (getCpState(cp.id).status === 'fail') failedCps.push({ tc, cp });
+    });
+  });
+
+  if (failedCps.length === 0) {
+    out += `🎉 本模块暂无 Bug（无检查点标记为 ❌）\n\n`;
+    // 列出一轮仍有未修复 Bug 的用例作提示
+    const r1Open = TEST_CASES.filter(t => ROUND1[t.id]?.status === 'fail');
+    if (r1Open.length > 0) {
+      out += `⚠️ 一轮遗留（case 级，待二轮复测）:\n`;
+      r1Open.forEach(t => {
+        out += `  - [${t.id}] ${t.title}: ${ROUND1[t.id].bugDesc}\n`;
+        if (FIX_NOTES[t.id]) out += `      ${FIX_NOTES[t.id]}\n`;
+      });
+    }
+  } else {
+    out += `## Bug 清单（检查点级，共 ${failedCps.length} 条）\n\n`;
+    failedCps.forEach((item, i) => {
+      const { tc, cp } = item;
+      const st = getCpState(cp.id);
+      out += `### Bug ${i + 1}: [${cp.id}] ${cp.desc}\n`;
+      out += `所属用例: [${tc.id}] ${tc.title} (${tc.driver})\n`;
+      out += `预期: ${cp.expected}\n`;
+      out += `状态: ❌ Bug\n`;
+      if (st.bugDesc) out += `Bug 描述: ${st.bugDesc}\n`;
+      out += `更新时间: ${st.updatedAt || '-'}\n\n`;
+    });
+  }
+
+  showExport(out);
+}
+
+function resetAll() {
+  if (!confirm('确定清空本模块用户标记的检查点记录吗？已实测的 1.7 预填结果会保留，其余重置为待测。')) return;
+  localStorage.removeItem(MODULE.storageKey);
+  renderAll();
+  showExport('✅ 已清空用户标记的检查点记录。1.7 预填结果保留，其余重置为待测。');
+}
+
+function showExport(text) {
+  const pre = document.getElementById('export-output');
+  pre.textContent = text;
+  pre.classList.add('visible');
+  document.getElementById('export-toolbar').style.display = 'flex';
+  document.getElementById('copy-hint').style.display = 'block';
+  pre.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyToClipboard() {
+  const text = document.getElementById('export-output').textContent;
+  if (!text) return;
+  const btn = document.querySelector('.btn-copy');
+  const orig = btn.textContent;
+  const done = () => { btn.textContent = '✅ 已复制'; setTimeout(() => { btn.textContent = orig; }, 2000); };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+function fallbackCopy(text, done) {
+  const pre = document.getElementById('export-output');
+  const range = document.createRange();
+  range.selectNodeContents(pre);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败，请手动全选复制'); }
+  sel.removeAllRanges();
+}
+
+// ===== 初始化 =====
+document.addEventListener('DOMContentLoaded', renderAll);
+</script>
+</body>
+</html>

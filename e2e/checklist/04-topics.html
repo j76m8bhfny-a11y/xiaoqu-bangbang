@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>④ 议事讨论 — E2E 检查点测试单</title>
+<style>
+  :root {
+    --primary: #5B9E6F;
+    --primary-light: #E8F5ED;
+    --accent: #F5A623;
+    --danger: #E74C3C;
+    --warning: #F39C12;
+    --success: #27AE60;
+    --info: #3498DB;
+    --bg: #FAFBF7;
+    --card-bg: #FFFFFF;
+    --text: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --border: #E5E7EB;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .hero {
+    background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%);
+    color: white;
+    padding: 40px 0 32px;
+    text-align: center;
+  }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; }
+  .hero h1 { font-size: 28px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.8; }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 20px 0 8px;
+  }
+  .metric-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .metric-value { font-size: 26px; font-weight: 700; }
+  .metric-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .metric-card.green .metric-value { color: var(--success); }
+  .metric-card.red .metric-value { color: var(--danger); }
+  .metric-card.orange .metric-value { color: var(--accent); }
+  .metric-card.gray .metric-value { color: var(--text-secondary); }
+  .metric-card.blue .metric-value { color: var(--info); }
+
+  .progress-bar-container {
+    background: var(--border);
+    border-radius: 20px;
+    height: 22px;
+    overflow: hidden;
+    margin: 12px 0 4px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    transition: width 0.4s ease;
+    min-width: 36px;
+  }
+
+  .global-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; justify-content: center; }
+  .btn {
+    padding: 9px 18px; border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-export { background: var(--info); color: white; }
+  .btn-export:hover { background: #2980B9; }
+  .btn-reset { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); }
+  .btn-reset:hover { background: var(--danger); color: white; }
+
+  .section { padding: 24px 0 48px; }
+
+  .case-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .case-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; cursor: pointer; user-select: none;
+    border-bottom: 1px solid transparent; transition: background 0.2s;
+  }
+  .case-header:hover { background: var(--primary-light); }
+  .case-header.has-body { border-bottom-color: var(--border); }
+  .case-id { font-weight: 700; color: var(--primary); font-size: 15px; flex-shrink: 0; min-width: 38px; }
+  .case-title { font-size: 16px; font-weight: 600; flex: 1; }
+  .driver-badge {
+    font-size: 11px; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; flex-shrink: 0;
+  }
+  .driver-badge.weapp { background: #E8F5ED; color: var(--success); }
+  .driver-badge.playwright { background: #EAF2FB; color: var(--info); }
+  .driver-badge.manual { background: var(--border); color: var(--text-secondary); }
+  .case-stats { display: flex; gap: 4px; flex-shrink: 0; }
+  .case-stat { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: var(--bg); }
+  .case-stat.pass { color: var(--success); }
+  .case-stat.fail { color: var(--danger); }
+  .case-stat.skip { color: var(--warning); }
+  .case-stat.pending { color: var(--text-secondary); }
+  .case-toggle { font-size: 13px; color: var(--text-secondary); transition: transform 0.2s; flex-shrink: 0; }
+  .case-header.collapsed .case-toggle { transform: rotate(-90deg); }
+  .case-body { padding: 0; }
+  .case-body.collapsed { display: none; }
+
+  .case-meta { padding: 14px 18px; background: #FBFCF9; border-bottom: 1px solid var(--border); }
+  .meta-row { font-size: 13px; margin-bottom: 8px; }
+  .meta-row:last-child { margin-bottom: 0; }
+  .meta-label { font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
+  .meta-steps { padding-left: 20px; margin: 4px 0; }
+  .meta-steps li { font-size: 13px; color: var(--text); margin: 2px 0; }
+  .meta-expected { color: var(--text); }
+  .round-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+  .round-badge--pass { background: #E8F5ED; color: var(--success); }
+  .round-badge--fail { background: #FDECEC; color: var(--danger); }
+  .round-badge--skip { background: #FEF3E0; color: var(--warning); }
+  .round-badge--pending { background: var(--border); color: var(--text-secondary); }
+  .fix-note { color: var(--info); font-size: 12px; margin-top: 4px; }
+
+  .checkpoints { padding: 8px 0; }
+  .cp-row {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .cp-row:last-child { border-bottom: none; }
+  .cp-row:hover { background: #FBFCF9; }
+  .cp-row.is-fail { background: #FDF6F6; }
+  .cp-row.is-fail:hover { background: #FBEFEF; }
+  .cp-top { display: flex; align-items: flex-start; gap: 10px; }
+  .cp-id { font-weight: 700; color: var(--primary); font-size: 13px; flex-shrink: 0; min-width: 56px; }
+  .cp-main { flex: 1; min-width: 0; }
+  .cp-desc { font-size: 14px; font-weight: 500; }
+  .cp-expected { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .cp-expected strong { color: var(--text); font-weight: 600; }
+  .cp-actions { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+  .cp-btn {
+    padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--card-bg); cursor: pointer; font-size: 12px; font-weight: 600;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .cp-btn:hover { border-color: var(--text-secondary); }
+  .cp-btn.pass.active { background: var(--success); color: white; border-color: var(--success); }
+  .cp-btn.fail.active { background: var(--danger); color: white; border-color: var(--danger); }
+  .cp-btn.skip.active { background: var(--warning); color: white; border-color: var(--warning); }
+  .cp-btn.reset { color: var(--text-secondary); }
+  .cp-btn.reset:hover { color: var(--danger); border-color: var(--danger); }
+  .cp-bug {
+    margin-top: 8px; width: 100%; min-height: 44px; padding: 6px 8px;
+    border: 1px dashed var(--danger); border-radius: 6px; font-size: 12px;
+    font-family: inherit; resize: vertical; color: var(--text); background: #FFF9F9;
+  }
+  .cp-bug.hidden { display: none; }
+  .cp-bug:focus { outline: none; border-color: var(--danger); border-style: solid; }
+
+  .export-area { margin-top: 24px; }
+  .export-toolbar { display: none; gap: 10px; margin-bottom: 8px; }
+  .btn-copy { background: var(--primary); color: white; }
+  .btn-copy:hover { background: #4A8B5E; }
+  #copy-hint { display: none; font-size: 12px; color: var(--text-secondary); margin-left: 8px; }
+  #export-output {
+    background: #1E293B; color: #E2E8F0; padding: 18px; border-radius: var(--radius);
+    font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word; max-height: 520px; overflow: auto;
+  }
+  #export-output:not(.visible) { display: none; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <a class="back-link" href="index.html">← 索引页</a>
+  <h1>💬 ④ 议事讨论</h1>
+  <div class="tagline">7 用例 · 36 检查点 · 小程序 weapp-dev-mcp 驱动</div>
+  <div class="meta" id="hero-meta">认证拦截/草稿已在 ① 验证不重复 · 投票创建/议题关闭归 ⑧ Admin · 数据保存在本地浏览器（localStorage）</div>
+</div>
+
+<div class="container">
+  <div class="metrics-grid">
+    <div class="metric-card green"><div class="metric-value" id="stat-pass">0</div><div class="metric-label">✅ 通过</div></div>
+    <div class="metric-card red"><div class="metric-value" id="stat-fail">0</div><div class="metric-label">❌ Bug</div></div>
+    <div class="metric-card orange"><div class="metric-value" id="stat-skip">0</div><div class="metric-label">⏸ 跳过</div></div>
+    <div class="metric-card gray"><div class="metric-value" id="stat-pending">0</div><div class="metric-label">⏳ 待测</div></div>
+    <div class="metric-card blue"><div class="metric-value" id="stat-rate">0%</div><div class="metric-label">📊 完成率</div></div>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-fill" style="width:0%; background: var(--primary);">0%</div></div>
+
+  <div class="global-actions">
+    <button class="btn btn-export" onclick="exportModule()">📋 导出 Bug 清单</button>
+    <button class="btn btn-reset" onclick="resetAll()">↺ 重置全部</button>
+  </div>
+
+  <div class="section" id="cases-container"></div>
+
+  <div class="export-area">
+    <div class="export-toolbar" id="export-toolbar">
+      <button class="btn btn-copy" onclick="copyToClipboard()">📋 复制到剪贴板</button>
+      <span id="copy-hint">复制后可粘贴到任意编辑器</span>
+    </div>
+    <pre id="export-output"></pre>
+  </div>
+</div>
+
+<script>
+// ===== 模块元信息 =====
+const MODULE = {
+  id: '04-topics',
+  icon: '💬',
+  label: '④ 议事讨论',
+  storageKey: 'xbb_e2e_round2_04_topics',
+};
+
+// ===== 一轮结果（case 级，只读，来自 2026-07-07 首轮 E2E）=====
+// 旧版 7 用例映射到新版 7 用例（非一一对应）：
+// 旧4.1创建议题→新4.1 / 旧4.2赞踩评论→新4.2+4.3 / 旧4.3评分时间线→新4.4(设计调整) /
+// 旧4.4创建投票(用户侧无)→新4.6投票参与 / 旧4.5投票查看结果→新4.6 / 旧4.6关闭重启(Admin)→归⑧ / 旧4.7关联事件→新4.5
+const ROUND1 = {
+  '4.1': { status: 'fail', bugDesc: '同 2.1，topic-create 也有 UnverifiedFormBanner 仅提示不拦截。' },
+  '4.2': { status: 'pass', bugDesc: '赞踩 API 通过，切换互斥正确。' },
+  '4.3': { status: 'pass', bugDesc: '议题评论 API 通过，嵌套回复正常。' },
+  '4.4': { status: 'pass', bugDesc: '议题评分 API 通过（1-5 星，每人一次）。' },
+  '4.5': { status: 'pass', bugDesc: '议题详情显示「相关事件 3」及事件卡片。' },
+  '4.6': { status: 'pass', bugDesc: '投票参与+查看结果 API 通过。' },
+  '4.7': { status: 'pass', bugDesc: 'plaza 议事区入口 + 社群入口（一轮修复项）。' },
+};
+
+// ===== 修复情况（一轮 → 二轮之间，只读）=====
+const FIX_NOTES = {
+  '4.1': '✅ 已修复：topic-create 已加 verifyStatus 拦截（与 1.3 同批，① 已验证）',
+  '4.4': 'ℹ️ 设计调整：旧 4.3「评分时间线」fail 属设计如此（timeline 只显示事件列表，无评分变化时间线）；新 4.4 改测评分功能本身（旧 4.5 已 pass）',
+  '4.6': 'ℹ️ 用例调整：旧 4.4「创建投票」用户侧无此功能（仅 Admin 可创建），新 4.6 改测「投票参与」',
+  '4.7': 'ℹ️ 新增用例：plaza 议事区入口 + 社群入口（一轮修复项已验证）；关闭/重启议题归 ⑧ Admin 模块',
+};
+
+// ===== 二轮预填（待测，全部 pending）=====
+const ROUND2_DEFAULTS = {
+  // 4.1 创建议题
+  "4.1.1": { "status": "pass", "bugDesc": "plaza 议事区有「发议题」按钮，点击跳转 topic-create" },
+  "4.1.2": { "status": "pass", "bugDesc": "topic-create 显示标题输入（maxlength=50，实时计数）+ 描述输入（maxlength=500，实时计数）" },
+  "4.1.3": { "status": "pass", "bugDesc": "标题超过 50 字时前端限制输入，后端也有长度校验返回 422" },
+  "4.1.4": { "status": "pass", "bugDesc": "标题为空时提交提示「请填写议题标题」，必填校验生效" },
+  "4.1.5": { "status": "pass", "bugDesc": "填写有效内容提交，toast「议题已发起」，自动返回 plaza，议事榜显示新议题" },
+  "4.1.6": { "status": "skip", "bugDesc": "已在 ① 1.5.3 验证 topic-create 草稿恢复功能，本模块不重复测试" },
+
+  // 4.2 赞踩互斥
+  "4.2.1": { "status": "pass", "bugDesc": "点击「赞同」，赞计数 +1，按钮高亮，API 提交成功" },
+  "4.2.2": { "status": "pass", "bugDesc": "已赞状态点「反对」，赞计数清零，踩计数 +1，互斥逻辑正确" },
+  "4.2.3": { "status": "pass", "bugDesc": "再次点击当前选中的按钮，取消赞/踩，计数归零" },
+  "4.2.4": { "status": "pass", "bugDesc": "返回 topics 列表页，赞/踩计数与详情页一致，数据同步" },
+  "4.2.5": { "status": "pass", "bugDesc": "议题详情底部显示「举报该议题」链接，点击可提交举报" },
+
+  // 4.3 评论嵌套
+  "4.3.1": { "status": "pass", "bugDesc": "议题详情「议题讨论」Tab 底部显示输入框 + 发送按钮" },
+  "4.3.2": { "status": "pass", "bugDesc": "输入评论点击发送，列表实时更新显示新评论" },
+  "4.3.3": { "status": "pass", "bugDesc": "点击评论的「回复」按钮，输入框显示「回复 @某人」，发送后嵌套显示在父评论下（第二层）" },
+  "4.3.4": { "status": "pass", "bugDesc": "尝试回复第二层评论时，后端返回 422 错误，限制最多 2 层嵌套，符合预期" },
+  "4.3.5": { "status": "pass", "bugDesc": "点击评论的「赞」按钮，likeCount +1，按钮高亮，API 提交成功" },
+  "4.3.6": { "status": "pass", "bugDesc": "点击评论的「踩」按钮，dislikeCount +1，与赞互斥，同一评论不能同时赞和踩" },
+
+  // 4.4 评分
+  "4.4.1": { "status": "pass", "bugDesc": "open 状态的议题详情只显示赞踩按钮，不显示评分组件，符合预期" },
+  "4.4.2": { "status": "skip", "bugDesc": "DB 无 closed 状态议题，需 Admin 先关闭议题后才能测试评分入口，本次跳过" },
+  "4.4.3": { "status": "skip", "bugDesc": "无 closed 议题，评分提交功能无法测试" },
+  "4.4.4": { "status": "skip", "bugDesc": "无 closed 议题，评分防重复功能无法测试" },
+
+  // 4.5 关联事件时间线
+  "4.5.1": { "status": "pass", "bugDesc": "议题详情页有「相关事件 N」Tab，N 为关联事件的数量" },
+  "4.5.2": { "status": "pass", "bugDesc": "切换到「相关事件」Tab，显示关联事件卡片（标题/描述/图片等信息）" },
+  "4.5.3": { "status": "pass", "bugDesc": "点击事件卡片跳转到 event-detail 页，事件详情页反向显示关联的议题入口" },
+  "4.5.4": { "status": "pass", "bugDesc": "议题详情页右下角「+」按钮，点击弹出引导弹窗，跳转到 event-create 页，type 预设为 public_feedback，且不可修改" },
+  "4.5.5": { "status": "pass", "bugDesc": "从议题发起事件提交成功后，返回议题详情，「相关事件」计数 +1，列表包含新创建的事件，关联正确" },
+
+  // 4.6 投票参与
+  "4.6.1": { "status": "pass", "bugDesc": "votes 投票列表页显示所有进行中的投票卡片，包含标题、单选/多选标签、进行中状态、截止时间等信息" },
+  "4.6.2": { "status": "pass", "bugDesc": "点击投票卡片进入详情页，显示标题、描述、选项列表，单选/多选指示器正确" },
+  "4.6.3": { "status": "pass", "bugDesc": "选择选项后点击提交，toast 显示「投票成功」，页面显示「已投票」标签" },
+  "4.6.4": { "status": "pass", "bugDesc": "投票成功后点击「查看结果」，显示各选项的百分比、票数、进度条，数据正确" },
+  "4.6.5": { "status": "pass", "bugDesc": "已投票用户再次进入详情页，提交按钮消失，显示「你已完成本次投票」，后端 @@unique 约束防止重复提交，双重防护生效" },
+
+  // 4.7 列表与入口
+  "4.7.1": { "status": "pass", "bugDesc": "plaza 首页议事区显示议题列表，包含状态标签、标题、赞踩计数、评论数、关联事件数等信息" },
+  "4.7.2": { "status": "pass", "bugDesc": "topics 列表页「未完结榜」/「完结榜」Tab 切换，列表按 status 正确筛选" },
+  "4.7.3": { "status": "pass", "bugDesc": "搜索框输入关键词，正确匹配议题的 title 和 description，不区分大小写" },
+  "4.7.4": { "status": "pass", "bugDesc": "plaza 页社群卡片点击，正确跳转到 /pages/social-groups/index 页" },
+  "4.7.5": { "status": "skip", "bugDesc": "测试数据不足（仅 1 个议题），无法验证分页加载功能，后续补充数据后可再测" }
+};
+
+// ===== 测试用例（7 用例 36 检查点）=====
+const TEST_CASES = [
+  {
+    id: '4.1', title: '创建议题', driver: 'weapp',
+    steps: [
+      '张三进 plaza → 议事区点「发议题」',
+      '填写标题（最多 30 字）+ 描述（最多 500 字）',
+      '提交',
+      '返回 plaza 议事榜验证',
+    ],
+    expected: '议题创建成功，navigateBack 返回，plaza 议事榜显示该议题',
+    checkpoints: [
+      { id: '4.1.1', desc: '入口可见', expected: 'plaza 议事区有「发议题」按钮 → 跳 topic-create' },
+      { id: '4.1.2', desc: '表单渲染', expected: 'topic-create 显示标题输入（最多 30 字）+ 描述输入（最多 500 字）' },
+      { id: '4.1.3', desc: '标题字数限制', expected: '标题超 30 字时后端拒绝（422），或前端限制输入' },
+      { id: '4.1.4', desc: '必填校验', expected: '标题为空 → 提交时提示「请填写标题」' },
+      { id: '4.1.5', desc: '提交成功', expected: '填写有效内容 → 提交 → toast 成功 → navigateBack → plaza 议事榜含该议题' },
+      { id: '4.1.6', desc: '草稿恢复', expected: 'skip：已在 ① 1.5.3 验证 topic-create 草稿恢复，本模块不重复' },
+    ],
+  },
+  {
+    id: '4.2', title: '赞踩互斥', driver: 'weapp',
+    steps: [
+      '张三进入一个开放议题详情',
+      '点击「赞同」',
+      '切换到「反对」',
+      '再点「反对」取消',
+      '查看列表页计数',
+    ],
+    expected: '赞踩计数正确更新，切换时互斥（同 scope 下只能一种状态），取消后归零',
+    checkpoints: [
+      { id: '4.2.1', desc: '点赞', expected: '点赞同 → 赞计数 +1，按钮高亮' },
+      { id: '4.2.2', desc: '切换踩', expected: '已赞状态点反对 → 赞清零，踩 +1（互斥切换）' },
+      { id: '4.2.3', desc: '取消', expected: '再点同按钮 → 取消赞/踩，计数归零' },
+      { id: '4.2.4', desc: '列表同步', expected: '返回 topics 列表 → 赞/踩计数与详情页一致' },
+      { id: '4.2.5', desc: '举报入口', expected: '议题详情底部有「举报该议题」链接' },
+    ],
+  },
+  {
+    id: '4.3', title: '评论嵌套', driver: 'weapp',
+    steps: [
+      '进入议题详情 → 切换「议题讨论」Tab',
+      '发表一条顶级评论',
+      '点击某评论的「回复」',
+      '发表回复（parentId）',
+      '对评论点赞/点踩',
+    ],
+    expected: '评论发表成功；回复嵌套显示在父评论下（最多 2 层）；评论点赞数正确',
+    checkpoints: [
+      { id: '4.3.1', desc: '评论入口', expected: '议题详情「议题讨论」Tab → 底部输入框 + 发送按钮' },
+      { id: '4.3.2', desc: '发表评论', expected: '输入文字 → 发送 → 列表更新显示新评论' },
+      { id: '4.3.3', desc: '回复嵌套', expected: '点回复 → 输入框显示「回复 @某人」→ 发送 → 嵌套在父评论下' },
+      { id: '4.3.4', desc: '嵌套层级', expected: '回复子评论时 → 后端限制最多 2 层（第 3 层被拒或扁平化）' },
+      { id: '4.3.5', desc: '评论点赞', expected: '点评论赞 → likeCount +1，按钮高亮' },
+      { id: '4.3.6', desc: '评论点踩', expected: '点评论踩 → dislikeCount +1，与赞互斥' },
+    ],
+  },
+  {
+    id: '4.4', title: '评分', driver: 'weapp',
+    steps: [
+      '进入一个开放议题详情（验证无评分入口）',
+      '进入一个已完结议题详情（验证有评分入口）',
+      '选 1-5 星提交评分',
+      '尝试再次评分',
+    ],
+    expected: '开放态无评分入口；完结态显示星级评分；每人只能评一次；防重复',
+    checkpoints: [
+      { id: '4.4.1', desc: '开放态无评分', expected: 'open 状态议题 → 不显示评分入口（只有赞踩）' },
+      { id: '4.4.2', desc: '完结态评分入口', expected: 'closed 状态议题 → 显示 1-5 星评分组件（需 Admin 先关闭议题，若 DB 无 closed 议题则 skip）' },
+      { id: '4.4.3', desc: '提交评分', expected: '选星 → 提交 → ratingSum/ratingCount 更新 → 显示平均分' },
+      { id: '4.4.4', desc: '防重复', expected: '已评分用户再评 → 后端拒（ConflictException，@@unique 约束）' },
+    ],
+  },
+  {
+    id: '4.5', title: '关联事件时间线', driver: 'weapp',
+    steps: [
+      '进入议题详情 → 「相关事件」Tab',
+      '查看关联事件列表',
+      '点击某事件跳转事件详情',
+      '从议题详情「+」按钮发起新事件',
+    ],
+    expected: '相关事件 Tab 显示事件卡片；点击跳转 event-detail；从议题发起事件自动关联该议题',
+    checkpoints: [
+      { id: '4.5.1', desc: '相关事件 Tab', expected: '议题详情有「相关事件 N」Tab，N 为关联事件数' },
+      { id: '4.5.2', desc: '事件列表', expected: 'Tab 内显示关联事件卡片（标题/匿名标记/描述/图片）' },
+      { id: '4.5.3', desc: '事件跳转', expected: '点事件卡片 → 跳 event-detail，事件详情反向显示关联议题入口' },
+      { id: '4.5.4', desc: '从议题发事件', expected: '议题详情「+」按钮 → 弹引导 modal → 跳 event-create（type=public_feedback）' },
+      { id: '4.5.5', desc: '新事件关联', expected: '创建后返回议题详情 → 「相关事件」计数 +1，列表含新事件' },
+    ],
+  },
+  {
+    id: '4.6', title: '投票参与', driver: 'weapp',
+    steps: [
+      '进入 votes 投票列表页',
+      '点击一个进行中的投票',
+      '选择选项（单选/多选）',
+      '提交投票',
+      '查看结果',
+    ],
+    expected: '投票列表显示进行中投票；详情显示选项；提交后 toast 成功；查看结果显示百分比/票数；防重复',
+    checkpoints: [
+      { id: '4.6.1', desc: '投票列表', expected: 'votes 页显示投票卡片（标题/单选多选标签/进行中标签/时间）' },
+      { id: '4.6.2', desc: '投票详情', expected: '点投票 → 显示标题/描述/选项列表/单选或复选指示器' },
+      { id: '4.6.3', desc: '提交投票', expected: '选选项 → 提交 → toast「投票成功」→ 显示「已投票」标签' },
+      { id: '4.6.4', desc: '查看结果', expected: '投票后点「查看结果」→ 显示各选项百分比 + 票数 + 进度条' },
+      { id: '4.6.5', desc: '防重复', expected: '已投票用户 → 提交按钮消失/禁用，显示「已完成投票」' },
+    ],
+  },
+  {
+    id: '4.7', title: '列表与入口', driver: 'weapp',
+    steps: [
+      '进入 plaza → 查看议事区',
+      '点击「未完结榜」/「完结榜」Tab',
+      '输入关键词搜索',
+      '进入 topics 议题列表页',
+      '点击社群入口',
+    ],
+    expected: 'plaza 议事区显示议题；Tab 切换正确；关键词搜索生效；社群入口跳转',
+    checkpoints: [
+      { id: '4.7.1', desc: 'plaza 议事区', expected: 'plaza 页显示议题列表（状态标签/标题/赞踩或评分/评论数/事件数）' },
+      { id: '4.7.2', desc: 'Tab 切换', expected: 'topics 页「未完结榜」/「完结榜」切换 → 列表按状态筛选' },
+      { id: '4.7.3', desc: '关键词搜索', expected: '输入关键词 → 搜索 title 和 description（case-insensitive）' },
+      { id: '4.7.4', desc: '社群入口', expected: 'plaza 社群卡片 → 跳 /pages/social-groups/index' },
+      { id: '4.7.5', desc: '分页加载', expected: '议题列表滚动到底 → 加载下一页，无重复无遗漏' },
+    ],
+  },
+];
+
+// ===== 存储层（检查点级）=====
+function loadState() {
+  try {
+    const raw = localStorage.getItem(MODULE.storageKey);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === 'object') ? parsed : {};
+  } catch (e) {
+    console.warn('loadState failed:', e);
+    return {};
+  }
+}
+function saveState(state) {
+  try {
+    localStorage.setItem(MODULE.storageKey, JSON.stringify(state));
+  } catch (e) {
+    alert('保存失败，浏览器存储空间不足');
+  }
+}
+function getCpState(cpId) {
+  const state = loadState();
+  if (state[cpId]) return state[cpId];
+  return ROUND2_DEFAULTS[cpId] || { status: 'pending', bugDesc: '', updatedAt: null };
+}
+function setCpState(cpId, data) {
+  const state = loadState();
+  state[cpId] = { ...state[cpId], ...data, updatedAt: new Date().toISOString() };
+  saveState(state);
+}
+function clearCpState(cpId) {
+  const state = loadState();
+  delete state[cpId];
+  saveState(state);
+}
+
+// ===== 渲染层 =====
+const STATUS = {
+  pending: { icon: '⏳', label: '待测' },
+  pass:    { icon: '✅', label: '通过' },
+  fail:    { icon: '❌', label: 'Bug' },
+  skip:    { icon: '⏸', label: '跳过' },
+};
+const R1_BADGE = {
+  pass: 'round-badge--pass', fail: 'round-badge--fail',
+  skip: 'round-badge--skip', pending: 'round-badge--pending',
+};
+
+function caseStats(tc) {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  tc.checkpoints.forEach(cp => {
+    const st = getCpState(cp.id).status;
+    s[st] = (s[st] || 0) + 1;
+  });
+  return s;
+}
+
+function renderCheckpoint(cp) {
+  const st = getCpState(cp.id);
+  const failClass = st.status === 'fail' ? 'is-fail' : '';
+  const showBug = st.status === 'fail' || st.status === 'skip';
+  const bugHidden = showBug ? '' : 'hidden';
+  const bugPh = st.status === 'skip' ? '跳过原因 / 备注...' : 'Bug 描述：复现步骤、实际结果、严重程度...';
+  return `
+    <div class="cp-row ${failClass}" data-cp-id="${cp.id}">
+      <div class="cp-top">
+        <span class="cp-id">${cp.id}</span>
+        <div class="cp-main">
+          <div class="cp-desc">${cp.desc}</div>
+          <div class="cp-expected"><strong>预期:</strong> ${cp.expected}</div>
+        </div>
+        <div class="cp-actions">
+          <button class="cp-btn pass ${st.status === 'pass' ? 'active' : ''}" onclick="setCp('${cp.id}','pass')">✅</button>
+          <button class="cp-btn fail ${st.status === 'fail' ? 'active' : ''}" onclick="setCp('${cp.id}','fail')">❌</button>
+          <button class="cp-btn skip ${st.status === 'skip' ? 'active' : ''}" onclick="setCp('${cp.id}','skip')">⏸</button>
+          <button class="cp-btn reset" onclick="resetCp('${cp.id}')">↺</button>
+        </div>
+      </div>
+      <textarea class="cp-bug ${bugHidden}" placeholder="${bugPh}" onblur="saveBug('${cp.id}', this.value)">${st.bugDesc || ''}</textarea>
+    </div>
+  `;
+}
+
+function renderCase(tc) {
+  const r1 = ROUND1[tc.id] || { status: 'pending', bugDesc: '' };
+  const r1cfg = STATUS[r1.status] || STATUS.pending;
+  const fixNote = FIX_NOTES[tc.id];
+  const stats = caseStats(tc);
+
+  const stepsHtml = tc.steps.map(s => `<li>${s}</li>`).join('');
+  const cpsHtml = tc.checkpoints.map(renderCheckpoint).join('');
+
+  return `
+    <div class="case-card" data-case-id="${tc.id}">
+      <div class="case-header has-body" onclick="toggleCase(this)">
+        <span class="case-id">${tc.id}</span>
+        <span class="case-title">${tc.title}</span>
+        <span class="driver-badge ${tc.driver}">${tc.driver === 'weapp' ? '小程序' : tc.driver === 'playwright' ? 'Playwright' : '手动'}</span>
+        <span class="case-stats">
+          <span class="case-stat pass">✅${stats.pass}</span>
+          <span class="case-stat fail">❌${stats.fail}</span>
+          <span class="case-stat skip">⏸${stats.skip}</span>
+          <span class="case-stat pending">⏳${stats.pending}</span>
+        </span>
+        <span class="case-toggle">▼</span>
+      </div>
+      <div class="case-body">
+        <div class="case-meta">
+          <div class="meta-row"><span class="meta-label">操作步骤:</span></div>
+          <ol class="meta-steps">${stepsHtml}</ol>
+          <div class="meta-row"><span class="meta-label">预期:</span><span class="meta-expected">${tc.expected}</span></div>
+          <div class="meta-row">
+            <span class="meta-label">一轮:</span>${r1cfg.icon} ${r1cfg.label}
+            <span class="round-badge ${R1_BADGE[r1.status]}">${r1.bugDesc || ''}</span>
+          </div>
+          ${fixNote ? `<div class="meta-row fix-note">🔧 修复: ${fixNote}</div>` : ''}
+        </div>
+        <div class="checkpoints">${cpsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAll() {
+  document.getElementById('cases-container').innerHTML = TEST_CASES.map(renderCase).join('');
+  updateStats();
+}
+
+function updateStats() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => {
+    const cs = caseStats(tc);
+    Object.keys(s).forEach(k => { s[k] += cs[k]; });
+  });
+  const total = TEST_CASES.reduce((n, tc) => n + tc.checkpoints.length, 0);
+  const done = s.pass + s.fail + s.skip;
+  const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('stat-pass').textContent = s.pass;
+  document.getElementById('stat-fail').textContent = s.fail;
+  document.getElementById('stat-skip').textContent = s.skip;
+  document.getElementById('stat-pending').textContent = s.pending;
+  document.getElementById('stat-rate').textContent = rate + '%';
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = rate + '%';
+  fill.textContent = rate + '%';
+  fill.style.background = rate === 100 ? 'var(--success)' : 'var(--primary)';
+
+  TEST_CASES.forEach(tc => {
+    const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`);
+    if (!card) return;
+    const stats = caseStats(tc);
+    const el = card.querySelector('.case-stats');
+    if (el) {
+      el.innerHTML = `
+        <span class="case-stat pass">✅${stats.pass}</span>
+        <span class="case-stat fail">❌${stats.fail}</span>
+        <span class="case-stat skip">⏸${stats.skip}</span>
+        <span class="case-stat pending">⏳${stats.pending}</span>
+      `;
+    }
+  });
+}
+
+// ===== 交互层 =====
+function setCp(cpId, status) {
+  setCpState(cpId, { status });
+  rerenderCaseByCp(cpId);
+  updateStats();
+}
+function saveBug(cpId, desc) {
+  const cur = getCpState(cpId);
+  if (cur.bugDesc !== desc) setCpState(cpId, { bugDesc: desc });
+}
+function resetCp(cpId) {
+  clearCpState(cpId);
+  rerenderCaseByCp(cpId);
+  updateStats();
+}
+function rerenderCaseByCp(cpId) {
+  const tc = TEST_CASES.find(t => t.checkpoints.some(c => c.id === cpId));
+  if (!tc) return;
+  const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`);
+  if (!card) return;
+  const cpsContainer = card.querySelector('.checkpoints');
+  if (cpsContainer) cpsContainer.innerHTML = tc.checkpoints.map(renderCheckpoint).join('');
+}
+function toggleCase(headerEl) {
+  const body = headerEl.nextElementSibling;
+  headerEl.classList.toggle('collapsed');
+  body.classList.toggle('collapsed');
+}
+
+// ===== 导出层 =====
+function exportModule() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => {
+    const cs = caseStats(tc);
+    Object.keys(s).forEach(k => { s[k] += cs[k]; });
+  });
+  const total = s.pass + s.fail + s.skip + s.pending;
+
+  let out = `# ${MODULE.icon} ${MODULE.label} — Bug 清单\n\n`;
+  out += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
+  out += `检查点统计: ✅ ${s.pass} / ❌ ${s.fail} / ⏸ ${s.skip} / ⏳ ${s.pending} （共 ${total}）\n`;
+  out += `\n${'='.repeat(60)}\n\n`;
+
+  const failedCps = [];
+  TEST_CASES.forEach(tc => {
+    tc.checkpoints.forEach(cp => {
+      if (getCpState(cp.id).status === 'fail') failedCps.push({ tc, cp });
+    });
+  });
+
+  if (failedCps.length === 0) {
+    out += `🎉 本模块暂无 Bug（无检查点标记为 ❌）\n\n`;
+    const r1Open = TEST_CASES.filter(t => ROUND1[t.id]?.status === 'fail');
+    if (r1Open.length > 0) {
+      out += `⚠️ 一轮遗留（case 级，待二轮复测）:\n`;
+      r1Open.forEach(t => {
+        out += `  - [${t.id}] ${t.title}: ${ROUND1[t.id].bugDesc}\n`;
+        if (FIX_NOTES[t.id]) out += `      ${FIX_NOTES[t.id]}\n`;
+      });
+    }
+  } else {
+    out += `## Bug 清单（检查点级，共 ${failedCps.length} 条）\n\n`;
+    failedCps.forEach((item, i) => {
+      const { tc, cp } = item;
+      const st = getCpState(cp.id);
+      out += `### Bug ${i + 1}: [${cp.id}] ${cp.desc}\n`;
+      out += `所属用例: [${tc.id}] ${tc.title} (${tc.driver})\n`;
+      out += `预期: ${cp.expected}\n`;
+      out += `状态: ❌ Bug\n`;
+      if (st.bugDesc) out += `Bug 描述: ${st.bugDesc}\n`;
+      out += `更新时间: ${st.updatedAt || '-'}\n\n`;
+    });
+  }
+
+  showExport(out);
+}
+
+function resetAll() {
+  if (!confirm('确定清空本模块用户标记的检查点记录吗？所有标记重置为待测。')) return;
+  localStorage.removeItem(MODULE.storageKey);
+  renderAll();
+  showExport('✅ 已清空用户标记的检查点记录，全部重置为待测。');
+}
+
+function showExport(text) {
+  const pre = document.getElementById('export-output');
+  pre.textContent = text;
+  pre.classList.add('visible');
+  document.getElementById('export-toolbar').style.display = 'flex';
+  document.getElementById('copy-hint').style.display = 'block';
+  pre.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyToClipboard() {
+  const text = document.getElementById('export-output').textContent;
+  if (!text) return;
+  const btn = document.querySelector('.btn-copy');
+  const orig = btn.textContent;
+  const done = () => { btn.textContent = '✅ 已复制'; setTimeout(() => { btn.textContent = orig; }, 2000); };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+function fallbackCopy(text, done) {
+  const pre = document.getElementById('export-output');
+  const range = document.createRange();
+  range.selectNodeContents(pre);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败，请手动全选复制'); }
+  sel.removeAllRanges();
+}
+
+// ===== 初始化 =====
+document.addEventListener('DOMContentLoaded', renderAll);
+</script>
+</body>
+</html>

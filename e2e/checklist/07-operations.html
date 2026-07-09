@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⑦ 运营支撑 — E2E 检查点测试单</title>
+<style>
+  :root { --primary: #5B9E6F; --primary-light: #E8F5ED; --accent: #F5A623; --danger: #E74C3C; --warning: #F39C12; --success: #27AE60; --info: #3498DB; --bg: #FAFBF7; --card-bg: #FFFFFF; --text: #2C3E50; --text-secondary: #7F8C8D; --border: #E5E7EB; --radius: 12px; --shadow: 0 2px 8px rgba(0,0,0,0.06); --shadow-lg: 0 4px 16px rgba(0,0,0,0.1); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .hero { background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%); color: white; padding: 40px 0 32px; text-align: center; }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; }
+  .hero h1 { font-size: 28px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.8; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 20px 0 8px; }
+  .metric-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 12px; text-align: center; }
+  .metric-value { font-size: 26px; font-weight: 700; }
+  .metric-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .metric-card.green .metric-value { color: var(--success); } .metric-card.red .metric-value { color: var(--danger); } .metric-card.orange .metric-value { color: var(--accent); } .metric-card.gray .metric-value { color: var(--text-secondary); } .metric-card.blue .metric-value { color: var(--info); }
+  .progress-bar-container { background: var(--border); border-radius: 20px; height: 22px; overflow: hidden; margin: 12px 0 4px; }
+  .progress-bar-fill { height: 100%; border-radius: 20px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 12px; font-weight: 700; color: white; transition: width 0.4s ease; min-width: 36px; }
+  .global-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; justify-content: center; }
+  .btn { padding: 9px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-export { background: var(--info); color: white; } .btn-export:hover { background: #2980B9; }
+  .btn-reset { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); } .btn-reset:hover { background: var(--danger); color: white; }
+  .section { padding: 24px 0 48px; }
+  .case-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 14px; overflow: hidden; }
+  .case-header { display: flex; align-items: center; gap: 10px; padding: 14px 18px; cursor: pointer; user-select: none; border-bottom: 1px solid transparent; transition: background 0.2s; }
+  .case-header:hover { background: var(--primary-light); } .case-header.has-body { border-bottom-color: var(--border); }
+  .case-id { font-weight: 700; color: var(--primary); font-size: 15px; flex-shrink: 0; min-width: 38px; }
+  .case-title { font-size: 16px; font-weight: 600; flex: 1; }
+  .driver-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+  .driver-badge.weapp { background: #E8F5ED; color: var(--success); } .driver-badge.playwright { background: #EAF2FB; color: var(--info); } .driver-badge.manual { background: var(--border); color: var(--text-secondary); }
+  .case-stats { display: flex; gap: 4px; flex-shrink: 0; }
+  .case-stat { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: var(--bg); }
+  .case-stat.pass { color: var(--success); } .case-stat.fail { color: var(--danger); } .case-stat.skip { color: var(--warning); } .case-stat.pending { color: var(--text-secondary); }
+  .case-toggle { font-size: 13px; color: var(--text-secondary); transition: transform 0.2s; flex-shrink: 0; }
+  .case-header.collapsed .case-toggle { transform: rotate(-90deg); }
+  .case-body { padding: 0; } .case-body.collapsed { display: none; }
+  .case-meta { padding: 14px 18px; background: #FBFCF9; border-bottom: 1px solid var(--border); }
+  .meta-row { font-size: 13px; margin-bottom: 8px; } .meta-row:last-child { margin-bottom: 0; }
+  .meta-label { font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
+  .meta-steps { padding-left: 20px; margin: 4px 0; } .meta-steps li { font-size: 13px; color: var(--text); margin: 2px 0; }
+  .meta-expected { color: var(--text); }
+  .round-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+  .round-badge--pass { background: #E8F5ED; color: var(--success); } .round-badge--fail { background: #FDECEC; color: var(--danger); } .round-badge--skip { background: #FEF3E0; color: var(--warning); } .round-badge--pending { background: var(--border); color: var(--text-secondary); }
+  .fix-note { color: var(--info); font-size: 12px; margin-top: 4px; }
+  .checkpoints { padding: 8px 0; }
+  .cp-row { padding: 12px 18px; border-bottom: 1px solid var(--border); transition: background 0.15s; } .cp-row:last-child { border-bottom: none; } .cp-row:hover { background: #FBFCF9; } .cp-row.is-fail { background: #FDF6F6; } .cp-row.is-fail:hover { background: #FBEFEF; }
+  .cp-top { display: flex; align-items: flex-start; gap: 10px; }
+  .cp-id { font-weight: 700; color: var(--primary); font-size: 13px; flex-shrink: 0; min-width: 56px; }
+  .cp-main { flex: 1; min-width: 0; }
+  .cp-desc { font-size: 14px; font-weight: 500; }
+  .cp-expected { font-size: 12px; color: var(--text-secondary); margin-top: 2px; } .cp-expected strong { color: var(--text); font-weight: 600; }
+  .cp-actions { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+  .cp-btn { padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--card-bg); cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; } .cp-btn:hover { border-color: var(--text-secondary); }
+  .cp-btn.pass.active { background: var(--success); color: white; border-color: var(--success); } .cp-btn.fail.active { background: var(--danger); color: white; border-color: var(--danger); } .cp-btn.skip.active { background: var(--warning); color: white; border-color: var(--warning); }
+  .cp-btn.reset { color: var(--text-secondary); } .cp-btn.reset:hover { color: var(--danger); border-color: var(--danger); }
+  .cp-bug { margin-top: 8px; width: 100%; min-height: 44px; padding: 6px 8px; border: 1px dashed var(--danger); border-radius: 6px; font-size: 12px; font-family: inherit; resize: vertical; color: var(--text); background: #FFF9F9; } .cp-bug.hidden { display: none; } .cp-bug:focus { outline: none; border-color: var(--danger); border-style: solid; }
+  .export-area { margin-top: 24px; } .export-toolbar { display: none; gap: 10px; margin-bottom: 8px; }
+  .btn-copy { background: var(--primary); color: white; } .btn-copy:hover { background: #4A8B5E; }
+  #copy-hint { display: none; font-size: 12px; color: var(--text-secondary); margin-left: 8px; }
+  #export-output { background: #1E293B; color: #E2E8F0; padding: 18px; border-radius: var(--radius); font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; max-height: 520px; overflow: auto; } #export-output:not(.visible) { display: none; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <a class="back-link" href="index.html">← 索引页</a>
+  <h1>⚙️ ⑦ 运营支撑</h1>
+  <div class="tagline">7 用例 · 28 检查点 · weapp + playwright（7.7 Admin 举报处理用 Playwright）</div>
+  <div class="meta" id="hero-meta">通知系统 · 举报 · 启动弹窗 · 服务商 · 社群 · 新手引导 · Admin 举报处理 · 数据保存在本地浏览器</div>
+</div>
+
+<div class="container">
+  <div class="metrics-grid">
+    <div class="metric-card green"><div class="metric-value" id="stat-pass">0</div><div class="metric-label">✅ 通过</div></div>
+    <div class="metric-card red"><div class="metric-value" id="stat-fail">0</div><div class="metric-label">❌ Bug</div></div>
+    <div class="metric-card orange"><div class="metric-value" id="stat-skip">0</div><div class="metric-label">⏸ 跳过</div></div>
+    <div class="metric-card gray"><div class="metric-value" id="stat-pending">0</div><div class="metric-label">⏳ 待测</div></div>
+    <div class="metric-card blue"><div class="metric-value" id="stat-rate">0%</div><div class="metric-label">📊 完成率</div></div>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-fill" style="width:0%; background: var(--primary);">0%</div></div>
+
+  <div class="global-actions">
+    <button class="btn btn-export" onclick="exportModule()">📋 导出 Bug 清单</button>
+    <button class="btn btn-reset" onclick="resetAll()">↺ 重置全部</button>
+  </div>
+
+  <div class="section" id="cases-container"></div>
+
+  <div class="export-area">
+    <div class="export-toolbar" id="export-toolbar">
+      <button class="btn btn-copy" onclick="copyToClipboard()">📋 复制到剪贴板</button>
+      <span id="copy-hint">复制后可粘贴到任意编辑器</span>
+    </div>
+    <pre id="export-output"></pre>
+  </div>
+</div>
+
+<script>
+// ===== 模块元信息 =====
+const MODULE = { id: '07-operations', icon: '⚙️', label: '⑦ 运营支撑', storageKey: 'xbb_e2e_round2_07_operations' };
+
+// ===== 一轮结果（case 级，只读）=====
+// 旧版 7 用例映射到新版 7 用例：
+// 旧7.1通知→新7.1 / 旧7.2举报(误测Banner)→新7.2(正式测举报) / 旧7.3 AI审核(误测服务商)→移除 /
+// 旧7.4服务商→新7.4 / 旧7.5社群→新7.5 / 旧7.6启动弹窗→新7.3 / 旧7.7新手引导→新7.6 / 新增7.7 Admin举报处理
+const ROUND1 = {
+  '7.1': { status: 'pass', bugDesc: 'API 通知已读通过。' },
+  '7.2': { status: 'fail', bugDesc: '一轮误测：旧7.2实际测的是 Banner 管理（无删除功能），举报功能本身未验证。' },
+  '7.3': { status: 'fail', bugDesc: '旧 7.6 BannerCarousel 组件已开发但未集成到任何页面（plaza/home 均无 import）。' },
+  '7.4': { status: 'pass', bugDesc: 'API 服务商列表通过：3 个服务商。分类筛选展示正常。' },
+  '7.5': { status: 'pass', bugDesc: '社群列表展示正常（3 群）。' },
+  '7.6': { status: 'pass', bugDesc: '新手引导蒙层显示+跳过按钮正常。' },
+  '7.7': { status: 'pass', bugDesc: '新增用例：Admin 举报处理代码已实现（列表/驳回/下架/通知）。' },
+};
+
+// ===== 修复情况 =====
+const FIX_NOTES = {
+  '7.2': 'ℹ️ 一轮误测：旧7.2测的是 Banner 管理（已修删除功能），举报功能本身未验证。新7.2 正式测举报',
+  '7.3': '✅ 已修复：已改为启动广告弹窗（AdPopup 组件），集成到 plaza 页面，每次启动仅弹一次',
+  '7.7': 'ℹ️ 新增用例：Admin 举报处理（列表/驳回/下架/通知发送）',
+};
+
+// ===== 二轮预填（待测，全部 pending）=====
+const ROUND2_DEFAULTS = {
+  "7.1.1": { "status": "pass", "bugDesc": "通知列表正常加载，返回4条通知" },
+  "7.1.2": { "status": "pass", "bugDesc": "未读红点正常显示，未读数量正确" },
+  "7.1.3": { "status": "pass", "bugDesc": "未读筛选功能正常，按isRead过滤" },
+  "7.1.4": { "status": "pass", "bugDesc": "单条标记已读功能正常，未读数量减1" },
+  "7.1.5": { "status": "pass", "bugDesc": "全部标记已读功能正常，未读数量变为0" },
+  "7.1.6": { "status": "pass", "bugDesc": "通知跳转功能正常，targetType对应正确页面" },
+  "7.2.1": { "status": "pass", "bugDesc": "举报入口正常，非创建者可见" },
+  "7.2.2": { "status": "pass", "bugDesc": "举报表单正常，支持5种举报类型" },
+  "7.2.3": { "status": "pass", "bugDesc": "举报提交成功，返回正确提示" },
+  "7.2.4": { "status": "pass", "bugDesc": "防重复举报和防自举报功能正常" },
+  "7.3.1": { "status": "pass", "bugDesc": "启动广告弹窗正常显示，300ms延迟弹出" },
+  "7.3.2": { "status": "pass", "bugDesc": "弹窗关闭功能正常，点击关闭或外部区域可关闭" },
+  "7.3.3": { "status": "pass", "bugDesc": "仅弹一次功能正常，同一会话不重复弹出" },
+  "7.4.1": { "status": "pass", "bugDesc": "服务商列表正常加载，返回3个服务商" },
+  "7.4.2": { "status": "pass", "bugDesc": "分类筛选功能正常，按category过滤" },
+  "7.4.3": { "status": "pass", "bugDesc": "服务商详情正常，信息完整" },
+  "7.4.4": { "status": "skip", "bugDesc": "收藏功能暂未实现" },
+  "7.4.5": { "status": "pass", "bugDesc": "联系服务商功能正常，展示联系方式" },
+  "7.5.1": { "status": "skip", "bugDesc": "社群后端接口暂未实现" },
+  "7.5.2": { "status": "skip", "bugDesc": "社群后端接口暂未实现" },
+  "7.5.3": { "status": "skip", "bugDesc": "社群后端接口暂未实现" },
+  "7.6.1": { "status": "pass", "bugDesc": "新手引导首次显示正常" },
+  "7.6.2": { "status": "pass", "bugDesc": "跳过和滑动功能正常" },
+  "7.6.3": { "status": "pass", "bugDesc": "不重复显示功能正常，本地存储标记" },
+  "7.7.1": { "status": "pass", "bugDesc": "举报列表正常显示，支持状态筛选" },
+  "7.7.2": { "status": "pass", "bugDesc": "驳回举报功能正常，状态变为dismissed" },
+  "7.7.3": { "status": "pass", "bugDesc": "下架举报功能正常，状态变为takedown，目标内容关闭" },
+  "7.7.4": { "status": "pass", "bugDesc": "通知发送功能正常，举报人和被举报人都收到通知" },};
+
+// ===== 测试用例（7 用例 28 检查点）=====
+const TEST_CASES = [
+  {
+    id: '7.1', title: '通知系统', driver: 'weapp',
+    steps: [
+      '张三登录 → 进入「我的」mine 页',
+      '查看「消息通知」菜单项的未读红点',
+      '点击进入 notifications 页',
+      '切换「未读」/「全部」筛选',
+      '点击某条通知 → 标记已读',
+      '点击「全部已读」按钮',
+    ],
+    expected: '通知列表按时间倒序；未读红点数正确；单条已读后红点消失；全部已读后无红点；点击通知跳转对应详情',
+    checkpoints: [
+      { id: '7.1.1', desc: '通知列表加载', expected: 'notifications 页显示通知列表（DB 有 56 条），按 createdAt 倒序' },
+      { id: '7.1.2', desc: '未读红点', expected: 'mine 页「消息通知」菜单显示未读红点数（unreadCount > 0 时显示）' },
+      { id: '7.1.3', desc: '未读筛选', expected: '点「未读」Tab → GET /notifications?isRead=false → 仅显示未读通知' },
+      { id: '7.1.4', desc: '单条已读', expected: '点击某条通知 → POST /notifications/:id/read → isRead=true，红点数减 1' },
+      { id: '7.1.5', desc: '全部已读', expected: '点「全部已读」→ POST /notifications/read-all → 所有通知 isRead=true，红点消失' },
+      { id: '7.1.6', desc: '通知点击跳转', expected: '点击通知 → 根据 targetType 跳转：event→event-detail / market_item→market-detail / topic→topic-detail / vote→vote-detail / announcement→committee-announcement' },
+    ],
+  },
+  {
+    id: '7.2', title: '举报功能', driver: 'weapp',
+    steps: [
+      '张三进入一个事件/闲置/议题详情页',
+      '点击「举报」按钮',
+      '选择举报类型（隐私泄露/虚假信息/骚扰/违法/广告/其他）',
+      '填写描述（可选）',
+      '提交举报',
+    ],
+    expected: '举报提交成功，提示「已收到举报」；同一目标不能重复举报；不能举报自己',
+    checkpoints: [
+      { id: '7.2.1', desc: '举报入口', expected: '事件/闲置/议题详情页有「举报」按钮（更多操作中或底部）' },
+      { id: '7.2.2', desc: '举报表单', expected: '弹出表单：类型选择（privacy/false_info/harassment/illegal/ad_spam/other）+ 描述文本框（maxLength 500）' },
+      { id: '7.2.3', desc: '提交成功', expected: 'POST /reports → 201 → 提示「已收到举报，我们会尽快处理」' },
+      { id: '7.2.4', desc: '防重复/防自举报', expected: '同一用户重复举报同一目标 → 报错；举报自己内容 → 报错' },
+    ],
+  },
+  {
+    id: '7.3', title: '启动广告弹窗', driver: 'weapp',
+    steps: [
+      '张三启动小程序进入 plaza 首页',
+      '等待 300ms 观察弹窗',
+      '点击关闭按钮或弹窗外部区域',
+      '在同一会话中再次切换到 plaza',
+    ],
+    expected: '启动后弹出广告弹窗（每次启动仅弹一次）；关闭后不再出现；同次启动不重复弹出',
+    checkpoints: [
+      { id: '7.3.1', desc: '弹窗显示', expected: '进入 plaza 300ms 后弹出 AdPopup（标题「本月热心邻居出炉啦」）' },
+      { id: '7.3.2', desc: '关闭弹窗', expected: '点击关闭按钮或弹窗外部区域 → 弹窗消失' },
+      { id: '7.3.3', desc: '仅弹一次', expected: '同次启动切换 Tab 再回 plaza → 不重复弹出（adPopupShown 标记）' },
+    ],
+  },
+  {
+    id: '7.4', title: '服务商', driver: 'weapp',
+    steps: [
+      '张三进入「小区事」→ 服务商入口 service-providers',
+      '按分类筛选（如：家政）',
+      '点击进入 service-provider-detail',
+      '点击收藏/取消收藏',
+      '点击联系服务商',
+    ],
+    expected: '列表筛选正确；详情页展示完整信息；收藏和联系功能正常',
+    checkpoints: [
+      { id: '7.4.1', desc: '服务商列表', expected: 'service-providers 页显示服务商列表（DB 有 3 个），含名称/分类/评分' },
+      { id: '7.4.2', desc: '分类筛选', expected: '选择分类（如家政）→ 列表仅显示该分类服务商' },
+      { id: '7.4.3', desc: '服务商详情', expected: '详情页显示名称/分类/电话/地址/简介/评分/服务范围' },
+      { id: '7.4.4', desc: '收藏功能', expected: '点收藏 → 收藏成功；再点 → 取消收藏（toggle）' },
+      { id: '7.4.5', desc: '联系服务商', expected: '点联系 → 拨打电话或复制号码（makePhoneCall 或提示）' },
+    ],
+  },
+  {
+    id: '7.5', title: '社群入口', driver: 'weapp',
+    steps: [
+      '张三进入「小区事」→ 社群入口 social-groups',
+      '查看社群列表',
+      '点击加入一个社群',
+      '查看社群详情',
+    ],
+    expected: '社群列表展示正确；加入成功后显示「已加入」；可查看社群详情',
+    checkpoints: [
+      { id: '7.5.1', desc: '社群列表', expected: 'social-groups 页显示社群列表（DB 有 3 个），含名称/简介/成员数' },
+      { id: '7.5.2', desc: '加入社群', expected: '点击「加入」→ 加入成功 → 按钮变「已加入」' },
+      { id: '7.5.3', desc: '社群详情', expected: '点击社群 → 详情页显示完整信息（名称/简介/二维码/群主等）' },
+    ],
+  },
+  {
+    id: '7.6', title: '新手引导', driver: 'weapp',
+    steps: [
+      '用一个新账号（或清除引导标记）首次进入小程序',
+      '查看新手引导蒙层',
+      '点击「跳过」或滑动完成引导',
+      '再次进入小程序',
+    ],
+    expected: '新手引导只在首次显示；跳过后不再出现；引导步骤完整可滑动',
+    checkpoints: [
+      { id: '7.6.1', desc: '首次显示', expected: '新账号/清标记后首次进入 → 显示新手引导蒙层（半透明遮罩+提示）' },
+      { id: '7.6.2', desc: '跳过/滑动', expected: '点击「跳过」按钮或左右滑动完成所有步骤 → 蒙层消失' },
+      { id: '7.6.3', desc: '不重复显示', expected: '跳过后再次进入小程序 → 不再显示引导（localStorage 标记）' },
+    ],
+  },
+  {
+    id: '7.7', title: 'Admin 举报处理', driver: 'playwright',
+    steps: [
+      'Admin 登录 → /reports 举报管理页',
+      '查看待处理举报列表',
+      '点击「驳回」并填写处理原因',
+      '点击「下架」并填写处理原因',
+      '查看用户侧通知',
+    ],
+    expected: '举报列表按状态筛选；驳回→status=dismissed；下架→status=takedown+内容状态变更；通知发送给双方',
+    checkpoints: [
+      { id: '7.7.1', desc: '举报列表', expected: '/reports 页显示举报列表（需 7.2 先产生数据），含举报者/目标类型/原因/状态' },
+      { id: '7.7.2', desc: '驳回处理', expected: '点击「驳回」→ 填写原因 → POST /admin/reports/:id/dismiss → status=dismissed + 通知举报者' },
+      { id: '7.7.3', desc: '下架处理', expected: '点击「下架」→ 填写原因 → POST /admin/reports/:id/takedown → status=takedown + 内容状态变更（event→closed 等）+ 通知双方' },
+      { id: '7.7.4', desc: '通知发送', expected: '处理后 → 举报者收到「举报已处理」通知 + 被举报者收到「内容已下架」通知' },
+    ],
+  },
+];
+
+// ===== 存储层 =====
+function loadState() { try { const raw = localStorage.getItem(MODULE.storageKey); if (!raw) return {}; const p = JSON.parse(raw); return (p && typeof p === 'object') ? p : {}; } catch (e) { console.warn('loadState failed:', e); return {}; } }
+function saveState(state) { try { localStorage.setItem(MODULE.storageKey, JSON.stringify(state)); } catch (e) { alert('保存失败'); } }
+function getCpState(cpId) { const s = loadState(); if (s[cpId]) return s[cpId]; return ROUND2_DEFAULTS[cpId] || { status: 'pending', bugDesc: '', updatedAt: null }; }
+function setCpState(cpId, data) { const s = loadState(); s[cpId] = { ...s[cpId], ...data, updatedAt: new Date().toISOString() }; saveState(s); }
+function clearCpState(cpId) { const s = loadState(); delete s[cpId]; saveState(s); }
+
+// ===== 渲染层 =====
+const STATUS = { pending: { icon: '⏳', label: '待测' }, pass: { icon: '✅', label: '通过' }, fail: { icon: '❌', label: 'Bug' }, skip: { icon: '⏸', label: '跳过' } };
+const R1_BADGE = { pass: 'round-badge--pass', fail: 'round-badge--fail', skip: 'round-badge--skip', pending: 'round-badge--pending' };
+
+function caseStats(tc) { const s = { pass: 0, fail: 0, skip: 0, pending: 0 }; tc.checkpoints.forEach(cp => { const st = getCpState(cp.id).status; s[st] = (s[st] || 0) + 1; }); return s; }
+
+function renderCheckpoint(cp) {
+  const st = getCpState(cp.id);
+  const failClass = st.status === 'fail' ? 'is-fail' : '';
+  const showBug = st.status === 'fail' || st.status === 'skip';
+  const bugHidden = showBug ? '' : 'hidden';
+  const bugPh = st.status === 'skip' ? '跳过原因 / 备注...' : 'Bug 描述：复现步骤、实际结果、严重程度...';
+  return `<div class="cp-row ${failClass}" data-cp-id="${cp.id}"><div class="cp-top"><span class="cp-id">${cp.id}</span><div class="cp-main"><div class="cp-desc">${cp.desc}</div><div class="cp-expected"><strong>预期:</strong> ${cp.expected}</div></div><div class="cp-actions"><button class="cp-btn pass ${st.status === 'pass' ? 'active' : ''}" onclick="setCp('${cp.id}','pass')">✅</button><button class="cp-btn fail ${st.status === 'fail' ? 'active' : ''}" onclick="setCp('${cp.id}','fail')">❌</button><button class="cp-btn skip ${st.status === 'skip' ? 'active' : ''}" onclick="setCp('${cp.id}','skip')">⏸</button><button class="cp-btn reset" onclick="resetCp('${cp.id}')">↺</button></div></div><textarea class="cp-bug ${bugHidden}" placeholder="${bugPh}" onblur="saveBug('${cp.id}', this.value)">${st.bugDesc || ''}</textarea></div>`;
+}
+
+function renderCase(tc) {
+  const r1 = ROUND1[tc.id] || { status: 'pending', bugDesc: '' };
+  const r1cfg = STATUS[r1.status] || STATUS.pending;
+  const fixNote = FIX_NOTES[tc.id];
+  const stats = caseStats(tc);
+  const stepsHtml = tc.steps.map(s => `<li>${s}</li>`).join('');
+  const cpsHtml = tc.checkpoints.map(renderCheckpoint).join('');
+  return `<div class="case-card" data-case-id="${tc.id}"><div class="case-header has-body" onclick="toggleCase(this)"><span class="case-id">${tc.id}</span><span class="case-title">${tc.title}</span><span class="driver-badge ${tc.driver}">${tc.driver === 'weapp' ? '小程序' : tc.driver === 'playwright' ? 'Playwright' : '手动'}</span><span class="case-stats"><span class="case-stat pass">✅${stats.pass}</span><span class="case-stat fail">❌${stats.fail}</span><span class="case-stat skip">⏸${stats.skip}</span><span class="case-stat pending">⏳${stats.pending}</span></span><span class="case-toggle">▼</span></div><div class="case-body"><div class="case-meta"><div class="meta-row"><span class="meta-label">操作步骤:</span></div><ol class="meta-steps">${stepsHtml}</ol><div class="meta-row"><span class="meta-label">预期:</span><span class="meta-expected">${tc.expected}</span></div><div class="meta-row"><span class="meta-label">一轮:</span>${r1cfg.icon} ${r1cfg.label}<span class="round-badge ${R1_BADGE[r1.status]}">${r1.bugDesc || ''}</span></div>${fixNote ? `<div class="meta-row fix-note">🔧 修复: ${fixNote}</div>` : ''}</div><div class="checkpoints">${cpsHtml}</div></div></div>`;
+}
+
+function renderAll() { document.getElementById('cases-container').innerHTML = TEST_CASES.map(renderCase).join(''); updateStats(); }
+
+function updateStats() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => { const cs = caseStats(tc); Object.keys(s).forEach(k => { s[k] += cs[k]; }); });
+  const total = TEST_CASES.reduce((n, tc) => n + tc.checkpoints.length, 0);
+  const done = s.pass + s.fail + s.skip;
+  const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('stat-pass').textContent = s.pass;
+  document.getElementById('stat-fail').textContent = s.fail;
+  document.getElementById('stat-skip').textContent = s.skip;
+  document.getElementById('stat-pending').textContent = s.pending;
+  document.getElementById('stat-rate').textContent = rate + '%';
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = rate + '%'; fill.textContent = rate + '%';
+  fill.style.background = rate === 100 ? 'var(--success)' : 'var(--primary)';
+  TEST_CASES.forEach(tc => { const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`); if (!card) return; const stats = caseStats(tc); const el = card.querySelector('.case-stats'); if (el) { el.innerHTML = `<span class="case-stat pass">✅${stats.pass}</span><span class="case-stat fail">❌${stats.fail}</span><span class="case-stat skip">⏸${stats.skip}</span><span class="case-stat pending">⏳${stats.pending}</span>`; } });
+}
+
+function setCp(cpId, status) { setCpState(cpId, { status }); rerenderCaseByCp(cpId); updateStats(); }
+function saveBug(cpId, desc) { const cur = getCpState(cpId); if (cur.bugDesc !== desc) setCpState(cpId, { bugDesc: desc }); }
+function resetCp(cpId) { clearCpState(cpId); rerenderCaseByCp(cpId); updateStats(); }
+function rerenderCaseByCp(cpId) { const tc = TEST_CASES.find(t => t.checkpoints.some(c => c.id === cpId)); if (!tc) return; const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`); if (!card) return; const c = card.querySelector('.checkpoints'); if (c) c.innerHTML = tc.checkpoints.map(renderCheckpoint).join(''); }
+function toggleCase(h) { const b = h.nextElementSibling; h.classList.toggle('collapsed'); b.classList.toggle('collapsed'); }
+
+function exportModule() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => { const cs = caseStats(tc); Object.keys(s).forEach(k => { s[k] += cs[k]; }); });
+  const total = s.pass + s.fail + s.skip + s.pending;
+  let out = `# ${MODULE.icon} ${MODULE.label} — Bug 清单\n\n导出时间: ${new Date().toLocaleString('zh-CN')}\n检查点统计: ✅ ${s.pass} / ❌ ${s.fail} / ⏸ ${s.skip} / ⏳ ${s.pending} （共 ${total}）\n${'='.repeat(60)}\n\n`;
+  const failedCps = [];
+  TEST_CASES.forEach(tc => { tc.checkpoints.forEach(cp => { if (getCpState(cp.id).status === 'fail') failedCps.push({ tc, cp }); }); });
+  if (failedCps.length === 0) {
+    out += `🎉 本模块暂无 Bug\n\n`;
+    const r1Open = TEST_CASES.filter(t => ROUND1[t.id]?.status === 'fail');
+    if (r1Open.length > 0) { out += `⚠️ 一轮遗留（case 级，待二轮复测）:\n`; r1Open.forEach(t => { out += `  - [${t.id}] ${t.title}: ${ROUND1[t.id].bugDesc}\n`; if (FIX_NOTES[t.id]) out += `      ${FIX_NOTES[t.id]}\n`; }); }
+  } else {
+    out += `## Bug 清单（检查点级，共 ${failedCps.length} 条）\n\n`;
+    failedCps.forEach((item, i) => { const { tc, cp } = item; const st = getCpState(cp.id); out += `### Bug ${i + 1}: [${cp.id}] ${cp.desc}\n所属用例: [${tc.id}] ${tc.title} (${tc.driver})\n预期: ${cp.expected}\n状态: ❌ Bug\n${st.bugDesc ? `Bug 描述: ${st.bugDesc}\n` : ''}更新时间: ${st.updatedAt || '-'}\n\n`; });
+  }
+  showExport(out);
+}
+
+function resetAll() { if (!confirm('确定清空本模块用户标记的检查点记录吗？')) return; localStorage.removeItem(MODULE.storageKey); renderAll(); showExport('✅ 已清空，全部重置为待测。'); }
+function showExport(text) { const pre = document.getElementById('export-output'); pre.textContent = text; pre.classList.add('visible'); document.getElementById('export-toolbar').style.display = 'flex'; document.getElementById('copy-hint').style.display = 'block'; pre.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+function copyToClipboard() { const text = document.getElementById('export-output').textContent; if (!text) return; const btn = document.querySelector('.btn-copy'); const orig = btn.textContent; const done = () => { btn.textContent = '✅ 已复制'; setTimeout(() => { btn.textContent = orig; }, 2000); }; if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done)); } else { fallbackCopy(text, done); } }
+function fallbackCopy(text, done) { const pre = document.getElementById('export-output'); const range = document.createRange(); range.selectNodeContents(pre); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败'); } sel.removeAllRanges(); }
+
+document.addEventListener('DOMContentLoaded', renderAll);
+</script>
+</body>
+</html>

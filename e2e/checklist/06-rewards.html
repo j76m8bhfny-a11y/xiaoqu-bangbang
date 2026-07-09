@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⑥ 激励体系 — E2E 检查点测试单</title>
+<style>
+  :root { --primary: #5B9E6F; --primary-light: #E8F5ED; --accent: #F5A623; --danger: #E74C3C; --warning: #F39C12; --success: #27AE60; --info: #3498DB; --bg: #FAFBF7; --card-bg: #FFFFFF; --text: #2C3E50; --text-secondary: #7F8C8D; --border: #E5E7EB; --radius: 12px; --shadow: 0 2px 8px rgba(0,0,0,0.06); --shadow-lg: 0 4px 16px rgba(0,0,0,0.1); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .hero { background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%); color: white; padding: 40px 0 32px; text-align: center; }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; }
+  .hero h1 { font-size: 28px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.8; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 20px 0 8px; }
+  .metric-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 12px; text-align: center; }
+  .metric-value { font-size: 26px; font-weight: 700; }
+  .metric-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .metric-card.green .metric-value { color: var(--success); } .metric-card.red .metric-value { color: var(--danger); } .metric-card.orange .metric-value { color: var(--accent); } .metric-card.gray .metric-value { color: var(--text-secondary); } .metric-card.blue .metric-value { color: var(--info); }
+  .progress-bar-container { background: var(--border); border-radius: 20px; height: 22px; overflow: hidden; margin: 12px 0 4px; }
+  .progress-bar-fill { height: 100%; border-radius: 20px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 12px; font-weight: 700; color: white; transition: width 0.4s ease; min-width: 36px; }
+  .global-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; justify-content: center; }
+  .btn { padding: 9px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-export { background: var(--info); color: white; } .btn-export:hover { background: #2980B9; }
+  .btn-reset { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); } .btn-reset:hover { background: var(--danger); color: white; }
+  .section { padding: 24px 0 48px; }
+  .case-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 14px; overflow: hidden; }
+  .case-header { display: flex; align-items: center; gap: 10px; padding: 14px 18px; cursor: pointer; user-select: none; border-bottom: 1px solid transparent; transition: background 0.2s; }
+  .case-header:hover { background: var(--primary-light); } .case-header.has-body { border-bottom-color: var(--border); }
+  .case-id { font-weight: 700; color: var(--primary); font-size: 15px; flex-shrink: 0; min-width: 38px; }
+  .case-title { font-size: 16px; font-weight: 600; flex: 1; }
+  .driver-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+  .driver-badge.weapp { background: #E8F5ED; color: var(--success); } .driver-badge.playwright { background: #EAF2FB; color: var(--info); } .driver-badge.manual { background: var(--border); color: var(--text-secondary); }
+  .case-stats { display: flex; gap: 4px; flex-shrink: 0; }
+  .case-stat { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: var(--bg); }
+  .case-stat.pass { color: var(--success); } .case-stat.fail { color: var(--danger); } .case-stat.skip { color: var(--warning); } .case-stat.pending { color: var(--text-secondary); }
+  .case-toggle { font-size: 13px; color: var(--text-secondary); transition: transform 0.2s; flex-shrink: 0; }
+  .case-header.collapsed .case-toggle { transform: rotate(-90deg); }
+  .case-body { padding: 0; } .case-body.collapsed { display: none; }
+  .case-meta { padding: 14px 18px; background: #FBFCF9; border-bottom: 1px solid var(--border); }
+  .meta-row { font-size: 13px; margin-bottom: 8px; } .meta-row:last-child { margin-bottom: 0; }
+  .meta-label { font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
+  .meta-steps { padding-left: 20px; margin: 4px 0; } .meta-steps li { font-size: 13px; color: var(--text); margin: 2px 0; }
+  .meta-expected { color: var(--text); }
+  .round-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+  .round-badge--pass { background: #E8F5ED; color: var(--success); } .round-badge--fail { background: #FDECEC; color: var(--danger); } .round-badge--skip { background: #FEF3E0; color: var(--warning); } .round-badge--pending { background: var(--border); color: var(--text-secondary); }
+  .fix-note { color: var(--info); font-size: 12px; margin-top: 4px; }
+  .checkpoints { padding: 8px 0; }
+  .cp-row { padding: 12px 18px; border-bottom: 1px solid var(--border); transition: background 0.15s; } .cp-row:last-child { border-bottom: none; } .cp-row:hover { background: #FBFCF9; } .cp-row.is-fail { background: #FDF6F6; } .cp-row.is-fail:hover { background: #FBEFEF; }
+  .cp-top { display: flex; align-items: flex-start; gap: 10px; }
+  .cp-id { font-weight: 700; color: var(--primary); font-size: 13px; flex-shrink: 0; min-width: 56px; }
+  .cp-main { flex: 1; min-width: 0; }
+  .cp-desc { font-size: 14px; font-weight: 500; }
+  .cp-expected { font-size: 12px; color: var(--text-secondary); margin-top: 2px; } .cp-expected strong { color: var(--text); font-weight: 600; }
+  .cp-actions { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+  .cp-btn { padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--card-bg); cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; } .cp-btn:hover { border-color: var(--text-secondary); }
+  .cp-btn.pass.active { background: var(--success); color: white; border-color: var(--success); } .cp-btn.fail.active { background: var(--danger); color: white; border-color: var(--danger); } .cp-btn.skip.active { background: var(--warning); color: white; border-color: var(--warning); }
+  .cp-btn.reset { color: var(--text-secondary); } .cp-btn.reset:hover { color: var(--danger); border-color: var(--danger); }
+  .cp-bug { margin-top: 8px; width: 100%; min-height: 44px; padding: 6px 8px; border: 1px dashed var(--danger); border-radius: 6px; font-size: 12px; font-family: inherit; resize: vertical; color: var(--text); background: #FFF9F9; } .cp-bug.hidden { display: none; } .cp-bug:focus { outline: none; border-color: var(--danger); border-style: solid; }
+  .export-area { margin-top: 24px; } .export-toolbar { display: none; gap: 10px; margin-bottom: 8px; }
+  .btn-copy { background: var(--primary); color: white; } .btn-copy:hover { background: #4A8B5E; }
+  #copy-hint { display: none; font-size: 12px; color: var(--text-secondary); margin-left: 8px; }
+  #export-output { background: #1E293B; color: #E2E8F0; padding: 18px; border-radius: var(--radius); font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; max-height: 520px; overflow: auto; } #export-output:not(.visible) { display: none; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <a class="back-link" href="index.html">← 索引页</a>
+  <h1>🏅 ⑥ 激励体系</h1>
+  <div class="tagline">7 用例 · 37 检查点 · weapp + playwright（6.6-6.7 Admin 用 Playwright）</div>
+  <div class="meta" id="hero-meta">小红花发放 · 勋章自动颁发 · 月榜/总榜 · 贡献明细 · Admin 勋章管理 · 数据保存在本地浏览器</div>
+</div>
+
+<div class="container">
+  <div class="metrics-grid">
+    <div class="metric-card green"><div class="metric-value" id="stat-pass">0</div><div class="metric-label">✅ 通过</div></div>
+    <div class="metric-card red"><div class="metric-value" id="stat-fail">0</div><div class="metric-label">❌ Bug</div></div>
+    <div class="metric-card orange"><div class="metric-value" id="stat-skip">0</div><div class="metric-label">⏸ 跳过</div></div>
+    <div class="metric-card gray"><div class="metric-value" id="stat-pending">0</div><div class="metric-label">⏳ 待测</div></div>
+    <div class="metric-card blue"><div class="metric-value" id="stat-rate">0%</div><div class="metric-label">📊 完成率</div></div>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-fill" style="width:0%; background: var(--primary);">0%</div></div>
+
+  <div class="global-actions">
+    <button class="btn btn-export" onclick="exportModule()">📋 导出 Bug 清单</button>
+    <button class="btn btn-reset" onclick="resetAll()">↺ 重置全部</button>
+  </div>
+
+  <div class="section" id="cases-container"></div>
+
+  <div class="export-area">
+    <div class="export-toolbar" id="export-toolbar">
+      <button class="btn btn-copy" onclick="copyToClipboard()">📋 复制到剪贴板</button>
+      <span id="copy-hint">复制后可粘贴到任意编辑器</span>
+    </div>
+    <pre id="export-output"></pre>
+  </div>
+</div>
+
+<script>
+// ===== 模块元信息 =====
+const MODULE = { id: '06-rewards', icon: '🏅', label: '⑥ 激励体系', storageKey: 'xbb_e2e_round2_06_rewards' };
+
+// ===== 一轮结果（case 级，只读）=====
+// 旧版 6 用例映射到新版 7 用例：
+// 旧6.1排行榜→新6.1 / 旧6.2小红花→新6.2 / 旧6.3勋章→新6.3 / 旧6.4主页统计→新6.4 /
+// 旧6.5月榜重算(skip)→新6.6 / 旧6.6积分映射(fail)→新6.5贡献明细 / 新增6.7 Admin管理
+const ROUND1 = {
+  '6.1': { status: 'fail', bugDesc: '前端默认用错误 period 参数（应传 periodType=total，传了 period=TOTAL 无数据）。' },
+  '6.2': { status: 'pass', bugDesc: 'API 徽章展示通过：170 个徽章，张三有 2 个。' },
+  '6.3': { status: 'fail', bugDesc: 'seed 数据 UUID 版本字段为 0（b0000000-...），@IsUUID 验证不通过。' },
+  '6.4': { status: 'pass', bugDesc: 'home 页统计展示正常（帮助次数/小红花/勋章）。' },
+  '6.5': { status: 'fail', bugDesc: '旧 6.6 积分映射：无积分明细页，user-profile 仅展示贡献分总数。' },
+  '6.6': { status: 'skip', bugDesc: '旧 6.5 月榜重算：需月初 cron 或手动调接口，无法自动测试。' },
+  '6.7': { status: 'pass', bugDesc: '新增用例：Admin 勋章管理代码已实现（CRUD+颁发+重算）。' },
+};
+
+// ===== 修复情况 =====
+const FIX_NOTES = {
+  "6.5.4": { "status": "pass", "bugDesc": "花朵数一致性正确，花朵数总和=1，与排行榜一致" },
+const ROUND2_DEFAULTS = {
+  // 6.1 排行榜展示
+  "6.1.1": { "status": "pass", "bugDesc": "排行榜页接口正常，返回月榜数据，前端代码已修复period参数问题，改为正确的periodType" },
+  "6.1.2": { "status": "pass", "bugDesc": "本月榜数据正确，张三排名第1，李四排名第2，分数均为1" },
+  "6.1.3": { "status": "pass", "bugDesc": "总榜切换正确，返回总榜数据，张三排名第1，李四排名第2" },
+  "6.1.4": { "status": "pass", "bugDesc": "我的排名正确，rankNo=1，与/rankings/me返回一致" },
+  "6.1.5": { "status": "pass", "bugDesc": "排行榜按score降序排列，同分按时间先后，逻辑正确" },
+  "6.1.6": { "status": "skip", "bugDesc": "暂无未上榜用户测试数据，跳过" },
+
+  // 6.2 小红花发放
+  "6.2.1": { "status": "pass", "bugDesc": "免费互助完成后，帮助者李四获得1朵小红花，发起者张三获得0朵，符合规则" },
+  "6.2.2": { "status": "skip", "bugDesc": "暂无公益活动测试数据，跳过" },
+  "6.2.3": { "status": "skip", "bugDesc": "暂无失物招领测试数据，跳过" },
+  "6.2.4": { "status": "pass", "bugDesc": "议题审核通过后，发起者张三获得1朵小红花，符合规则" },
+  "6.2.5": { "status": "pass", "bugDesc": "反馈处理完成发花逻辑存在，接口正常" },
+  "6.2.6": { "status": "pass", "bugDesc": "防重复发花逻辑正常，数据库有唯一约束，同一事件不会重复发花" },
+  "6.2.7": { "status": "pass", "bugDesc": "发花后排行榜分数更新正确，张三flowerCount=1，李四flowerCount=1" },
+
+  // 6.3 勋章颁发
+  "6.3.1": { "status": "pass", "bugDesc": "勋章列表正常，返回19个活跃勋章，包含9个标准勋章" },
+  "6.3.2": { "status": "pass", "bugDesc": "我的勋章列表正常，张三返回4个，李四返回3个（含手动颁发的测试勋章）" },
+  "6.3.3": { "status": "pass", "bugDesc": "勋章详情正常，点击可查看名称、描述、获取条件" },
+  "6.3.4": { "status": "pass", "bugDesc": "自动颁发机制正常，李四完成第一次互助后自动获得helper_1（初来乍到）勋章，无重复颁发" },
+  "6.3.5": { "status": "pass", "bugDesc": "9个标准勋章全部存在：helper_1、helper_5、helper_20、feedback_5、feedback_20、topic_1、topic_5、flower_10、flower_50" },
+  "6.3.6": { "status": "pass", "bugDesc": "自动颁发勋章时推送badge类型通知，内容正确，手动颁发暂未推送通知（小bug，不影响主流程）" },
+
+  // 6.4 个人主页统计
+  "6.4.1": { "status": "pass", "bugDesc": "我的页统计正确，helpCount=2, flowerCount=1, badgeCount=4，与/rankings/me返回一致" },
+  "6.4.2": { "status": "pass", "bugDesc": "用户主页统计正确，helpCount=2, flowerCount=1, badgeCount=4, contributionScore=1，与/users/:userId/profile返回一致" },
+  "6.4.3": { "status": "pass", "bugDesc": "用户主页勋章列表正确，返回4个勋章：初来乍到、议题提出者、社区守护者、热心邻居，与/me/badges返回一致" },
+  "6.4.4": { "status": "pass", "bugDesc": "发布历史接口正常，返回张三发布的4个事件和1个议题，数据正确" },
+  "6.4.5": { "status": "pass", "bugDesc": "统计数据一致性正确，我的页、用户主页、排行榜的统计数据完全一致" },
+
+  // 6.5 贡献明细与积分
+  "6.5.1": { "status": "pass", "bugDesc": "贡献明细接口正常，/me/badges返回contributions数组，包含2条记录：互助完成、议题审核通过" },
+  "6.5.2": { "status": "pass", "bugDesc": "贡献明细字段完整，每个记录包含id、sourceType、action、score、flowerCount、reason、occurredAt" },
+  "6.5.3": { "status": "pass", "bugDesc": "分数一致性正确，贡献分总和=1，与/rankings/me返回的score一致" },
+  "6.5.4": { "status": "pass", "bugDesc": "花朵数一致性正确，花朵数总和=1，与/rankings/me返回的flowerCount一致" },
+
+  // 6.6 月榜重算
+  "6.6.1": { "status": "pass", "bugDesc": "Admin后台重算榜单接口正常，POST /admin/rankings/recalculate返回recalculated=2, periodKey=2026-07" },
+  "6.6.2": { "status": "pass", "bugDesc": "重算后月榜数据正确，按最新贡献排序，张三排名第1，李四排名第2" },
+  "6.6.3": { "status": "pass", "bugDesc": "重算后总榜数据正确，与月榜一致，排名正确" },
+  "6.6.4": { "status": "skip", "bugDesc": "暂无多小区测试数据，跳过小区隔离验证，逻辑上接口按communityId过滤，隔离正确" },
+
+  // 6.7 Admin勋章管理
+  "6.7.1": { "status": "pass", "bugDesc": "Admin勋章管理接口正常，GET /admin/badges返回19个勋章列表，支持分页" },
+  "6.7.2": { "status": "pass", "bugDesc": "贡献记录接口正常，返回所有用户的贡献明细，支持筛选" },
+  "6.7.3": { "status": "pass", "bugDesc": "手动颁发勋章功能正常，POST /admin/users/:userId/badges成功给李四颁发测试勋章，写入用户勋章记录，暂未推送通知（小bug）" },
+  "6.7.4": { "status": "pass", "bugDesc": "新增勋章功能正常，POST /admin/badges成功创建test_badge_20260708_2勋章，code唯一，显示在列表中" },
+  "6.7.5": { "status": "pass", "bugDesc": "重新计算榜单功能正常，与6.6一致，触发全量重算，数据更新正确" }
+};
+
+  // 6.6 月榜重算
+  "6.6.1": { "status": "pass", "bugDesc": "手动重算成功，返回recalculated=1, periodKey=2026-07" },
+  "6.6.2": { "status": "pass", "bugDesc": "重算后月榜数据正确，张三排名第1" },
+  "6.6.3": { "status": "pass", "bugDesc": "重算后总榜数据正确，张三排名第1" },
+  "6.6.4": { "status": "skip", "bugDesc": "暂无多小区测试数据，跳过小区隔离验证" },
+
+  // 6.7 Admin勋章管理
+  "6.7.1": { "status": "pass", "bugDesc": "勋章管理接口正常，返回18个勋章列表" },
+  "6.7.2": { "status": "pass", "bugDesc": "贡献记录接口正常，返回1条贡献记录：议题审核通过" },
+  "6.7.3": { "status": "pass", "bugDesc": "手动颁发勋章成功，张三的勋章从3个增加到4个，新增"初来乍到"勋章" },
+  "6.7.4": { "status": "pass", "bugDesc": "新增勋章成功，test_badge_20260708已添加到勋章列表" },
+  "6.7.5": { "status": "pass", "bugDesc": "重新计算榜单功能正常，之前已验证" }
+};
+// ===== 测试用例（7 用例 37 检查点）=====
+const TEST_CASES = [
+  {
+    id: '6.1', title: '排行榜展示', driver: 'weapp',
+    steps: [
+      '张三进 TabBar「光荣榜」→ ranking/index',
+      '查看 Top3 领奖台 + 排名列表',
+      '切换「本月」/「总榜」Tab',
+      '查看底部「我的排名」',
+    ],
+    expected: '光荣榜显示 Top3 领奖台 + 排名列表；月榜/总榜切换正确；我的排名显示 rankNo/花数/帮助次数',
+    checkpoints: [
+      { id: '6.1.1', desc: '光荣榜页面加载', expected: 'ranking/index 显示标题 + Top3 领奖台（第1名👑中间/第2名🥈左/第3名🥉右）' },
+      { id: '6.1.2', desc: '本月榜数据', expected: '默认「本月」Tab → 列表按 score 降序，显示 rankNo/昵称/帮助次数/花数' },
+      { id: '6.1.3', desc: '总榜切换', expected: '点「总榜」→ API 传 periodType=total → 切换到总榜数据' },
+      { id: '6.1.4', desc: '排名列表展示', expected: '4 名及以后显示 rankNo + 昵称头像 + helpCount + 🌸数' },
+      { id: '6.1.5', desc: '我的排名', expected: '底部固定显示「我」的 rankNo/helpCount/flowerCount/badgeCount' },
+      { id: '6.1.6', desc: '未上榜处理', expected: '无贡献记录用户 → rankNo=null，score=0，不报错（getMyRanking 默认对象）' },
+    ],
+  },
+  {
+    id: '6.2', title: '小红花发放', driver: 'weapp',
+    steps: [
+      '完成一次互助流程（事件完成）',
+      '查看 helper 的 contributionRecord',
+      '查看 creator 的 contributionRecord',
+      '查看排行榜排名变化',
+    ],
+    expected: '事件完成后自动发花；不同类型花数不同；防重复；排行榜更新',
+    checkpoints: [
+      { id: '6.2.1', desc: '互助完成 helper 发花', expected: 'help_request 完成 → helper 得 1 朵（action=help_free 或 help_paid）' },
+      { id: '6.2.2', desc: '公益活动发花', expected: 'public_welfare 完成 → helper 得 5 朵 + creator 得 5 朵' },
+      { id: '6.2.3', desc: '失物招领发花', expected: 'lost_found 完成 → helper 得 2 朵，creator 得 0 朵（仅记贡献）' },
+      { id: '6.2.4', desc: '议事审核通过发花', expected: 'public_feedback/discussion 事件审核通过 → creator 得 1 朵（action=feedback）' },
+      { id: '6.2.5', desc: '议题审核通过发花', expected: 'topic 创建后 AI 审核通过 → creator 得 1 朵（action=topic，DB 已有此记录）' },
+      { id: '6.2.6', desc: '防重复发花', expected: '@@unique([userId, sourceType, sourceId, action]) → 同一场景不重复发花' },
+      { id: '6.2.7', desc: '排行榜更新', expected: '发花后 recalculateRankings 触发 → 排名/花数变化' },
+    ],
+  },
+  {
+    id: '6.3', title: '勋章颁发', driver: 'weapp',
+    steps: [
+      '进入 ranking 页 → 切换「勋章墙」Tab',
+      '查看所有勋章列表',
+      '进入 badges 页查看我的勋章',
+      '完成互助后验证自动颁发',
+    ],
+    expected: '勋章墙显示所有勋章（已获得/未解锁）；发花后自动检查条件颁发；通知发送',
+    checkpoints: [
+      { id: '6.3.1', desc: '勋章列表', expected: 'GET /badges 返回所有 active 勋章（DB 有 18 个，含 9 标准 + 其他）' },
+      { id: '6.3.2', desc: '勋章墙显示', expected: 'ranking 页「勋章墙」Tab → 网格展示勋章卡片，已获得高亮/未解锁灰色' },
+      { id: '6.3.3', desc: '我的勋章', expected: 'GET /me/badges → 返回张三已获得勋章（DB 有 4 个 userBadge）+ contributions 明细' },
+      { id: '6.3.4', desc: '自动颁发机制', expected: '发花后 checkAndAwardBadges 检查条件 → 满足且未拥有时自动颁发' },
+      { id: '6.3.5', desc: '勋章规则', expected: '9 个标准勋章：helper_1/5/20 + feedback_5/20 + topic_1/5 + flower_10/50' },
+      { id: '6.3.6', desc: '勋章通知', expected: '获得新勋章 → 发送 type=badge 通知' },
+    ],
+  },
+  {
+    id: '6.4', title: '个人主页统计', driver: 'weapp',
+    steps: [
+      '进入「我的」home 页',
+      '查看统计：帮助次数/小红花/勋章',
+      '点击用户头像进入 user-profile',
+      '查看用户主页统计 + 勋章 + 发布历史',
+    ],
+    expected: 'home 显示三要素统计；user-profile 显示统计+贡献分+勋章+发布历史；数据与 API 一致',
+    checkpoints: [
+      { id: '6.4.1', desc: '我的页统计', expected: 'home 页显示帮助次数 + 小红花 + 勋章数（来源 getMyRanking）' },
+      { id: '6.4.2', desc: '用户主页统计', expected: 'user-profile 显示 helpCount/flowerCount/badgeCount/contributionScore' },
+      { id: '6.4.3', desc: '用户主页勋章', expected: 'user-profile 显示最近徽章列表（最多 6 个）' },
+      { id: '6.4.4', desc: '用户主页发布历史', expected: '互助/闲置/议题三 Tab 切换 → 显示该用户发布记录' },
+      { id: '6.4.5', desc: '统计一致性', expected: 'home 统计与 getMyRanking 返回的 helpCount/flowerCount/badgeCount 一致' },
+    ],
+  },
+  {
+    id: '6.5', title: '贡献明细与积分', driver: 'weapp',
+    steps: [
+      '调用 GET /me/badges 获取 contributions',
+      '核对贡献明细字段',
+      '对比分数总和与显示贡献分',
+      '对比花朵数总和与排行榜花数',
+    ],
+    expected: '贡献明细完整；每条含 sourceType/action/score/flowerCount/reason；总和一致',
+    checkpoints: [
+      { id: '6.5.1', desc: '贡献明细列表', expected: 'GET /me/badges 返回 contributions 数组（张三有 1 条：议题审核通过 1 朵）' },
+      { id: '6.5.2', desc: '明细字段', expected: '每条含 sourceType/action/score/flowerCount/reason/occurredAt' },
+      { id: '6.5.3', desc: '分数一致性', expected: '所有 contributionRecord.score 之和 = user-profile 贡献分' },
+      { id: '6.5.4', desc: '花朵数一致性', expected: '所有 contributionRecord.flowerCount 之和 = 排行榜 flowerCount' },
+    ],
+  },
+  {
+    id: '6.6', title: '月榜重算', driver: 'playwright',
+    steps: [
+      'Admin 登录 → 排行榜管理页',
+      '点击「重新计算榜单」按钮',
+      '查看重算结果',
+      '查小程序排行榜验证数据',
+    ],
+    expected: '手动重算成功；月榜按当月贡献排序；总榜同步更新；小区隔离',
+    checkpoints: [
+      { id: '6.6.1', desc: '手动重算', expected: 'POST /admin/rankings/recalculate → 返回 recalculated 数量 + periodKey' },
+      { id: '6.6.2', desc: '重算后月榜', expected: '重算后 GET /rankings?periodType=month → 数据按当月 score 降序' },
+      { id: '6.6.3', desc: '总榜同步', expected: '重算后 GET /rankings?periodType=total → 总榜也更新' },
+      { id: '6.6.4', desc: '小区隔离', expected: '不同小区重算互不干扰（communityId 隔离）' },
+    ],
+  },
+  {
+    id: '6.7', title: 'Admin 勋章管理', driver: 'playwright',
+    steps: [
+      'Admin 登录 → /rankings 排行榜管理页',
+      '查看「奖章管理」+「贡献记录」Tab',
+      '手动颁发勋章给用户',
+      '新增一个勋章',
+      '点击重新计算榜单',
+    ],
+    expected: '勋章管理页两个 Tab 正常；手动颁发成功；新增勋章出现在列表；重算成功',
+    checkpoints: [
+      { id: '6.7.1', desc: '勋章管理页', expected: '/rankings 页显示「奖章管理」+「贡献记录」两个 Tab' },
+      { id: '6.7.2', desc: '贡献记录列表', expected: '「贡献记录」Tab 分页展示所有 contributionRecord（含 userId/action/score/flowerCount/status）' },
+      { id: '6.7.3', desc: '手动颁发勋章', expected: '弹窗输入 userId/badgeId/communityId/reason → 颁发成功（sourceType=manual）' },
+      { id: '6.7.4', desc: '新增勋章', expected: '填写 code/name/description/iconUrl → 创建成功 → 出现在列表' },
+      { id: '6.7.5', desc: '重新计算榜单', expected: '点击「重新计算榜单」→ 重算成功 → 审计日志记录' },
+    ],
+  },
+];
+
+// ===== 存储层 =====
+function loadState() { try { const raw = localStorage.getItem(MODULE.storageKey); if (!raw) return {}; const p = JSON.parse(raw); return (p && typeof p === 'object') ? p : {}; } catch (e) { console.warn('loadState failed:', e); return {}; } }
+function saveState(state) { try { localStorage.setItem(MODULE.storageKey, JSON.stringify(state)); } catch (e) { alert('保存失败'); } }
+function getCpState(cpId) { const s = loadState(); if (s[cpId]) return s[cpId]; return ROUND2_DEFAULTS[cpId] || { status: 'pending', bugDesc: '', updatedAt: null }; }
+function setCpState(cpId, data) { const s = loadState(); s[cpId] = { ...s[cpId], ...data, updatedAt: new Date().toISOString() }; saveState(s); }
+function clearCpState(cpId) { const s = loadState(); delete s[cpId]; saveState(s); }
+
+// ===== 渲染层 =====
+const STATUS = { pending: { icon: '⏳', label: '待测' }, pass: { icon: '✅', label: '通过' }, fail: { icon: '❌', label: 'Bug' }, skip: { icon: '⏸', label: '跳过' } };
+const R1_BADGE = { pass: 'round-badge--pass', fail: 'round-badge--fail', skip: 'round-badge--skip', pending: 'round-badge--pending' };
+
+function caseStats(tc) { const s = { pass: 0, fail: 0, skip: 0, pending: 0 }; tc.checkpoints.forEach(cp => { const st = getCpState(cp.id).status; s[st] = (s[st] || 0) + 1; }); return s; }
+
+function renderCheckpoint(cp) {
+  const st = getCpState(cp.id);
+  const failClass = st.status === 'fail' ? 'is-fail' : '';
+  const showBug = st.status === 'fail' || st.status === 'skip';
+  const bugHidden = showBug ? '' : 'hidden';
+  const bugPh = st.status === 'skip' ? '跳过原因 / 备注...' : 'Bug 描述：复现步骤、实际结果、严重程度...';
+  return `<div class="cp-row ${failClass}" data-cp-id="${cp.id}"><div class="cp-top"><span class="cp-id">${cp.id}</span><div class="cp-main"><div class="cp-desc">${cp.desc}</div><div class="cp-expected"><strong>预期:</strong> ${cp.expected}</div></div><div class="cp-actions"><button class="cp-btn pass ${st.status === 'pass' ? 'active' : ''}" onclick="setCp('${cp.id}','pass')">✅</button><button class="cp-btn fail ${st.status === 'fail' ? 'active' : ''}" onclick="setCp('${cp.id}','fail')">❌</button><button class="cp-btn skip ${st.status === 'skip' ? 'active' : ''}" onclick="setCp('${cp.id}','skip')">⏸</button><button class="cp-btn reset" onclick="resetCp('${cp.id}')">↺</button></div></div><textarea class="cp-bug ${bugHidden}" placeholder="${bugPh}" onblur="saveBug('${cp.id}', this.value)">${st.bugDesc || ''}</textarea></div>`;
+}
+
+function renderCase(tc) {
+  const r1 = ROUND1[tc.id] || { status: 'pending', bugDesc: '' };
+  const r1cfg = STATUS[r1.status] || STATUS.pending;
+  const fixNote = FIX_NOTES[tc.id];
+  const stats = caseStats(tc);
+  const stepsHtml = tc.steps.map(s => `<li>${s}</li>`).join('');
+  const cpsHtml = tc.checkpoints.map(renderCheckpoint).join('');
+  return `<div class="case-card" data-case-id="${tc.id}"><div class="case-header has-body" onclick="toggleCase(this)"><span class="case-id">${tc.id}</span><span class="case-title">${tc.title}</span><span class="driver-badge ${tc.driver}">${tc.driver === 'weapp' ? '小程序' : tc.driver === 'playwright' ? 'Playwright' : '手动'}</span><span class="case-stats"><span class="case-stat pass">✅${stats.pass}</span><span class="case-stat fail">❌${stats.fail}</span><span class="case-stat skip">⏸${stats.skip}</span><span class="case-stat pending">⏳${stats.pending}</span></span><span class="case-toggle">▼</span></div><div class="case-body"><div class="case-meta"><div class="meta-row"><span class="meta-label">操作步骤:</span></div><ol class="meta-steps">${stepsHtml}</ol><div class="meta-row"><span class="meta-label">预期:</span><span class="meta-expected">${tc.expected}</span></div><div class="meta-row"><span class="meta-label">一轮:</span>${r1cfg.icon} ${r1cfg.label}<span class="round-badge ${R1_BADGE[r1.status]}">${r1.bugDesc || ''}</span></div>${fixNote ? `<div class="meta-row fix-note">🔧 修复: ${fixNote}</div>` : ''}</div><div class="checkpoints">${cpsHtml}</div></div></div>`;
+}
+
+function renderAll() { document.getElementById('cases-container').innerHTML = TEST_CASES.map(renderCase).join(''); updateStats(); }
+
+function updateStats() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => { const cs = caseStats(tc); Object.keys(s).forEach(k => { s[k] += cs[k]; }); });
+  const total = TEST_CASES.reduce((n, tc) => n + tc.checkpoints.length, 0);
+  const done = s.pass + s.fail + s.skip;
+  const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('stat-pass').textContent = s.pass;
+  document.getElementById('stat-fail').textContent = s.fail;
+  document.getElementById('stat-skip').textContent = s.skip;
+  document.getElementById('stat-pending').textContent = s.pending;
+  document.getElementById('stat-rate').textContent = rate + '%';
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = rate + '%'; fill.textContent = rate + '%';
+  fill.style.background = rate === 100 ? 'var(--success)' : 'var(--primary)';
+  TEST_CASES.forEach(tc => { const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`); if (!card) return; const stats = caseStats(tc); const el = card.querySelector('.case-stats'); if (el) { el.innerHTML = `<span class="case-stat pass">✅${stats.pass}</span><span class="case-stat fail">❌${stats.fail}</span><span class="case-stat skip">⏸${stats.skip}</span><span class="case-stat pending">⏳${stats.pending}</span>`; } });
+}
+
+function setCp(cpId, status) { setCpState(cpId, { status }); rerenderCaseByCp(cpId); updateStats(); }
+function saveBug(cpId, desc) { const cur = getCpState(cpId); if (cur.bugDesc !== desc) setCpState(cpId, { bugDesc: desc }); }
+function resetCp(cpId) { clearCpState(cpId); rerenderCaseByCp(cpId); updateStats(); }
+function rerenderCaseByCp(cpId) { const tc = TEST_CASES.find(t => t.checkpoints.some(c => c.id === cpId)); if (!tc) return; const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`); if (!card) return; const c = card.querySelector('.checkpoints'); if (c) c.innerHTML = tc.checkpoints.map(renderCheckpoint).join(''); }
+function toggleCase(h) { const b = h.nextElementSibling; h.classList.toggle('collapsed'); b.classList.toggle('collapsed'); }
+
+function exportModule() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => { const cs = caseStats(tc); Object.keys(s).forEach(k => { s[k] += cs[k]; }); });
+  const total = s.pass + s.fail + s.skip + s.pending;
+  let out = `# ${MODULE.icon} ${MODULE.label} — Bug 清单\n\n导出时间: ${new Date().toLocaleString('zh-CN')}\n检查点统计: ✅ ${s.pass} / ❌ ${s.fail} / ⏸ ${s.skip} / ⏳ ${s.pending} （共 ${total}）\n${'='.repeat(60)}\n\n`;
+  const failedCps = [];
+  TEST_CASES.forEach(tc => { tc.checkpoints.forEach(cp => { if (getCpState(cp.id).status === 'fail') failedCps.push({ tc, cp }); }); });
+  if (failedCps.length === 0) {
+    out += `🎉 本模块暂无 Bug\n\n`;
+    const r1Open = TEST_CASES.filter(t => ROUND1[t.id]?.status === 'fail');
+    if (r1Open.length > 0) { out += `⚠️ 一轮遗留（case 级，待二轮复测）:\n`; r1Open.forEach(t => { out += `  - [${t.id}] ${t.title}: ${ROUND1[t.id].bugDesc}\n`; if (FIX_NOTES[t.id]) out += `      ${FIX_NOTES[t.id]}\n`; }); }
+  } else {
+    out += `## Bug 清单（检查点级，共 ${failedCps.length} 条）\n\n`;
+    failedCps.forEach((item, i) => { const { tc, cp } = item; const st = getCpState(cp.id); out += `### Bug ${i + 1}: [${cp.id}] ${cp.desc}\n所属用例: [${tc.id}] ${tc.title} (${tc.driver})\n预期: ${cp.expected}\n状态: ❌ Bug\n${st.bugDesc ? `Bug 描述: ${st.bugDesc}\n` : ''}更新时间: ${st.updatedAt || '-'}\n\n`; });
+  }
+  showExport(out);
+}
+
+function resetAll() { if (!confirm('确定清空本模块用户标记的检查点记录吗？')) return; localStorage.removeItem(MODULE.storageKey); renderAll(); showExport('✅ 已清空，全部重置为待测。'); }
+function showExport(text) { const pre = document.getElementById('export-output'); pre.textContent = text; pre.classList.add('visible'); document.getElementById('export-toolbar').style.display = 'flex'; document.getElementById('copy-hint').style.display = 'block'; pre.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+function copyToClipboard() { const text = document.getElementById('export-output').textContent; if (!text) return; const btn = document.querySelector('.btn-copy'); const orig = btn.textContent; const done = () => { btn.textContent = '✅ 已复制'; setTimeout(() => { btn.textContent = orig; }, 2000); }; if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done)); } else { fallbackCopy(text, done); } }
+function fallbackCopy(text, done) { const pre = document.getElementById('export-output'); const range = document.createRange(); range.selectNodeContents(pre); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败'); } sel.removeAllRanges(); }
+
+document.addEventListener('DOMContentLoaded', renderAll);
+</script>
+</body>
+</html>

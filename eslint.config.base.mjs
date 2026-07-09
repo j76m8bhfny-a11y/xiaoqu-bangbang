@@ -7,7 +7,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/.taro/**', '**/.next/**', '**/coverage/**'],
+    ignores: ['**/dist/**', '**/node_modules/**', '**/.taro/**', '**/.next/**', '**/coverage/**', 'e2e/**'],
   },
   {
     files: ['**/*.{ts,tsx}'],

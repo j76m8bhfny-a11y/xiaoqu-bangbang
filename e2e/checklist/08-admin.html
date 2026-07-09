@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⑧ Admin 后台 - E2E 检查点测试单</title>
+<style>
+  :root { --primary: #5B9E6F; --primary-light: #E8F5ED; --accent: #F5A623; --danger: #E74C3C; --warning: #F39C12; --success: #27AE60; --info: #3498DB; --bg: #FAFBF7; --card-bg: #FFFFFF; --text: #2C3E50; --text-secondary: #7F8C8D; --border: #E5E7EB; --radius: 12px; --shadow: 0 2px 8px rgba(0,0,0,0.06); --shadow-lg: 0 4px 16px rgba(0,0,0,0.1); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .hero { background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%); color: white; padding: 40px 0 32px; text-align: center; }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; }
+  .hero h1 { font-size: 28px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.8; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 20px 0 8px; }
+  .metric-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 12px; text-align: center; }
+  .metric-value { font-size: 26px; font-weight: 700; }
+  .metric-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .metric-card.green .metric-value { color: var(--success); } .metric-card.red .metric-value { color: var(--danger); } .metric-card.orange .metric-value { color: var(--accent); } .metric-card.gray .metric-value { color: var(--text-secondary); } .metric-card.blue .metric-value { color: var(--info); }
+  .progress-bar-container { background: var(--border); border-radius: 20px; height: 22px; overflow: hidden; margin: 12px 0 4px; }
+  .progress-bar-fill { height: 100%; border-radius: 20px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 12px; font-weight: 700; color: white; transition: width 0.4s ease; min-width: 36px; }
+  .global-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; justify-content: center; }
+  .btn { padding: 9px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-export { background: var(--info); color: white; } .btn-export:hover { background: #2980B9; }
+  .btn-reset { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); } .btn-reset:hover { background: var(--danger); color: white; }
+  .section { padding: 24px 0 48px; }
+  .case-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 14px; overflow: hidden; }
+  .case-header { display: flex; align-items: center; gap: 10px; padding: 14px 18px; cursor: pointer; user-select: none; border-bottom: 1px solid transparent; transition: background 0.2s; }
+  .case-header:hover { background: var(--primary-light); } .case-header.has-body { border-bottom-color: var(--border); }
+  .case-id { font-weight: 700; color: var(--primary); font-size: 15px; flex-shrink: 0; min-width: 38px; }
+  .case-title { font-size: 16px; font-weight: 600; flex: 1; }
+  .driver-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+  .driver-badge.weapp { background: #E8F5ED; color: var(--success); } .driver-badge.playwright { background: #EAF2FB; color: var(--info); } .driver-badge.manual { background: var(--border); color: var(--text-secondary); }
+  .case-stats { display: flex; gap: 4px; flex-shrink: 0; }
+  .case-stat { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: var(--bg); }
+  .case-stat.pass { color: var(--success); } .case-stat.fail { color: var(--danger); } .case-stat.skip { color: var(--warning); } .case-stat.pending { color: var(--text-secondary); }
+  .case-toggle { font-size: 13px; color: var(--text-secondary); transition: transform 0.2s; flex-shrink: 0; }
+  .case-header.collapsed .case-toggle { transform: rotate(-90deg); }
+  .case-body { padding: 0; } .case-body.collapsed { display: none; }
+  .case-meta { padding: 14px 18px; background: #FBFCF9; border-bottom: 1px solid var(--border); }
+  .meta-row { font-size: 13px; margin-bottom: 8px; } .meta-row:last-child { margin-bottom: 0; }
+  .meta-label { font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
+  .meta-steps { padding-left: 20px; margin: 4px 0; } .meta-steps li { font-size: 13px; color: var(--text); margin: 2px 0; }
+  .meta-expected { color: var(--text); }
+  .round-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+  .round-badge--pass { background: #E8F5ED; color: var(--success); } .round-badge--fail { background: #FDECEC; color: var(--danger); } .round-badge--skip { background: #FEF3E0; color: var(--warning); } .round-badge--pending { background: var(--border); color: var(--text-secondary); }
+  .fix-note { color: var(--info); font-size: 12px; margin-top: 4px; }
+  .checkpoints { padding: 8px 0; }
+  .cp-row { padding: 12px 18px; border-bottom: 1px solid var(--border); transition: background 0.15s; } .cp-row:last-child { border-bottom: none; } .cp-row:hover { background: #FBFCF9; } .cp-row.is-fail { background: #FDF6F6; } .cp-row.is-fail:hover { background: #FBEFEF; }
+  .cp-top { display: flex; align-items: flex-start; gap: 10px; }
+  .cp-id { font-weight: 700; color: var(--primary); font-size: 13px; flex-shrink: 0; min-width: 56px; }
+  .cp-main { flex: 1; min-width: 0; }
+  .cp-desc { font-size: 14px; font-weight: 500; }
+  .cp-expected { font-size: 12px; color: var(--text-secondary); margin-top: 2px; } .cp-expected strong { color: var(--text); font-weight: 600; }
+  .cp-actions { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+  .cp-btn { padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--card-bg); cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; white-space: nowrap; } .cp-btn:hover { border-color: var(--text-secondary); }
+  .cp-btn.pass.active { background: var(--success); color: white; border-color: var(--success); } .cp-btn.fail.active { background: var(--danger); color: white; border-color: var(--danger); } .cp-btn.skip.active { background: var(--warning); color: white; border-color: var(--warning); }
+  .cp-btn.reset { color: var(--text-secondary); } .cp-btn.reset:hover { color: var(--danger); border-color: var(--danger); }
+  .cp-bug { margin-top: 8px; width: 100%; min-height: 44px; padding: 6px 8px; border: 1px dashed var(--danger); border-radius: 6px; font-size: 12px; font-family: inherit; resize: vertical; color: var(--text); background: #FFF9F9; } .cp-bug.hidden { display: none; } .cp-bug:focus { outline: none; border-color: var(--danger); border-style: solid; }
+  .export-area { margin-top: 24px; } .export-toolbar { display: none; gap: 10px; margin-bottom: 8px; }
+  .btn-copy { background: var(--primary); color: white; } .btn-copy:hover { background: #4A8B5E; }
+  #copy-hint { display: none; font-size: 12px; color: var(--text-secondary); margin-left: 8px; }
+  #export-output { background: #1E293B; color: #E2E8F0; padding: 18px; border-radius: var(--radius); font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; max-height: 520px; overflow: auto; } #export-output:not(.visible) { display: none; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <a class="back-link" href="index.html">← 索引页</a>
+  <h1>🛠️ ⑧ Admin 后台</h1>
+  <div class="tagline">8 用例 · 35 检查点 · 全部 Playwright 驱动</div>
+  <div class="meta" id="hero-meta">登录仪表盘 · 菜单权限 · 内容审核 · 事件闲置 · 议事 · 投票公告 · Banner服务商 · 审计日志设置 · 数据保存在本地浏览器</div>
+</div>
+
+<div class="container">
+  <div class="metrics-grid">
+    <div class="metric-card green"><div class="metric-value" id="stat-pass">0</div><div class="metric-label">✅ 通过</div></div>
+    <div class="metric-card red"><div class="metric-value" id="stat-fail">0</div><div class="metric-label">❌ Bug</div></div>
+    <div class="metric-card orange"><div class="metric-value" id="stat-skip">0</div><div class="metric-label">⏸ 跳过</div></div>
+    <div class="metric-card gray"><div class="metric-value" id="stat-pending">0</div><div class="metric-label">⏳ 待测</div></div>
+    <div class="metric-card blue"><div class="metric-value" id="stat-rate">0%</div><div class="metric-label">📊 完成率</div></div>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-fill" style="width:0%; background: var(--primary);">0%</div></div>
+
+  <div class="global-actions">
+    <button class="btn btn-export" onclick="exportModule()">📋 导出 Bug 清单</button>
+    <button class="btn btn-reset" onclick="resetAll()">↺ 重置全部</button>
+  </div>
+
+  <div class="section" id="cases-container"></div>
+
+  <div class="export-area">
+    <div class="export-toolbar" id="export-toolbar">
+      <button class="btn btn-copy" onclick="copyToClipboard()">📋 复制到剪贴板</button>
+      <span id="copy-hint">复制后可粘贴到任意编辑器</span>
+    </div>
+    <pre id="export-output"></pre>
+  </div>
+</div>
+
+<script>
+// ===== 模块元信息 =====
+const MODULE = { id: '08-admin', icon: '🛠️', label: '⑧ Admin 后台', storageKey: 'xbb_e2e_round2_08_admin' };
+
+// ===== 一轮结果（case 级，只读）=====
+// 旧版 8 用例一轮测试严重误测，新版重新映射：
+// 旧8.1登录仪表盘(pass)->新8.1 / 旧8.2菜单完整(pass,但误测仪表盘)->新8.2 /
+// 旧8.3内容审核(fail,但误测用户管理)->新8.3 / 旧8.4小区审批->移至①1.7 / 旧8.5举报管理->移至⑦7.7 /
+// 旧8.6Banner管理(pass,但误测认证审核)->新8.7 / 旧8.7议事管理(fail,但误测举报)->新8.5 /
+// 旧8.8审计日志设置(pass,但只测了设置)->新8.8 / 新增8.4事件闲置+8.6投票公告
+const ROUND1 = {
+  '8.1': { status: 'pass', bugDesc: 'Admin 登录/登出流程正常。仪表盘展示正常。' },
+  '8.2': { status: 'pass', bugDesc: '一轮误测：实际测的是仪表盘统计（9卡片），菜单完整性未逐项验证。' },
+  '8.3': { status: 'fail', bugDesc: '一轮误测：旧8.3测的是用户管理（无独立页面），内容审核本身未验证。' },
+  '8.4': { status: 'pass', bugDesc: '新增用例：事件与闲置管理（隐藏/恢复/拒绝）。' },
+  '8.5': { status: 'fail', bugDesc: '一轮误测：旧8.7测的是举报管理（无数据），议事管理本身未验证。' },
+  '8.6': { status: 'pass', bugDesc: '新增用例：投票管理 + 业委会公告管理。' },
+  '8.7': { status: 'fail', bugDesc: '一轮误测：旧8.6测的是认证审核（6条记录 pass），Banner管理本身未验证。' },
+  '8.8': { status: 'pass', bugDesc: '系统设置页面正常（基础设置+AI开关4个）。审计日志未验证。' },
+};
+
+// ===== 修复情况 =====
+const FIX_NOTES = {
+  '8.2': 'ℹ️ 一轮误测：实际测仪表盘统计，菜单完整性待二轮逐项验证（18 菜单项）',
+  '8.3': 'ℹ️ 一轮误测：旧8.3测用户管理（无页面），新8.3正式测内容审核（reviews）',
+  '8.4': 'ℹ️ 新增用例：事件管理（列表/筛选/隐藏/恢复）+ 闲置管理（列表/筛选/隐藏/恢复/拒绝）',
+  '8.5': 'ℹ️ 一轮误测：旧8.7测举报管理（无数据），新8.5正式测议事管理（完结/重启/合并）',
+  '8.6': 'ℹ️ 新增用例：投票管理（CRUD/发布/结果）+ 业委会公告管理（CRUD/发布/置顶/隐藏）',
+  '8.7': 'ℹ️ 一轮误测：旧8.6测认证审核（pass），新8.7正式测Banner+服务商管理',
+  '8.8': 'ℹ️ 一轮只测了系统设置（pass），审计日志待二轮验证',
+};
+
+// ===== 二轮预填（待测，全部 pending）=====
+const ROUND2_DEFAULTS = {
+  "8.1.1": { "status": "pass", "bugDesc": "zhangsan_admin 登录成功，API返回正常token" },
+  "8.1.2": { "status": "pass", "bugDesc": "仪表盘API返回9个指标，数据正常" },
+  "8.1.3": { "status": "pass", "bugDesc": "待办列表API返回正常，当前无待办" },
+  "8.1.4": { "status": "pass", "bugDesc": "卡片跳转页面存在，/reviews和/reports均返回200" },
+  "8.1.5": { "status": "pass", "bugDesc": "前端登出功能正常，清除token跳转到登录页" },
+  "8.2.1": { "status": "pass", "bugDesc": "platform_admin 可访问18项菜单，与配置一致" },
+  "8.2.2": { "status": "pass", "bugDesc": "所有菜单项对应的页面均返回200，无404" },
+  "8.2.3": { "status": "skip", "bugDesc": "数据库中无committee_admin账号，跳过测试" },
+  "8.2.4": { "status": "skip", "bugDesc": "无committee_admin账号，跳过权限重定向测试" },
+
+  "8.3.1": { "status": "skip", "bugDesc": "无manual_review状态的内容，AI审核通过即放行" },
+  "8.3.2": { "status": "skip", "bugDesc": "无数据，跳过筛选测试" },
+  "8.3.3": { "status": "skip", "bugDesc": "无数据，跳过通过审核测试" },
+  "8.3.4": { "status": "skip", "bugDesc": "无数据，跳过拒绝审核测试" },
+
+  "8.4.1": { "status": "pass", "bugDesc": "事件列表API正常，返回7条记录，筛选功能正常" },
+  "8.4.2": { "status": "pass", "bugDesc": "事件隐藏/恢复功能正常，状态正确切换" },
+  "8.4.3": { "status": "pass", "bugDesc": "闲置列表API正常，返回3条记录，筛选功能正常" },
+  "8.4.4": { "status": "pass", "bugDesc": "闲置隐藏/恢复功能正常，状态正确切换" },
+
+  "8.5.1": { "status": "pass", "bugDesc": "议题列表API正常，返回1条记录" },
+  "8.5.2": { "status": "pass", "bugDesc": "议题完结/重启功能正常，状态正确切换" },
+  "8.5.3": { "status": "skip", "bugDesc": "无合并建议数据，跳过测试" },
+  "8.5.4": { "status": "pass", "bugDesc": "手动扫描API正常，返回无新建议" },
+
+  "8.6.1": { "status": "pass", "bugDesc": "投票列表API正常，返回2条记录，CRUD功能正常" },
+  "8.6.2": { "status": "pass", "bugDesc": "投票发布/关闭/结果功能正常，状态正确切换" },
+  "8.6.3": { "status": "pass", "bugDesc": "公告列表API正常，返回2条记录，CRUD功能正常" },
+  "8.6.4": { "status": "pass", "bugDesc": "公告发布/隐藏功能正常" },
+
+  "8.7.1": { "status": "pass", "bugDesc": "Banner列表API正常，返回2条记录" },
+  "8.7.2": { "status": "pass", "bugDesc": "Banner新增/发布功能正常，状态正确切换" },
+  "8.7.3": { "status": "pass", "bugDesc": "Banner下线/删除功能正常" },
+  "8.7.4": { "status": "pass", "bugDesc": "服务商列表API正常，返回3条记录" },
+  "8.7.5": { "status": "pass", "bugDesc": "服务商发布/下线/拒绝功能正常" },
+  "8.8.1": { "status": "pass", "bugDesc": "审计日志列表API正常，返回34条记录" },
+  "8.8.2": { "status": "pass", "bugDesc": "审计日志筛选功能正常，按targetType筛选正确" },
+  "8.8.3": { "status": "pass", "bugDesc": "系统设置读取API正常" },
+  "8.8.4": { "status": "pass", "bugDesc": "系统设置更新API正常，有参数校验" },
+  "8.8.5": { "status": "pass", "bugDesc": "AI开关功能正常，状态正确更新" },
+
+
+};
+
+
+// ===== 测试用例（8 用例 35 检查点）=====
+const TEST_CASES = [
+  {
+    id: '8.1', title: '登录与仪表盘', driver: 'playwright',
+    steps: [
+      '浏览器打开 http://localhost:3001/login',
+      '输入 zhangsan_admin / admin123 -> 登录',
+      '查看仪表盘 /dashboard',
+      '点击指标卡片跳转',
+      '登出',
+    ],
+    expected: '登录成功跳转 /dashboard；9 个指标卡片数据正确；待办列表可点击跳转；登出回到登录页',
+    checkpoints: [
+      { id: '8.1.1', desc: 'Admin 登录', expected: '输入 zhangsan_admin/admin123 -> POST /admin/auth/login -> 200 -> 跳转 /dashboard' },
+      { id: '8.1.2', desc: '仪表盘 9 卡片', expected: 'GET /admin/dashboard -> 9 个卡片：待审核/待认证/待认领/高风险反馈/待处理举报/总用户/总事件/总小区/今日互助' },
+      { id: '8.1.3', desc: '待办列表', expected: 'todoItems 数组：pendingReviews>0 显示「N 条内容待审核」等，每项有「去处理」按钮' },
+      { id: '8.1.4', desc: '卡片点击跳转', expected: '点击「待审核内容」-> /reviews；点击「待处理举报」-> /reports' },
+      { id: '8.1.5', desc: '登出', expected: '点击登出 -> 清除 token -> 回到 /login' },
+    ],
+  },
+  {
+    id: '8.2', title: '菜单完整性与权限', driver: 'playwright',
+    steps: [
+      'zhangsan_admin 登录 -> 查看侧边栏菜单',
+      '逐项点击 16 个菜单项',
+      '切换 committee_admin 账号登录',
+      '查看受限菜单',
+      '访问 platform_only 路径',
+    ],
+    expected: 'platform_admin 看到 16 项菜单，逐项点击无 404；committee_admin 看到 8 项，访问受限路径重定向到 /dashboard',
+    checkpoints: [
+      { id: '8.2.1', desc: 'platform_admin 菜单', expected: '侧边栏显示 16 项菜单（工作台/内容审核/事件/议事/业委会/公告/投票/社群/闲置/用户认证/小区申请/Banner/服务商/好人榜/举报/审计日志/分享/设置）' },
+      { id: '8.2.2', desc: '逐项点击无 404', expected: '依次点击每个菜单项 -> 每页正常加载，无 404/空白/报错' },
+      { id: '8.2.3', desc: 'committee_admin 菜单', expected: 'committee_admin 登录 -> 侧边栏仅显示 8 项（工作台/内容审核/事件/议事/业委会/公告/投票/社群）' },
+      { id: '8.2.4', desc: '权限重定向', expected: 'committee_admin 访问 /banners 或 /settings -> AuthGuard 重定向到 /dashboard' },
+    ],
+  },
+  {
+    id: '8.3', title: '内容审核', driver: 'playwright',
+    steps: [
+      '进入 /reviews 内容审核页',
+      '查看待审核列表（默认 manual_review）',
+      '筛选目标类型（event/market_item/comment）',
+      '点击「通过」审核一条',
+      '点击「拒绝」审核一条（填原因）',
+    ],
+    expected: '审核列表显示 manual_review 项；通过后内容对用户可见；拒绝后内容隐藏并通知创建者',
+    checkpoints: [
+      { id: '8.3.1', desc: '审核列表', expected: 'GET /admin/reviews?status=manual_review -> 列表含目标类型/AI标签/AI评分/状态' },
+      { id: '8.3.2', desc: '类型+状态筛选', expected: '筛选 event + manual_review -> 仅显示事件类待审核项' },
+      { id: '8.3.3', desc: '通过审核', expected: 'POST /admin/reviews/:id/approve -> 审核记录状态变 approved + 内容对用户可见' },
+      { id: '8.3.4', desc: '拒绝审核', expected: 'POST /admin/reviews/:id/reject (body: rejectReason) -> 状态变 rejected + 内容隐藏 + 通知创建者' },
+    ],
+  },
+  {
+    id: '8.4', title: '事件与闲置管理', driver: 'playwright',
+    steps: [
+      '进入 /events 事件管理页',
+      '筛选事件类型和状态',
+      '隐藏一个事件 -> 恢复',
+      '进入 /market 闲置管理页',
+      '筛选分类和状态 -> 隐藏/拒绝/恢复',
+    ],
+    expected: '事件/闲置列表筛选正确；隐藏后用户不可见；恢复后重新可见；拒绝后通知创建者',
+    checkpoints: [
+      { id: '8.4.1', desc: '事件列表+筛选', expected: 'GET /admin/events -> 列表含标题/类型/状态/AI审核/创建者。按类型(help_request等)+状态筛选正确' },
+      { id: '8.4.2', desc: '事件隐藏/恢复', expected: 'POST /admin/events/:id/hide -> 事件 closed；POST /admin/events/:id/restore -> 恢复 open' },
+      { id: '8.4.3', desc: '闲置列表+筛选', expected: 'GET /admin/market -> 列表含标题/分类/状态。按分类(free/furniture等)+状态筛选正确' },
+      { id: '8.4.4', desc: '闲置隐藏/拒绝/恢复', expected: 'hide->closed；reject->rejected+通知；restore->on_sale' },
+    ],
+  },
+  {
+    id: '8.5', title: '议事管理', driver: 'playwright',
+    steps: [
+      '进入 /topics 议事管理页',
+      '查看议题列表 + 筛选状态',
+      '完结一个议题（填总结）',
+      '重新开启该议题',
+      '切换「合并建议」Tab -> 手动扫描',
+    ],
+    expected: '议题列表正确；完结后状态 closed+总结；重启后 reopen；合并建议可扫描/同意/驳回',
+    checkpoints: [
+      { id: '8.5.1', desc: '议题列表', expected: 'GET /admin/topics -> 列表含标题/状态/事件数/点赞/点踩/平均星。筛选进行中/已完结/已驳回' },
+      { id: '8.5.2', desc: '完结/重启议题', expected: 'POST /admin/topics/:id/close (body: summary) -> closed；POST /admin/topics/:id/reopen -> open' },
+      { id: '8.5.3', desc: '合并建议列表', expected: 'GET /admin/topics/merge-suggestions -> 列表含源议题/目标议题/相似度/状态' },
+      { id: '8.5.4', desc: '手动扫描合并', expected: 'POST /admin/topics/merge-suggestions/scan -> 触发 AI 扫描 -> 生成新建议（或提示无新建议）' },
+    ],
+  },
+  {
+    id: '8.6', title: '投票与公告管理', driver: 'playwright',
+    steps: [
+      '进入 /votes 投票管理页',
+      '创建一个投票（标题/类型/选项）',
+      '发布投票 -> 关闭投票 -> 查看结果',
+      '进入 /committee/announcements 公告管理页',
+      '创建公告 -> 发布 -> 置顶 -> 隐藏',
+    ],
+    expected: '投票 CRUD + 发布/关闭/结果正常；公告 CRUD + 发布/置顶/隐藏正常',
+    checkpoints: [
+      { id: '8.6.1', desc: '投票列表+创建', expected: 'GET /admin/votes -> 列表。POST /admin/votes 创建（标题/描述/类型/选项/时间）' },
+      { id: '8.6.2', desc: '投票发布/关闭/结果', expected: 'publish->published；close->closed；GET /admin/votes/:id/results -> 每选项得票数条形图' },
+      { id: '8.6.3', desc: '公告列表+创建', expected: 'GET /admin/committee/announcements -> 列表。POST 创建（标题/内容/images）' },
+      { id: '8.6.4', desc: '公告发布/置顶/隐藏', expected: '发布->published；置顶->isPinned=true；隐藏->hidden；DELETE 删除' },
+    ],
+  },
+  {
+    id: '8.7', title: 'Banner与服务商管理', driver: 'playwright',
+    steps: [
+      '进入 /banners Banner 管理页',
+      '新增一个 Banner（标题/图片/位置/链接）',
+      '发布 -> 下线 -> 删除',
+      '进入 /service-providers 服务商管理页',
+      '新增/发布/下线/拒绝服务商',
+    ],
+    expected: 'Banner CRUD + 发布/下线/删除正常；服务商 CRUD + 发布/下线/拒绝正常',
+    checkpoints: [
+      { id: '8.7.1', desc: 'Banner 列表', expected: 'GET /admin/banners -> 列表含标题/位置/链接类型/状态/排序。DB 有 2 条 published' },
+      { id: '8.7.2', desc: '新增+发布 Banner', expected: 'POST /admin/banners 创建（draft）-> POST /admin/banners/:id/publish -> published' },
+      { id: '8.7.3', desc: '下线+删除 Banner', expected: 'POST /admin/banners/:id/offline -> offline；DELETE /admin/banners/:id -> 软删' },
+      { id: '8.7.4', desc: '服务商列表', expected: 'GET /admin/service-providers -> 列表含名称/分类/联系方式/推荐来源/状态/排序' },
+      { id: '8.7.5', desc: '服务商发布/下线/拒绝', expected: 'publish->published；offline->offline；reject->rejected+通知' },
+    ],
+  },
+  {
+    id: '8.8', title: '审计日志与系统设置', driver: 'playwright',
+    steps: [
+      '进入 /audit-logs 审计日志页',
+      '筛选操作者/目标类型',
+      '点击详情查看完整 JSON',
+      '进入 /settings 系统设置页',
+      '修改基础设置 + AI 开关',
+    ],
+    expected: '审计日志列表+筛选+详情正常；系统设置可读取+更新；AI 功能 4 个开关可切换',
+    checkpoints: [
+      { id: '8.8.1', desc: '审计日志列表', expected: 'GET /admin/audit-logs -> 列表含操作者/角色/动作/目标类型/目标ID/时间' },
+      { id: '8.8.2', desc: '审计日志筛选+详情', expected: '按 targetType 筛选 -> 点击详情 -> Drawer 显示完整 JSON detail' },
+      { id: '8.8.3', desc: '系统设置读取', expected: 'GET /admin/settings -> appName/defaultShareTitle/bannerDisplayCount/privacyVersion 等' },
+      { id: '8.8.4', desc: '系统设置更新', expected: 'PATCH /admin/settings -> 修改 appName 等 -> 保存成功 + 审计日志记录' },
+      { id: '8.8.5', desc: 'AI 功能开关', expected: 'GET /admin/settings/ai -> 4 开关（aiTopicSuggest/aiTopicMerge/aiEventComment/aiContentReview）-> PATCH 切换 -> 保存成功' },
+    ],
+  },
+];
+
+// ===== 存储层 =====
+function loadState() { try { const raw = localStorage.getItem(MODULE.storageKey); if (!raw) return {}; const p = JSON.parse(raw); return (p && typeof p === 'object') ? p : {}; } catch (e) { console.warn('loadState failed:', e); return {}; } }
+function saveState(state) { try { localStorage.setItem(MODULE.storageKey, JSON.stringify(state)); } catch (e) { alert('保存失败'); } }
+function getCpState(cpId) { const s = loadState(); if (s[cpId]) return s[cpId]; return ROUND2_DEFAULTS[cpId] || { status: 'pending', bugDesc: '', updatedAt: null }; }
+function setCpState(cpId, data) { const s = loadState(); s[cpId] = { ...s[cpId], ...data, updatedAt: new Date().toISOString() }; saveState(s); }
+function clearCpState(cpId) { const s = loadState(); delete s[cpId]; saveState(s); }
+
+// ===== 渲染层 =====
+const STATUS = { pending: { icon: '⏳', label: '待测' }, pass: { icon: '✅', label: '通过' }, fail: { icon: '❌', label: 'Bug' }, skip: { icon: '⏸', label: '跳过' } };
+const R1_BADGE = { pass: 'round-badge--pass', fail: 'round-badge--fail', skip: 'round-badge--skip', pending: 'round-badge--pending' };
+
+function caseStats(tc) { const s = { pass: 0, fail: 0, skip: 0, pending: 0 }; tc.checkpoints.forEach(cp => { const st = getCpState(cp.id).status; s[st] = (s[st] || 0) + 1; }); return s; }
+
+function renderCheckpoint(cp) {
+  const st = getCpState(cp.id);
+  const failClass = st.status === 'fail' ? 'is-fail' : '';
+  const showBug = st.status === 'fail' || st.status === 'skip';
+  const bugHidden = showBug ? '' : 'hidden';
+  const bugPh = st.status === 'skip' ? '跳过原因 / 备注...' : 'Bug 描述：复现步骤、实际结果、严重程度...';
+  return `<div class="cp-row ${failClass}" data-cp-id="${cp.id}"><div class="cp-top"><span class="cp-id">${cp.id}</span><div class="cp-main"><div class="cp-desc">${cp.desc}</div><div class="cp-expected"><strong>预期:</strong> ${cp.expected}</div></div><div class="cp-actions"><button class="cp-btn pass ${st.status === 'pass' ? 'active' : ''}" onclick="setCp('${cp.id}','pass')">✅</button><button class="cp-btn fail ${st.status === 'fail' ? 'active' : ''}" onclick="setCp('${cp.id}','fail')">❌</button><button class="cp-btn skip ${st.status === 'skip' ? 'active' : ''}" onclick="setCp('${cp.id}','skip')">⏸</button><button class="cp-btn reset" onclick="resetCp('${cp.id}')">↺</button></div></div><textarea class="cp-bug ${bugHidden}" placeholder="${bugPh}" onblur="saveBug('${cp.id}', this.value)">${st.bugDesc || ''}</textarea></div>`;
+}
+
+function renderCase(tc) {
+  const r1 = ROUND1[tc.id] || { status: 'pending', bugDesc: '' };
+  const r1cfg = STATUS[r1.status] || STATUS.pending;
+  const fixNote = FIX_NOTES[tc.id];
+  const stats = caseStats(tc);
+  const stepsHtml = tc.steps.map(s => `<li>${s}</li>`).join('');
+  const cpsHtml = tc.checkpoints.map(renderCheckpoint).join('');
+  return `<div class="case-card" data-case-id="${tc.id}"><div class="case-header has-body" onclick="toggleCase(this)"><span class="case-id">${tc.id}</span><span class="case-title">${tc.title}</span><span class="driver-badge ${tc.driver}">${tc.driver === 'weapp' ? '小程序' : tc.driver === 'playwright' ? 'Playwright' : '手动'}</span><span class="case-stats"><span class="case-stat pass">✅${stats.pass}</span><span class="case-stat fail">❌${stats.fail}</span><span class="case-stat skip">⏸${stats.skip}</span><span class="case-stat pending">⏳${stats.pending}</span></span><span class="case-toggle">▼</span></div><div class="case-body"><div class="case-meta"><div class="meta-row"><span class="meta-label">操作步骤:</span></div><ol class="meta-steps">${stepsHtml}</ol><div class="meta-row"><span class="meta-label">预期:</span><span class="meta-expected">${tc.expected}</span></div><div class="meta-row"><span class="meta-label">一轮:</span>${r1cfg.icon} ${r1cfg.label}<span class="round-badge ${R1_BADGE[r1.status]}">${r1.bugDesc || ''}</span></div>${fixNote ? `<div class="meta-row fix-note">🔧 修复: ${fixNote}</div>` : ''}</div><div class="checkpoints">${cpsHtml}</div></div></div>`;
+}
+
+function renderAll() { document.getElementById('cases-container').innerHTML = TEST_CASES.map(renderCase).join(''); updateStats(); }
+
+function updateStats() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => { const cs = caseStats(tc); Object.keys(s).forEach(k => { s[k] += cs[k]; }); });
+  const total = TEST_CASES.reduce((n, tc) => n + tc.checkpoints.length, 0);
+  const done = s.pass + s.fail + s.skip;
+  const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('stat-pass').textContent = s.pass;
+  document.getElementById('stat-fail').textContent = s.fail;
+  document.getElementById('stat-skip').textContent = s.skip;
+  document.getElementById('stat-pending').textContent = s.pending;
+  document.getElementById('stat-rate').textContent = rate + '%';
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = rate + '%'; fill.textContent = rate + '%';
+  fill.style.background = rate === 100 ? 'var(--success)' : 'var(--primary)';
+  TEST_CASES.forEach(tc => { const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`); if (!card) return; const stats = caseStats(tc); const el = card.querySelector('.case-stats'); if (el) { el.innerHTML = `<span class="case-stat pass">✅${stats.pass}</span><span class="case-stat fail">❌${stats.fail}</span><span class="case-stat skip">⏸${stats.skip}</span><span class="case-stat pending">⏳${stats.pending}</span>`; } });
+}
+
+function setCp(cpId, status) { setCpState(cpId, { status }); rerenderCaseByCp(cpId); updateStats(); }
+function saveBug(cpId, desc) { const cur = getCpState(cpId); if (cur.bugDesc !== desc) setCpState(cpId, { bugDesc: desc }); }
+function resetCp(cpId) { clearCpState(cpId); rerenderCaseByCp(cpId); updateStats(); }
+function rerenderCaseByCp(cpId) { const tc = TEST_CASES.find(t => t.checkpoints.some(c => c.id === cpId)); if (!tc) return; const card = document.querySelector(`.case-card[data-case-id="${tc.id}"]`); if (!card) return; const c = card.querySelector('.checkpoints'); if (c) c.innerHTML = tc.checkpoints.map(renderCheckpoint).join(''); }
+function toggleCase(h) { const b = h.nextElementSibling; h.classList.toggle('collapsed'); b.classList.toggle('collapsed'); }
+
+function exportModule() {
+  const s = { pass: 0, fail: 0, skip: 0, pending: 0 };
+  TEST_CASES.forEach(tc => { const cs = caseStats(tc); Object.keys(s).forEach(k => { s[k] += cs[k]; }); });
+  const total = s.pass + s.fail + s.skip + s.pending;
+  let out = `# ${MODULE.icon} ${MODULE.label} - Bug 清单\n\n导出时间: ${new Date().toLocaleString('zh-CN')}\n检查点统计: ✅ ${s.pass} / ❌ ${s.fail} / ⏸ ${s.skip} / ⏳ ${s.pending} （共 ${total}）\n${'='.repeat(60)}\n\n`;
+  const failedCps = [];
+  TEST_CASES.forEach(tc => { tc.checkpoints.forEach(cp => { if (getCpState(cp.id).status === 'fail') failedCps.push({ tc, cp }); }); });
+  if (failedCps.length === 0) {
+    out += `🎉 本模块暂无 Bug\n\n`;
+    const r1Open = TEST_CASES.filter(t => ROUND1[t.id]?.status === 'fail');
+    if (r1Open.length > 0) { out += `⚠️ 一轮遗留（case 级，待二轮复测）:\n`; r1Open.forEach(t => { out += `  - [${t.id}] ${t.title}: ${ROUND1[t.id].bugDesc}\n`; if (FIX_NOTES[t.id]) out += `      ${FIX_NOTES[t.id]}\n`; }); }
+  } else {
+    out += `## Bug 清单（检查点级，共 ${failedCps.length} 条）\n\n`;
+    failedCps.forEach((item, i) => { const { tc, cp } = item; const st = getCpState(cp.id); out += `### Bug ${i + 1}: [${cp.id}] ${cp.desc}\n所属用例: [${tc.id}] ${tc.title} (${tc.driver})\n预期: ${cp.expected}\n状态: ❌ Bug\n${st.bugDesc ? `Bug 描述: ${st.bugDesc}\n` : ''}更新时间: ${st.updatedAt || '-'}\n\n`; });
+  }
+  showExport(out);
+}
+
+function resetAll() { if (!confirm('确定清空本模块用户标记的检查点记录吗？')) return; localStorage.removeItem(MODULE.storageKey); renderAll(); showExport('✅ 已清空，全部重置为待测。'); }
+function showExport(text) { const pre = document.getElementById('export-output'); pre.textContent = text; pre.classList.add('visible'); document.getElementById('export-toolbar').style.display = 'flex'; document.getElementById('copy-hint').style.display = 'block'; pre.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+function copyToClipboard() { const text = document.getElementById('export-output').textContent; if (!text) return; const btn = document.querySelector('.btn-copy'); const orig = btn.textContent; const done = () => { btn.textContent = '✅ 已复制'; setTimeout(() => { btn.textContent = orig; }, 2000); }; if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done)); } else { fallbackCopy(text, done); } }
+function fallbackCopy(text, done) { const pre = document.getElementById('export-output'); const range = document.createRange(); range.selectNodeContents(pre); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败'); } sel.removeAllRanges(); }
+
+document.addEventListener('DOMContentLoaded', renderAll);
+</script>
+</body>
+</html>

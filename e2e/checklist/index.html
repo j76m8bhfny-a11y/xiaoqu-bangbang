@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小区帮榜棒 — E2E 测试单索引</title>
+<style>
+  :root {
+    --primary: #5B9E6F; --primary-light: #E8F5ED; --accent: #F5A623;
+    --danger: #E74C3C; --success: #27AE60; --info: #3498DB;
+    --bg: #FAFBF7; --card-bg: #FFFFFF; --text: #2C3E50;
+    --text-secondary: #7F8C8D; --border: #E5E7EB; --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06); --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+  }
+  .hero {
+    background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%);
+    color: white; padding: 44px 0 36px; text-align: center;
+  }
+  .hero h1 { font-size: 30px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.85; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .note {
+    background: var(--primary-light); border-left: 4px solid var(--primary);
+    border-radius: 8px; padding: 12px 18px; margin: 20px 0; font-size: 13px;
+  }
+  .note strong { color: var(--primary); }
+  .section { padding: 16px 0 48px; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .module-card {
+    background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 20px; display: flex; flex-direction: column; gap: 8px;
+    transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: var(--text);
+    position: relative; overflow: hidden;
+  }
+  .module-card:hover { text-decoration: none; transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .module-card.disabled { opacity: 0.55; cursor: not-allowed; }
+  .module-card.disabled:hover { transform: none; box-shadow: var(--shadow); }
+  .module-icon { font-size: 28px; }
+  .module-label { font-size: 16px; font-weight: 700; }
+  .module-sub { font-size: 12px; color: var(--text-secondary); }
+  .module-badge {
+    position: absolute; top: 12px; right: 12px; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 10px;
+  }
+  .module-badge.active { background: var(--success); color: white; }
+  .module-badge.todo { background: var(--border); color: var(--text-secondary); }
+  .stats-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0; }
+  .stat-pill {
+    background: var(--card-bg); border-radius: 20px; padding: 8px 18px;
+    box-shadow: var(--shadow); font-size: 13px;
+  }
+  .stat-pill strong { font-size: 16px; margin-right: 4px; }
+  .stat-pill.pass strong { color: var(--success); }
+  .stat-pill.fail strong { color: var(--danger); }
+  .stat-pill.pending strong { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>📋 E2E 测试单索引</h1>
+  <div class="tagline">8 模块独立测试 · 检查点级 pass/fail · 小程序 weapp-dev-mcp + Admin Playwright</div>
+  <div class="meta">数据保存在各子页面本地浏览器（localStorage）</div>
+</div>
+
+<div class="container">
+  <div class="note">
+    <strong>说明:</strong> 本索引页为 8 模块入口。每模块独立子页面，含检查点级 4 态（pass/fail/skip/pending）+ Bug 描述 + 一键导出。
+    旧版单页清单见 <a href="../../e2e-test-checklist.html">/e2e-test-checklist.html</a>（一轮二轮手测归档，保留）。
+    全局统计聚合待后续（postMessage / 手动汇总）。
+  </div>
+
+  <div class="stats-row">
+    <span class="stat-pill pass"><strong id="g-pass">—</strong>已通过</span>
+    <span class="stat-pill fail"><strong id="g-fail">—</strong>Bug</span>
+    <span class="stat-pill pending"><strong id="g-pending">—</strong>待测</span>
+    <span class="stat-pill"><strong style="color:var(--info)" id="g-active">8</strong>/8 模块已启用</span>
+  </div>
+
+  <div class="section">
+    <div class="grid">
+      <a class="module-card" href="01-auth-community.html">
+        <span class="module-badge active">已启用</span>
+        <span class="module-icon">🔐</span>
+        <span class="module-label">① 认证与小区</span>
+        <span class="module-sub">8 用例 · 45 检查点 · weapp + playwright</span>
+      </a>
+      <a class="module-card" href="02-events.html">
+        <span class="module-badge active">已启用</span>
+        <span class="module-icon">🤝</span>
+        <span class="module-label">② 事件互助</span>
+        <span class="module-sub">8 用例 · 43 检查点 · weapp（2.8 含手动）</span>
+      </a>
+      <a class="module-card" href="03-market.html">
+        <span class="module-badge active">已启用</span>
+        <span class="module-icon">♻️</span>
+        <span class="module-label">③ 闲置流转</span>
+        <span class="module-sub">7 用例 · 37 检查点 · weapp</span>
+      </a>
+      <a class="module-card" href="04-topics.html">
+        <span class="module-badge active">已启用</span>
+        <span class="module-icon">💬</span>
+        <span class="module-label">④ 议事讨论</span>
+        <span class="module-sub">7 用例 · 36 检查点 · weapp</span>
+      </a>
+      <a class="module-card" href="05-committee.html">
+        <span class="module-badge active">已启用</span>
+        <span class="module-icon">🏛️</span>
+        <span class="module-label">⑤ 业委会</span>
+        <span class="module-sub">6 用例 · 28 检查点 · weapp + playwright</span>
+      </a>
+      <a class="module-card" href="06-rewards.html">
+        <span class="module-badge active">已启用</span>
+        <span class="module-icon">🏅</span>
+        <span class="module-label">⑥ 激励体系</span>
+        <span class="module-sub">7 用例 · 37 检查点 · weapp + playwright</span>
+      </a>
+      <a class="module-card" href="07-operations.html">
+        <span class="module-badge active">已启用</span>
+        <span class="module-icon">⚙️</span>
+        <span class="module-label">⑦ 运营支撑</span>
+        <span class="module-sub">7 用例 · 28 检查点 · weapp + playwright</span>
+      </a>
+      <a class="module-card" href="08-admin.html">
+        <span class="module-badge active">已启用</span>
+        <span class="module-icon">🛠️</span>
+        <span class="module-label">⑧ Admin 后台</span>
+        <span class="module-sub">8 用例 · 35 检查点 · playwright</span>
+      </a>
+    </div>
+  </div>
+</div>
+</body>
+</html>
