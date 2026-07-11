@@ -1,0 +1,133 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>我的（装饰增强版）·晨光暖</title><style>:root{--c-bg:#FFF8EE;--c-card:#FFF;--c-primary:#5B9E6F;--c-primary-deep:#4A8C5E;--c-primary-soft:#A8D5B5;--c-accent:#E89B6C;--c-accent-soft:#FBF0DD;--c-cream:#FFF3D6;--c-cream-deep:#F3EAD0;--c-text:#2C3A2E;--c-text-2:#6B7A6E;--c-border:#E8E0D0;--c-bg-green:#EAF4EC;--c-bg-orange:#FBF0DD;--c-danger:#D9534F;--r-sm:16px;--r-md:20px;--r-lg:28px;--r-pill:999px;--sh-card:0 4px 20px rgba(91,158,111,.08);--sh-warm:0 4px 16px rgba(232,155,108,.1);--sh-btn:0 6px 16px rgba(74,140,94,.24);--fs-xs:13px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:20px;--fs-xxl:24px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;background:#EDE6D6;display:flex;justify-content:center;min-height:100vh;-webkit-font-smoothing:antialiased}
+.phone{width:375px;min-height:100vh;background:var(--c-bg);position:relative;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.08)}
+.phone::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.015' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;padding-bottom:32px}
+/* Scattered background decorations */
+.page::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg opacity='0.04'%3E%3Ccircle cx='10' cy='10' r='2' fill='%235B9E6F'/%3E%3Cpath d='M30 5C29 3 26 3 26 5.5C26 8 30 11 30 11C30 11 34 8 34 5.5C34 3 31 3 30 5Z' fill='%23E89B6C'/%3E%3Cellipse cx='48' cy='30' rx='4' ry='2' fill='%23A8D5B5'/%3E%3C/g%3E%3C/svg%3E");background-size:120px 120px}
+.notes{position:fixed;top:20px;right:20px;width:220px;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:100;font-size:12px;line-height:1.6;color:#333;max-height:80vh;overflow-y:auto}
+.notes h3{font-size:13px;margin-bottom:6px;color:var(--c-primary-deep)}
+.notes .item{margin-bottom:4px;padding-left:8px;border-left:2px solid var(--c-primary-soft)}
+@media(max-width:900px){.notes{display:none}}.fab{position:fixed;bottom:80px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--c-primary);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-btn);z-index:10}</style></head><body><div class="notes"><h3>我的（装饰增强版）</h3><div class="item">我的页 · 装饰增强版</div><div class="item">新增: header场景插画(太阳+云朵+飞鸟)</div><div class="item">新增: section间波浪分隔线</div><div class="item">新增: 卡片角落叶子装饰</div><div class="item">新增: 待办��片角落点缀</div><div class="item">新增: 统计数字旁小花/勋章图标</div><div class="item">新增: 全局散落小图案背景</div></div><div class="phone"><div class="page">
+<div style="margin:24px 24px 0;background:linear-gradient(135deg,var(--c-primary),var(--c-primary-deep));border-radius:var(--r-lg);padding:24px;box-shadow:var(--sh-card);position:relative;overflow:hidden">
+
+<!-- Sun -->
+<svg style="position:absolute;top:-16px;right:20px;opacity:0.10" width="80" height="80" viewBox="0 0 80 80" fill="none">
+  <circle cx="40" cy="40" r="16" fill="#FFF"/>
+  <g stroke="#FFF" stroke-width="3" stroke-linecap="round"><path d="M40 8V2M40 78V72M8 40H2M78 40H72M18 18L14 14M62 62L66 66M18 62L14 66M62 18L66 14"/></g>
+</svg>
+<!-- Cloud 1 -->
+<svg style="position:absolute;top:12px;right:60px;opacity:0.1" width="50" height="30" viewBox="0 0 50 30" fill="none">
+  <path d="M10 22C7 22 4 19 4 16C4 12 7 9 11 9C12 5 16 2 20 3C24 0 30 1 32 5C37 4 42 7 42 12C42 18 37 22 32 22Z" fill="#FFF"/>
+</svg>
+<!-- Cloud 2 -->
+<svg style="position:absolute;bottom:8px;left:20px;opacity:0.08" width="60" height="35" viewBox="0 0 60 35" fill="none">
+  <path d="M12 28C8 28 5 25 5 21C5 17 8 14 12 14C13 9 18 5 24 6C29 3 36 4 39 9C45 8 50 12 50 18C50 24 45 28 40 28Z" fill="#FFF"/>
+</svg>
+<!-- Birds -->
+<svg style="position:absolute;top:20px;left:140px;opacity:0.1" width="40" height="14" viewBox="0 0 40 14" fill="none">
+  <path d="M2 7 Q6 2 10 7 Q14 2 18 7" stroke="#FFF" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M22 5 Q26 0 30 5 Q34 0 38 5" stroke="#FFF" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>
+<div style="display:flex;align-items:center;gap:16px;position:relative;z-index:1">
+<div style="width:54px;height:54px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,0.6);flex-shrink:0;overflow:hidden"><span style="font-size:26px;color:var(--c-primary-deep);font-weight:700">李</span></div>
+<div style="flex:1"><span style="display:block;font-size:var(--fs-xl);font-weight:700;color:#fff;margin-bottom:6px">李奶奶</span>
+<div style="display:flex;gap:4px"><div style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--r-pill);white-space:nowrap;background:rgba(255,255,255,0.22)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12L10 17L19 7" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:var(--fs-xs);color:#fff">已认证</span></div><div style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--r-pill);white-space:nowrap;background:rgba(255,255,255,0.18)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V20H15V14H9V20H4Z" stroke="#FFF" stroke-width="2" stroke-linejoin="round" fill="#FFF11"/></svg><span style="font-size:var(--fs-xs);color:#fff">阳光花园小区</span></div></div></div>
+<span style="font-size:22px;color:rgba(255,255,255,0.7)"><span style="font-size:20px;color:#6B7A6E">›</span></span></div>
+<div style="display:flex;margin-top:16px;padding-top:14px;border-top:1.5px solid rgba(255,255,255,0.2);position:relative;z-index:1">
+<div style="flex:1;text-align:center"><div style="font-size:var(--fs-xxl);font-weight:700;color:#fff">12</div><div style="font-size:var(--fs-xs);color:rgba(255,255,255,0.85)">帮助次数</div></div>
+<div style="flex:1;text-align:center"><div style="display:flex;align-items:center;justify-content:center;gap:3px"><span style="font-size:var(--fs-xxl);font-weight:700;color:#fff">36</span><svg width="12" height="12" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#FFF"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#FFF" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#FFF" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#FFF" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#FFF" opacity="0.5"/></svg></div><div style="font-size:var(--fs-xs);color:rgba(255,255,255,0.85)">小红花</div></div>
+<div style="flex:1;text-align:center"><div style="display:flex;align-items:center;justify-content:center;gap:3px"><span style="font-size:var(--fs-xxl);font-weight:700;color:#fff">3</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="6" stroke="#FFF" stroke-width="2" fill="#FFF11"/><path d="M12 6L13.2 8.4L16 8.8L14 10.6L14.5 13.4L12 12.2L9.5 13.4L10 10.6L8 8.8L10.8 8.4Z" fill="#FFF"/></svg></div><div style="font-size:var(--fs-xs);color:rgba(255,255,255,0.85)">勋章</div></div>
+</div></div>
+<svg width="100%" height="20" viewBox="0 0 375 20" preserveAspectRatio="none" style="display:block;margin:12px 0">
+<path d="M0 10 Q47 0 94 10 T188 10 T282 10 T375 10" stroke="#E89B6C" stroke-width="1.5" fill="none" opacity="0.15"/>
+<path d="M0 14 Q47 4 94 14 T188 14 T282 14 T375 14" stroke="#5B9E6F" stroke-width="1.5" fill="none" opacity="0.105"/>
+</svg>
+<!-- Feature grid with corner decorations -->
+<div style="display:flex;flex-wrap:wrap;gap:14px;margin:4px 24px 0;position:relative">
+
+<div style="width:calc(50% - 7px);background:var(--c-cream);border-radius:var(--r-md);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--sh-card);border:1.5px solid var(--c-cream-deep);position:relative;overflow:hidden">
+<svg style="position:absolute;top:-4px;right:-4px;opacity:0.1;transform:rotate(0deg);pointer-events:none" width="28" height="28" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+
+<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;position:relative;z-index:1"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M14 20C12 22 12 26 14 28L18 32C20 34 24 34 26 32L34 24" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/><path d="M34 28C36 26 36 22 34 20L30 16C28 14 24 14 22 16L14 24" stroke="#5B9E6F" stroke-width="2.5" stroke-linecap="round"/><path d="M24 18C23 16 20 16 20 18.5C20 21 24 24 24 24C24 24 28 21 28 18.5C28 16 25 16 24 18Z" fill="#E89B6C" opacity="0.8"/><circle cx="14" cy="24" r="3" stroke="#E89B6C" stroke-width="2"/><circle cx="34" cy="24" r="3" stroke="#5B9E6F" stroke-width="2"/></svg></div>
+<span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text);position:relative;z-index:1">发布求助</span>
+<span style="font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1">找邻居搭把手</span></div>
+
+<div style="width:calc(50% - 7px);background:var(--c-cream);border-radius:var(--r-md);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--sh-card);border:1.5px solid var(--c-cream-deep);position:relative;overflow:hidden">
+<svg style="position:absolute;top:-4px;right:-4px;opacity:0.1;transform:rotate(0deg);pointer-events:none" width="28" height="28" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+
+<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;position:relative;z-index:1"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M10 10C8 10 6 12 6 14V28C6 30 8 32 10 32H18L24 38V32H38C40 32 42 30 42 28V14C42 12 40 10 38 10Z" stroke="#5B9E6F" stroke-width="2.5" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/><circle cx="16" cy="21" r="2" fill="#E89B6C"/><circle cx="24" cy="21" r="2" fill="#E89B6C"/><circle cx="32" cy="21" r="2" fill="#E89B6C"/></svg></div>
+<span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text);position:relative;z-index:1">发起议题</span>
+<span style="font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1">大家一起议</span></div>
+
+<div style="width:calc(50% - 7px);background:var(--c-cream);border-radius:var(--r-md);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--sh-card);border:1.5px solid var(--c-cream-deep);position:relative;overflow:hidden">
+<svg style="position:absolute;top:-4px;right:-4px;opacity:0.1;transform:rotate(0deg);pointer-events:none" width="28" height="28" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+
+<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;position:relative;z-index:1"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M16 10H32V18C32 22 28 26 24 26C20 26 16 22 16 18Z" stroke="#E89B6C" stroke-width="2.5" stroke-linejoin="round" fill="rgba(232,155,108,0.1)"/><path d="M12 12C10 12 8 14 8 16C8 19 10 21 12 21" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/><path d="M36 12C38 12 40 14 40 16C40 19 38 21 36 21" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/><path d="M24 26V32M18 36H30" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/><path d="M24 14L25 16L27 16.5L25.5 17.5L26 19.5L24 18.5L22 19.5L22.5 17.5L21 16.5L23 16Z" fill="#FFF3D6"/></svg></div>
+<span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text);position:relative;z-index:1">我的排名</span>
+<span style="font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1">看看贡献值</span></div>
+
+<div style="width:calc(50% - 7px);background:var(--c-cream);border-radius:var(--r-md);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--sh-card);border:1.5px solid var(--c-cream-deep);position:relative;overflow:hidden">
+<svg style="position:absolute;top:-4px;right:-4px;opacity:0.1;transform:rotate(0deg);pointer-events:none" width="28" height="28" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+
+<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;position:relative;z-index:1"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 6L30 10L38 10L36 18L40 24L36 30L38 38L30 38L24 42L18 38L10 38L12 30L8 24L12 18L10 10L18 10Z" stroke="#5B9E6F" stroke-width="2.5" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/><path d="M17 24L22 29L31 18" stroke="#E89B6C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text);position:relative;z-index:1">业主认证</span>
+<span style="font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1">认证享更多</span></div>
+</div>
+<svg width="100%" height="20" viewBox="0 0 375 20" preserveAspectRatio="none" style="display:block;margin:12px 0">
+<path d="M0 10 Q47 0 94 10 T188 10 T282 10 T375 10" stroke="#E89B6C" stroke-width="1.5" fill="none" opacity="0.15"/>
+<path d="M0 14 Q47 4 94 14 T188 14 T282 14 T375 14" stroke="#5B9E6F" stroke-width="1.5" fill="none" opacity="0.105"/>
+</svg>
+<!-- Todo section with flower decoration -->
+<div style="margin:4px 24px 0;position:relative">
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:14px"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#E89B6C"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/></svg><span style="font-size:var(--fs-md);font-weight:700;color:var(--c-text)">待办提醒</span></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<div style="flex:1;min-width:0;overflow:hidden;background:var(--c-bg-green);border-radius:var(--r-md);padding:8px 6px;display:flex;align-items:center;gap:6px;position:relative;overflow:hidden"><svg style="position:absolute;bottom:-4px;right:-4px;opacity:0.06;transform:rotate(270deg);pointer-events:none" width="28" height="28" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="14" height="17" rx="2" stroke="#5B9E6F" stroke-width="2"/><path d="M9 4V2H15V4" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/></svg></div>
+<div style="min-width:0;overflow:hidden"><span style="font-size:14px;font-weight:700;color:var(--c-primary-deep);display:block;line-height:1.1;white-space:nowrap">2</span><span style="font-size:11px;color:var(--c-text-2);white-space:nowrap">进行中互助</span></div></div>
+<div style="flex:1;min-width:0;overflow:hidden;background:var(--c-bg-orange);border-radius:var(--r-md);padding:8px 6px;display:flex;align-items:center;gap:6px;position:relative;overflow:hidden"><svg style="position:absolute;bottom:-4px;right:-4px;opacity:0.06;transform:rotate(270deg);pointer-events:none" width="28" height="28" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#E89B6C" stroke-width="1.5" fill="#E89B6C" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#E89B6C" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 8L12 4L20 8V18L12 22L4 18Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/><path d="M4 8L12 12L20 8M12 12V22" stroke="#5B9E6F" stroke-width="1.5"/></svg></div>
+<div style="min-width:0;overflow:hidden"><span style="font-size:14px;font-weight:700;color:var(--c-accent);display:block;line-height:1.1;white-space:nowrap">1</span><span style="font-size:11px;color:var(--c-text-2);white-space:nowrap">待投票</span></div></div>
+<div style="flex:1;min-width:0;overflow:hidden;background:var(--c-bg-green);border-radius:var(--r-md);padding:8px 6px;display:flex;align-items:center;gap:6px;position:relative;overflow:hidden"><svg style="position:absolute;bottom:-4px;right:-4px;opacity:0.06;transform:rotate(270deg);pointer-events:none" width="28" height="28" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 4C5 4 4 5 4 6V14C4 15 5 16 6 16H10L12 20L14 16H18C19 16 20 15 20 14V6C20 5 19 4 18 4Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg></div>
+<div style="min-width:0;overflow:hidden"><span style="font-size:14px;font-weight:700;color:var(--c-primary-deep);display:block;line-height:1.1;white-space:nowrap">3</span><span style="font-size:11px;color:var(--c-text-2);white-space:nowrap">未读消息</span></div></div>
+</div></div>
+<svg width="100%" height="20" viewBox="0 0 375 20" preserveAspectRatio="none" style="display:block;margin:12px 0">
+<path d="M0 10 Q47 0 94 10 T188 10 T282 10 T375 10" stroke="#E89B6C" stroke-width="1.5" fill="none" opacity="0.15"/>
+<path d="M0 14 Q47 4 94 14 T188 14 T282 14 T375 14" stroke="#5B9E6F" stroke-width="1.5" fill="none" opacity="0.105"/>
+</svg>
+<!-- Menu groups with leaf decorations -->
+<div style="margin:4px 24px 0;background:var(--c-card);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-card);position:relative"><svg style="position:absolute;top:-4px;right:-4px;opacity:0.05;transform:rotate(0deg);pointer-events:none" width="28" height="28" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 4C5 4 4 5 4 6V14C4 15 5 16 6 16H10L12 20L14 16H18C19 16 20 15 20 14V6C20 5 19 4 18 4Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">消息通知</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1.5px solid var(--c-border)"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="6" stroke="#E89B6C" stroke-width="2" fill="#E89B6C11"/><path d="M12 6L13.2 8.4L16 8.8L14 10.6L14.5 13.4L12 12.2L9.5 13.4L10 10.6L8 8.8L10.8 8.4Z" fill="#E89B6C"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">我的勋章</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1.5px solid var(--c-border)"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 4L20 10L10 20L4 20L4 14Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">我的服务</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div></div>
+<div style="margin:12px 24px 0;background:var(--c-card);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-card);position:relative"><svg style="position:absolute;top:-4px;right:-4px;opacity:0.05;transform:rotate(0deg);pointer-events:none" width="28" height="28" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#E89B6C" stroke-width="1.5" fill="#E89B6C" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#E89B6C" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V20H15V14H9V20H4Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">申请开���小区</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1.5px solid var(--c-border)"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 3C5 3 4 4 4 5V21L8 19L12 21L16 19L20 21V5C20 4 19 3 18 3Z" stroke="#E89B6C" stroke-width="2" stroke-linejoin="round" fill="#E89B6C11"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">我的小区申请</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1.5px solid var(--c-border)"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6C4 5 5 4 6 4H18C19 4 20 5 20 6V14C20 15 19 16 18 16H12L8 20V16H6C5 16 4 15 4 14Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">邀请邻居</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div></div>
+<div style="margin:12px 24px 0;background:var(--c-card);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-card);position:relative"><svg style="position:absolute;top:-4px;right:-4px;opacity:0.05;transform:rotate(0deg);pointer-events:none" width="28" height="28" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="#6B7A6E" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#6B7A6E" stroke-width="2"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">设置</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1.5px solid var(--c-border)"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3C8 3 5 6 5 10C5 14 9 17 12 21C15 17 19 14 19 10C19 6 16 3 12 3Z" stroke="#E89B6C" stroke-width="2" stroke-linejoin="round" fill="#E89B6C11"/><circle cx="12" cy="10" r="3" stroke="#E89B6C" stroke-width="1.5"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">关于我们</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div></div>
+<div style="height:32px"></div></div></div></body></html>

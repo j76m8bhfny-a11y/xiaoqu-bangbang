@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小区事 · 晨光暖设计稿</title><style>:root{--c-bg:#FFF8EE;--c-card:#FFF;--c-primary:#5B9E6F;--c-primary-deep:#4A8C5E;--c-primary-soft:#A8D5B5;--c-accent:#E89B6C;--c-accent-soft:#FBF0DD;--c-cream:#FFF3D6;--c-cream-deep:#F3EAD0;--c-text:#2C3A2E;--c-text-2:#6B7A6E;--c-border:#E8E0D0;--c-bg-green:#EAF4EC;--c-bg-orange:#FBF0DD;--c-danger:#D9534F;--r-sm:16px;--r-md:20px;--r-lg:28px;--r-pill:999px;--sh-card:0 4px 20px rgba(91,158,111,.08);--sh-warm:0 4px 16px rgba(232,155,108,.1);--sh-btn:0 6px 16px rgba(74,140,94,.24);--fs-xs:13px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:20px;--fs-xxl:24px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;background:#EDE6D6;display:flex;justify-content:center;min-height:100vh;-webkit-font-smoothing:antialiased}
+.phone{width:375px;min-height:100vh;background:var(--c-bg);position:relative;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.08)}
+.phone::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.015' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;padding-bottom:32px}
+.notes{position:fixed;top:20px;right:20px;width:220px;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:100;font-size:12px;line-height:1.6;color:#333;max-height:80vh;overflow-y:auto}
+.notes h3{font-size:13px;margin-bottom:6px;color:var(--c-primary-deep)}
+.notes .item{margin-bottom:4px;padding-left:8px;border-left:2px solid var(--c-primary-soft)}
+@media(max-width:900px){.notes{display:none}}
+
+</style></head><body>
+<div class="notes"><h3>小区事</h3><div class="item">小区事首页</div><div class="item">业委会公告+待投票+社群入口+议题列表</div><div class="item">emoji替换: 🏠→手绘房子 📢→手绘喇叭 🗳️→手绘投票 👥→手绘社群</div><div class="item">议题列表卡片保持白卡+标签样式</div></div>
+<div class="phone"><div class="page">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--c-cream);border-bottom:1px solid var(--c-cream-deep)">
+  <div style="display:flex;align-items:center;gap:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 11 L12 4 L20 11 V20 H15 V14 H9 V20 H4 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg><span style="font-size:var(--fs-md);font-weight:600;color:var(--c-text)">阳光花园小区</span></div>
+  <span style="font-size:var(--fs-xs);color:var(--c-primary)">切换 <span style="font-size:20px;color:var(--c-text-2)">›</span></span>
+</div>
+
+<div style="margin:16px 24px 0;background:var(--c-card);border-radius:var(--r-md);padding:16px 20px;box-shadow:var(--sh-card)">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 10 C4 9 5 8 6 8 H8 L16 4 V20 L8 16 H6 C5 16 4 15 4 14 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/><path d="M16 8 C18 8 20 10 20 12 C20 14 18 16 16 16" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:var(--fs-md);font-weight:700;color:var(--c-text)">业委会通知</span></div>
+    <span style="font-size:var(--fs-xs);color:var(--c-primary)">进入 <span style="font-size:20px;color:var(--c-text-2)">›</span></span>
+  </div>
+  <div style="background:var(--c-bg-orange);border-radius:var(--r-sm);padding:12px">
+    <div style="font-size:var(--fs-sm);font-weight:600;color:var(--c-text);margin-bottom:4px">关于暑期泳池维修的通知</div>
+    <div style="font-size:var(--fs-xs);color:var(--c-text-2)">2026-07-05</div>
+  </div>
+</div>
+
+<div style="margin:12px 24px 0;background:var(--c-card);border-radius:var(--r-md);padding:16px 20px;box-shadow:var(--sh-card)">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 8 L12 4 L20 8 V18 L12 22 L4 18 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/><path d="M4 8 L12 12 L20 8 M12 12 V22" stroke="#5B9E6F" stroke-width="1.5" stroke-linecap="round"/></svg><span style="font-size:var(--fs-md);font-weight:700;color:var(--c-text)">进行中投票</span></div>
+    <span style="font-size:var(--fs-xs);color:var(--c-primary)">查看全部 <span style="font-size:20px;color:var(--c-text-2)">›</span></span>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;background:var(--c-bg-green);border-radius:var(--r-sm);padding:12px;margin-bottom:8px">
+    <div><div style="font-size:var(--fs-sm);font-weight:600;color:var(--c-text)">小区绿化改造方案</div><div style="font-size:var(--fs-xs);color:var(--c-text-2)">截止 2026-07-15</div></div>
+    <div style="background:var(--c-primary);color:#fff;border-radius:var(--r-pill);white-space:nowrap;padding:4px 12px;font-size:var(--fs-xs)">去投票</div>
+  </div>
+</div>
+
+<div style="margin:12px 24px 0;background:var(--c-cream);border-radius:var(--r-md);padding:16px 20px;box-shadow:var(--sh-card);border:1.5px solid var(--c-cream-deep);display:flex;justify-content:space-between;align-items:center">
+  <div style="display:flex;align-items:center;gap:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="8" r="3" stroke="#5B9E6F" stroke-width="2"/><circle cx="16" cy="8" r="3" stroke="#5B9E6F" stroke-width="2"/><path d="M3 20 C3 16 5 14 8 14 C11 14 13 16 13 20" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/><path d="M13 14 C16 14 21 16 21 20" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:var(--fs-md);font-weight:700;color:var(--c-text)">社群</span></div>
+  <span style="font-size:var(--fs-xs);color:var(--c-accent)">进入 <span style="font-size:20px;color:var(--c-text-2)">›</span></span>
+</div>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin:24px 24px 12px">
+  <div style="display:flex;gap:8px">
+    <div style="background:var(--c-primary);color:#fff;padding:6px 16px;border-radius:var(--r-pill);white-space:nowrap;font-size:var(--fs-sm);white-space:nowrap">进行中</div>
+    <div style="background:var(--c-card);color:var(--c-text-2);padding:6px 16px;border-radius:var(--r-pill);white-space:nowrap;font-size:var(--fs-sm);border:1px solid var(--c-border)">已完结</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:4px;background:var(--c-accent);color:#fff;padding:6px 14px;border-radius:var(--r-pill);white-space:nowrap;font-size:var(--fs-sm);white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5 V19 M5 12 H19" stroke="#FFF" stroke-width="2.5" stroke-linecap="round"/></svg> 发议题</div>
+</div>
+
+<div style="margin:8px 24px 0;background:var(--c-card);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--sh-card)">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <span style="flex-shrink:0;background:var(--c-bg-green);color:var(--c-primary-deep);padding:2px 8px;border-radius:var(--r-pill);white-space:nowrap;font-size:var(--fs-xs)">进行中</span>
+    <span style="font-size:var(--fs-md);font-weight:600;color:var(--c-text)">关于小区停车位管理的建议</span>
+  </div>
+  <div style="display:flex;gap:12px;font-size:var(--fs-xs);color:var(--c-text-2)">
+    <span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 11 H8 V20 H4 Z M8 11 L12 4 C14 4 14 6 13 8 L12 11 H18 C19 11 20 12 20 13 L19 18 C19 19 18 20 17 20 H8" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg> 赞 13</span><span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 13 H16 V4 H20 Z M16 13 L12 20 C10 20 10 18 11 16 L12 13 H6 C5 13 4 12 4 11 L5 6 C5 5 6 4 7 4 H16" stroke="#6B7A6E" stroke-width="2" stroke-linejoin="round" fill="#6B7A6E11"/></svg> 踩 4</span>
+    <span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6 C4 5 5 4 6 4 H18 C19 4 20 5 20 6 V14 C20 15 19 16 18 16 H12 L8 20 V16 H6 C5 16 4 15 4 14 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg> 评论 7</span>
+    <span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="14" height="17" rx="2" stroke="#5B9E6F" stroke-width="2"/><path d="M9 4 V2 H15 V4" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/><path d="M8 10 H16 M8 14 H13" stroke="#5B9E6F" stroke-width="1.5" stroke-linecap="round"/></svg> 事件 2</span>
+  </div>
+</div><div style="margin:8px 24px 0;background:var(--c-card);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--sh-card)">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <span style="flex-shrink:0;background:var(--c-bg-green);color:var(--c-primary-deep);padding:2px 8px;border-radius:var(--r-pill);white-space:nowrap;font-size:var(--fs-xs)">进行中</span>
+    <span style="font-size:var(--fs-md);font-weight:600;color:var(--c-text)">关于小区停车位管理的建议</span>
+  </div>
+  <div style="display:flex;gap:12px;font-size:var(--fs-xs);color:var(--c-text-2)">
+    <span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 11 H8 V20 H4 Z M8 11 L12 4 C14 4 14 6 13 8 L12 11 H18 C19 11 20 12 20 13 L19 18 C19 19 18 20 17 20 H8" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg> 赞 14</span><span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 13 H16 V4 H20 Z M16 13 L12 20 C10 20 10 18 11 16 L12 13 H6 C5 13 4 12 4 11 L5 6 C5 5 6 4 7 4 H16" stroke="#6B7A6E" stroke-width="2" stroke-linejoin="round" fill="#6B7A6E11"/></svg> 踩 5</span>
+    <span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6 C4 5 5 4 6 4 H18 C19 4 20 5 20 6 V14 C20 15 19 16 18 16 H12 L8 20 V16 H6 C5 16 4 15 4 14 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg> 评论 9</span>
+    <span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="14" height="17" rx="2" stroke="#5B9E6F" stroke-width="2"/><path d="M9 4 V2 H15 V4" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/><path d="M8 10 H16 M8 14 H13" stroke="#5B9E6F" stroke-width="1.5" stroke-linecap="round"/></svg> 事件 3</span>
+  </div>
+</div><div style="margin:8px 24px 0;background:var(--c-card);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--sh-card)">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <span style="flex-shrink:0;background:var(--c-bg-green);color:var(--c-primary-deep);padding:2px 8px;border-radius:var(--r-pill);white-space:nowrap;font-size:var(--fs-xs)">已完结</span>
+    <span style="font-size:var(--fs-md);font-weight:600;color:var(--c-text)">关于小区停车位管理的建议</span>
+  </div>
+  <div style="display:flex;gap:12px;font-size:var(--fs-xs);color:var(--c-text-2)">
+    <span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 4 L14.5 9 L20 10 L16 14 L17 19 L12 16.5 L7 19 L8 14 L4 10 L9.5 9 Z" stroke="#E89B6C" stroke-width="2" stroke-linejoin="round" fill="#E89B6C"/></svg> 评分 4.3（11人）</span>
+    <span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6 C4 5 5 4 6 4 H18 C19 4 20 5 20 6 V14 C20 15 19 16 18 16 H12 L8 20 V16 H6 C5 16 4 15 4 14 Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg> 评论 11</span>
+    <span style="display:flex;align-items:center;gap:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="14" height="17" rx="2" stroke="#5B9E6F" stroke-width="2"/><path d="M9 4 V2 H15 V4" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/><path d="M8 10 H16 M8 14 H13" stroke="#5B9E6F" stroke-width="1.5" stroke-linecap="round"/></svg> 事件 4</span>
+  </div>
+</div>
+<div style="height:32px"></div></div></div>
+</body></html>

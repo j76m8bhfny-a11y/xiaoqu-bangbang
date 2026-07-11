@@ -128,7 +128,7 @@ body {
   font-weight: 700;
 }
 
-.home__user-detail { flex: 1; min-width: 0; }
+.home__user-detail { flex:1;min-width:0;overflow:hidden; }
 
 .home__user-name {
   display: block;
@@ -173,7 +173,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-}
+;white-space:nowrap}
 
 .home__stat-icon-row {
   display: flex;
@@ -186,12 +186,12 @@ body {
   font-weight: 700;
   color: #fff;
   line-height: 1.1;
-}
+;white-space:nowrap}
 
 .home__stat-label {
   font-size: var(--font-size-xs);
   color: rgba(255, 255, 255, 0.85);
-}
+;white-space:nowrap}
 
 /* ═══ Feature Grid 2x2 ═══ */
 .home__grid {
@@ -285,33 +285,43 @@ body {
   min-width: 0;
   background: var(--color-bg-green);
   border-radius: var(--radius-md);
-  padding: 12px;
+  padding: 10px 8px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  overflow: hidden;
 }
 
 .home__todo-icon-wrap {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.home__todo-detail { display: flex; flex-direction: column; }
+.home__todo-detail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
 
 .home__todo-value {
-  font-size: var(--font-size-lg);
+  font-size: 15px;
   font-weight: 700;
   color: var(--color-primary-deep);
   line-height: 1.1;
+  white-space: nowrap;
 }
 
 .home__todo-label {
-  font-size: var(--font-size-xs);
+  font-size: 11px;
   color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ═══ Menu List ═══ */

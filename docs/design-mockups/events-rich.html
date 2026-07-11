@@ -1,0 +1,133 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>邻里帮（浓郁版）·晨光暖</title><style>:root{--c-bg:#FFF8EE;--c-card:#FFF;--c-primary:#5B9E6F;--c-primary-deep:#4A8C5E;--c-primary-soft:#A8D5B5;--c-accent:#E89B6C;--c-accent-soft:#FBF0DD;--c-cream:#FFF3D6;--c-cream-deep:#F3EAD0;--c-text:#2C3A2E;--c-text-2:#6B7A6E;--c-border:#E8E0D0;--c-bg-green:#EAF4EC;--c-bg-orange:#FBF0DD;--c-danger:#D9534F;--r-sm:16px;--r-md:20px;--r-lg:28px;--r-pill:999px;--sh-card:0 4px 20px rgba(91,158,111,.08);--sh-warm:0 4px 16px rgba(232,155,108,.1);--sh-btn:0 6px 16px rgba(74,140,94,.24);--fs-xs:13px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:20px;--fs-xxl:24px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;background:#EDE6D6;display:flex;justify-content:center;min-height:100vh;-webkit-font-smoothing:antialiased}
+.phone{width:375px;min-height:100vh;background:var(--c-bg);position:relative;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.08)}
+/* Paper texture */
+.phone::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.015' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+/* Rich scattered background: flowers + leaves + dots + sparkles */
+.page-bg{position:absolute;inset:0;pointer-events:none;z-index:0;opacity:0.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg%3E%3Ccircle cx='10' cy='10' r='2' fill='%23E89B6C'/%3E%3Cpath d='M30 5C29 3 26 3 26 5.5C26 8 30 11 30 11C30 11 34 8 34 5.5C34 3 31 3 30 5Z' fill='%23E89B6C'/%3E%3Cellipse cx='48' cy='30' rx='4' ry='2' fill='%23A8D5B5'/%3E%3Cpath d='M70 8C66 8 62 12 62 16C62 20 66 24 70 24C74 24 78 20 78 16C78 12 74 8 70 8Z M67 16C67 14 68 12 70 12C72 12 73 14 73 16C73 18 72 20 70 20C68 20 67 18 67 16Z' fill='%235B9E6F'/%3E%3Cpath d='M100 40C98 38 95 38 95 40.5C95 43 100 46 100 46C100 46 105 43 105 40.5C105 38 102 38 100 40Z' fill='%23E89B6C'/%3E%3Ccircle cx='130' cy='15' r='1.5' fill='%235B9E6F'/%3E%3Cpath d='M140 50C138 48 135 48 135 50.5C135 53 140 56 140 56C140 56 145 53 145 50.5C145 48 142 48 140 50Z' fill='%23A8D5B5'/%3E%3Cellipse cx='25' cy='60' rx='3' ry='1.5' fill='%23E89B6C'/%3E%3Ccircle cx='55' cy='75' r='2' fill='%235B9E6F'/%3E%3Cpath d='M85 70C83 68 80 68 80 70.5C80 73 85 76 85 76C85 76 90 73 90 70.5C90 68 87 68 85 70Z' fill='%23E89B6C' opacity='0.6'/%3E%3Ccircle cx='115' cy='85' r='1.5' fill='%23A8D5B5'/%3E%3Cpath d='M145 95C143 93 140 93 140 95.5C140 98 145 101 145 101C145 101 150 98 150 95.5C150 93 147 93 145 95Z' fill='%235B9E6F' opacity='0.5'/%3E%3Ccircle cx='15' cy='100' r='2' fill='%23E89B6C'/%3E%3Cpath d='M35 120C33 118 30 118 30 120.5C30 123 35 126 35 126C35 126 40 123 40 120.5C40 118 37 118 35 120Z' fill='%23A8D5B5'/%3E%3Ccircle cx='65' cy='110' r='1.5' fill='%235B9E6F'/%3E%3Cellipse cx='95' cy='130' rx='3' ry='1.5' fill='%23E89B6C' opacity='0.6'/%3E%3Ccircle cx='125' cy='120' r='2' fill='%235B9E6F'/%3E%3Cpath d='M150 140C148 138 145 138 145 140.5C145 143 150 146 150 146C150 146 155 143 155 140.5C155 138 152 138 150 140Z' fill='%23E89B6C' opacity='0.5'/%3E%3Ccircle cx='10' cy='145' r='1.5' fill='%23A8D5B5'/%3E%3C/g%3E%3C/svg%3E");background-size:160px 160px}
+.page{position:relative;z-index:1;padding-bottom:32px}
+.notes{position:fixed;top:20px;right:20px;width:220px;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:100;font-size:12px;line-height:1.6;color:#333;max-height:80vh;overflow-y:auto}
+.notes h3{font-size:13px;margin-bottom:6px;color:var(--c-primary-deep)}
+.notes .item{margin-bottom:4px;padding-left:8px;border-left:2px solid var(--c-primary-soft)}
+@media(max-width:900px){.notes{display:none}}.fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--c-primary);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-btn);z-index:10}</style></head><body><div class="notes"><h3>邻里帮（浓郁版）</h3><div class="item">邻里帮页 · 浓郁���饰版</div><div class="item">新增: 彩旗拉花+街区剪影</div><div class="item">新增: 事件卡片和纸胶带(3种)</div><div class="item">新增: 波浪分隔线带花朵</div><div class="item">新增: 底部空状态大插画(房子+树+太阳+鸟+蝶)</div><div class="item">新增: header五彩碎屑</div><div class="item">新增: 更密集散落背景</div></div><div class="phone"><div class="page-bg"></div><div class="page">
+
+<div style="position:absolute;top:0;left:0;right:0;height:32px;z-index:2;pointer-events:none;overflow:hidden">
+<svg width="100%" height="32" viewBox="0 0 375 32" preserveAspectRatio="none">
+<!-- String -->
+<path d="M0 6 Q94 14 188 8 T375 6" stroke="#E89B6C" stroke-width="1" fill="none" opacity="0.3"/>
+<!-- Flags -->
+<path d="M4 12 L18 12 L11 24 Z" fill="#E89B6C" opacity="0.25"/><path d="M51 14 L65 14 L58 26 Z" fill="#5B9E6F" opacity="0.25"/><path d="M98 12 L112 12 L105 24 Z" fill="#FFF3D6" opacity="0.25"/><path d="M145 14 L159 14 L152 26 Z" fill="#E89B6C" opacity="0.25"/><path d="M192 12 L206 12 L199 24 Z" fill="#5B9E6F" opacity="0.25"/><path d="M239 14 L253 14 L246 26 Z" fill="#FFF3D6" opacity="0.25"/><path d="M286 12 L300 12 L293 24 Z" fill="#E89B6C" opacity="0.25"/><path d="M333 14 L347 14 L340 26 Z" fill="#5B9E6F" opacity="0.25"/>
+</svg></div>
+<div style="margin:28px 24px 0;padding:24px;border-radius:var(--r-lg);background:linear-gradient(135deg,var(--c-primary),var(--c-primary-deep));box-shadow:var(--sh-card);position:relative;overflow:hidden">
+
+<svg style="position:absolute;top:-16px;right:20px;opacity:0.15" width="80" height="80" viewBox="0 0 80 80" fill="none">
+<circle cx="40" cy="40" r="16" fill="#FFF"/>
+<g stroke="#FFF" stroke-width="3" stroke-linecap="round"><path d="M40 8V2M40 78V72M8 40H2M78 40H72M18 18L14 14M62 62L66 66M18 62L14 66M62 18L66 14"/></g>
+</svg>
+<svg style="position:absolute;top:12px;right:60px;opacity:0.1" width="50" height="30" viewBox="0 0 50 30" fill="none">
+<path d="M10 22C7 22 4 19 4 16C4 12 7 9 11 9C12 5 16 2 20 3C24 0 30 1 32 5C37 4 42 7 42 12C42 18 37 22 32 22Z" fill="#FFF"/></svg>
+<svg style="position:absolute;bottom:8px;left:20px;opacity:0.08" width="60" height="35" viewBox="0 0 60 35" fill="none">
+<path d="M12 28C8 28 5 25 5 21C5 17 8 14 12 14C13 9 18 5 24 6C29 3 36 4 39 9C45 8 50 12 50 18C50 24 45 28 40 28Z" fill="#FFF"/></svg>
+<svg style="position:absolute;top:20px;left:140px;opacity:0.1" width="40" height="14" viewBox="0 0 40 14" fill="none">
+<path d="M2 7 Q6 2 10 7 Q14 2 18 7" stroke="#FFF" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<path d="M22 5 Q26 0 30 5 Q34 0 38 5" stroke="#FFF" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+
+<svg style="position:absolute;bottom:-2px;left:0;right:0;opacity:0.05" width="100%" height="60" viewBox="0 0 375 60" preserveAspectRatio="none">
+<path d="M0 60 L0 45 L20 45 L20 30 L25 30 L25 45 L45 45 L45 35 L50 35 L50 25 L55 25 L55 35 L60 35 L60 45 L80 45 L80 20 L85 15 L90 20 L90 45 L110 45 L110 30 L115 30 L115 25 L120 25 L120 30 L125 30 L125 45 L145 45 L145 35 L150 35 L150 28 L155 28 L155 35 L160 35 L160 45 L180 45 L180 22 L185 18 L190 22 L190 45 L210 45 L210 30 L215 30 L215 25 L220 25 L220 30 L225 30 L225 45 L245 45 L245 35 L250 35 L250 28 L255 28 L255 35 L260 35 L260 45 L280 45 L280 20 L285 15 L290 20 L290 45 L310 45 L310 30 L315 30 L315 25 L320 25 L320 30 L325 30 L325 45 L345 45 L345 35 L350 35 L350 28 L355 28 L355 35 L360 35 L360 45 L375 45 L375 60 Z" fill="#FFF"/>
+<!-- Little trees -->
+<circle cx="35" cy="42" r="4" fill="#FFF"/><rect x="34" y="42" width="2" height="6" fill="#FFF"/>
+<circle cx="95" cy="42" r="3" fill="#FFF"/><rect x="94" y="42" width="2" height="6" fill="#FFF"/>
+<circle cx="185" cy="42" r="4" fill="#FFF"/><rect x="184" y="42" width="2" height="6" fill="#FFF"/>
+<circle cx="285" cy="42" r="3" fill="#FFF"/><rect x="284" y="42" width="2" height="6" fill="#FFF"/>
+</svg>
+<svg style="position:absolute;inset:0;pointer-events:none" width="375" height="80" viewBox="0 0 375 80"><circle cx="53.434876656972676" cy="74.95687001946779" r="2" fill="#E89B6C" opacity="0.3"/><rect x="68.14772911664201" y="19.447183586056795" width="3" height="3" fill="#5B9E6F" opacity="0.3" transform="rotate(4.384719903544226 68.14772911664201 19.447183586056795)"/><path d="M246.1847018167062 59.158564123896014C245.1847018167062 57.158564123896014 243.1847018167062 57.158564123896014 243.1847018167062 59.158564123896014C243.1847018167062 61.158564123896014 245.1847018167062 61.158564123896014 246.1847018167062 59.158564123896014Z" fill="#A8D5B5" opacity="0.3"/><circle cx="274.3488854089322" cy="47.874935501496516" r="2" fill="#FFF3D6" opacity="0.3"/><rect x="1.6704364706992825" y="10.446679349613968" width="3" height="3" fill="#E89B6C" opacity="0.3" transform="rotate(34.40448523427338 1.6704364706992825 10.446679349613968)"/><path d="M133.99595284350227 32.9299444565806C132.99595284350227 30.9299444565806 130.99595284350227 30.9299444565806 130.99595284350227 32.9299444565806C130.99595284350227 34.9299444565806 132.99595284350227 34.9299444565806 133.99595284350227 32.9299444565806Z" fill="#5B9E6F" opacity="0.3"/></svg>
+<div style="display:flex;align-items:center;gap:8px;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 12L7 8L12 10L17 8L21 12L17 16L12 14L7 16Z" stroke="#FFF" stroke-width="2" stroke-linejoin="round" fill="#FFF11"/></svg><span style="font-size:var(--fs-xl);font-weight:700;color:#fff">邻里互助</span></div>
+<div style="font-size:var(--fs-sm);color:rgba(255,255,255,0.8);margin-top:4px;position:relative;z-index:1">求助、帮忙、闲置流转</div></div>
+<div style="display:flex;margin:16px 24px 0;gap:8px"><div style="flex:1;text-align:center;padding:10px;border-radius:var(--r-md);background:var(--c-primary);color:#fff;font-size:var(--fs-sm);font-weight:600;white-space:nowrap">互助</div><div style="flex:1;text-align:center;padding:10px;border-radius:var(--r-md);background:var(--c-card);color:var(--c-text-2);font-size:var(--fs-sm);box-shadow:var(--sh-card);white-space:nowrap">闲置</div></div>
+<div style="display:flex;gap:6px;padding:12px 24px 0;flex-wrap:wrap;align-items:center"><div style="padding:5px 12px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;background:var(--c-primary-soft);color:var(--c-primary-deep)">全部</div><div style="padding:5px 12px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;background:var(--c-card);color:var(--c-text-2);border:1px solid var(--c-border)">求助</div><div style="padding:5px 12px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;background:var(--c-card);color:var(--c-text-2);border:1px solid var(--c-border)">我能帮忙</div><div style="padding:5px 12px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;background:var(--c-card);color:var(--c-text-2);border:1px solid var(--c-border)">公益</div><div style="padding:5px 12px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;background:var(--c-card);color:var(--c-text-2);border:1px solid var(--c-border)">寻宠寻物</div><div style="margin-left:auto;width:32px;height:32px;background:var(--c-card);border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-card)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#6B7A6E" stroke-width="2"/><path d="M16 16L21 21" stroke="#6B7A6E" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+<svg width="100%" height="24" viewBox="0 0 375 24" preserveAspectRatio="none" style="display:block;margin:6px 0">
+<path d="M0 12 Q47 2 94 12 T188 12 T282 12 T375 12" stroke="#E89B6C" stroke-width="1.5" fill="none" opacity="0.2"/>
+<path d="M0 16 Q47 6 94 16 T188 16 T282 16 T375 16" stroke="#5B9E6F" stroke-width="1.5" fill="none" opacity="0.12"/>
+<!-- Small flowers on the wave -->
+<circle cx="47" cy="8" r="2" fill="#E89B6C" opacity="0.2"/>
+<circle cx="141" cy="8" r="2" fill="#5B9E6F" opacity="0.2"/>
+<circle cx="235" cy="8" r="2" fill="#E89B6C" opacity="0.2"/>
+<circle cx="329" cy="8" r="2" fill="#5B9E6F" opacity="0.2"/>
+</svg>
+<div style="margin:12px 24px 0;background:var(--c-card);border-radius:var(--r-md);padding:16px;box-shadow:var(--sh-card);position:relative;overflow:hidden">
+<svg style="position:absolute;top:-8px;right:12px;transform:rotate(-15deg);pointer-events:none" width="40" height="20" viewBox="0 0 40 20">
+  <rect width="40" height="20" rx="2" fill="#5B9E6F" opacity="0.15"/>
+  <line x1="0" y1="10" x2="40" y2="10" stroke="#5B9E6F" stroke-width="0.5" opacity="0.2" stroke-dasharray="3 2"/>
+</svg>
+
+
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;position:relative;z-index:1"><span style="background:var(--c-bg-green);color:var(--c-primary-deep);padding:2px 8px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;flex-shrink:0">求助</span><span style="background:var(--c-bg-orange);color:var(--c-accent);padding:2px 8px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;flex-shrink:0">免费</span></div>
+<div style="font-size:var(--fs-md);font-weight:600;color:var(--c-text);margin-bottom:4px;position:relative;z-index:1">帮忙搬几箱快递到6栋</div>
+<div style="font-size:var(--fs-sm);color:var(--c-text-2);margin-bottom:8px;position:relative;z-index:1">在小区门口取了几个大件快递，一个人搬不动，找个邻居搭把手</div>
+<div style="display:flex;gap:12px;font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1;flex-wrap:wrap"><span style="display:flex;align-items:center;gap:2px;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3C8 3 5 6 5 10C5 14 12 21 12 21C12 21 19 14 19 10C19 6 16 3 12 3Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/><circle cx="12" cy="10" r="3" stroke="#5B9E6F" stroke-width="1.5"/></svg> 3栋门口</span><span style="display:flex;align-items:center;gap:2px;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#6B7A6E" stroke-width="2"/><path d="M12 7V13L16 15" stroke="#6B7A6E" stroke-width="2" stroke-linecap="round"/></svg> 2小时前</span><span style="display:flex;align-items:center;gap:2px;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6C4 5 5 4 6 4H18C19 4 20 5 20 6V14C20 15 19 16 18 16H12L8 20V16H6C5 16 4 15 4 14Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg> 4评论</span></div></div><div style="margin:12px 24px 0;background:var(--c-card);border-radius:var(--r-md);padding:16px;box-shadow:var(--sh-card);position:relative;overflow:hidden">
+
+<svg style="position:absolute;top:-4px;right:-4px;opacity:0.06;transform:rotate(0deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg>
+
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;position:relative;z-index:1"><span style="background:var(--c-bg-green);color:var(--c-primary-deep);padding:2px 8px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;flex-shrink:0">求助</span><span style="background:var(--c-bg-orange);color:var(--c-accent);padding:2px 8px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;flex-shrink:0">免费</span></div>
+<div style="font-size:var(--fs-md);font-weight:600;color:var(--c-text);margin-bottom:4px;position:relative;z-index:1">帮忙搬几箱快递到6栋</div>
+<div style="font-size:var(--fs-sm);color:var(--c-text-2);margin-bottom:8px;position:relative;z-index:1">在小区门口取了几个大件快递，一个人搬不动，找个邻居搭把手</div>
+<div style="display:flex;gap:12px;font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1;flex-wrap:wrap"><span style="display:flex;align-items:center;gap:2px;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3C8 3 5 6 5 10C5 14 12 21 12 21C12 21 19 14 19 10C19 6 16 3 12 3Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/><circle cx="12" cy="10" r="3" stroke="#5B9E6F" stroke-width="1.5"/></svg> 3栋门口</span><span style="display:flex;align-items:center;gap:2px;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#6B7A6E" stroke-width="2"/><path d="M12 7V13L16 15" stroke="#6B7A6E" stroke-width="2" stroke-linecap="round"/></svg> 2小时前</span><span style="display:flex;align-items:center;gap:2px;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6C4 5 5 4 6 4H18C19 4 20 5 20 6V14C20 15 19 16 18 16H12L8 20V16H6C5 16 4 15 4 14Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg> 5评论</span></div></div><div style="margin:12px 24px 0;background:var(--c-card);border-radius:var(--r-md);padding:16px;box-shadow:var(--sh-card);position:relative;overflow:hidden">
+
+
+<svg style="position:absolute;top:-8px;left:12px;transform:rotate(15deg);pointer-events:none" width="40" height="20" viewBox="0 0 40 20">
+  <rect width="40" height="20" rx="2" fill="#E89B6C" opacity="0.15"/>
+  <line x1="0" y1="10" x2="40" y2="10" stroke="#E89B6C" stroke-width="0.5" opacity="0.2" stroke-dasharray="3 2"/>
+</svg>
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;position:relative;z-index:1"><span style="background:var(--c-bg-green);color:var(--c-primary-deep);padding:2px 8px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;flex-shrink:0">求助</span><span style="background:var(--c-bg-orange);color:var(--c-accent);padding:2px 8px;border-radius:var(--r-pill);font-size:var(--fs-xs);white-space:nowrap;flex-shrink:0">免费</span></div>
+<div style="font-size:var(--fs-md);font-weight:600;color:var(--c-text);margin-bottom:4px;position:relative;z-index:1">帮忙搬几箱快递到6栋</div>
+<div style="font-size:var(--fs-sm);color:var(--c-text-2);margin-bottom:8px;position:relative;z-index:1">在小区门口取了几个大件快递，一个人搬不动，找个邻居搭把手</div>
+<div style="display:flex;gap:12px;font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1;flex-wrap:wrap"><span style="display:flex;align-items:center;gap:2px;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3C8 3 5 6 5 10C5 14 12 21 12 21C12 21 19 14 19 10C19 6 16 3 12 3Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/><circle cx="12" cy="10" r="3" stroke="#5B9E6F" stroke-width="1.5"/></svg> 3栋门口</span><span style="display:flex;align-items:center;gap:2px;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#6B7A6E" stroke-width="2"/><path d="M12 7V13L16 15" stroke="#6B7A6E" stroke-width="2" stroke-linecap="round"/></svg> 2小时前</span><span style="display:flex;align-items:center;gap:2px;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6C4 5 5 4 6 4H18C19 4 20 5 20 6V14C20 15 19 16 18 16H12L8 20V16H6C5 16 4 15 4 14Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg> 6评论</span></div></div>
+<svg width="100%" height="24" viewBox="0 0 375 24" preserveAspectRatio="none" style="display:block;margin:6px 0">
+<path d="M0 12 Q47 2 94 12 T188 12 T282 12 T375 12" stroke="#E89B6C" stroke-width="1.5" fill="none" opacity="0.2"/>
+<path d="M0 16 Q47 6 94 16 T188 16 T282 16 T375 16" stroke="#5B9E6F" stroke-width="1.5" fill="none" opacity="0.12"/>
+<!-- Small flowers on the wave -->
+<circle cx="47" cy="8" r="2" fill="#E89B6C" opacity="0.2"/>
+<circle cx="141" cy="8" r="2" fill="#5B9E6F" opacity="0.2"/>
+<circle cx="235" cy="8" r="2" fill="#E89B6C" opacity="0.2"/>
+<circle cx="329" cy="8" r="2" fill="#5B9E6F" opacity="0.2"/>
+</svg>
+<div style="text-align:center;padding:20px 0 0">
+<svg width="140" height="110" viewBox="0 0 140 110" fill="none">
+<!-- Ground line -->
+<path d="M10 90 Q35 85 60 88 Q85 82 110 86 Q120 88 130 90" stroke="#A8D5B5" stroke-width="2" fill="none" stroke-linecap="round"/>
+<!-- House -->
+<path d="M35 90 L35 60 L52 48 L70 60 L70 90 Z" stroke="#5B9E6F" stroke-width="2" fill="#FFF3D6" stroke-linejoin="round"/>
+<path d="M44 90 L44 72 L61 72 L61 90" stroke="#5B9E6F" stroke-width="1.5" fill="none"/>
+<rect x="48" y="76" width="8" height="8" fill="#E89B6C" opacity="0.3"/>
+<!-- Chimney -->
+<rect x="58" y="50" width="6" height="8" fill="#5B9E6F" opacity="0.3"/>
+<!-- Smoke -->
+<path d="M61 50 Q59 45 62 42 Q65 39 63 35" stroke="#6B7A6E" stroke-width="1" fill="none" opacity="0.3"/>
+<!-- Big tree -->
+<circle cx="92" cy="62" r="14" fill="#A8D5B5" opacity="0.4"/>
+<circle cx="88" cy="56" r="10" fill="#5B9E6F" opacity="0.3"/>
+<circle cx="96" cy="58" r="9" fill="#5B9E6F" opacity="0.2"/>
+<path d="M92 76 L92 90" stroke="#4A8C5E" stroke-width="2.5" stroke-linecap="round"/>
+<!-- Small bush -->
+<circle cx="18" cy="86" r="4" fill="#A8D5B5" opacity="0.3"/>
+<circle cx="22" cy="84" r="3" fill="#5B9E6F" opacity="0.2"/>
+<!-- Flowers -->
+<circle cx="24" cy="88" r="2" fill="#E89B6C"/><path d="M24 90L24 94" stroke="#4A8C5E" stroke-width="1"/>
+<circle cx="108" cy="86" r="2" fill="#E89B6C"/><path d="M108 88L108 92" stroke="#4A8C5E" stroke-width="1"/>
+<circle cx="116" cy="84" r="1.5" fill="#E89B6C"/><path d="M116 86L116 90" stroke="#4A8C5E" stroke-width="1"/>
+<!-- Sun -->
+<circle cx="115" cy="18" r="7" fill="#E89B6C" opacity="0.2"/>
+<g stroke="#E89B6C" stroke-width="1.5" stroke-linecap="round" opacity="0.2"><path d="M115 5V2M115 34V31M102 18H99M131 18H128M106 9L104 7M124 27L126 29M106 27L104 29M124 9L126 7"/></g>
+<!-- Birds -->
+<path d="M15 28 Q19 24 23 28 Q27 24 31 28" stroke="#6B7A6E" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.4"/>
+<path d="M38 20 Q42 16 46 20" stroke="#6B7A6E" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.3"/>
+<!-- Butterflies -->
+<path d="M75 30 C72 27 68 28 68 31 C68 34 72 33 75 30 Z M75 30 C78 27 82 28 82 31 C82 34 78 33 75 30 Z" fill="#E89B6C" opacity="0.3"/>
+<path d="M75 30L75 34" stroke="#E89B6C" stroke-width="0.8" opacity="0.3"/>
+</svg><div style="font-size:var(--fs-sm);color:var(--c-text-2);margin-top:8px">没有更多了</div></div>
+<div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#FFF" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+<div style="height:32px"></div></div></div></body></html>

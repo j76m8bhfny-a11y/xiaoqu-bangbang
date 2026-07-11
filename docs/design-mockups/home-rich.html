@@ -1,0 +1,196 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>我的（浓郁版）·晨光暖</title><style>:root{--c-bg:#FFF8EE;--c-card:#FFF;--c-primary:#5B9E6F;--c-primary-deep:#4A8C5E;--c-primary-soft:#A8D5B5;--c-accent:#E89B6C;--c-accent-soft:#FBF0DD;--c-cream:#FFF3D6;--c-cream-deep:#F3EAD0;--c-text:#2C3A2E;--c-text-2:#6B7A6E;--c-border:#E8E0D0;--c-bg-green:#EAF4EC;--c-bg-orange:#FBF0DD;--c-danger:#D9534F;--r-sm:16px;--r-md:20px;--r-lg:28px;--r-pill:999px;--sh-card:0 4px 20px rgba(91,158,111,.08);--sh-warm:0 4px 16px rgba(232,155,108,.1);--sh-btn:0 6px 16px rgba(74,140,94,.24);--fs-xs:13px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:20px;--fs-xxl:24px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;background:#EDE6D6;display:flex;justify-content:center;min-height:100vh;-webkit-font-smoothing:antialiased}
+.phone{width:375px;min-height:100vh;background:var(--c-bg);position:relative;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.08)}
+/* Paper texture */
+.phone::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.015' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+/* Rich scattered background: flowers + leaves + dots + sparkles */
+.page-bg{position:absolute;inset:0;pointer-events:none;z-index:0;opacity:0.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg%3E%3Ccircle cx='10' cy='10' r='2' fill='%23E89B6C'/%3E%3Cpath d='M30 5C29 3 26 3 26 5.5C26 8 30 11 30 11C30 11 34 8 34 5.5C34 3 31 3 30 5Z' fill='%23E89B6C'/%3E%3Cellipse cx='48' cy='30' rx='4' ry='2' fill='%23A8D5B5'/%3E%3Cpath d='M70 8C66 8 62 12 62 16C62 20 66 24 70 24C74 24 78 20 78 16C78 12 74 8 70 8Z M67 16C67 14 68 12 70 12C72 12 73 14 73 16C73 18 72 20 70 20C68 20 67 18 67 16Z' fill='%235B9E6F'/%3E%3Cpath d='M100 40C98 38 95 38 95 40.5C95 43 100 46 100 46C100 46 105 43 105 40.5C105 38 102 38 100 40Z' fill='%23E89B6C'/%3E%3Ccircle cx='130' cy='15' r='1.5' fill='%235B9E6F'/%3E%3Cpath d='M140 50C138 48 135 48 135 50.5C135 53 140 56 140 56C140 56 145 53 145 50.5C145 48 142 48 140 50Z' fill='%23A8D5B5'/%3E%3Cellipse cx='25' cy='60' rx='3' ry='1.5' fill='%23E89B6C'/%3E%3Ccircle cx='55' cy='75' r='2' fill='%235B9E6F'/%3E%3Cpath d='M85 70C83 68 80 68 80 70.5C80 73 85 76 85 76C85 76 90 73 90 70.5C90 68 87 68 85 70Z' fill='%23E89B6C' opacity='0.6'/%3E%3Ccircle cx='115' cy='85' r='1.5' fill='%23A8D5B5'/%3E%3Cpath d='M145 95C143 93 140 93 140 95.5C140 98 145 101 145 101C145 101 150 98 150 95.5C150 93 147 93 145 95Z' fill='%235B9E6F' opacity='0.5'/%3E%3Ccircle cx='15' cy='100' r='2' fill='%23E89B6C'/%3E%3Cpath d='M35 120C33 118 30 118 30 120.5C30 123 35 126 35 126C35 126 40 123 40 120.5C40 118 37 118 35 120Z' fill='%23A8D5B5'/%3E%3Ccircle cx='65' cy='110' r='1.5' fill='%235B9E6F'/%3E%3Cellipse cx='95' cy='130' rx='3' ry='1.5' fill='%23E89B6C' opacity='0.6'/%3E%3Ccircle cx='125' cy='120' r='2' fill='%235B9E6F'/%3E%3Cpath d='M150 140C148 138 145 138 145 140.5C145 143 150 146 150 146C150 146 155 143 155 140.5C155 138 152 138 150 140Z' fill='%23E89B6C' opacity='0.5'/%3E%3Ccircle cx='10' cy='145' r='1.5' fill='%23A8D5B5'/%3E%3C/g%3E%3C/svg%3E");background-size:160px 160px}
+.page{position:relative;z-index:1;padding-bottom:32px}
+.notes{position:fixed;top:20px;right:20px;width:220px;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:100;font-size:12px;line-height:1.6;color:#333;max-height:80vh;overflow-y:auto}
+.notes h3{font-size:13px;margin-bottom:6px;color:var(--c-primary-deep)}
+.notes .item{margin-bottom:4px;padding-left:8px;border-left:2px solid var(--c-primary-soft)}
+@media(max-width:900px){.notes{display:none}}.fab{position:fixed;bottom:80px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--c-primary);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-btn);z-index:10}</style></head><body><div class="notes"><h3>我的（浓郁版）</h3><div class="item">我的页 · 浓郁装饰版</div><div class="item">新增: 顶部彩旗拉花</div><div class="item">新增: header街区剪影</div><div class="item">新增: header五彩碎屑(6个)</div><div class="item">新增: 和纸胶带(卡片顶部)</div><div class="item">新增: 标题手绘波浪下划线</div><div class="item">新增: 更密集散落背景(花+叶+点+星光)</div><div class="item">新增: 底部花叶装饰带</div><div class="item">新增: 头像旁星星闪烁</div></div><div class="phone"><div class="page-bg"></div><div class="page">
+
+<div style="position:absolute;top:0;left:0;right:0;height:32px;z-index:2;pointer-events:none;overflow:hidden">
+<svg width="100%" height="32" viewBox="0 0 375 32" preserveAspectRatio="none">
+<!-- String -->
+<path d="M0 6 Q94 14 188 8 T375 6" stroke="#E89B6C" stroke-width="1" fill="none" opacity="0.3"/>
+<!-- Flags -->
+<path d="M4 12 L18 12 L11 24 Z" fill="#E89B6C" opacity="0.25"/><path d="M51 14 L65 14 L58 26 Z" fill="#5B9E6F" opacity="0.25"/><path d="M98 12 L112 12 L105 24 Z" fill="#FFF3D6" opacity="0.25"/><path d="M145 14 L159 14 L152 26 Z" fill="#E89B6C" opacity="0.25"/><path d="M192 12 L206 12 L199 24 Z" fill="#5B9E6F" opacity="0.25"/><path d="M239 14 L253 14 L246 26 Z" fill="#FFF3D6" opacity="0.25"/><path d="M286 12 L300 12 L293 24 Z" fill="#E89B6C" opacity="0.25"/><path d="M333 14 L347 14 L340 26 Z" fill="#5B9E6F" opacity="0.25"/>
+</svg></div>
+<!-- Header with skyline + scene -->
+<div style="margin:28px 24px 0;background:linear-gradient(135deg,var(--c-primary),var(--c-primary-deep));border-radius:var(--r-lg);padding:24px;box-shadow:var(--sh-card);position:relative;overflow:hidden">
+
+<svg style="position:absolute;top:-16px;right:20px;opacity:0.15" width="80" height="80" viewBox="0 0 80 80" fill="none">
+<circle cx="40" cy="40" r="16" fill="#FFF"/>
+<g stroke="#FFF" stroke-width="3" stroke-linecap="round"><path d="M40 8V2M40 78V72M8 40H2M78 40H72M18 18L14 14M62 62L66 66M18 62L14 66M62 18L66 14"/></g>
+</svg>
+<svg style="position:absolute;top:12px;right:60px;opacity:0.1" width="50" height="30" viewBox="0 0 50 30" fill="none">
+<path d="M10 22C7 22 4 19 4 16C4 12 7 9 11 9C12 5 16 2 20 3C24 0 30 1 32 5C37 4 42 7 42 12C42 18 37 22 32 22Z" fill="#FFF"/></svg>
+<svg style="position:absolute;bottom:8px;left:20px;opacity:0.08" width="60" height="35" viewBox="0 0 60 35" fill="none">
+<path d="M12 28C8 28 5 25 5 21C5 17 8 14 12 14C13 9 18 5 24 6C29 3 36 4 39 9C45 8 50 12 50 18C50 24 45 28 40 28Z" fill="#FFF"/></svg>
+<svg style="position:absolute;top:20px;left:140px;opacity:0.1" width="40" height="14" viewBox="0 0 40 14" fill="none">
+<path d="M2 7 Q6 2 10 7 Q14 2 18 7" stroke="#FFF" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<path d="M22 5 Q26 0 30 5 Q34 0 38 5" stroke="#FFF" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+
+<svg style="position:absolute;bottom:-2px;left:0;right:0;opacity:0.06" width="100%" height="60" viewBox="0 0 375 60" preserveAspectRatio="none">
+<path d="M0 60 L0 45 L20 45 L20 30 L25 30 L25 45 L45 45 L45 35 L50 35 L50 25 L55 25 L55 35 L60 35 L60 45 L80 45 L80 20 L85 15 L90 20 L90 45 L110 45 L110 30 L115 30 L115 25 L120 25 L120 30 L125 30 L125 45 L145 45 L145 35 L150 35 L150 28 L155 28 L155 35 L160 35 L160 45 L180 45 L180 22 L185 18 L190 22 L190 45 L210 45 L210 30 L215 30 L215 25 L220 25 L220 30 L225 30 L225 45 L245 45 L245 35 L250 35 L250 28 L255 28 L255 35 L260 35 L260 45 L280 45 L280 20 L285 15 L290 20 L290 45 L310 45 L310 30 L315 30 L315 25 L320 25 L320 30 L325 30 L325 45 L345 45 L345 35 L350 35 L350 28 L355 28 L355 35 L360 35 L360 45 L375 45 L375 60 Z" fill="#FFF"/>
+<!-- Little trees -->
+<circle cx="35" cy="42" r="4" fill="#FFF"/><rect x="34" y="42" width="2" height="6" fill="#FFF"/>
+<circle cx="95" cy="42" r="3" fill="#FFF"/><rect x="94" y="42" width="2" height="6" fill="#FFF"/>
+<circle cx="185" cy="42" r="4" fill="#FFF"/><rect x="184" y="42" width="2" height="6" fill="#FFF"/>
+<circle cx="285" cy="42" r="3" fill="#FFF"/><rect x="284" y="42" width="2" height="6" fill="#FFF"/>
+</svg>
+<svg style="position:absolute;inset:0;pointer-events:none" width="375" height="80" viewBox="0 0 375 80"><circle cx="121.18964339358502" cy="33.568993227291884" r="2" fill="#E89B6C" opacity="0.3"/><rect x="253.1681022987508" y="20.144076637449153" width="3" height="3" fill="#5B9E6F" opacity="0.3" transform="rotate(15.278145402068814 253.1681022987508 20.144076637449153)"/><path d="M164.28648239202005 9.160492256792567C163.28648239202005 7.160492256792567 161.28648239202005 7.160492256792567 161.28648239202005 9.160492256792567C161.28648239202005 11.160492256792567 163.28648239202005 11.160492256792567 164.28648239202005 9.160492256792567Z" fill="#A8D5B5" opacity="0.3"/><circle cx="169.61440980757973" cy="45.704593541308256" r="2" fill="#FFF3D6" opacity="0.3"/><rect x="228.39400819183936" y="22.859642526177304" width="3" height="3" fill="#E89B6C" opacity="0.3" transform="rotate(38.61588140123919 228.39400819183936 22.859642526177304)"/><path d="M84.23708385762129 23.31864985431426C83.23708385762129 21.31864985431426 81.23708385762129 21.31864985431426 81.23708385762129 23.31864985431426C81.23708385762129 25.31864985431426 83.23708385762129 25.31864985431426 84.23708385762129 23.31864985431426Z" fill="#5B9E6F" opacity="0.3"/></svg>
+<div style="display:flex;align-items:center;gap:16px;position:relative;z-index:1">
+<div style="width:54px;height:54px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,0.6);flex-shrink:0;overflow:hidden;position:relative"><span style="font-size:26px;color:var(--c-primary-deep);font-weight:700">李</span><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 0L7 5L12 6L7 7L6 12L5 7L0 6L5 5Z" fill="#FFF" opacity="0.5"/></svg></div>
+<div style="flex:1;min-width:0"><span style="display:block;font-size:var(--fs-xl);font-weight:700;color:#fff;margin-bottom:6px">李奶奶</span>
+<div style="display:flex;gap:4px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--r-pill);background:rgba(255,255,255,0.22);white-space:nowrap;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12L10 17L19 7" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:var(--fs-xs);color:#fff">已认证</span></div><div style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--r-pill);background:rgba(255,255,255,0.18);white-space:nowrap;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V20H15V14H9V20H4Z" stroke="#FFF" stroke-width="2" stroke-linejoin="round" fill="#FFF11"/></svg><span style="font-size:var(--fs-xs);color:#fff">阳光花园小区</span></div></div></div>
+<span style="font-size:22px;color:rgba(255,255,255,0.7);flex-shrink:0"><span style="font-size:20px;color:#6B7A6E">›</span></span></div>
+<div style="display:flex;margin-top:16px;padding-top:14px;border-top:1.5px solid rgba(255,255,255,0.2);position:relative;z-index:1">
+<div style="flex:1;min-width:0;text-align:center"><div style="font-size:var(--fs-xxl);font-weight:700;color:#fff;white-space:nowrap">12</div><div style="font-size:var(--fs-xs);color:rgba(255,255,255,0.85);white-space:nowrap">帮助次数</div></div>
+<div style="flex:1;min-width:0;text-align:center"><div style="display:flex;align-items:center;justify-content:center;gap:3px"><span style="font-size:var(--fs-xxl);font-weight:700;color:#fff;white-space:nowrap">36</span><svg width="12" height="12" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#FFF"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#FFF" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#FFF" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#FFF" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#FFF" opacity="0.5"/></svg></div><div style="font-size:var(--fs-xs);color:rgba(255,255,255,0.85);white-space:nowrap">小红花</div></div>
+<div style="flex:1;min-width:0;text-align:center"><div style="display:flex;align-items:center;justify-content:center;gap:3px"><span style="font-size:var(--fs-xxl);font-weight:700;color:#fff;white-space:nowrap">3</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="6" stroke="#FFF" stroke-width="2" fill="#FFF11"/><path d="M12 6L13.2 8.4L16 8.8L14 10.6L14.5 13.4L12 12.2L9.5 13.4L10 10.6L8 8.8L10.8 8.4Z" fill="#FFF"/></svg></div><div style="font-size:var(--fs-xs);color:rgba(255,255,255,0.85);white-space:nowrap">勋章</div></div>
+</div></div>
+<svg width="100%" height="24" viewBox="0 0 375 24" preserveAspectRatio="none" style="display:block;margin:6px 0">
+<path d="M0 12 Q47 2 94 12 T188 12 T282 12 T375 12" stroke="#E89B6C" stroke-width="1.5" fill="none" opacity="0.2"/>
+<path d="M0 16 Q47 6 94 16 T188 16 T282 16 T375 16" stroke="#5B9E6F" stroke-width="1.5" fill="none" opacity="0.12"/>
+<!-- Small flowers on the wave -->
+<circle cx="47" cy="8" r="2" fill="#E89B6C" opacity="0.2"/>
+<circle cx="141" cy="8" r="2" fill="#5B9E6F" opacity="0.2"/>
+<circle cx="235" cy="8" r="2" fill="#E89B6C" opacity="0.2"/>
+<circle cx="329" cy="8" r="2" fill="#5B9E6F" opacity="0.2"/>
+</svg>
+<!-- Feature grid -->
+<div style="display:flex;flex-wrap:wrap;gap:14px;margin:4px 24px 0;position:relative">
+<div style="width:calc(50% - 7px);background:var(--c-cream);border-radius:var(--r-md);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--sh-card);border:1.5px solid var(--c-cream-deep);position:relative;overflow:hidden">
+<svg style="position:absolute;top:-8px;left:12px;transform:rotate(20deg);pointer-events:none" width="40" height="20" viewBox="0 0 40 20">
+  <rect width="40" height="20" rx="2" fill="#E89B6C" opacity="0.15"/>
+  <line x1="0" y1="10" x2="40" y2="10" stroke="#E89B6C" stroke-width="0.5" opacity="0.2" stroke-dasharray="3 2"/>
+</svg>
+<svg style="position:absolute;top:-4px;right:-4px;opacity:0.12;transform:rotate(0deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg><svg style="position:absolute;bottom:-4px;left:-4px;opacity:0.1;transform:rotate(180deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#E89B6C" stroke-width="1.5" fill="#E89B6C" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#E89B6C" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;position:relative;z-index:1"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M14 20C12 22 12 26 14 28L18 32C20 34 24 34 26 32L34 24" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/><path d="M34 28C36 26 36 22 34 20L30 16C28 14 24 14 22 16L14 24" stroke="#5B9E6F" stroke-width="2.5" stroke-linecap="round"/><path d="M24 18C23 16 20 16 20 18.5C20 21 24 24 24 24C24 24 28 21 28 18.5C28 16 25 16 24 18Z" fill="#E89B6C" opacity="0.8"/><circle cx="14" cy="24" r="3" stroke="#E89B6C" stroke-width="2"/><circle cx="34" cy="24" r="3" stroke="#5B9E6F" stroke-width="2"/></svg></div>
+<span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text);position:relative;z-index:1;white-space:nowrap">发布求助</span>
+<span style="font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1;white-space:nowrap">找邻居搭把手</span></div><div style="width:calc(50% - 7px);background:var(--c-cream);border-radius:var(--r-md);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--sh-card);border:1.5px solid var(--c-cream-deep);position:relative;overflow:hidden">
+<svg style="position:absolute;top:-8px;right:12px;transform:rotate(-20deg);pointer-events:none" width="40" height="20" viewBox="0 0 40 20">
+  <rect width="40" height="20" rx="2" fill="#5B9E6F" opacity="0.15"/>
+  <line x1="0" y1="10" x2="40" y2="10" stroke="#5B9E6F" stroke-width="0.5" opacity="0.2" stroke-dasharray="3 2"/>
+</svg>
+<svg style="position:absolute;top:-4px;right:-4px;opacity:0.12;transform:rotate(0deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg><svg style="position:absolute;bottom:-4px;left:-4px;opacity:0.1;transform:rotate(180deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#E89B6C" stroke-width="1.5" fill="#E89B6C" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#E89B6C" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;position:relative;z-index:1"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M10 10C8 10 6 12 6 14V28C6 30 8 32 10 32H18L24 38V32H38C40 32 42 30 42 28V14C42 12 40 10 38 10Z" stroke="#5B9E6F" stroke-width="2.5" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/><circle cx="16" cy="21" r="2" fill="#E89B6C"/><circle cx="24" cy="21" r="2" fill="#E89B6C"/><circle cx="32" cy="21" r="2" fill="#E89B6C"/></svg></div>
+<span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text);position:relative;z-index:1;white-space:nowrap">发起议题</span>
+<span style="font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1;white-space:nowrap">大家一起议</span></div><div style="width:calc(50% - 7px);background:var(--c-cream);border-radius:var(--r-md);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--sh-card);border:1.5px solid var(--c-cream-deep);position:relative;overflow:hidden">
+<svg style="position:absolute;top:-8px;left:12px;transform:rotate(20deg);pointer-events:none" width="40" height="20" viewBox="0 0 40 20">
+  <rect width="40" height="20" rx="2" fill="#E89B6C" opacity="0.15"/>
+  <line x1="0" y1="10" x2="40" y2="10" stroke="#E89B6C" stroke-width="0.5" opacity="0.2" stroke-dasharray="3 2"/>
+</svg>
+<svg style="position:absolute;top:-4px;right:-4px;opacity:0.12;transform:rotate(0deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg><svg style="position:absolute;bottom:-4px;left:-4px;opacity:0.1;transform:rotate(180deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#E89B6C" stroke-width="1.5" fill="#E89B6C" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#E89B6C" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;position:relative;z-index:1"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M16 10H32V18C32 22 28 26 24 26C20 26 16 22 16 18Z" stroke="#E89B6C" stroke-width="2.5" stroke-linejoin="round" fill="rgba(232,155,108,0.1)"/><path d="M12 12C10 12 8 14 8 16C8 19 10 21 12 21" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/><path d="M36 12C38 12 40 14 40 16C40 19 38 21 36 21" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/><path d="M24 26V32M18 36H30" stroke="#E89B6C" stroke-width="2.5" stroke-linecap="round"/><path d="M24 14L25 16L27 16.5L25.5 17.5L26 19.5L24 18.5L22 19.5L22.5 17.5L21 16.5L23 16Z" fill="#FFF3D6"/></svg></div>
+<span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text);position:relative;z-index:1;white-space:nowrap">我的排名</span>
+<span style="font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1;white-space:nowrap">看看贡献值</span></div><div style="width:calc(50% - 7px);background:var(--c-cream);border-radius:var(--r-md);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--sh-card);border:1.5px solid var(--c-cream-deep);position:relative;overflow:hidden">
+<svg style="position:absolute;top:-8px;right:12px;transform:rotate(-20deg);pointer-events:none" width="40" height="20" viewBox="0 0 40 20">
+  <rect width="40" height="20" rx="2" fill="#5B9E6F" opacity="0.15"/>
+  <line x1="0" y1="10" x2="40" y2="10" stroke="#5B9E6F" stroke-width="0.5" opacity="0.2" stroke-dasharray="3 2"/>
+</svg>
+<svg style="position:absolute;top:-4px;right:-4px;opacity:0.12;transform:rotate(0deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg><svg style="position:absolute;bottom:-4px;left:-4px;opacity:0.1;transform:rotate(180deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#E89B6C" stroke-width="1.5" fill="#E89B6C" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#E89B6C" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;position:relative;z-index:1"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 6L30 10L38 10L36 18L40 24L36 30L38 38L30 38L24 42L18 38L10 38L12 30L8 24L12 18L10 10L18 10Z" stroke="#5B9E6F" stroke-width="2.5" stroke-linejoin="round" fill="rgba(91,158,111,0.06)"/><path d="M17 24L22 29L31 18" stroke="#E89B6C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text);position:relative;z-index:1;white-space:nowrap">业主认证</span>
+<span style="font-size:var(--fs-xs);color:var(--c-text-2);position:relative;z-index:1;white-space:nowrap">认证享更多</span></div>
+</div>
+<svg width="100%" height="24" viewBox="0 0 375 24" preserveAspectRatio="none" style="display:block;margin:6px 0">
+<path d="M0 12 Q47 2 94 12 T188 12 T282 12 T375 12" stroke="#E89B6C" stroke-width="1.5" fill="none" opacity="0.2"/>
+<path d="M0 16 Q47 6 94 16 T188 16 T282 16 T375 16" stroke="#5B9E6F" stroke-width="1.5" fill="none" opacity="0.12"/>
+<!-- Small flowers on the wave -->
+<circle cx="47" cy="8" r="2" fill="#E89B6C" opacity="0.2"/>
+<circle cx="141" cy="8" r="2" fill="#5B9E6F" opacity="0.2"/>
+<circle cx="235" cy="8" r="2" fill="#E89B6C" opacity="0.2"/>
+<circle cx="329" cy="8" r="2" fill="#5B9E6F" opacity="0.2"/>
+</svg>
+<!-- Todo section with squiggly underline -->
+<div style="margin:4px 24px 0;position:relative">
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#E89B6C"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/></svg><span style="font-size:var(--fs-md);font-weight:700;color:var(--c-text)">待办提醒</span></div>
+<svg width="100" height="6" viewBox="0 0 100 6" fill="none" style="display:block;margin-top:2px">
+<path d="M0 3 Q5 0 10 3 T20 3 T30 3 T40 3 T50 3 T60 3 T70 3 T100 3" stroke="#E89B6C" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+</svg>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+<div style="flex:1;min-width:0;background:var(--c-bg-green);border-radius:var(--r-md);padding:8px 6px;display:flex;align-items:center;gap:6px;overflow:hidden;position:relative"><svg style="position:absolute;bottom:-4px;right:-4px;opacity:0.08;transform:rotate(270deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="14" height="17" rx="2" stroke="#5B9E6F" stroke-width="2"/><path d="M9 4V2H15V4" stroke="#5B9E6F" stroke-width="2" stroke-linecap="round"/></svg></div>
+<div style="min-width:0;overflow:hidden"><span style="font-size:14px;font-weight:700;color:var(--c-primary-deep);display:block;line-height:1.1;white-space:nowrap">2</span><span style="font-size:11px;color:var(--c-text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">进行中互助</span></div></div>
+<div style="flex:1;min-width:0;background:var(--c-bg-orange);border-radius:var(--r-md);padding:8px 6px;display:flex;align-items:center;gap:6px;overflow:hidden;position:relative"><svg style="position:absolute;bottom:-4px;right:-4px;opacity:0.08;transform:rotate(270deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#E89B6C" stroke-width="1.5" fill="#E89B6C" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#E89B6C" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 8L12 4L20 8V18L12 22L4 18Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/><path d="M4 8L12 12L20 8M12 12V22" stroke="#5B9E6F" stroke-width="1.5"/></svg></div>
+<div style="min-width:0;overflow:hidden"><span style="font-size:14px;font-weight:700;color:var(--c-accent);display:block;line-height:1.1;white-space:nowrap">1</span><span style="font-size:11px;color:var(--c-text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">待投票</span></div></div>
+<div style="flex:1;min-width:0;background:var(--c-bg-green);border-radius:var(--r-md);padding:8px 6px;display:flex;align-items:center;gap:6px;overflow:hidden;position:relative"><svg style="position:absolute;bottom:-4px;right:-4px;opacity:0.08;transform:rotate(270deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 4C5 4 4 5 4 6V14C4 15 5 16 6 16H10L12 20L14 16H18C19 16 20 15 20 14V6C20 5 19 4 18 4Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg></div>
+<div style="min-width:0;overflow:hidden"><span style="font-size:14px;font-weight:700;color:var(--c-primary-deep);display:block;line-height:1.1;white-space:nowrap">3</span><span style="font-size:11px;color:var(--c-text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">未读消息</span></div></div>
+</div></div>
+<svg width="100%" height="24" viewBox="0 0 375 24" preserveAspectRatio="none" style="display:block;margin:6px 0">
+<path d="M0 12 Q47 2 94 12 T188 12 T282 12 T375 12" stroke="#E89B6C" stroke-width="1.5" fill="none" opacity="0.2"/>
+<path d="M0 16 Q47 6 94 16 T188 16 T282 16 T375 16" stroke="#5B9E6F" stroke-width="1.5" fill="none" opacity="0.12"/>
+<!-- Small flowers on the wave -->
+<circle cx="47" cy="8" r="2" fill="#E89B6C" opacity="0.2"/>
+<circle cx="141" cy="8" r="2" fill="#5B9E6F" opacity="0.2"/>
+<circle cx="235" cy="8" r="2" fill="#E89B6C" opacity="0.2"/>
+<circle cx="329" cy="8" r="2" fill="#5B9E6F" opacity="0.2"/>
+</svg>
+<!-- Menu groups with washi tape -->
+<div style="margin:4px 24px 0;background:var(--c-card);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-card);position:relative"><svg style="position:absolute;top:-8px;right:12px;transform:rotate(-15deg);pointer-events:none" width="40" height="20" viewBox="0 0 40 20">
+  <rect width="40" height="20" rx="2" fill="#5B9E6F" opacity="0.15"/>
+  <line x1="0" y1="10" x2="40" y2="10" stroke="#5B9E6F" stroke-width="0.5" opacity="0.2" stroke-dasharray="3 2"/>
+</svg><svg style="position:absolute;top:-4px;left:-4px;opacity:0.06;transform:rotate(90deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 4C5 4 4 5 4 6V14C4 15 5 16 6 16H10L12 20L14 16H18C19 16 20 15 20 14V6C20 5 19 4 18 4Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">消息通知</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1.5px solid var(--c-border)"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="6" stroke="#E89B6C" stroke-width="2" fill="#E89B6C11"/><path d="M12 6L13.2 8.4L16 8.8L14 10.6L14.5 13.4L12 12.2L9.5 13.4L10 10.6L8 8.8L10.8 8.4Z" fill="#E89B6C"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">我的勋章</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1.5px solid var(--c-border)"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 4L20 10L10 20L4 20L4 14Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">我的服务</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div></div>
+<div style="margin:12px 24px 0;background:var(--c-card);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-card);position:relative"><svg style="position:absolute;top:-8px;left:12px;transform:rotate(15deg);pointer-events:none" width="40" height="20" viewBox="0 0 40 20">
+  <rect width="40" height="20" rx="2" fill="#E89B6C" opacity="0.15"/>
+  <line x1="0" y1="10" x2="40" y2="10" stroke="#E89B6C" stroke-width="0.5" opacity="0.2" stroke-dasharray="3 2"/>
+</svg><svg style="position:absolute;top:-4px;right:-4px;opacity:0.06;transform:rotate(0deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#E89B6C" stroke-width="1.5" fill="#E89B6C" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#E89B6C" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V20H15V14H9V20H4Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">申请开通小区</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1.5px solid var(--c-border)"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 3C5 3 4 4 4 5V21L8 19L12 21L16 19L20 21V5C20 4 19 3 18 3Z" stroke="#E89B6C" stroke-width="2" stroke-linejoin="round" fill="#E89B6C11"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">我的小区申请</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1.5px solid var(--c-border)"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6C4 5 5 4 6 4H18C19 4 20 5 20 6V14C20 15 19 16 18 16H12L8 20V16H6C5 16 4 15 4 14Z" stroke="#5B9E6F" stroke-width="2" stroke-linejoin="round" fill="#5B9E6F11"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">邀请邻居</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div></div>
+<div style="margin:12px 24px 0;background:var(--c-card);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-card);position:relative"><svg style="position:absolute;top:-8px;right:12px;transform:rotate(-20deg);pointer-events:none" width="40" height="20" viewBox="0 0 40 20">
+  <rect width="40" height="20" rx="2" fill="#5B9E6F" opacity="0.15"/>
+  <line x1="0" y1="10" x2="40" y2="10" stroke="#5B9E6F" stroke-width="0.5" opacity="0.2" stroke-dasharray="3 2"/>
+</svg><svg style="position:absolute;top:-4px;left:-4px;opacity:0.06;transform:rotate(90deg);pointer-events:none" width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <path d="M5 45 C5 25 15 5 45 5 C45 25 35 45 5 45 Z" stroke="#5B9E6F" stroke-width="1.5" fill="#5B9E6F" fill-opacity="0.1"/>
+  <path d="M5 45 L35 15" stroke="#5B9E6F" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="#6B7A6E" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#6B7A6E" stroke-width="2"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">设置</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1.5px solid var(--c-border)"><div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3C8 3 5 6 5 10C5 14 9 17 12 21C15 17 19 14 19 10C19 6 16 3 12 3Z" stroke="#E89B6C" stroke-width="2" stroke-linejoin="round" fill="#E89B6C11"/><circle cx="12" cy="10" r="3" stroke="#E89B6C" stroke-width="1.5"/></svg></div><span style="font-size:var(--fs-md);color:var(--c-text)">关于我们</span></div><span style="font-size:20px;color:#6B7A6E">›</span></div></div>
+<!-- Bottom decoration -->
+<div style="text-align:center;padding:16px 0 0"><svg width="120" height="20" viewBox="0 0 120 20" fill="none"><path d="M10 10C8 8 5 8 5 10.5C5 13 10 16 10 16C10 16 15 13 15 10.5C15 8 12 8 10 10Z" fill="#E89B6C" opacity="0.15"/><circle cx="30" cy="10" r="2" fill="#5B9E6F" opacity="0.15"/><path d="M50 10C48 8 45 8 45 10.5C45 13 50 16 50 16C50 16 55 13 55 10.5C55 8 52 8 50 10Z" fill="#E89B6C" opacity="0.12"/><circle cx="70" cy="10" r="2" fill="#5B9E6F" opacity="0.12"/><path d="M90 10C88 8 85 8 85 10.5C85 13 90 16 90 16C90 16 95 13 95 10.5C95 8 92 8 90 10Z" fill="#E89B6C" opacity="0.1"/><circle cx="110" cy="10" r="2" fill="#5B9E6F" opacity="0.1"/></svg></div>
+<div style="height:16px"></div></div></div></body></html>
