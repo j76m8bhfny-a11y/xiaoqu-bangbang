@@ -37,7 +37,7 @@ const DEFAULT_BANNERS: BannerItem[] = [
     tag: '公益活动',
     ctaText: '我要报名',
     bgColor: '#fbf0dd',
-    accentColor: '#e0a458',
+    accentColor: '#e89b6c',
   },
   {
     id: '3',

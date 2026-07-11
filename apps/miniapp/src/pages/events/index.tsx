@@ -12,6 +12,7 @@ import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
 import EventCard from '../../components/event-card';
 import BlurredList from '@/components/blurred-list';
+import Icon from '@/components/icon';
 import './index.scss';
 
 // S1-7 events 二层 tab 重构：
@@ -115,7 +116,9 @@ export default function Events() {
   return (
     <View className="events">
       <View className="events__header">
-        <Text className="events__header-title">🤝 邻里互助</Text>
+        <View className="events__header-title">
+          <Icon name="handshake" size={22} /> <Text>邻里互助</Text>
+        </View>
         <Text className="events__header-sub">求助、帮忙、闲置流转</Text>
       </View>
 
@@ -160,14 +163,18 @@ export default function Events() {
           className={`events__search-toggle ${searchText ? 'events__search-toggle--active' : ''}`}
           onClick={() => setSearchOpen((o) => !o)}
         >
-          <Text className="events__search-toggle-icon">{searchOpen ? '✕' : '🔍'}</Text>
+          <View className="events__search-toggle-icon">
+            <Icon name={searchOpen ? 'close' : 'search'} size={20} />
+          </View>
         </View>
       </View>
 
       {searchOpen && (
         <View className="events__search-wrap">
           <View className="events__search">
-            <Text className="events__search-icon">🔍</Text>
+            <View className="events__search-icon">
+              <Icon name="search" size={18} />
+            </View>
             <Input
               className="events__search-input"
               placeholder={isHelp ? '搜索互助事件...' : '搜索闲置物品...'}
@@ -177,9 +184,9 @@ export default function Events() {
               onInput={(e) => setSearchText(e.detail.value)}
             />
             {searchText ? (
-              <Text className="events__search-clear" onClick={() => setSearchText('')}>
-                ✕
-              </Text>
+              <View className="events__search-clear" onClick={() => setSearchText('')}>
+                <Icon name="close" size={18} />
+              </View>
             ) : null}
           </View>
         </View>
@@ -195,7 +202,10 @@ export default function Events() {
         {list.loading && <Loading />}
         {list.error && <ErrorState message={list.error.message} onRetry={list.refresh} />}
         {!list.loading && !list.error && list.items.length === 0 && (
-          <EmptyState icon={isHelp ? '🤝' : '📦'} text={isHelp ? '暂无互助事件' : '暂无闲置物品'} />
+          <EmptyState
+            icon={isHelp ? 'handshake' : 'box'}
+            text={isHelp ? '暂无互助事件' : '暂无闲置物品'}
+          />
         )}
 
         {!list.loading && !list.error && isHelp && (
@@ -225,7 +235,9 @@ export default function Events() {
                 <Image className="events__market-img" src={it.images[0]} mode="aspectFill" />
               ) : (
                 <View className="events__market-img events__market-img--empty">
-                  <Text className="events__market-img-emoji">📦</Text>
+                  <View className="events__market-img-emoji">
+                    <Icon name="box" size={32} />
+                  </View>
                 </View>
               )}
               <View className="events__market-body">

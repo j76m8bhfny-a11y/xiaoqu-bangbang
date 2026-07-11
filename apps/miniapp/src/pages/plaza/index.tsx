@@ -7,6 +7,7 @@ import { useCommunityStore } from '@/store';
 import Loading from '@/components/loading';
 import EmptyState from '@/components/empty-state';
 import AdPopup from '@/components/ad-popup';
+import Icon from '@/components/icon';
 import type { TopicDto, VoteDto, CommitteeAnnouncementDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
@@ -114,14 +115,18 @@ export default function Plaza() {
           className="plaza__community-bar"
           onClick={() => Taro.navigateTo({ url: '/pages/community-select/index' })}
         >
-          <Text className="plaza__community-name">🏠 {communityName ?? '我的小区'}</Text>
+          <View className="plaza__community-name">
+            <Icon name="house" size={16} /> <Text>{communityName ?? '我的小区'}</Text>
+          </View>
           <Text className="plaza__community-switch">切换 ›</Text>
         </View>
 
         {/* 业委会公告 */}
         <View className="plaza__card plaza__committee">
           <View className="plaza__card-header">
-            <Text className="plaza__card-title">📢 业委会通知</Text>
+            <View className="plaza__card-title">
+              <Icon name="megaphone" size={18} /> <Text>业委会通知</Text>
+            </View>
             <Text
               className="plaza__card-more"
               onClick={() => Taro.navigateTo({ url: '/pages/committee/index' })}
@@ -152,7 +157,9 @@ export default function Plaza() {
         {activeVotes.length > 0 && (
           <View className="plaza__card">
             <View className="plaza__card-header">
-              <Text className="plaza__card-title">🗳️ 进行中投票</Text>
+              <View className="plaza__card-title">
+                <Icon name="vote" size={18} /> <Text>进行中投票</Text>
+              </View>
               <Text
                 className="plaza__card-more"
                 onClick={() => Taro.navigateTo({ url: '/pages/votes/index' })}
@@ -186,7 +193,9 @@ export default function Plaza() {
           onClick={() => Taro.navigateTo({ url: '/pages/social-groups/index' })}
         >
           <View className="plaza__card-header">
-            <Text className="plaza__card-title">👥 社群</Text>
+            <View className="plaza__card-title">
+              <Icon name="people" size={18} /> <Text>社群</Text>
+            </View>
             <Text className="plaza__card-more">进入 ›</Text>
           </View>
         </View>
@@ -215,7 +224,7 @@ export default function Plaza() {
         {loadingTopics && <Loading />}
         {!loadingTopics && topics.length === 0 && (
           <EmptyState
-            icon="💬"
+            icon="chat"
             text={topicStatus === 'open' ? '暂无进行中议题' : '暂无已完结议题'}
           />
         )}
@@ -239,16 +248,24 @@ export default function Plaza() {
                 <View className="plaza__topic-meta">
                   {isOpen ? (
                     <>
-                      <Text className="plaza__topic-metric">👍 赞 {t.likeCount}</Text>
-                      <Text className="plaza__topic-metric">👎 踩 {t.dislikeCount}</Text>
+                      <View className="plaza__topic-metric">
+                        <Icon name="thumbs-up" size={14} /> <Text>赞 {t.likeCount}</Text>
+                      </View>
+                      <View className="plaza__topic-metric">
+                        <Icon name="thumbs-down" size={14} /> <Text>踩 {t.dislikeCount}</Text>
+                      </View>
                     </>
                   ) : (
                     <Text className="plaza__topic-metric">
                       ⭐ 评分 {t.avgRating?.toFixed(1) ?? '—'}（{t.ratingCount}人）
                     </Text>
                   )}
-                  <Text className="plaza__topic-metric">💬 评论 {t.commentCount}</Text>
-                  <Text className="plaza__topic-metric">📋 事件 {t.eventCount}</Text>
+                  <View className="plaza__topic-metric">
+                    <Icon name="chat" size={14} /> <Text>评论 {t.commentCount}</Text>
+                  </View>
+                  <View className="plaza__topic-metric">
+                    <Icon name="clipboard" size={14} /> <Text>事件 {t.eventCount}</Text>
+                  </View>
                 </View>
               </View>
             );

@@ -8,6 +8,7 @@ import ErrorState from '@/components/error-state';
 import type { RankingItemDto, MyRankingDto } from '@xiaoqu-bangbang/shared';
 import { PeriodType } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon, { emojiToIconName } from '@/components/icon';
 
 const PERIOD_TABS = [
   { key: PeriodType.MONTH, label: '本月' },
@@ -20,6 +21,7 @@ interface BadgeItem {
   icon: string;
   description: string;
   earned: boolean;
+  // icon 来自 API（iconUrl），渲染时用 emojiToIconName 映射
 }
 
 export default function Ranking() {
@@ -74,7 +76,9 @@ export default function Ranking() {
   return (
     <View className="ranking">
       <View className="ranking__header">
-        <Text className="ranking__header-title">🏆 好人榜</Text>
+        <View className="ranking__header-title">
+          <Icon name="trophy" size={22} /> <Text>好人榜</Text>
+        </View>
         <Text className="ranking__header-sub">每一朵小花，都是一份温暖</Text>
       </View>
 
@@ -133,7 +137,9 @@ export default function Ranking() {
                   {/* 第2名 */}
                   <View className="ranking__podium-item ranking__podium-item--second">
                     <View className="ranking__podium-avatar-wrap">
-                      <Text className="ranking__podium-crown">🥈</Text>
+                      <View className="ranking__podium-crown">
+                        <Icon name="silver" size={24} />
+                      </View>
                       <View className="ranking__podium-avatar ranking__podium-avatar--second">
                         <Text className="ranking__podium-avatar-text">
                           {top3[1].nickname.slice(0, 1)}
@@ -141,14 +147,19 @@ export default function Ranking() {
                       </View>
                     </View>
                     <Text className="ranking__podium-name">{top3[1].nickname}</Text>
-                    <Text className="ranking__podium-flowers">🌸 {top3[1].flowerCount}</Text>
+                    <View className="ranking__podium-flowers">
+                      <Icon name="flower" size={16} color="#E89B6C" />{' '}
+                      <Text>{top3[1].flowerCount}</Text>
+                    </View>
                     <View className="ranking__podium-bar ranking__podium-bar--second" />
                   </View>
 
                   {/* 第1名 */}
                   <View className="ranking__podium-item ranking__podium-item--first">
                     <View className="ranking__podium-avatar-wrap">
-                      <Text className="ranking__podium-crown ranking__podium-crown--first">👑</Text>
+                      <View className="ranking__podium-crown ranking__podium-crown--first">
+                        <Icon name="crown" size={28} color="#E89B6C" />
+                      </View>
                       <View className="ranking__podium-avatar ranking__podium-avatar--first">
                         <Text className="ranking__podium-avatar-text">
                           {top3[0].nickname.slice(0, 1)}
@@ -156,14 +167,19 @@ export default function Ranking() {
                       </View>
                     </View>
                     <Text className="ranking__podium-name">{top3[0].nickname}</Text>
-                    <Text className="ranking__podium-flowers">🌸 {top3[0].flowerCount}</Text>
+                    <View className="ranking__podium-flowers">
+                      <Icon name="flower" size={16} color="#E89B6C" />{' '}
+                      <Text>{top3[0].flowerCount}</Text>
+                    </View>
                     <View className="ranking__podium-bar ranking__podium-bar--first" />
                   </View>
 
                   {/* 第3名 */}
                   <View className="ranking__podium-item ranking__podium-item--third">
                     <View className="ranking__podium-avatar-wrap">
-                      <Text className="ranking__podium-crown">🥉</Text>
+                      <View className="ranking__podium-crown">
+                        <Icon name="bronze" size={24} />
+                      </View>
                       <View className="ranking__podium-avatar ranking__podium-avatar--third">
                         <Text className="ranking__podium-avatar-text">
                           {top3[2].nickname.slice(0, 1)}
@@ -171,7 +187,10 @@ export default function Ranking() {
                       </View>
                     </View>
                     <Text className="ranking__podium-name">{top3[2].nickname}</Text>
-                    <Text className="ranking__podium-flowers">🌸 {top3[2].flowerCount}</Text>
+                    <View className="ranking__podium-flowers">
+                      <Icon name="flower" size={16} color="#E89B6C" />{' '}
+                      <Text>{top3[2].flowerCount}</Text>
+                    </View>
                     <View className="ranking__podium-bar ranking__podium-bar--third" />
                   </View>
                 </View>
@@ -190,7 +209,10 @@ export default function Ranking() {
                       <Text className="ranking__list-help">帮助了{user.helpCount}位邻居</Text>
                     </View>
                     <View className="ranking__list-flowers">
-                      <Text className="ranking__list-flower-count">🌸 {user.flowerCount}</Text>
+                      <View className="ranking__list-flower-count">
+                        <Icon name="flower" size={14} color="#E89B6C" />{' '}
+                        <Text>{user.flowerCount}</Text>
+                      </View>
                     </View>
                   </View>
                 ))}
@@ -207,7 +229,10 @@ export default function Ranking() {
                     <Text className="ranking__list-help">帮助了{myRank.helpCount}位邻居</Text>
                   </View>
                   <Text className="ranking__my-rank-pos">第{myRank.rankNo ?? '--'}名</Text>
-                  <Text className="ranking__list-flower-count">🌸 {myRank.flowerCount}</Text>
+                  <View className="ranking__list-flower-count">
+                    <Icon name="flower" size={14} color="#E89B6C" />{' '}
+                    <Text>{myRank.flowerCount}</Text>
+                  </View>
                 </View>
               )}
             </>
@@ -231,7 +256,9 @@ export default function Ranking() {
                   <View
                     className={`ranking__badge-icon-wrap ${badge.earned ? '' : 'ranking__badge-icon-wrap--locked'}`}
                   >
-                    <Text className="ranking__badge-icon">{badge.icon}</Text>
+                    <View className="ranking__badge-icon">
+                      <Icon name={emojiToIconName(badge.icon)} size={28} />
+                    </View>
                   </View>
                   <Text className="ranking__badge-name">{badge.name}</Text>
                   <Text className="ranking__badge-desc">{badge.description}</Text>

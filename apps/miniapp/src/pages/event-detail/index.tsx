@@ -68,7 +68,7 @@ const REWARD_TYPE_LABELS: Record<string, string> = {
 
 const FEEDBACK_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
   submitted: { label: '已提交', color: '#3586FF', bgColor: '#EBF2FF' },
-  received: { label: '已接收', color: '#e0a458', bgColor: '#fbf0dd' },
+  received: { label: '已接收', color: '#e89b6c', bgColor: '#fbf0dd' },
   processing: { label: '处理中', color: '#5b9e6f', bgColor: '#eaf4ec' },
   resolved: { label: '已解决', color: '#5b9e6f', bgColor: '#eaf4ec' },
   closed: { label: '已关闭', color: '#999', bgColor: '#F5F5F5' },

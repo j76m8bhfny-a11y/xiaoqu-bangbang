@@ -1,5 +1,5 @@
 page {
-  background-color: #f5f8f2;
+  background-color: #fff8ee;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -17,4 +17,14 @@ page {
   font-size: 32px; // ≈16pt 正文基准（放大一档，老人友好）
   line-height: 1.6;
   box-sizing: border-box;
+}
+
+/* 纸纹背景：极淡 SVG noise，opacity 0.025 */
+page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.015' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
 }

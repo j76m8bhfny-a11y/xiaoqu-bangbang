@@ -5,6 +5,7 @@ import { useAuthStore, useCommunityStore } from '@/store';
 import { authService, rankingService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
 import Onboarding, { shouldShowOnboarding } from '@/components/onboarding';
+import Icon, { type IconName } from '@/components/icon';
 import './index.scss';
 
 // 「我的」页（UI 重设计 v2 · 功能宫格样板）：
@@ -17,7 +18,7 @@ import './index.scss';
 interface GridItem {
   id: string;
   label: string;
-  icon: string;
+  icon: IconName;
   desc: string;
   route: string;
   isTab?: boolean;
@@ -27,49 +28,55 @@ const GRID_ITEMS: GridItem[] = [
   {
     id: 'event',
     label: '发布求助',
-    icon: '🆘',
+    icon: 'help',
     desc: '找邻居搭把手',
     route: '/pages/event-create/index',
   },
   {
     id: 'topic',
     label: '发起议题',
-    icon: '💬',
+    icon: 'chat',
     desc: '大家一起议',
     route: '/pages/topic-create/index',
   },
   {
     id: 'rank',
     label: '我的排名',
-    icon: '🏆',
+    icon: 'trophy',
     desc: '看看贡献值',
     route: '/pages/ranking/index',
     isTab: true,
   },
-  { id: 'verify', label: '业主认证', icon: '✅', desc: '认证享更多', route: '/pages/verify/index' },
+  {
+    id: 'verify',
+    label: '业主认证',
+    icon: 'check-circle',
+    desc: '认证享更多',
+    route: '/pages/verify/index',
+  },
 ];
 
 // 设置类列表（次要功能，列表呈现即可）
 interface MenuItem {
   id: string;
   label: string;
-  icon: string;
+  icon: IconName;
 }
 
 const MENU_ITEMS: MenuItem[][] = [
   [
-    { id: 'notifications', label: '消息通知', icon: '🔔' },
-    { id: 'my_badges', label: '我的勋章', icon: '🏅' },
-    { id: 'my_services', label: '我的服务', icon: '🔧' },
+    { id: 'notifications', label: '消息通知', icon: 'bell' },
+    { id: 'my_badges', label: '我的勋章', icon: 'medal' },
+    { id: 'my_services', label: '我的服务', icon: 'wrench' },
   ],
   [
-    { id: 'community_apply', label: '申请开通小区', icon: '🏘️' },
-    { id: 'my_applications', label: '我的小区申请', icon: '📑' },
-    { id: 'invite', label: '邀请邻居', icon: '💌' },
+    { id: 'community_apply', label: '申请开通小区', icon: 'community' },
+    { id: 'my_applications', label: '我的小区申请', icon: 'documents' },
+    { id: 'invite', label: '邀请邻居', icon: 'envelope' },
   ],
   [
-    { id: 'settings', label: '设置', icon: '⚙️' },
-    { id: 'about', label: '关于我们', icon: '💡' },
+    { id: 'settings', label: '设置', icon: 'gear' },
+    { id: 'about', label: '关于我们', icon: 'bulb' },
   ],
 ];
 
@@ -119,23 +126,29 @@ export default function Home() {
 
   const nickname = user?.nickname ?? '邻居';
   const isVerified = user?.verifyStatus === 'verified';
-  const verifyLabel = isVerified ? '✅ 已认证' : '⏳ 未认证';
+  const verifyIcon: IconName = isVerified ? 'check-circle' : 'clock';
+  const verifyLabel = isVerified ? '已认证' : '未认证';
   const verifyClass = isVerified ? 'home__tag--verified' : 'home__tag--unverified';
 
-  const stats = [
-    { label: '帮助次数', value: myRanking?.helpCount ?? 0, icon: '🤲' },
-    { label: '小红花', value: myRanking?.flowerCount ?? 0, icon: '🌸' },
-    { label: '勋章', value: myRanking?.badgeCount ?? 0, icon: '🏅' },
+  const stats: { label: string; value: number; icon: IconName }[] = [
+    { label: '帮助次数', value: myRanking?.helpCount ?? 0, icon: 'hands-up' },
+    { label: '小红花', value: myRanking?.flowerCount ?? 0, icon: 'flower' },
+    { label: '勋章', value: myRanking?.badgeCount ?? 0, icon: 'medal' },
   ];
 
   // 待办提醒（dashboard）—— 没数据不渲染
-  const todos: { key: string; icon: string; label: string; value: number; onClick: () => void }[] =
-    [];
+  const todos: {
+    key: string;
+    icon: IconName;
+    label: string;
+    value: number;
+    onClick: () => void;
+  }[] = [];
   if (dashboard) {
     if (dashboard.myActiveEventCount > 0) {
       todos.push({
         key: 'active_event',
-        icon: '📋',
+        icon: 'clipboard',
         label: '进行中互助',
         value: dashboard.myActiveEventCount,
         onClick: () => Taro.switchTab({ url: '/pages/events/index' }),
@@ -144,7 +157,7 @@ export default function Home() {
     if (dashboard.pendingVotes && dashboard.pendingVotes.length > 0) {
       todos.push({
         key: 'pending_votes',
-        icon: '🗳️',
+        icon: 'vote',
         label: '待投票',
         value: dashboard.pendingVotes.length,
         onClick: () => Taro.navigateTo({ url: '/pages/votes/index' }),
@@ -153,7 +166,7 @@ export default function Home() {
     if (dashboard.unreadNotificationCount > 0) {
       todos.push({
         key: 'unread',
-        icon: '🔔',
+        icon: 'bell',
         label: '未读消息',
         value: dashboard.unreadNotificationCount,
         onClick: () => Taro.navigateTo({ url: '/pages/notifications/index' }),
@@ -202,11 +215,13 @@ export default function Home() {
               <Text className="home__user-name">{nickname}</Text>
               <View className="home__tags">
                 <View className={`home__tag ${verifyClass}`}>
+                  <Icon name={verifyIcon} size={14} />
                   <Text className="home__tag-text">{verifyLabel}</Text>
                 </View>
                 {communityName && (
                   <View className="home__tag home__tag--community">
-                    <Text className="home__tag-text">🏠 {communityName}</Text>
+                    <Icon name="house" size={14} />
+                    <Text className="home__tag-text">{communityName}</Text>
                   </View>
                 )}
               </View>
@@ -219,9 +234,10 @@ export default function Home() {
             {stats.map((stat) => (
               <View key={stat.label} className="home__stat">
                 <Text className="home__stat-value">{stat.value}</Text>
-                <Text className="home__stat-label">
-                  {stat.icon} {stat.label}
-                </Text>
+                <View className="home__stat-label">
+                  <Icon name={stat.icon} size={16} />
+                  <Text> {stat.label}</Text>
+                </View>
               </View>
             ))}
           </View>
@@ -231,7 +247,9 @@ export default function Home() {
         <View className="home__grid">
           {GRID_ITEMS.map((item) => (
             <View key={item.id} className="home__grid-item" onClick={() => handleGridClick(item)}>
-              <Text className="home__grid-icon">{item.icon}</Text>
+              <View className="home__grid-icon">
+                <Icon name={item.icon} size={28} />
+              </View>
               <Text className="home__grid-label">{item.label}</Text>
               <Text className="home__grid-desc">{item.desc}</Text>
             </View>
@@ -245,7 +263,9 @@ export default function Home() {
             <View className="home__todo-row">
               {todos.map((t) => (
                 <View key={t.key} className="home__todo" onClick={t.onClick}>
-                  <Text className="home__todo-icon">{t.icon}</Text>
+                  <View className="home__todo-icon">
+                    <Icon name={t.icon} size={22} />
+                  </View>
                   <View className="home__todo-detail">
                     <Text className="home__todo-value">{t.value}</Text>
                     <Text className="home__todo-label">{t.label}</Text>
@@ -267,7 +287,9 @@ export default function Home() {
                   openType="share"
                 >
                   <View className="home__menu-left">
-                    <Text className="home__menu-icon">{item.icon}</Text>
+                    <View className="home__menu-icon">
+                      <Icon name={item.icon} size={22} />
+                    </View>
                     <Text className="home__menu-label">{item.label}</Text>
                   </View>
                   <Text className="home__menu-arrow">›</Text>
@@ -279,7 +301,9 @@ export default function Home() {
                   onClick={() => handleMenuClick(item)}
                 >
                   <View className="home__menu-left">
-                    <Text className="home__menu-icon">{item.icon}</Text>
+                    <View className="home__menu-icon">
+                      <Icon name={item.icon} size={22} />
+                    </View>
                     <Text className="home__menu-label">{item.label}</Text>
                   </View>
                   <Text className="home__menu-arrow">›</Text>

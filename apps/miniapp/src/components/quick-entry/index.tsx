@@ -15,13 +15,13 @@ interface QuickEntryGridProps {
 
 const ENTRIES: QuickEntryItem[] = [
   { key: 'help_request', label: '找人帮忙', emoji: '🤲', color: '#5b9e6f', bgColor: '#eaf4ec' },
-  { key: 'help_offer', label: '我能帮忙', emoji: '🔧', color: '#e0a458', bgColor: '#fbf0dd' },
-  { key: 'public_welfare', label: '发公益', emoji: '☀️', color: '#e0a458', bgColor: '#fbf0dd' },
+  { key: 'help_offer', label: '我能帮忙', emoji: '🔧', color: '#e89b6c', bgColor: '#fbf0dd' },
+  { key: 'public_welfare', label: '发公益', emoji: '☀️', color: '#e89b6c', bgColor: '#fbf0dd' },
   { key: 'lost_found', label: '寻宠寻物', emoji: '🐾', color: '#5b9e6f', bgColor: '#eaf4ec' },
   { key: 'public_feedback', label: '反馈问题', emoji: '📢', color: '#FF6B6B', bgColor: '#FFF0F0' },
   { key: 'discussion', label: '发讨论', emoji: '💬', color: '#5b9e6f', bgColor: '#E8FAF8' },
   { key: 'vote', label: '社区投票', emoji: '🗳️', color: '#5b9e6f', bgColor: '#eaf4ec' },
-  { key: 'committee', label: '业委会', emoji: '🏛️', color: '#e0a458', bgColor: '#fbf0dd' },
+  { key: 'committee', label: '业委会', emoji: '🏛️', color: '#e89b6c', bgColor: '#fbf0dd' },
 ];
 
 export default function QuickEntryGrid({ onEntryClick }: QuickEntryGridProps) {

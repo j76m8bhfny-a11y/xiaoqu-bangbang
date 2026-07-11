@@ -9,7 +9,7 @@ import { ClaimStatus, type CommitteeMemberDetailDto } from '@xiaoqu-bangbang/sha
 import './index.scss';
 
 const CLAIM_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  [ClaimStatus.UNCLAIMED]: { label: '待认领', color: '#e0a458', bgColor: '#fbf0dd' },
+  [ClaimStatus.UNCLAIMED]: { label: '待认领', color: '#e89b6c', bgColor: '#fbf0dd' },
   [ClaimStatus.PENDING]: { label: '审核中', color: '#3586FF', bgColor: '#EBF2FF' },
   [ClaimStatus.CLAIMED]: { label: '已认领', color: '#5b9e6f', bgColor: '#eaf4ec' },
   [ClaimStatus.REJECTED]: { label: '已拒绝', color: '#FF6B6B', bgColor: '#FFF0F0' },

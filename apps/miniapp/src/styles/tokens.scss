@@ -1,17 +1,17 @@
 // 小区帮榜棒 Design Tokens
-// v2 草木绿 · 老年友好版（UI 重设计 feature/ui-redesign）
-// 设计基调：温润草木绿、简洁温暖、字号放大、柔和圆润、老人也能用
+// v3 晨光暖 · 轻手绘版（codex/ui-morning-warm-handrawn）
+// 设计基调：暖系手绘、治愈插画、晨光暖色、克制点缀
 // 注意：designWidth=750，源码里 px 会 1:1 转成 rpx。真机显示 ≈ 数值/2 pt。
 //       即正文 32(px→rpx) ≈ 16pt。
 
-// ── 主色（草木绿）──
-$color-bg: #f5f8f2; // 页面背景：白绿，柔和不刺眼
+// ── 主色（晨光暖：奶油黄 + 草木绿 + 蜜桃橙）──
+$color-bg: #fff8ee; // 页面背景：暖白，奶油纸感
 $color-card: #ffffff; // 卡片背景：纯白，与背景拉开层次
 $color-primary: #5b9e6f; // 主色：草绿（点缀/选中/链接）
 $color-primary-deep: #4a8c5e; // 主色加深：按钮底色，配白字对比达标
 $color-primary-soft: #a8d5b5; // 主色浅：标签/浅底
-$color-accent: #e0a458; // 点缀暖色：琥珀（少量用于提醒/奖励，增添温度）
-$color-cream: #f3ead0; // 奶油色：浅暖底
+$color-accent: #e89b6c; // 点缀暖色：蜜桃橙（提醒/奖励/装饰）
+$color-cream: #fff3d6; // 奶油色：宫格卡片底色
 $color-dark: #171717; // 深墨黑
 
 // ── 文字 ──
@@ -20,7 +20,7 @@ $color-text-secondary: #6b7a6e; // 次要文字：绿灰（不用浅灰，保证
 $color-text-on-primary: #ffffff; // 主色底上的文字
 
 // ── 辅助 ──
-$color-border: #e2eae0; // 浅绿边框
+$color-border: #e8e0d0; // 暖灰边框
 $color-success: #5b9e6f; // 成功绿
 $color-danger: #d9534f; // 危险/删除：柔红
 $color-bg-green: #eaf4ec; // 浅绿底

@@ -16,7 +16,7 @@ import './index.scss';
 const TRADE_TYPE_LABELS: Record<string, { label: string; color: string; bgColor: string }> = {
   [TradeType.SELL]: { label: '出售', color: '#ff6b6b', bgColor: '#fff0f0' },
   [TradeType.FREE]: { label: '免费', color: '#5b9e6f', bgColor: '#eaf4ec' },
-  [TradeType.EXCHANGE]: { label: '交换', color: '#e0a458', bgColor: '#fbf0dd' },
+  [TradeType.EXCHANGE]: { label: '交换', color: '#e89b6c', bgColor: '#fbf0dd' },
 };
 
 const REVIEW_TAGS = ['沟通顺畅', '描述相符', '发货迅速', '物超所值', '态度友好'];

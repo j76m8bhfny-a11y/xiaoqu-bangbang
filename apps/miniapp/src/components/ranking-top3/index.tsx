@@ -27,8 +27,8 @@ function getRankStyle(rank: number) {
         order: 2,
         size: 96,
         crown: '👑',
-        bg: 'linear-gradient(135deg, #f3ead0 0%, #e0a458 100%)',
-        border: '3px solid #e0a458',
+        bg: 'linear-gradient(135deg, #fff3d6 0%, #e89b6c 100%)',
+        border: '3px solid #e89b6c',
       };
     case 1:
       return { order: 1, size: 80, crown: '🥈', bg: '#F5F5F5', border: '3px solid #E0E0E0' };

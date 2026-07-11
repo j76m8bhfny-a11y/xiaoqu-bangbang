@@ -25,10 +25,10 @@ const TYPE_COLOR_MAP: Record<string, string> = {
   review_result: '#5b9e6f',
   event_response: '#5b9e6f',
   completion: '#5b9e6f',
-  badge: '#e0a458',
-  feedback: '#e0a458',
+  badge: '#e89b6c',
+  feedback: '#e89b6c',
   vote: '#5b9e6f',
-  announcement: '#e0a458',
+  announcement: '#e89b6c',
   system: '#5b9e6f',
 };
 
