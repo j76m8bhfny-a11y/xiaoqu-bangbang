@@ -36,6 +36,8 @@
   }
 
   &__stat-label {
+    display: flex;
+    align-items: center;
     font-size: $font-size-xs;
     color: $color-text-secondary;
   }
@@ -47,6 +49,8 @@
   }
 
   &__section-header {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
@@ -243,6 +247,8 @@
   }
 
   &__announcement-pin-text {
+    display: flex;
+    align-items: center;
     font-size: 20px;
     color: $color-accent;
     font-weight: $font-weight-medium;

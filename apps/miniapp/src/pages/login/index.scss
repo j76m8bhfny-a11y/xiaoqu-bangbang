@@ -21,6 +21,8 @@
   }
 
   &__logo {
+    display: flex;
+    align-items: center;
     font-size: 120px;
     margin-bottom: $spacing-md;
   }

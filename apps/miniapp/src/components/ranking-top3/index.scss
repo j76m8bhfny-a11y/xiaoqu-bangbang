@@ -29,6 +29,8 @@
   }
 
   &__crown {
+    display: flex;
+    align-items: center;
     font-size: 36px;
     line-height: 1;
   }
@@ -71,6 +73,8 @@
   }
 
   &__flower {
+    display: flex;
+    align-items: center;
     font-size: 22px;
     color: $color-accent;
     font-weight: $font-weight-medium;

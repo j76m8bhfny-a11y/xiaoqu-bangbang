@@ -10,6 +10,8 @@
   }
 
   &__header-title {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
@@ -38,6 +40,8 @@
   }
 
   &__search-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-sm;
     flex-shrink: 0;
   }
@@ -111,6 +115,8 @@
   }
 
   &__category-icon {
+    display: flex;
+    align-items: center;
     font-size: 40px;
   }
 
@@ -209,6 +215,8 @@
   }
 
   &__image-emoji {
+    display: flex;
+    align-items: center;
     font-size: 80px;
   }
 

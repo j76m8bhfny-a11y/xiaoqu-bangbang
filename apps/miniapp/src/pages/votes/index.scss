@@ -9,6 +9,8 @@
   }
 
   &__header-title {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
@@ -44,6 +46,8 @@
   }
 
   &__card-title {
+    display: flex;
+    align-items: center;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
     color: $color-text;

@@ -110,6 +110,8 @@
   }
 
   &__count-hint {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-xs;
     color: $color-text-secondary;
@@ -130,6 +132,8 @@
   }
 
   &__section-title {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;

@@ -624,6 +624,8 @@
   }
 
   &__report-link-text {
+    display: flex;
+    align-items: center;
     font-size: $font-size-xs;
     color: $color-text-secondary;
   }

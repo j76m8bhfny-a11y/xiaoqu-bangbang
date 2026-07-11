@@ -83,6 +83,8 @@
   }
 
   &__avatar-emoji {
+    display: flex;
+    align-items: center;
     font-size: $font-size-sm;
   }
 
@@ -185,6 +187,8 @@
   }
 
   &__comments-header {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
@@ -229,6 +233,8 @@
   }
 
   &__comment-avatar-emoji {
+    display: flex;
+    align-items: center;
     font-size: $font-size-xs;
   }
 
@@ -383,6 +389,8 @@
   }
 
   &__rated-hint-text {
+    display: flex;
+    align-items: center;
     font-size: $font-size-sm;
     color: $color-text-secondary;
   }
@@ -396,6 +404,8 @@
   }
 
   &__ratings-list-header {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-sm;
     font-weight: $font-weight-bold;
@@ -527,6 +537,8 @@
   }
 
   &__manage-btn-text {
+    display: flex;
+    align-items: center;
     font-size: $font-size-sm;
     color: $color-text-secondary;
     font-weight: $font-weight-medium;
@@ -546,6 +558,8 @@
   }
 
   &__report-link-text {
+    display: flex;
+    align-items: center;
     font-size: $font-size-xs;
     color: $color-text-secondary;
   }
@@ -602,6 +616,8 @@
   }
 
   &__action-btn-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-md;
   }
 
@@ -696,6 +712,8 @@
   }
 
   &__participant-action-text {
+    display: flex;
+    align-items: center;
     font-size: 20px;
     color: $color-primary;
     font-weight: $font-weight-medium;
@@ -793,6 +811,8 @@
   }
 
   &__matched-skills-header {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;

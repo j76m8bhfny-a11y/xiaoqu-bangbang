@@ -21,6 +21,8 @@
   }
 
   &__section-title {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-sm;
     font-weight: $font-weight-medium;
@@ -122,6 +124,8 @@
   }
 
   &__checkbox-icon {
+    display: flex;
+    align-items: center;
     color: #fff;
     font-size: 24px;
     font-weight: bold;

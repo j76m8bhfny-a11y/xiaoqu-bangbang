@@ -9,6 +9,8 @@
   }
 
   &__header-title {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
@@ -169,6 +171,8 @@
   }
 
   &__podium-flowers {
+    display: flex;
+    align-items: center;
     font-size: $font-size-xs;
     color: $color-accent;
     font-weight: $font-weight-medium;
@@ -257,6 +261,8 @@
   }
 
   &__list-flower-count {
+    display: flex;
+    align-items: center;
     font-size: $font-size-xs;
     color: $color-accent;
     font-weight: $font-weight-medium;
@@ -321,6 +327,8 @@
   }
 
   &__badge-icon {
+    display: flex;
+    align-items: center;
     font-size: 48px;
   }
 

@@ -9,6 +9,8 @@
   }
 
   &__header-title {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
@@ -37,6 +39,8 @@
   }
 
   &__search-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-sm;
     flex-shrink: 0;
   }
@@ -53,6 +57,8 @@
   }
 
   &__search-clear {
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
     font-size: $font-size-sm;
     color: $color-text-secondary;
@@ -122,6 +128,8 @@
   }
 
   &__search-toggle-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-md;
   }
 
@@ -249,6 +257,8 @@
   }
 
   &__market-img-emoji {
+    display: flex;
+    align-items: center;
     font-size: 64px;
   }
 

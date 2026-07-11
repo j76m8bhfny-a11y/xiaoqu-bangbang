@@ -13,6 +13,8 @@
   }
 
   &__section-title {
+    display: flex;
+    align-items: center;
     display: block;
     padding: $spacing-sm $spacing-md 8px;
     font-size: $font-size-xs;
@@ -52,6 +54,8 @@
   }
 
   &__menu-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-md;
   }
 

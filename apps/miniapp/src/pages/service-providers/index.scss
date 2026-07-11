@@ -9,6 +9,8 @@
   }
 
   &__header-title {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
@@ -88,6 +90,8 @@
   }
 
   &__card-icon-text {
+    display: flex;
+    align-items: center;
     font-size: 40px;
   }
 

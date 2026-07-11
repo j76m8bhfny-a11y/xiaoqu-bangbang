@@ -21,6 +21,8 @@
   }
 
   &__hero-emoji {
+    display: flex;
+    align-items: center;
     font-size: 64px;
     line-height: 1;
   }
@@ -51,6 +53,8 @@
   }
 
   &__section-title {
+    display: flex;
+    align-items: center;
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;

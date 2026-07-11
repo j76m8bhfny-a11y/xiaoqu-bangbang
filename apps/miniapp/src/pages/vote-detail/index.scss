@@ -165,6 +165,8 @@
   }
 
   &__indicator-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-sm;
     color: #fff;
     font-weight: $font-weight-bold;
@@ -331,6 +333,8 @@
   }
 
   &__report-link-text {
+    display: flex;
+    align-items: center;
     font-size: $font-size-xs;
     color: $color-text-secondary;
   }

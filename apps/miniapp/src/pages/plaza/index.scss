@@ -18,9 +18,14 @@
     align-items: center;
     justify-content: space-between;
     padding: $spacing-md $spacing-lg;
+    background: $color-cream;
+    border-bottom: 2px solid $color-border;
   }
 
   &__community-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
     color: $color-text;
@@ -53,6 +58,9 @@
   }
 
   &__card-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
     color: $color-text;

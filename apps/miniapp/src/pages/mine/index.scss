@@ -107,6 +107,8 @@ $radius-xl: 40px;
   }
 
   &__stat-icon {
+    display: flex;
+    align-items: center;
     font-size: 32px;
     margin-bottom: 2px;
   }
@@ -118,6 +120,8 @@ $radius-xl: 40px;
   }
 
   &__stat-label {
+    display: flex;
+    align-items: center;
     font-size: $font-size-xs;
     color: $color-text-secondary;
   }
@@ -169,6 +173,8 @@ $radius-xl: 40px;
   }
 
   &__activity-icon {
+    display: flex;
+    align-items: center;
     font-size: 36px;
   }
 
@@ -225,6 +231,8 @@ $radius-xl: 40px;
   }
 
   &__menu-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-md;
   }
 
