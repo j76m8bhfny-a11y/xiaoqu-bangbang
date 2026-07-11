@@ -1,5 +1,6 @@
 import { View, Text } from '@tarojs/components';
 import './index.scss';
+import Icon from '@/components/icon';
 
 interface AdPopupProps {
   visible: boolean;
@@ -19,10 +20,14 @@ export default function AdPopup({ visible, onClose }: AdPopupProps) {
     <View className="ad-popup" onClick={onClose}>
       <View className="ad-popup__card" catchMove>
         <View className="ad-popup__close" onClick={onClose}>
-          <Text className="ad-popup__close-icon">✕</Text>
+          <View className="ad-popup__close-icon">
+            <Icon name="close" size={20} />
+          </View>
         </View>
         <View className="ad-popup__content">
-          <Text className="ad-popup__emoji">🌸</Text>
+          <View className="ad-popup__emoji">
+            <Icon name="flower" size={48} color="#E89B6C" />
+          </View>
           <Text className="ad-popup__title">{AD_CONTENT.title}</Text>
           <Text className="ad-popup__subtitle">{AD_CONTENT.subtitle}</Text>
           <View className="ad-popup__cta" onClick={onClose}>

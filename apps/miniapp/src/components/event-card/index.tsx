@@ -1,5 +1,6 @@
 import { View, Text, Image } from '@tarojs/components';
 import './index.scss';
+import Icon from '@/components/icon';
 
 export interface EventCardData {
   id: string;
@@ -71,9 +72,15 @@ export default function EventCard({ data, onClick, onCtaClick }: EventCardProps)
           )}
         </View>
         <View className="event-card__stats">
-          <Text className="event-card__stat">❤️ {data.likeCount}</Text>
-          <Text className="event-card__stat">💬 {data.commentCount}</Text>
-          <Text className="event-card__stat">🌸 {data.thanksCount}</Text>
+          <View className="event-card__stat">
+            <Icon name="heart" size={14} color="#E89B6C" /> <Text>{data.likeCount}</Text>
+          </View>
+          <View className="event-card__stat">
+            <Icon name="chat" size={14} /> <Text>{data.commentCount}</Text>
+          </View>
+          <View className="event-card__stat">
+            <Icon name="flower" size={14} color="#E89B6C" /> <Text>{data.thanksCount}</Text>
+          </View>
         </View>
       </View>
 

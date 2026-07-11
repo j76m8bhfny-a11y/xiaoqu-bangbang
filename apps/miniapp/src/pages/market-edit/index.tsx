@@ -10,6 +10,7 @@ import { MARKET_CATEGORY_CONFIG, CONDITION_LABELS } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
 import ErrorState from '@/components/error-state';
 import './index.scss';
+import Icon from '@/components/icon';
 
 const TRADE_OPTIONS: { key: TradeType; label: string }[] = [
   { key: TradeType.SELL, label: '出售' },
@@ -29,11 +30,12 @@ export default function MarketEdit() {
   const id = Taro.getCurrentInstance().router?.params?.id;
   const user = useAuthStore((s) => s.user);
 
-  const { data: item, loading, error, refresh } = useRequest<MarketItemDto>(
-    () => marketService.getById(id!),
-    [id],
-    { enabled: !!id },
-  );
+  const {
+    data: item,
+    loading,
+    error,
+    refresh,
+  } = useRequest<MarketItemDto>(() => marketService.getById(id!), [id], { enabled: !!id });
 
   const [category, setCategory] = useState<MarketCategory>(MarketCategory.OTHER);
   const [title, setTitle] = useState('');
@@ -62,10 +64,10 @@ export default function MarketEdit() {
 
   if (loading) {
     return (
-      <View className='market-edit'>
-        <View className='market-edit__body'>
-          <View className='market-edit__loading'>
-            <Text className='market-edit__loading-text'>加载中...</Text>
+      <View className="market-edit">
+        <View className="market-edit__body">
+          <View className="market-edit__loading">
+            <Text className="market-edit__loading-text">加载中...</Text>
           </View>
         </View>
       </View>
@@ -74,9 +76,9 @@ export default function MarketEdit() {
 
   if (error || !item) {
     return (
-      <View className='market-edit'>
-        <View className='market-edit__body'>
-          <ErrorState message='加载失败' onRetry={refresh} />
+      <View className="market-edit">
+        <View className="market-edit__body">
+          <ErrorState message="加载失败" onRetry={refresh} />
         </View>
       </View>
     );
@@ -85,9 +87,9 @@ export default function MarketEdit() {
   // Guard: only the seller can edit
   if (user && item.sellerId !== user.id) {
     return (
-      <View className='market-edit'>
-        <View className='market-edit__body'>
-          <ErrorState message='无权编辑此商品' />
+      <View className="market-edit">
+        <View className="market-edit__body">
+          <ErrorState message="无权编辑此商品" />
         </View>
       </View>
     );
@@ -128,21 +130,27 @@ export default function MarketEdit() {
   };
 
   return (
-    <View className='market-edit'>
-      <View className='market-edit__body'>
-        <View className='market-edit__card'>
-          <View className='market-edit__field'>
-            <Text className='market-edit__label'>分类 <Text className='market-edit__required'>*</Text></Text>
-            <ScrollView scrollX className='market-edit__category-scroll'>
-              <View className='market-edit__category-list'>
+    <View className="market-edit">
+      <View className="market-edit__body">
+        <View className="market-edit__card">
+          <View className="market-edit__field">
+            <Text className="market-edit__label">
+              分类 <Text className="market-edit__required">*</Text>
+            </Text>
+            <ScrollView scrollX className="market-edit__category-scroll">
+              <View className="market-edit__category-list">
                 {Object.entries(MARKET_CATEGORY_CONFIG).map(([key, cfg]) => (
                   <View
                     key={key}
                     className={`market-edit__category-item ${category === key ? 'market-edit__category-item--active' : ''}`}
                     onClick={() => setCategory(key as MarketCategory)}
                   >
-                    <Text className='market-edit__category-icon'>{cfg.icon}</Text>
-                    <Text className={`market-edit__category-label ${category === key ? 'market-edit__category-label--active' : ''}`}>
+                    <View className="market-edit__category-icon">
+                      <Icon name={cfg.icon as any} size={24} />
+                    </View>
+                    <Text
+                      className={`market-edit__category-label ${category === key ? 'market-edit__category-label--active' : ''}`}
+                    >
                       {cfg.label}
                     </Text>
                   </View>
@@ -151,24 +159,28 @@ export default function MarketEdit() {
             </ScrollView>
           </View>
 
-          <View className='market-edit__field'>
-            <Text className='market-edit__label'>标题 <Text className='market-edit__required'>*</Text></Text>
+          <View className="market-edit__field">
+            <Text className="market-edit__label">
+              标题 <Text className="market-edit__required">*</Text>
+            </Text>
             <Input
-              className='market-edit__input'
-              placeholder='请输入物品标题'
-              placeholderClass='market-edit__placeholder'
+              className="market-edit__input"
+              placeholder="请输入物品标题"
+              placeholderClass="market-edit__placeholder"
               value={title}
               onInput={(e) => setTitle(e.detail.value)}
               maxlength={30}
             />
           </View>
 
-          <View className='market-edit__field'>
-            <Text className='market-edit__label'>详细描述 <Text className='market-edit__required'>*</Text></Text>
+          <View className="market-edit__field">
+            <Text className="market-edit__label">
+              详细描述 <Text className="market-edit__required">*</Text>
+            </Text>
             <Textarea
-              className='market-edit__textarea'
-              placeholder='请描述物品详情、使用情况等...'
-              placeholderClass='market-edit__placeholder'
+              className="market-edit__textarea"
+              placeholder="请描述物品详情、使用情况等..."
+              placeholderClass="market-edit__placeholder"
               value={description}
               onInput={(e) => setDescription(e.detail.value)}
               maxlength={500}
@@ -176,26 +188,26 @@ export default function MarketEdit() {
             />
           </View>
 
-          <View className='market-edit__field'>
-            <Text className='market-edit__label'>图片</Text>
+          <View className="market-edit__field">
+            <Text className="market-edit__label">图片</Text>
             <ImagePicker images={images} onChange={setImages} />
           </View>
 
-          <View className='market-edit__field'>
-            <Text className='market-edit__label'>价格</Text>
+          <View className="market-edit__field">
+            <Text className="market-edit__label">价格</Text>
             <Input
-              className='market-edit__input'
-              type='digit'
-              placeholder='请输入价格，免费可不填'
-              placeholderClass='market-edit__placeholder'
+              className="market-edit__input"
+              type="digit"
+              placeholder="请输入价格，免费可不填"
+              placeholderClass="market-edit__placeholder"
               value={price}
               onInput={(e) => setPrice(e.detail.value)}
             />
           </View>
 
-          <View className='market-edit__field'>
-            <Text className='market-edit__label'>交易方式</Text>
-            <View className='market-edit__radio-group'>
+          <View className="market-edit__field">
+            <Text className="market-edit__label">交易方式</Text>
+            <View className="market-edit__radio-group">
               {TRADE_OPTIONS.map((opt) => (
                 <View
                   key={opt.key}
@@ -212,9 +224,9 @@ export default function MarketEdit() {
             </View>
           </View>
 
-          <View className='market-edit__field'>
-            <Text className='market-edit__label'>成色</Text>
-            <View className='market-edit__condition-group'>
+          <View className="market-edit__field">
+            <Text className="market-edit__label">成色</Text>
+            <View className="market-edit__condition-group">
               {CONDITION_OPTIONS.map((opt) => {
                 const cfg = CONDITION_LABELS[opt.key];
                 const isActive = conditionLevel === opt.key;
@@ -222,7 +234,11 @@ export default function MarketEdit() {
                   <View
                     key={opt.key}
                     className={`market-edit__condition ${isActive ? 'market-edit__condition--active' : ''}`}
-                    style={isActive ? { background: cfg.color + '1a', borderColor: cfg.color } : undefined}
+                    style={
+                      isActive
+                        ? { background: cfg.color + '1a', borderColor: cfg.color }
+                        : undefined
+                    }
                     onClick={() => setConditionLevel(opt.key)}
                   >
                     <Text
@@ -237,12 +253,12 @@ export default function MarketEdit() {
             </View>
           </View>
 
-          <View className='market-edit__field'>
-            <Text className='market-edit__label'>联系方式</Text>
+          <View className="market-edit__field">
+            <Text className="market-edit__label">联系方式</Text>
             <Input
-              className='market-edit__input'
-              placeholder='微信号/手机号（选填）'
-              placeholderClass='market-edit__placeholder'
+              className="market-edit__input"
+              placeholder="微信号/手机号（选填）"
+              placeholderClass="market-edit__placeholder"
               value={contactText}
               onInput={(e) => setContactText(e.detail.value)}
             />
@@ -250,14 +266,12 @@ export default function MarketEdit() {
         </View>
       </View>
 
-      <View className='market-edit__footer'>
+      <View className="market-edit__footer">
         <View
           className={`market-edit__submit ${submitting ? 'market-edit__submit--disabled' : ''}`}
           onClick={submitting ? undefined : handleSubmit}
         >
-          <Text className='market-edit__submit-text'>
-            {submitting ? '保存中...' : '保存修改'}
-          </Text>
+          <Text className="market-edit__submit-text">{submitting ? '保存中...' : '保存修改'}</Text>
         </View>
       </View>
     </View>

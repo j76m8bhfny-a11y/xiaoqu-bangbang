@@ -6,15 +6,26 @@ import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import type { ServiceProviderDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 const CATEGORY_LABELS: Record<string, string> = {
-  repair: '维修', cleaning: '保洁', lock: '开锁',
-  home_appliance: '家电', moving: '搬家', pet: '宠物', other: '其他',
+  repair: '维修',
+  cleaning: '保洁',
+  lock: '开锁',
+  home_appliance: '家电',
+  moving: '搬家',
+  pet: '宠物',
+  other: '其他',
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
-  repair: '🔧', cleaning: '🧹', lock: '🔑',
-  home_appliance: '🔌', moving: '📦', pet: '🐾', other: '🏠',
+  repair: 'wrench',
+  cleaning: 'star',
+  lock: 'key',
+  home_appliance: 'plug',
+  moving: 'box',
+  pet: 'paw',
+  other: 'house',
 };
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -26,14 +37,17 @@ const SOURCE_LABELS: Record<string, string> = {
 export default function ServiceProviderDetail() {
   const { id } = Taro.getCurrentInstance().router?.params ?? {};
 
-  const { data: provider, loading, error, refresh } = useRequest<ServiceProviderDto>(
-    () => serviceProviderService.getById(id!),
-    [id],
-    { enabled: !!id },
-  );
+  const {
+    data: provider,
+    loading,
+    error,
+    refresh,
+  } = useRequest<ServiceProviderDto>(() => serviceProviderService.getById(id!), [id], {
+    enabled: !!id,
+  });
 
   if (loading) {
-    return <Loading text='加载服务详情...' />;
+    return <Loading text="加载服务详情..." />;
   }
 
   if (error || !provider) {
@@ -41,50 +55,53 @@ export default function ServiceProviderDetail() {
   }
 
   const categoryLabel = CATEGORY_LABELS[provider.category] ?? provider.category;
-  const categoryIcon = CATEGORY_ICONS[provider.category] ?? '🏠';
+  const categoryIcon = CATEGORY_ICONS[provider.category] ?? 'house';
   const sourceLabel = SOURCE_LABELS[provider.recommendationSource] ?? provider.recommendationSource;
 
   return (
-    <View className='sp-detail'>
-      <ScrollView scrollY className='sp-detail__scroll'>
+    <View className="sp-detail">
+      <ScrollView scrollY className="sp-detail__scroll">
         {/* Header */}
-        <View className='sp-detail__header'>
-          <View className='sp-detail__logo'>
-            <Text className='sp-detail__logo-icon'>{categoryIcon}</Text>
+        <View className="sp-detail__header">
+          <View className="sp-detail__logo">
+            <Text className="sp-detail__logo-icon">{categoryIcon}</Text>
           </View>
-          <Text className='sp-detail__name'>{provider.name}</Text>
-          <View className='sp-detail__tags'>
-            <View className='sp-detail__tag sp-detail__tag--category'>
-              <Text className='sp-detail__tag-text'>{categoryLabel}</Text>
+          <Text className="sp-detail__name">{provider.name}</Text>
+          <View className="sp-detail__tags">
+            <View className="sp-detail__tag sp-detail__tag--category">
+              <Text className="sp-detail__tag-text">{categoryLabel}</Text>
             </View>
-            <View className='sp-detail__tag sp-detail__tag--source'>
-              <Text className='sp-detail__tag-text'>{sourceLabel}推荐</Text>
+            <View className="sp-detail__tag sp-detail__tag--source">
+              <Text className="sp-detail__tag-text">{sourceLabel}推荐</Text>
             </View>
           </View>
         </View>
 
         {/* Description */}
-        <View className='sp-detail__section'>
-          <Text className='sp-detail__section-title'>服务介绍</Text>
-          <Text className='sp-detail__description'>{provider.description}</Text>
+        <View className="sp-detail__section">
+          <Text className="sp-detail__section-title">服务介绍</Text>
+          <Text className="sp-detail__description">{provider.description}</Text>
         </View>
 
         {/* Contact */}
-        <View className='sp-detail__section'>
-          <Text className='sp-detail__section-title'>联系方式</Text>
+        <View className="sp-detail__section">
+          <Text className="sp-detail__section-title">联系方式</Text>
           {provider.contactText ? (
-            <Text className='sp-detail__contact-value'>{provider.contactText}</Text>
+            <Text className="sp-detail__contact-value">{provider.contactText}</Text>
           ) : (
-            <Text className='sp-detail__no-contact'>暂无联系方式</Text>
+            <Text className="sp-detail__no-contact">暂无联系方式</Text>
           )}
         </View>
 
         {/* Risk Disclaimer */}
-        <View className='sp-detail__disclaimer'>
-          <Text className='sp-detail__disclaimer-text'>⚠️ 请用户线下自行确认资质与费用</Text>
+        <View className="sp-detail__disclaimer">
+          <View className="sp-detail__disclaimer-text">
+            <Icon name="warning" size={16} color="#D9534F" />{' '}
+            <Text>请用户线下自行确认资质与费用</Text>
+          </View>
         </View>
 
-        <View className='sp-detail__bottom-spacer' />
+        <View className="sp-detail__bottom-spacer" />
       </ScrollView>
     </View>
   );

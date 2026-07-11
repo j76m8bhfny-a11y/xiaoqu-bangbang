@@ -1,14 +1,15 @@
 import { View, Text } from '@tarojs/components';
 import ImagePicker from '../image-picker';
 import './index.scss';
+import Icon from '@/components/icon';
 
 export type MaterialType = 'property_cert' | 'rent_contract' | 'access_card' | 'other';
 
-export const MATERIAL_OPTIONS: { key: MaterialType; label: string }[] = [
-  { key: 'property_cert', label: '🏠 房产证' },
-  { key: 'rent_contract', label: '📄 租房合同' },
-  { key: 'access_card', label: '🔑 门禁卡' },
-  { key: 'other', label: '📋 其他' },
+export const MATERIAL_OPTIONS: { key: MaterialType; label: string; icon: string }[] = [
+  { key: 'property_cert', label: '房产证', icon: 'house' },
+  { key: 'rent_contract', label: '租房合同', icon: 'document' },
+  { key: 'access_card', label: '门禁卡', icon: 'key' },
+  { key: 'other', label: '其他', icon: 'clipboard' },
 ];
 
 export const MATERIAL_LABEL_MAP: Record<MaterialType, string> = {
@@ -47,7 +48,7 @@ export default function MaterialUploader({
             <Text
               className={`mu__pill-text ${materialType === opt.key ? 'mu__pill-text--active' : ''}`}
             >
-              {opt.label}
+              <Icon name={opt.icon as any} size={16} /> {opt.label}
             </Text>
           </View>
         ))}

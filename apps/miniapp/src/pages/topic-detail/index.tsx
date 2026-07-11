@@ -6,6 +6,7 @@ import { useRequest, useAuthGuard } from '@/hooks';
 import EmptyState from '@/components/empty-state';
 import type { TopicTimelineItem, TopicCommentDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 // emoji 常量：避免 TS 解析器对 JSX 内 emoji 的编码问题
 const ICON_THUMB_UP = '\u{1f44d}';
@@ -337,7 +338,7 @@ export default function TopicDetail() {
                 </View>
               )}
               {!timelineLoading && !timelineError && items.length === 0 && (
-                <EmptyState icon="📋" text="还没有相关事件\n点右下角 ＋ 新建一个" />
+                <EmptyState icon="clipboard" text="还没有相关事件\n点右下角 ＋ 新建一个" />
               )}
               {items.map((it) => {
                 const ev = it.data;
@@ -423,7 +424,7 @@ export default function TopicDetail() {
                 </View>
               )}
               {!commentsLoading && !commentsError && topicComments.length === 0 && (
-                <EmptyState icon="💬" text="还没有讨论\n来说说你的看法吧" />
+                <EmptyState icon="chat" text="还没有讨论\n来说说你的看法吧" />
               )}
               {topicComments.map((c) => renderComment(c))}
             </>

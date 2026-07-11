@@ -6,14 +6,15 @@ import { useDraft } from '@/hooks';
 import ImagePicker from '@/components/image-picker';
 import type { CreateCommunityApplicationRequest } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 type MaterialType = CreateCommunityApplicationRequest['materialType'];
 
-const MATERIAL_OPTIONS: { key: MaterialType; label: string }[] = [
-  { key: 'property_cert', label: '🏠 房产证' },
-  { key: 'rent_contract', label: '📄 租房合同' },
-  { key: 'access_card', label: '🔑 门禁卡' },
-  { key: 'other', label: '📋 其他' },
+const MATERIAL_OPTIONS: { key: MaterialType; label: string; icon: string }[] = [
+  { key: 'property_cert', label: '房产证', icon: 'house' },
+  { key: 'rent_contract', label: '租房合同', icon: 'document' },
+  { key: 'access_card', label: '门禁卡', icon: 'key' },
+  { key: 'other', label: '其他', icon: 'clipboard' },
 ];
 
 export default function CommunityApply() {
@@ -127,7 +128,9 @@ export default function CommunityApply() {
     <View className="apply">
       <ScrollView scrollY className="apply__body">
         <View className="apply__hero">
-          <Text className="apply__hero-emoji">🏘️</Text>
+          <View className="apply__hero-emoji">
+            <Icon name="community" size={64} color="#E89B6C" />
+          </View>
           <Text className="apply__hero-title">申请开通你家小区</Text>
           <Text className="apply__hero-subtitle">
             填写小区信息+1 张证明材料，邀请邻居助力，平台审核通过即开通
@@ -220,7 +223,7 @@ export default function CommunityApply() {
                 <Text
                   className={`apply__type-text ${materialType === opt.key ? 'apply__type-text--active' : ''}`}
                 >
-                  {opt.label}
+                  <Icon name={opt.icon as any} size={16} /> {opt.label}
                 </Text>
               </View>
             ))}

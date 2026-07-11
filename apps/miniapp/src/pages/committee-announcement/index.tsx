@@ -7,6 +7,7 @@ import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import type { CommitteeAnnouncementDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 function formatDate(isoString: string): string {
   const d = new Date(isoString);
@@ -97,7 +98,9 @@ export default function CommitteeAnnouncement() {
         <View className="committee-announcement__card">
           {/* 官方标识 */}
           <View className="committee-announcement__badge">
-            <Text className="committee-announcement__badge-icon">🏛️</Text>
+            <View className="committee-announcement__badge-icon">
+              <Icon name="building" size={20} />
+            </View>
             <Text className="committee-announcement__badge-text">业委会公告</Text>
           </View>
 
@@ -106,7 +109,9 @@ export default function CommitteeAnnouncement() {
             <Text className="committee-announcement__title">{announcement.title}</Text>
             {announcement.isPinned && (
               <View className="committee-announcement__pin-tag">
-                <Text className="committee-announcement__pin-tag-text">📌 置顶</Text>
+                <View className="committee-announcement__pin-tag-text">
+                  <Icon name="flag" size={14} /> <Text>置顶</Text>
+                </View>
               </View>
             )}
           </View>
@@ -154,7 +159,9 @@ export default function CommitteeAnnouncement() {
             className={`committee-announcement__like-btn ${liked ? 'committee-announcement__like-btn--active' : ''}`}
             onClick={handleToggleLike}
           >
-            <Text className="committee-announcement__like-icon">{liked ? '❤️' : '🤍'}</Text>
+            <View className="committee-announcement__like-icon">
+              <Icon name="heart" size={20} color={liked ? '#E89B6C' : '#6B7A6E'} />
+            </View>
             <Text className="committee-announcement__like-text">
               {likeCount > 0 ? `${likeCount} 人觉得有用` : '有用'}
             </Text>

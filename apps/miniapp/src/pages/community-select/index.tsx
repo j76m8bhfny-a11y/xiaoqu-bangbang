@@ -6,6 +6,7 @@ import { useCommunityStore, useAuthStore } from '@/store';
 import { useRequest } from '@/hooks';
 import type { CommunityDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 export default function CommunitySelect() {
   const router = useRouter();
@@ -49,7 +50,9 @@ export default function CommunitySelect() {
       {/* 顶部装饰区域 */}
       <View className="cs__hero">
         <View className="cs__hero-decor">
-          <Text className="cs__hero-emoji">🏘️</Text>
+          <View className="cs__hero-emoji">
+            <Icon name="community" size={64} color="#E89B6C" />
+          </View>
         </View>
         <Text className="cs__hero-title">选择您所在的小区</Text>
         <Text className="cs__hero-subtitle">加入社区，开启邻里互助之旅</Text>
@@ -58,7 +61,9 @@ export default function CommunitySelect() {
       {/* 搜索栏 */}
       <View className="cs__search-wrap">
         <View className="cs__search">
-          <Text className="cs__search-icon">🔍</Text>
+          <View className="cs__search-icon">
+            <Icon name="search" size={20} />
+          </View>
           <Input
             className="cs__search-input"
             placeholder="搜索小区名称或地址..."
@@ -68,7 +73,7 @@ export default function CommunitySelect() {
           />
           {keyword && (
             <Text className="cs__search-clear" onClick={() => setKeyword('')}>
-              ✕
+              <Icon name="close" size={20} />
             </Text>
           )}
         </View>
@@ -89,14 +94,18 @@ export default function CommunitySelect() {
 
         {error && (
           <View className="cs__empty">
-            <Text className="cs__empty-emoji">😵</Text>
+            <View className="cs__empty-emoji">
+              <Icon name="confused" size={48} color="#6B7A6E" />
+            </View>
             <Text className="cs__empty-text">加载失败，请重试</Text>
           </View>
         )}
 
         {!loading && !error && communities.length === 0 && (
           <View className="cs__empty">
-            <Text className="cs__empty-emoji">🏘️</Text>
+            <View className="cs__empty-emoji">
+              <Icon name="community" size={48} color="#E89B6C" />
+            </View>
             <Text className="cs__empty-text">未找到匹配的小区</Text>
             <Text className="cs__empty-hint">换个关键词试试？</Text>
             <View
@@ -113,7 +122,9 @@ export default function CommunitySelect() {
             <View key={c.id} className="cs__card" onClick={() => handleSelect(c)}>
               <View className="cs__card-left">
                 <View className="cs__card-icon">
-                  <Text className="cs__card-icon-text">🏠</Text>
+                  <View className="cs__card-icon-text">
+                    <Icon name="house" size={20} />
+                  </View>
                 </View>
               </View>
               <View className="cs__card-body">

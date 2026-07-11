@@ -8,6 +8,7 @@ import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import type { CommunityApplicationDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   pending: { label: '审核中', color: 'orange' },
@@ -44,7 +45,7 @@ export default function CommunityApplicationDetail() {
     setSupporting(true);
     try {
       await communityApplicationService.support(id);
-      Taro.showToast({ title: '助力成功！🎉', icon: 'success' });
+      Taro.showToast({ title: '助力成功！', icon: 'success' });
       refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : '助力失败';
@@ -127,7 +128,11 @@ export default function CommunityApplicationDetail() {
           <Text className="cad__count-num">{data.supportCount}</Text>
           <Text className="cad__count-label">位邻居已助力</Text>
           {isPending && <Text className="cad__count-hint">助力越多，越早被平台审核哦～</Text>}
-          {isApproved && <Text className="cad__count-hint">🎉 小区已开通，欢迎大家加入</Text>}
+          {isApproved && (
+            <View className="cad__count-hint">
+              <Icon name="party" size={18} color="#E89B6C" /> <Text>小区已开通，欢迎大家加入</Text>
+            </View>
+          )}
         </View>
 
         {/* 申请人 */}
@@ -201,7 +206,7 @@ export default function CommunityApplicationDetail() {
             onClick={data.hasSupported || supporting ? undefined : handleSupport}
           >
             <Text className="cad__support-text">
-              {data.hasSupported ? '✓ 已助力' : supporting ? '助力中...' : '👍 我来助力'}
+              {data.hasSupported ? '✓ 已助力' : supporting ? '助力中...' : '我来助力'}
             </Text>
           </View>
         )}

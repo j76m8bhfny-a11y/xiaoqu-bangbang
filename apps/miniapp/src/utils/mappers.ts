@@ -149,19 +149,19 @@ export function mapServiceProviderDto(dto: ServiceProviderDto): ServiceProviderD
 }
 
 export const MARKET_CATEGORY_CONFIG: Record<string, { label: string; icon: string }> = {
-  free: { label: '免费', icon: '🎁' },
-  furniture: { label: '家具', icon: '🪑' },
-  baby: { label: '母婴', icon: '🧸' },
-  books: { label: '书籍', icon: '📚' },
-  pet: { label: '宠物', icon: '🐾' },
-  digital: { label: '数码', icon: '📱' },
-  other: { label: '其他', icon: '📦' },
+  free: { label: '免费', icon: 'gift' },
+  furniture: { label: '家具', icon: 'chair' },
+  baby: { label: '母婴', icon: 'teddy' },
+  books: { label: '书籍', icon: 'books' },
+  pet: { label: '宠物', icon: 'paw' },
+  digital: { label: '数码', icon: 'phone' },
+  other: { label: '其他', icon: 'box' },
 };
 
 export const CONDITION_LABELS: Record<string, { label: string; color: string }> = {
   new: { label: '全新', color: '#5b9e6f' },
   like_new: { label: '九成新', color: '#5b9e6f' },
-  good: { label: '八成新', color: '#e0a458' },
+  good: { label: '八成新', color: '#e89b6c' },
   used: { label: '七成新', color: '#FF6B6B' },
   old: { label: '旧物', color: '#999' },
 };

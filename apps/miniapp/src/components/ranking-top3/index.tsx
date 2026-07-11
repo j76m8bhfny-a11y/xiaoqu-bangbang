@@ -1,5 +1,6 @@
 import { View, Text, Image } from '@tarojs/components';
 import './index.scss';
+import Icon from '@/components/icon';
 
 export interface RankingUser {
   id: string;
@@ -26,14 +27,14 @@ function getRankStyle(rank: number) {
       return {
         order: 2,
         size: 96,
-        crown: '👑',
+        crown: 'crown',
         bg: 'linear-gradient(135deg, #fff3d6 0%, #e89b6c 100%)',
         border: '3px solid #e89b6c',
       };
     case 1:
-      return { order: 1, size: 80, crown: '🥈', bg: '#F5F5F5', border: '3px solid #E0E0E0' };
+      return { order: 1, size: 80, crown: 'silver', bg: '#F5F5F5', border: '3px solid #E0E0E0' };
     case 2:
-      return { order: 3, size: 80, crown: '🥉', bg: '#fbf0dd', border: '3px solid #FFD9B3' };
+      return { order: 3, size: 80, crown: 'bronze', bg: '#fbf0dd', border: '3px solid #FFD9B3' };
     default:
       return { order: rank + 1, size: 80, crown: '', bg: '#fff', border: '3px solid #EFE7D8' };
   }
@@ -73,7 +74,9 @@ export default function RankingTop3({ users = DEFAULT_USERS, onViewAll }: Rankin
               </View>
               <Text className="ranking-top3__name">{user.nickname}</Text>
               <View className="ranking-top3__stats">
-                <Text className="ranking-top3__flower">🌸 {user.flowerCount}</Text>
+                <View className="ranking-top3__flower">
+                  <Icon name="flower" size={14} color="#E89B6C" /> <Text>{user.flowerCount}</Text>
+                </View>
                 <Text className="ranking-top3__help">帮助{user.helpCount}次</Text>
               </View>
             </View>

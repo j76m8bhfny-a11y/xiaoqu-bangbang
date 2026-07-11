@@ -4,6 +4,7 @@ import { useRequest } from '@/hooks';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import './index.scss';
+import Icon from '@/components/icon';
 
 export default function Badges() {
   const {
@@ -11,20 +12,14 @@ export default function Badges() {
     loading: badgesLoading,
     error: badgesError,
     refresh: refreshBadges,
-  } = useRequest(
-    () => rankingService.getBadges(),
-    []
-  );
+  } = useRequest(() => rankingService.getBadges(), []);
 
   const {
     data: myBadgesData,
     loading: myBadgesLoading,
     error: myBadgesError,
     refresh: refreshMyBadges,
-  } = useRequest(
-    () => rankingService.getMyBadges(),
-    []
-  );
+  } = useRequest(() => rankingService.getMyBadges(), []);
 
   const loading = badgesLoading || myBadgesLoading;
   const error = badgesError ?? myBadgesError;
@@ -34,23 +29,31 @@ export default function Badges() {
   const earnedCount = allBadges.filter((b) => myBadgeIds.has(b.id)).length;
 
   if (loading) {
-    return <Loading text='加载勋章...' />;
+    return <Loading text="加载勋章..." />;
   }
 
   if (error) {
-    return <ErrorState message={error.message} onRetry={() => { refreshBadges(); refreshMyBadges(); }} />;
+    return (
+      <ErrorState
+        message={error.message}
+        onRetry={() => {
+          refreshBadges();
+          refreshMyBadges();
+        }}
+      />
+    );
   }
 
   return (
-    <View className='badges'>
-      <View className='badges__stats'>
-        <Text className='badges__stats-text'>
+    <View className="badges">
+      <View className="badges__stats">
+        <Text className="badges__stats-text">
           已获得 {earnedCount}/{allBadges.length} 枚勋章
         </Text>
       </View>
 
-      <ScrollView scrollY className='badges__content'>
-        <View className='badges__grid'>
+      <ScrollView scrollY className="badges__content">
+        <View className="badges__grid">
           {allBadges.map((badge) => {
             const earned = myBadgeIds.has(badge.id);
             return (
@@ -58,19 +61,21 @@ export default function Badges() {
                 key={badge.id}
                 className={`badges__card ${earned ? 'badges__card--earned' : 'badges__card--locked'}`}
               >
-                <Text className='badges__card-icon'>{badge.icon}</Text>
-                <Text className='badges__card-name'>{badge.name}</Text>
-                <Text className='badges__card-desc'>{badge.description}</Text>
+                <Text className="badges__card-icon">{badge.icon}</Text>
+                <Text className="badges__card-name">{badge.name}</Text>
+                <Text className="badges__card-desc">{badge.description}</Text>
                 {earned ? (
-                  <Text className='badges__card-badge badges__card-badge--earned'>已获得</Text>
+                  <Text className="badges__card-badge badges__card-badge--earned">已获得</Text>
                 ) : (
-                  <Text className='badges__card-badge badges__card-badge--locked'>🔒</Text>
+                  <View className="badges__card-badge badges__card-badge--locked">
+                    <Icon name="lock" size={32} color="#6B7A6E" />
+                  </View>
                 )}
               </View>
             );
           })}
         </View>
-        <View className='badges__bottom-spacer' />
+        <View className="badges__bottom-spacer" />
       </ScrollView>
     </View>
   );

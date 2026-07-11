@@ -11,12 +11,13 @@ import EmptyState from '@/components/empty-state';
 import { MaterialType, VerificationStatus } from '@xiaoqu-bangbang/shared';
 import type { VerificationDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
-const MATERIAL_OPTIONS: { key: MaterialType; label: string }[] = [
-  { key: MaterialType.PROPERTY_CERT, label: '🏠 房产证' },
-  { key: MaterialType.RENT_CONTRACT, label: '📄 租房合同' },
-  { key: MaterialType.ACCESS_CARD, label: '🔑 门禁卡' },
-  { key: MaterialType.OTHER, label: '📋 其他' },
+const MATERIAL_OPTIONS: { key: MaterialType; label: string; icon: string }[] = [
+  { key: MaterialType.PROPERTY_CERT, label: '房产证', icon: 'house' },
+  { key: MaterialType.RENT_CONTRACT, label: '租房合同', icon: 'document' },
+  { key: MaterialType.ACCESS_CARD, label: '门禁卡', icon: 'key' },
+  { key: MaterialType.OTHER, label: '其他', icon: 'clipboard' },
 ];
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -95,8 +96,8 @@ export default function Verify() {
 
       const statusMsg =
         result.status === 'approved'
-          ? '✅ OCR 识别与您输入一致，已自动通过认证'
-          : '⏳ OCR 识别与您输入不一致，已转入人工审核，请等待 Admin 审批';
+          ? 'OCR 识别与您输入一致，已自动通过认证'
+          : 'OCR 识别与您输入不一致，已转入人工审核，请等待 Admin 审批';
 
       Taro.showModal({
         title: result.status === 'approved' ? '认证已通过' : '认证审核中',
@@ -147,7 +148,7 @@ export default function Verify() {
                 <Text
                   className={`verify__type-text ${materialType === opt.key ? 'verify__type-text--active' : ''}`}
                 >
-                  {opt.label}
+                  <Icon name={opt.icon as any} size={16} /> {opt.label}
                 </Text>
               </View>
             ))}
@@ -191,7 +192,11 @@ export default function Verify() {
             <View
               className={`verify__checkbox ${consentAccepted ? 'verify__checkbox--checked' : ''}`}
             >
-              {consentAccepted && <Text className="verify__checkbox-icon">✓</Text>}
+              {consentAccepted && (
+                <View className="verify__checkbox-icon">
+                  <Icon name="check" size={16} color="#FFF" />
+                </View>
+              )}
             </View>
             <Text className="verify__consent-text">我同意授权认证，并确认所提供信息真实有效</Text>
           </View>
@@ -212,7 +217,9 @@ export default function Verify() {
 
           {recordsError && <ErrorState message="加载失败" onRetry={refreshRecords} />}
 
-          {records && records.items.length === 0 && <EmptyState icon="📋" text="暂无认证记录" />}
+          {records && records.items.length === 0 && (
+            <EmptyState icon="clipboard" text="暂无认证记录" />
+          )}
 
           {records && records.items.length > 0 && (
             <View className="verify__record-list">

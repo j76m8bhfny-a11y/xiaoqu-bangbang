@@ -22,6 +22,7 @@ import {
 } from '@xiaoqu-bangbang/shared';
 import { EVENT_TYPE_CONFIG, EVENT_STATUS_LABELS } from '@/utils/mappers';
 import './index.scss';
+import Icon, { type IconName } from '@/components/icon';
 
 interface CommentDto {
   id: string;
@@ -464,7 +465,9 @@ export default function EventDetail() {
         <View className="event-detail__creator">
           {event.isAnonymous ? (
             <View className="event-detail__avatar event-detail__avatar--anonymous">
-              <Text className="event-detail__avatar-emoji">😺</Text>
+              <View className="event-detail__avatar-emoji">
+                <Icon name="cat" size={32} />
+              </View>
             </View>
           ) : (
             <View
@@ -481,7 +484,9 @@ export default function EventDetail() {
                   mode="aspectFill"
                 />
               ) : (
-                <Text className="event-detail__avatar-emoji">👤</Text>
+                <View className="event-detail__avatar-emoji">
+                  <Icon name="person" size={32} />
+                </View>
               )}
             </View>
           )}
@@ -548,10 +553,18 @@ export default function EventDetail() {
         </View>
 
         <View className="event-detail__stats">
-          <Text className="event-detail__stat">👁 {event.viewCount}浏览</Text>
-          <Text className="event-detail__stat">❤️ {event.likeCount}赞</Text>
-          <Text className="event-detail__stat">💬 {event.commentCount}评论</Text>
-          <Text className="event-detail__stat">🌸 {event.thanksCount}感谢</Text>
+          <View className="event-detail__stat">
+            <Icon name="eye" size={14} /> <Text>{event.viewCount}浏览</Text>
+          </View>
+          <View className="event-detail__stat">
+            <Icon name="heart" size={14} color="#E89B6C" /> <Text>{event.likeCount}赞</Text>
+          </View>
+          <View className="event-detail__stat">
+            <Icon name="chat" size={14} /> <Text>{event.commentCount}评论</Text>
+          </View>
+          <View className="event-detail__stat">
+            <Icon name="flower" size={14} color="#E89B6C" /> <Text>{event.thanksCount}感谢</Text>
+          </View>
         </View>
 
         {/* Participants / Responses Section */}
@@ -683,7 +696,9 @@ export default function EventDetail() {
                         className="event-detail__participant-action-btn event-detail__participant-action-btn--thanks"
                         onClick={() => handleThanks(p.userId)}
                       >
-                        <Text className="event-detail__participant-action-text">🌸 送花</Text>
+                        <View className="event-detail__participant-action-text">
+                          <Icon name="flower" size={16} color="#E89B6C" /> <Text>送花</Text>
+                        </View>
                       </View>
                       <View
                         className="event-detail__participant-action-btn event-detail__participant-action-btn--rate"
@@ -695,7 +710,9 @@ export default function EventDetail() {
                           setHasRated(false);
                         }}
                       >
-                        <Text className="event-detail__participant-action-text">⭐ 评价</Text>
+                        <View className="event-detail__participant-action-text">
+                          <Icon name="star" size={16} color="#E89B6C" /> <Text>评价</Text>
+                        </View>
                       </View>
                     </View>
                   )}
@@ -707,7 +724,9 @@ export default function EventDetail() {
         {/* Matched skills for help_request */}
         {isHelperType && matchedSkills.length > 0 && (
           <View className="event-detail__matched-skills">
-            <Text className="event-detail__matched-skills-header">🔍 匹配的帮手</Text>
+            <View className="event-detail__matched-skills-header">
+              <Icon name="search" size={18} /> <Text>匹配的帮手</Text>
+            </View>
             {matchedSkills.map((s) => (
               <View
                 key={s.skillId}
@@ -813,7 +832,9 @@ export default function EventDetail() {
           )}
 
         <View className="event-detail__comments">
-          <Text className="event-detail__comments-header">💬 评论 ({event.commentCount})</Text>
+          <View className="event-detail__comments-header">
+            <Icon name="chat" size={18} /> <Text>评论 ({event.commentCount})</Text>
+          </View>
 
           {comments.length === 0 && !commentsLoading && (
             <Text className="event-detail__comments-empty">暂无评论</Text>
@@ -829,7 +850,9 @@ export default function EventDetail() {
                     mode="aspectFill"
                   />
                 ) : (
-                  <Text className="event-detail__comment-avatar-emoji">👤</Text>
+                  <View className="event-detail__comment-avatar-emoji">
+                    <Icon name="person" size={24} />
+                  </View>
                 )}
               </View>
               <View className="event-detail__comment-body">
@@ -887,7 +910,7 @@ export default function EventDetail() {
               onClick={() => handleThanks()}
             >
               <Text className="event-detail__lifecycle-btn-text" style={{ color: '#FF6B6B' }}>
-                🌸 送花感谢
+                <Icon name="flower" size={16} color="#E89B6C" /> 送花感谢
               </Text>
             </View>
           )}
@@ -898,12 +921,14 @@ export default function EventDetail() {
             rateTargetUserId &&
             (hasRated ? (
               <View className="event-detail__rated-hint">
-                <Text className="event-detail__rated-hint-text">✓ 已完成评价</Text>
+                <View className="event-detail__rated-hint-text">
+                  <Icon name="check" size={14} /> <Text>已完成评价</Text>
+                </View>
               </View>
             ) : (
               <View className="event-detail__rating">
                 <Text className="event-detail__rating-title">
-                  ⭐ 评价{isCreator ? '帮手' : '发起者'}
+                  <Icon name="star" size={16} color="#E89B6C" /> 评价{isCreator ? '帮手' : '发起者'}
                 </Text>
                 <View className="event-detail__rating-stars">
                   {[1, 2, 3, 4, 5].map((n) => (
@@ -960,7 +985,9 @@ export default function EventDetail() {
           {/* 已有评价列表 */}
           {event.status === EventStatus.COMPLETED && ratings.length > 0 && (
             <View className="event-detail__ratings-list">
-              <Text className="event-detail__ratings-list-header">⭐ 评价 ({ratings.length})</Text>
+              <View className="event-detail__ratings-list-header">
+                <Icon name="star" size={18} color="#E89B6C" /> <Text>评价 ({ratings.length})</Text>
+              </View>
               {ratings.map((r) => (
                 <View key={r.id} className="event-detail__rating-item">
                   <View className="event-detail__rating-item-header">
@@ -1033,11 +1060,15 @@ export default function EventDetail() {
                       Taro.navigateTo({ url: `/pages/event-edit/index?id=${event.id}` })
                     }
                   >
-                    <Text className="event-detail__manage-btn-text">✏️ 编辑</Text>
+                    <View className="event-detail__manage-btn-text">
+                      <Icon name="edit" size={16} /> <Text>编辑</Text>
+                    </View>
                   </View>
                 )}
                 <View className="event-detail__manage-btn" onClick={handleClose}>
-                  <Text className="event-detail__manage-btn-text">🔒 关闭事件</Text>
+                  <View className="event-detail__manage-btn-text">
+                    <Icon name="lock" size={16} /> <Text>关闭事件</Text>
+                  </View>
                 </View>
               </View>
             )}
@@ -1047,7 +1078,9 @@ export default function EventDetail() {
             event.status !== EventStatus.PENDING_REVIEW &&
             event.status !== EventStatus.REJECTED && (
               <View className="event-detail__report-link" onClick={handleReport}>
-                <Text className="event-detail__report-link-text">🚫 举报该事件</Text>
+                <View className="event-detail__report-link-text">
+                  <Icon name="block" size={16} color="#D9534F" /> <Text>举报该事件</Text>
+                </View>
               </View>
             )}
         </View>
@@ -1101,7 +1134,9 @@ export default function EventDetail() {
           className={`event-detail__action-btn event-detail__action-btn--like ${liked ? 'event-detail__action-btn--active' : ''} ${interactionDisabled ? 'event-detail__action-btn--disabled' : ''}`}
           onClick={interactionDisabled ? undefined : handleLike}
         >
-          <Text className="event-detail__action-btn-icon">{liked ? '❤️' : '🤍'}</Text>
+          <View className="event-detail__action-btn-icon">
+            <Icon name="heart" size={24} color={liked ? '#E89B6C' : '#6B7A6E'} />
+          </View>
           <Text className="event-detail__action-btn-label">赞</Text>
         </View>
 
@@ -1109,7 +1144,9 @@ export default function EventDetail() {
           className={`event-detail__action-btn event-detail__action-btn--comment ${interactionDisabled ? 'event-detail__action-btn--disabled' : ''}`}
           onClick={interactionDisabled ? undefined : handleComment}
         >
-          <Text className="event-detail__action-btn-icon">💬</Text>
+          <View className="event-detail__action-btn-icon">
+            <Icon name="chat" size={24} />
+          </View>
           <Text className="event-detail__action-btn-label">评论</Text>
         </View>
 
@@ -1130,7 +1167,9 @@ export default function EventDetail() {
           className={`event-detail__action-btn event-detail__action-btn--fav ${favorited ? 'event-detail__action-btn--active' : ''} ${interactionDisabled ? 'event-detail__action-btn--disabled' : ''}`}
           onClick={interactionDisabled ? undefined : handleFavorite}
         >
-          <Text className="event-detail__action-btn-icon">{favorited ? '⭐' : '☆'}</Text>
+          <View className="event-detail__action-btn-icon">
+            <Icon name={favorited ? 'star' : 'star-outline'} size={24} color="#E89B6C" />
+          </View>
           <Text className="event-detail__action-btn-label">收藏</Text>
         </View>
       </View>

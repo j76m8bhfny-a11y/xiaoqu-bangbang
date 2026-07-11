@@ -10,6 +10,7 @@ import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
 import type { TopicDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 function TopicCard({ topic, onClick }: { topic: TopicDto; onClick: (id: string) => void }) {
   const isOpen = topic.status === 'open';
@@ -22,22 +23,32 @@ function TopicCard({ topic, onClick }: { topic: TopicDto; onClick: (id: string) 
       <View className="topic-card__meta">
         {isOpen ? (
           <>
-            <Text>👍 {topic.likeCount}</Text>
-            <Text>👎 {topic.dislikeCount}</Text>
+            <View>
+              <Icon name="thumbs-up" size={14} /> <Text>{topic.likeCount}</Text>
+            </View>
+            <View>
+              <Icon name="thumbs-down" size={14} /> <Text>{topic.dislikeCount}</Text>
+            </View>
           </>
         ) : (
           <Text>
             ⭐ {topic.avgRating?.toFixed(1) ?? '—'}（{topic.ratingCount}）
           </Text>
         )}
-        <Text>📋 {topic.eventCount}</Text>
-        <Text>💬 {topic.commentCount}</Text>
+        <View>
+          <Icon name="clipboard" size={14} /> <Text>{topic.eventCount}</Text>
+        </View>
+        <View>
+          <Icon name="chat" size={14} /> <Text>{topic.commentCount}</Text>
+        </View>
       </View>
       {!isOpen && topic.closedSummary && (
         <View className="topic-card__summary">{topic.closedSummary}</View>
       )}
       {isOpen && topic.latestEventPreview?.title && (
-        <View className="topic-card__preview">📌 {topic.latestEventPreview.title}</View>
+        <View className="topic-card__preview">
+          <Icon name="flag" size={14} /> {topic.latestEventPreview.title}
+        </View>
       )}
     </View>
   );
@@ -90,7 +101,7 @@ export default function TopicsPage() {
         {error && <ErrorState message={error.message} onRetry={refresh} />}
         {!loading && !error && items.length === 0 && (
           <EmptyState
-            icon="💬"
+            icon="chat"
             text={status === 'open' ? '还没有议题，快来发起吧' : '暂无已完结议题'}
           />
         )}

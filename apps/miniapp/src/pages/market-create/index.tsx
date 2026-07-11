@@ -9,6 +9,7 @@ import { MARKET_CATEGORY_CONFIG, CONDITION_LABELS } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
 import UnverifiedFormBanner from '@/components/unverified-form-banner';
 import './index.scss';
+import Icon from '@/components/icon';
 
 const TRADE_OPTIONS: { key: TradeType; label: string }[] = [
   { key: TradeType.SELL, label: '出售' },
@@ -154,7 +155,9 @@ export default function MarketCreate() {
                     className={`market-create__category-item ${category === key ? 'market-create__category-item--active' : ''}`}
                     onClick={() => setCategory(key as MarketCategory)}
                   >
-                    <Text className="market-create__category-icon">{cfg.icon}</Text>
+                    <View className="market-create__category-icon">
+                      <Icon name={cfg.icon as any} size={24} />
+                    </View>
                     <Text
                       className={`market-create__category-label ${category === key ? 'market-create__category-label--active' : ''}`}
                     >

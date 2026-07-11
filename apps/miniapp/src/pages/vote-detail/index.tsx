@@ -8,6 +8,7 @@ import ErrorState from '@/components/error-state';
 import { VoteType, VoteStatus, ResultVisibility } from '@xiaoqu-bangbang/shared';
 import type { VoteDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 interface VoteResultOption {
   id: string;
@@ -233,7 +234,11 @@ export default function VoteDetail() {
                 <View
                   className={`vote-detail__indicator ${vote.voteType === VoteType.SINGLE ? 'vote-detail__indicator--radio' : 'vote-detail__indicator--checkbox'} ${isSelected ? 'vote-detail__indicator--checked' : ''}`}
                 >
-                  {isSelected && <Text className="vote-detail__indicator-icon">✓</Text>}
+                  {isSelected && (
+                    <View className="vote-detail__indicator-icon">
+                      <Icon name="check" size={16} color="#FFF" />
+                    </View>
+                  )}
                 </View>
                 <Text className="vote-detail__option-text">{option.content}</Text>
               </View>

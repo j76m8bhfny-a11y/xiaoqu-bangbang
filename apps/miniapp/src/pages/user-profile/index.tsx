@@ -7,13 +7,14 @@ import Loading from '@/components/loading';
 import EmptyState from '@/components/empty-state';
 import type { UserProfileDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon, { type IconName } from '@/components/icon';
 
 type TabKey = 'event' | 'market' | 'topic';
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
-  { key: 'event', label: '互助', icon: '🤝' },
-  { key: 'market', label: '闲置', icon: '♻️' },
-  { key: 'topic', label: '议题', icon: '📋' },
+  { key: 'event', label: '互助', icon: 'handshake' },
+  { key: 'market', label: '闲置', icon: 'recycle' },
+  { key: 'topic', label: '议题', icon: 'clipboard' },
 ];
 
 const EVENT_STATUS_LABEL: Record<string, string> = {
@@ -118,7 +119,7 @@ export default function UserProfile() {
   if (notFound || !profile) {
     return (
       <View className="up">
-        <EmptyState icon="👤" text="用户不存在或已注销" />
+        <EmptyState icon="person" text="用户不存在或已注销" />
       </View>
     );
   }
@@ -152,13 +153,15 @@ export default function UserProfile() {
               className={`up__tag ${profile.verifyStatus === 'verified' ? 'up__tag--verified' : 'up__tag--unverified'}`}
             >
               <Text className="up__tag-text">
-                {profile.verifyStatus === 'verified' ? '✅ 已认证业主' : '⏳ 未认证'}
+                profile.verifyStatus === 'verified' ? '已认证业主' : '未认证'
               </Text>
             </View>
           )}
           {profile.communityName && (
             <View className="up__tag up__tag--community">
-              <Text className="up__tag-text">🏠 {profile.communityName}</Text>
+              <View className="up__tag-text">
+                <Icon name="house" size={14} /> <Text>{profile.communityName}</Text>
+              </View>
             </View>
           )}
         </View>
@@ -175,29 +178,39 @@ export default function UserProfile() {
 
       <View className="up__stats">
         <View className="up__stat">
-          <Text className="up__stat-icon">🤲</Text>
+          <View className="up__stat-icon">
+            <Icon name="hands-up" size={20} />
+          </View>
           <Text className="up__stat-value">{profile.helpCount}</Text>
           <Text className="up__stat-label">帮助次数</Text>
         </View>
         <View className="up__stat">
-          <Text className="up__stat-icon">🌸</Text>
+          <View className="up__stat-icon">
+            <Icon name="flower" size={20} color="#E89B6C" />
+          </View>
           <Text className="up__stat-value">{profile.flowerCount}</Text>
           <Text className="up__stat-label">小红花</Text>
         </View>
         <View className="up__stat">
-          <Text className="up__stat-icon">🏅</Text>
+          <View className="up__stat-icon">
+            <Icon name="medal" size={20} />
+          </View>
           <Text className="up__stat-value">{profile.badgeCount}</Text>
           <Text className="up__stat-label">勋章</Text>
         </View>
         <View className="up__stat">
-          <Text className="up__stat-icon">📊</Text>
+          <View className="up__stat-icon">
+            <Icon name="chart" size={20} />
+          </View>
           <Text className="up__stat-value">{profile.contributionScore}</Text>
           <Text className="up__stat-label">贡献分</Text>
         </View>
       </View>
 
       <View className="up__section">
-        <Text className="up__section-title">🏅 最近徽章</Text>
+        <View className="up__section-title">
+          <Icon name="medal" size={18} /> <Text>最近徽章</Text>
+        </View>
         {profile.badges.length === 0 ? (
           <View className="up__empty">
             <Text className="up__empty-text">暂无徽章</Text>
@@ -209,7 +222,9 @@ export default function UserProfile() {
                 {b.iconUrl ? (
                   <Image className="up__badge-icon" src={b.iconUrl} mode="aspectFit" />
                 ) : (
-                  <Text className="up__badge-emoji">🏅</Text>
+                  <View className="up__badge-emoji">
+                    <Icon name="medal" size={28} />
+                  </View>
                 )}
                 <Text className="up__badge-name">{b.name}</Text>
               </View>
@@ -219,7 +234,9 @@ export default function UserProfile() {
       </View>
 
       <View className="up__section">
-        <Text className="up__section-title">📦 发布历史</Text>
+        <View className="up__section-title">
+          <Icon name="box" size={18} /> <Text>发布历史</Text>
+        </View>
         <View className="up__tabs">
           {TABS.map((t) => (
             <View
@@ -236,7 +253,7 @@ export default function UserProfile() {
         {historyLoading ? (
           <Loading />
         ) : historyItems.length === 0 ? (
-          <EmptyState icon="📦" text="暂无发布记录" />
+          <EmptyState icon="box" text="暂无发布记录" />
         ) : (
           <View className="up__history-list">
             {historyItems.map((item) => (
