@@ -69,7 +69,7 @@
 <body>
 <div class="hero">
   <h1>📋 E2E 测试单索引</h1>
-  <div class="tagline">8 模块独立测试 · 检查点级 pass/fail · 小程序 weapp-dev-mcp + Admin Playwright</div>
+  <div class="tagline">8 模块独立测试 + 1 最终测试 · 检查点级 pass/fail · 小程序 weapp-dev-mcp + Admin Playwright</div>
   <div class="meta">数据保存在各子页面本地浏览器（localStorage）</div>
 </div>
 
@@ -84,7 +84,7 @@
     <span class="stat-pill pass"><strong id="g-pass">—</strong>已通过</span>
     <span class="stat-pill fail"><strong id="g-fail">—</strong>Bug</span>
     <span class="stat-pill pending"><strong id="g-pending">—</strong>待测</span>
-    <span class="stat-pill"><strong style="color:var(--info)" id="g-active">8</strong>/8 模块已启用</span>
+    <span class="stat-pill"><strong style="color:var(--info)" id="g-active">9</strong>/9 入口已启用</span>
   </div>
 
   <div class="section">
@@ -136,6 +136,12 @@
         <span class="module-icon">🛠️</span>
         <span class="module-label">⑧ Admin 后台</span>
         <span class="module-sub">8 用例 · 35 检查点 · playwright</span>
+      </a>
+      <a class="module-card" href="09-final-test.html" style="border:2px solid var(--accent)">
+        <span class="module-badge active" style="background:var(--accent);color:white">最终测试</span>
+        <span class="module-icon">🎯</span>
+        <span class="module-label">⑨ 傻瓜式最终测试</span>
+        <span class="module-sub">9 模块 · 闭环用例 · 手测脚本 + 检查点</span>
       </a>
     </div>
   </div>

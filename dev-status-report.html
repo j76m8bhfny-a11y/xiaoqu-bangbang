@@ -339,7 +339,7 @@
   <div class="container">
     <h1>🌱 小区帮榜棒</h1>
     <p class="tagline">让小区里的好事，被看见</p>
-    <p class="meta">开发进展汇报 · 2026-07-07 · HEAD: 18ce73b · 161 commits · 领先 origin 19</p>
+    <p class="meta">开发进展汇报 · 2026-07-12 · HEAD: 7c431f9 · 172 commits · 分支 codex/ui-morning-warm-handrawn</p>
   </div>
 </div>
 
@@ -361,9 +361,9 @@
         <div class="metric-value">100%</div>
         <div class="metric-label">PRD 功能开发完成</div>
       </div>
-      <div class="metric-card orange">
-        <div class="metric-value">14</div>
-        <div class="metric-label">待验收项</div>
+      <div class="metric-card green">
+        <div class="metric-value">221/244</div>
+        <div class="metric-label">E2E 二轮通过率</div>
       </div>
       <div class="metric-card blue">
         <div class="metric-value">297</div>
@@ -373,14 +373,14 @@
         <div class="metric-value">0</div>
         <div class="metric-label">建议修（已清零）</div>
       </div>
-      <div class="metric-card green">
-        <div class="metric-value">0</div>
-        <div class="metric-label">可延后（已清零）</div>
+      <div class="metric-card orange">
+        <div class="metric-value">晨光暖色</div>
+        <div class="metric-label">UI 全站改造完成</div>
       </div>
     </div>
 
     <div class="highlight-box">
-      <strong>一句话总结：</strong>核心功能 100% 开发完毕，黄+绿+契约对齐问题全部清零，没有阻塞发布的 Bug。E2E 交互式测试单已发布（二轮模式，8 模块独立板块），首轮修复批次完成 5 个 bug。剩余 65 条⚠️设计选择均不影响用户使用。后续 <span style="color:var(--info);font-weight:700;">E2E 测试</span> 与 <span style="color:var(--primary);font-weight:700;">项目开发</span> 分开处理。
+      <strong>一句话总结：</strong>核心功能 100% 开发完毕，UI 晨光暖色系全站改造完成（tokens 换色 + 69 个手绘 SVG Icon + 150 处 emoji 替换 + tabBar 重绘）。E2E 二轮测试 244 检查点 221 通过 / 23 跳过 / 0 bug，首轮 12 个 bug 全部修复。18 项跳过项的 seed 数据已补齐，可进入第三轮测试。后续 <span style="color:var(--info);font-weight:700;">UI 预览验证</span> 与 <span style="color:var(--primary);font-weight:700;">E2E 三轮测试</span> 并行。
     </div>
   </div>
 </div>
@@ -549,6 +549,76 @@
         </div>
         <span class="feature-status">已完成</span>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- UI 晨光暖色改造 -->
+<div class="section" style="background:linear-gradient(135deg,#FFF8EE 0%,#FFF3D6 100%);">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:#E89B6C;color:white;">🎨</span>
+      UI 晨光暖色全站改造（2026-07-09 ~ 07-12）
+    </div>
+    <p class="section-desc">从草木绿升级为晨光暖色系，69 个手绘 SVG Icon 替换全站 emoji，tabBar 重绘</p>
+
+    <div class="feature-grid">
+      <div class="feature-item">
+        <span class="feature-emoji">🎨</span>
+        <div class="feature-info">
+          <h4>tokens 换色</h4>
+          <p>4 个变量换晨光暖色系（#FFF8EE / #E89B6C / #FFF3D6 / #E8E0D0）</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">📄</span>
+        <div class="feature-info">
+          <h4>纸纹背景</h4>
+          <p>极淡 SVG noise 纸纹（opacity 0.025），增加质感</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🖌️</span>
+        <div class="feature-info">
+          <h4>69 个手绘 SVG Icon</h4>
+          <p>新建 Icon 组件 + emojiToIconName 辅助函数</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🔄</span>
+        <div class="feature-info">
+          <h4>150 处 emoji 替换</h4>
+          <p>25+ 个 TSX 文件全站 emoji 替换为 &lt;Icon&gt; 组件</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🏠</span>
+        <div class="feature-info">
+          <h4>SCSS 微调</h4>
+          <p>home 宫格奶油底+描边+角落装饰、plaza 社区条奶油底、ranking header 蜜桃橙渐变</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">📱</span>
+        <div class="feature-info">
+          <h4>tabBar 重绘</h4>
+          <p>8 张 PNG 重绘 + backgroundColor 适配</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="background:white;border-left-color:#E89B6C;">
+      <strong>验证状态：</strong>每步均通过 <code>pnpm --filter miniapp build:weapp</code> 编译，ESLint + Prettier 通过。131 个文件变更，+4546 / -523 行。分支 <code>codex/ui-morning-warm-handrawn</code>，4 次提交（step①②③A / 批次B+C / step④ SCSS / step⑤ tabBar）。
+    </div>
+
+    <div class="highlight-box" style="background:#FFF3D6;border-left-color:#F5A623;">
+      <strong>待验证：</strong>① Icon 组件在小程序中的 SVG 渲染（部分小程序对内联 SVG 支持有限）② <code>page::before</code> 纸纹背景的性能影响 ③ tabBar PNG 在真机的清晰度
     </div>
   </div>
 </div>
@@ -986,10 +1056,40 @@
           <div class="timeline-desc">b98e94d: 8 模块独立板块+独立导出，一轮结果+修复情况+二轮可编辑</div>
         </div>
         <div class="timeline-item">
-          <div class="timeline-dot" style="background:var(--success); box-shadow:0 0 0 2px var(--success);"></div>
-          <div class="timeline-date">07-07 · 当前</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-07</div>
           <div class="timeline-title">E2E 测试单模块级 bug 清单导出</div>
           <div class="timeline-desc">18ce73b: 每个模块可独立导出 bug 清单+一键复制，方便分工执行。297 已修复 / 65 设计选择 / 0 阻塞 / 0 黄 / 0 绿，237 测试通过</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-09</div>
+          <div class="timeline-title">E2E 二轮测试完成 + 首轮 12 bug 全修复</div>
+          <div class="timeline-desc">dd800f0: 244 检查点 221 通过 / 23 跳过 / 0 bug。首轮 12 个 bug 全部修复（表单认证拦截/草稿恢复/价格 ¥null/admin 公告删除/banner 删除+plaza/ad-popup 弹窗等）</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-09</div>
+          <div class="timeline-title">DESIGN.md 视觉规范 + 用户主页发布历史</div>
+          <div class="timeline-desc">b15d879: events/market/topics 加 userId 过滤 + 前端 tab 区域。73832ed: DESIGN.md 逆向工程视觉规范（供 Google Stitch 使用）</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:#E89B6C; box-shadow:0 0 0 2px #E89B6C;"></div>
+          <div class="timeline-date">07-09</div>
+          <div class="timeline-title">E2E seed 数据补齐（18 项跳过项）</div>
+          <div class="timeline-desc">e8f7b89: closed 议题/闲置分页/议题分页/带图公告/committee_admin/pending 申请/manual_review/公益活动 completed/失物招领 completed/合并建议/未上榜用户</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:#E89B6C; box-shadow:0 0 0 2px #E89B6C;"></div>
+          <div class="timeline-date">07-09 ~ 07-12</div>
+          <div class="timeline-title">UI 晨光暖色全站改造</div>
+          <div class="timeline-desc">ea4eac6/85dff00/c6197bc/7c431f9: tokens 换色 + 69 个手绘 SVG Icon + 150 处 emoji 替换 + SCSS 微调 + tabBar 重绘。131 文件 +4546/-523 行</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--success); box-shadow:0 0 0 2px var(--success);"></div>
+          <div class="timeline-date">07-12 · 当前</div>
+          <div class="timeline-title">UI 改造完成，进入预览验证 + E2E 三轮测试</div>
+          <div class="timeline-desc">HEAD: 7c431f9 · 172 commits · 分支 codex/ui-morning-warm-handrawn。小程序编译通过，待微信开发者工具预览</div>
         </div>
       </div>
     </div>
@@ -1009,8 +1109,8 @@
         <h4 style="margin-bottom:12px;">代码规模</h4>
         <table class="table">
           <tbody>
-            <tr><td>总 commits</td><td><strong>161</strong></td></tr>
-            <tr><td>已推送</td><td><strong>142</strong>（本地领先 19）</td></tr>
+            <tr><td>总 commits</td><td><strong>172</strong></td></tr>
+            <tr><td>分支</td><td><strong>codex/ui-morning-warm-handrawn</strong>（领先 main 5 commits）</td></tr>
             <tr><td>数据库表</td><td><strong>49 张</strong></td></tr>
             <tr><td>数据库迁移</td><td><strong>9 次</strong></td></tr>
             <tr><td>小程序页面</td><td><strong>33 个</strong></td></tr>
@@ -1059,16 +1159,20 @@
         是一份在浏览器里打开就能用的交互式测试清单，独立于本报告。它把小程序所有端到端测试用例拆成 8 个模块，每个模块可以单独勾选、单独导出 bug 清单，方便分工执行。
       </p>
 
-      <h4 style="margin-bottom:12px;">当前状态（HEAD: 18ce73b）</h4>
+      <h4 style="margin-bottom:12px;">当前状态（HEAD: 7c431f9 · 2026-07-12）</h4>
       <table class="table" style="margin-bottom:16px;">
         <tbody>
-          <tr><td>测试用例总数</td><td><strong>57 个</strong>（8 模块）</td></tr>
-          <tr><td>模式</td><td><strong>二轮测试模式</strong>（b98e94d 重构）</td></tr>
-          <tr><td>首轮修复</td><td><strong>5 个 bug 已修复</strong>（认证流程/草稿恢复/¥null/admin 删除/小区隔离）</td></tr>
-          <tr><td>导出能力</td><td>每模块独立导出 bug 清单 + 一键复制（18ce73b）</td></tr>
-          <tr><td>测试用户</td><td>已内置测试用户清单 + 未认证用户标注</td></tr>
+          <tr><td>测试用例总数</td><td><strong>244 个</strong>（8 模块）</td></tr>
+          <tr><td>二轮结果</td><td><strong>221 通过 / 23 跳过 / 0 bug</strong></td></tr>
+          <tr><td>首轮修复</td><td><strong>12 个 bug 全部修复</strong>（认证流程/草稿恢复/¥null/admin 删除/小区隔离/表单拦截/价格修复/banner 删除/ad-popup 等）</td></tr>
+          <tr><td>seed 数据补齐</td><td><strong>18 项跳过项数据已补齐</strong>（commit e8f7b89：closed 议题/闲置分页/议题分页/带图公告/committee_admin/pending 申请/manual_review/公益活动/失物招领/合并建议/未上榜用户）</td></tr>
+          <tr><td>测试用户</td><td><code>test_zhangsan</code> / <code>test_lisi</code>（阳光花园 verified）/ Admin: <code>committee_admin</code> / <code>admin123</code></td></tr>
         </tbody>
       </table>
+
+      <div class="highlight-box" style="background:#E8F8E8;border-left-color:var(--success);">
+        <strong>三轮测试就绪：</strong>18 项因缺 seed 数据而跳过的检查点现已全部补齐数据，可进入第三轮测试。23 跳过项中 17 项为 seed 数据缺失（已补齐），6 项为功能未实现（收藏/社群）。
+      </div>
 
       <h4 style="margin-bottom:12px;">8 个模块</h4>
       <div class="feature-grid" style="margin-bottom:16px;">
@@ -1099,15 +1203,25 @@
     <p class="section-desc">发布前需要处理的事项</p>
 
     <div class="advice-grid">
+      <div class="advice-card medium">
+        <div class="advice-priority">⭐⭐ 待验证</div>
+        <div class="advice-title">Icon SVG 小程序渲染</div>
+        <div class="advice-desc">69 个手绘 SVG Icon 需在微信开发者工具中验证渲染效果，部分小程序对内联 SVG 支持有限</div>
+      </div>
+      <div class="advice-card medium">
+        <div class="advice-priority">⭐⭐ 待验证</div>
+        <div class="advice-title">纸纹背景性能</div>
+        <div class="advice-desc">page::before 的 SVG noise 纸纹（opacity 0.025）在低端机上的性能影响需验证</div>
+      </div>
+      <div class="advice-card medium">
+        <div class="advice-priority">⭐⭐ 待验证</div>
+        <div class="advice-title">tabBar PNG 清晰度</div>
+        <div class="advice-desc">8 张重绘的 tabBar PNG 需在真机上确认清晰度</div>
+      </div>
       <div class="advice-card low">
         <div class="advice-priority">已修复 ✅</div>
         <div class="advice-title">临时登录框</div>
         <div class="advice-desc">已核实为正常微信登录页，非临时页面，无需删除</div>
-      </div>
-      <div class="advice-card low">
-        <div class="advice-priority">已修复 ✅</div>
-        <div class="advice-title">Admin 依赖</div>
-        <div class="advice-desc">package.json 正常，pnpm install 后可编译</div>
       </div>
       <div class="advice-card low">
         <div class="advice-priority">已修复 ✅</div>
@@ -1118,11 +1232,6 @@
         <div class="advice-priority">已修复 ✅</div>
         <div class="advice-title">测试 flaky</div>
         <div class="advice-desc">rankings.spec.ts afterAll 清理已补全，237 测试稳定通过</div>
-      </div>
-      <div class="advice-card low">
-        <div class="advice-priority">已修复 ✅</div>
-        <div class="advice-title">构建产物 tracked</div>
-        <div class="advice-desc">tsconfig.tsbuildinfo 已 git rm --cached，.gitignore 已有规则</div>
       </div>
     </div>
   </div>
@@ -1135,46 +1244,51 @@
       <span class="icon" style="background:var(--primary-light)">🎯</span>
       下一步建议
     </div>
-    <p class="section-desc">E2E 测试与项目开发分开推进，两条线并行</p>
+    <p class="section-desc">UI 预览验证 + E2E 三轮测试 + 合并分支，三条线并行</p>
 
     <div class="advice-grid">
       <div class="advice-card high">
-        <div class="advice-priority">⭐⭐⭐ E2E 测试线</div>
-        <div class="advice-title">按 e2e-test-checklist.html 执行二轮测试</div>
-        <div class="advice-desc">打开 e2e-test-checklist.html，逐模块执行 57 个用例，发现 bug 用「一键导出」生成清单，修复后进入下一轮</div>
+        <div class="advice-priority">⭐⭐⭐ UI 验证线</div>
+        <div class="advice-title">微信开发者工具预览 UI 改造</div>
+        <div class="advice-desc">重点验证：① Icon SVG 渲染效果 ② 纸纹背景性能 ③ tabBar PNG 清晰度 ④ 全站色彩协调性。发现问题记录后修复</div>
       </div>
       <div class="advice-card high">
-        <div class="advice-priority">⭐⭐⭐ 项目开发线</div>
-        <div class="advice-title">跑完验收（14 项）</div>
-        <div class="advice-desc">重点验收 C11-C16 新开发的功能（事件评价/闲置评价/意向系统/多帮手/技能档案/卖家下架），确认好用</div>
+        <div class="advice-priority">⭐⭐⭐ E2E 测试线</div>
+        <div class="advice-title">执行 E2E 三轮测试（18 项已补数据）</div>
+        <div class="advice-desc">seed 数据已补齐：closed 议题/闲置分页/议题分页/带图公告/committee_admin/pending 申请/manual_review/公益活动/失物招领/合并建议/未上榜用户。用 test_zhangsan / test_lisi 登录测试</div>
+      </div>
+      <div class="advice-card high">
+        <div class="advice-priority">⭐⭐⭐ 分支管理</div>
+        <div class="advice-title">合并 UI 改造分支到 main</div>
+        <div class="advice-desc">UI 验证通过后，将 codex/ui-morning-warm-handrawn 分支 --no-ff 合并回 main，推送远程</div>
       </div>
       <div class="advice-card medium">
         <div class="advice-priority">⭐⭐ 尽快做</div>
-        <div class="advice-title">推送到远程</div>
-        <div class="advice-desc">本地领先 origin 19 个 commit（含 E2E 测试单 + 首轮修复批次），需尽快推送备份</div>
+        <div class="advice-title">发布前删除临时登录框</div>
+        <div class="advice-desc">apps/miniapp/src/pages/login/index.tsx 的 devLogin code 输入框，发布前必须删除</div>
       </div>
       <div class="advice-card low">
         <div class="advice-priority">⭐ 可延后</div>
-        <div class="advice-title">装 Admin 依赖</div>
-        <div class="advice-desc">pnpm install 修复 antd 模块解析问题</div>
+        <div class="advice-title">功能补全</div>
+        <div class="advice-desc">收藏功能（事件/闲置/议题）+ 社群入口 + 徽章手动发放通知（6.3.6/6.7.3），PRD 未锁版必须可后置</div>
       </div>
       <div class="advice-card low">
         <div class="advice-priority">⭐ 可延后</div>
         <div class="advice-title">准备发布</div>
-        <div class="advice-desc">E2E 测试全绿 + 验收通过后，确定版本号、写发版说明、提交微信审核</div>
+        <div class="advice-desc">E2E 三轮全绿 + UI 验证通过后，确定版本号、写发版说明、提交微信审核</div>
       </div>
     </div>
 
     <div class="highlight-box" style="margin-top:24px;">
-      <strong>总结：</strong>代码层面已 100% 开发完毕，95 条黄色 + 67 条绿色 + 25 条契约对齐问题全部清零，没有阻塞 Bug。剩余 65 条⚠️为设计选择/ponytail 可接受，均不影响用户使用。后续分两条线并行：<span style="color:var(--info);font-weight:700;">E2E 测试线</span>按 e2e-test-checklist.html 执行二轮测试（57 用例，首轮 5 bug 已修），<span style="color:var(--primary);font-weight:700;">项目开发线</span>跑完 14 项验收。两条线都绿了就可以推送到远程 + 准备发布。
+      <strong>总结：</strong>代码层面 100% 开发完毕，UI 晨光暖色全站改造完成（131 文件 +4546/-523 行），E2E 二轮测试 0 bug，18 项跳过项 seed 数据已补齐。当前在 <code>codex/ui-morning-warm-handrawn</code> 分支，待微信开发者工具预览验证 + E2E 三轮测试通过后合并回 main。发布前需删除临时登录框。剩余 65 条⚠️设计选择均不影响用户使用。
     </div>
   </div>
 </div>
 
 <div class="footer">
   <div class="container">
-    <p>小区帮榜棒 · 开发进展汇报 · 生成于 2026-07-07</p>
-    <p style="margin-top:4px;">HEAD: 18ce73b · 161 commits · 9 迁移 · 49 表 · 33 页面 · 237 测试 · 🟡 0 · 🟢 0 · E2E 测试单二轮模式</p>
+    <p>小区帮榜棒 · 开发进展汇报 · 生成于 2026-07-12</p>
+    <p style="margin-top:4px;">HEAD: 7c431f9 · 172 commits · 9 迁移 · 49 表 · 33 页面 · 237 测试 · E2E 221/244 通过 · UI 晨光暖色改造完成</p>
   </div>
 </div>
 

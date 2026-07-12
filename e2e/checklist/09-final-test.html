@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>傻瓜式最终测试 - 小区帮榜棒</title>
+<style>
+  :root {
+    --primary: #5B9E6F; --primary-light: #E8F5ED; --accent: #E89B6C;
+    --danger: #E74C3C; --warning: #F39C12; --success: #27AE60; --info: #3498DB;
+    --bg: #FAFBF7; --card-bg: #FFFFFF; --text: #2C3E50;
+    --text-secondary: #7F8C8D; --border: #E5E7EB; --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06); --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+  }
+  .hero {
+    background: linear-gradient(135deg, #E89B6C 0%, #D9854A 100%);
+    color: white; padding: 44px 0 36px; text-align: center;
+  }
+  .hero a { color: white; }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; text-decoration: none; }
+  .hero h1 { font-size: 30px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.85; }
+  .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* 顶部统计 */
+  .metrics-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 20px 0 8px; }
+  .metric-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 12px; text-align: center; }
+  .metric-value { font-size: 28px; font-weight: 700; }
+  .metric-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .metric-card.green .metric-value { color: var(--success); }
+  .metric-card.red .metric-value { color: var(--danger); }
+  .metric-card.orange .metric-value { color: var(--warning); }
+  .metric-card.gray .metric-value { color: var(--text-secondary); }
+
+  .progress-bar-container { background: var(--border); border-radius: 20px; height: 22px; overflow: hidden; margin: 12px 0 4px; }
+  .progress-bar-fill { height: 100%; border-radius: 20px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 12px; font-weight: 700; color: white; transition: width 0.4s ease; min-width: 36px; }
+
+  /* 全局操作 */
+  .global-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; justify-content: center; }
+  .btn { padding: 9px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-reset { background: var(--card-bg); color: var(--danger); border: 1px solid var(--danger); }
+  .btn-reset:hover { background: var(--danger); color: white; }
+
+  /* 准备工作区 */
+  .prep-box {
+    background: linear-gradient(135deg,#FFF8EE,#FFF3D6);
+    border-radius: var(--radius); padding: 20px 24px; margin: 20px 0;
+    border-left: 4px solid var(--accent);
+  }
+  .prep-box h3 { font-size: 16px; margin-bottom: 12px; }
+  .prep-box ol { padding-left: 20px; }
+  .prep-box li { font-size: 13px; margin: 6px 0; }
+  .prep-box code { background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .prep-box .account-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  .prep-box .account-table th { background: rgba(232,155,108,0.15); padding: 8px 10px; text-align: left; font-weight: 600; }
+  .prep-box .account-table td { padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .prep-box .account-table code { font-size: 12px; }
+
+  /* 模块标题 */
+  .module-section {
+    background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow);
+    margin-bottom: 16px; overflow: hidden;
+  }
+  .module-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px 20px; cursor: pointer; user-select: none;
+    background: var(--primary-light); transition: background 0.2s;
+  }
+  .module-header:hover { background: #DCEEE2; }
+  .module-num { font-size: 20px; }
+  .module-title { font-size: 17px; font-weight: 700; flex: 1; }
+  .module-stat { font-size: 12px; color: var(--text-secondary); flex-shrink: 0; }
+  .module-stat .pass { color: var(--success); font-weight: 700; }
+  .module-stat .fail { color: var(--danger); font-weight: 700; }
+  .module-stat .pending { color: var(--text-secondary); font-weight: 700; }
+  .module-toggle { font-size: 13px; color: var(--text-secondary); transition: transform 0.2s; flex-shrink: 0; }
+  .module-header.collapsed .module-toggle { transform: rotate(-90deg); }
+  .module-body { padding: 0; }
+  .module-body.collapsed { display: none; }
+
+  /* 测试用例 */
+  .case-card { border-bottom: 1px solid var(--border); }
+  .case-card:last-child { border-bottom: none; }
+  .case-header {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 14px 20px; cursor: pointer; user-select: none; transition: background 0.2s;
+  }
+  .case-header:hover { background: #FBFCF9; }
+  .case-id { font-weight: 700; color: var(--primary); font-size: 14px; flex-shrink: 0; min-width: 48px; }
+  .case-title { font-size: 15px; font-weight: 600; flex: 1; }
+  .case-stat { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+  .case-stat.pending { background: var(--border); color: var(--text-secondary); }
+  .case-stat.pass { background: #E8F5ED; color: var(--success); }
+  .case-stat.fail { background: #FDECEC; color: var(--danger); }
+  .case-stat.skip { background: #FEF3E0; color: var(--warning); }
+  .case-toggle { font-size: 12px; color: var(--text-secondary); transition: transform 0.2s; flex-shrink: 0; }
+  .case-header.collapsed .case-toggle { transform: rotate(-90deg); }
+  .case-body { padding: 0 20px 16px; display: block; }
+  .case-body.collapsed { display: none; }
+
+  /* 步骤 */
+  .steps-title { font-size: 13px; font-weight: 700; color: var(--text); margin: 12px 0 8px; }
+  .steps { counter-reset: step; padding-left: 0; list-style: none; }
+  .steps li {
+    counter-increment: step; position: relative; padding-left: 32px;
+    font-size: 13px; margin: 6px 0; line-height: 1.7;
+  }
+  .steps li::before {
+    content: counter(step); position: absolute; left: 0; top: 0;
+    width: 22px; height: 22px; background: var(--primary); color: white;
+    border-radius: 50%; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps li code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  .steps li .tip { color: var(--info); font-size: 12px; }
+  .steps li .warn { color: var(--warning); font-size: 12px; font-weight: 600; }
+
+  .expected-box {
+    background: #F0F8F4; border-left: 3px solid var(--success);
+    border-radius: 6px; padding: 10px 14px; margin: 10px 0;
+    font-size: 13px;
+  }
+  .expected-box strong { color: var(--success); }
+
+  /* 检查点 */
+  .checkpoint {
+    display: flex; align-items: flex-start; gap: 10px; padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .checkpoint:last-child { border-bottom: none; }
+  .cp-id { font-weight: 700; color: var(--primary); font-size: 12px; flex-shrink: 0; min-width: 48px; }
+  .cp-desc { flex: 1; font-size: 13px; }
+  .cp-desc .detail { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .cp-actions { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+  .cp-btn {
+    padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--card-bg); cursor: pointer; font-size: 12px; font-weight: 600;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .cp-btn:hover { border-color: var(--text-secondary); }
+  .cp-btn.pass.active { background: var(--success); color: white; border-color: var(--success); }
+  .cp-btn.fail.active { background: var(--danger); color: white; border-color: var(--danger); }
+  .cp-btn.skip.active { background: var(--warning); color: white; border-color: var(--warning); }
+  .cp-btn.reset { color: var(--text-secondary); }
+  .cp-btn.reset:hover { color: var(--danger); border-color: var(--danger); }
+  .cp-bug {
+    margin-top: 6px; width: 100%; min-height: 36px; padding: 6px 8px;
+    border: 1px dashed var(--danger); border-radius: 6px; font-size: 12px;
+    font-family: inherit; resize: vertical; color: var(--text); background: #FFF9F9;
+  }
+  .cp-bug.hidden { display: none; }
+  .cp-bug:focus { outline: none; border-color: var(--danger); border-style: solid; }
+
+  /* 导出 */
+  .export-area { margin-top: 24px; }
+  #export-output {
+    background: #1E293B; color: #E2E8F0; padding: 18px; border-radius: var(--radius);
+    font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word; max-height: 520px; overflow: auto;
+  }
+  #export-output:not(.visible) { display: none; }
+
+  .footer { text-align: center; padding: 32px 0; color: var(--text-secondary); font-size: 13px; border-top: 1px solid var(--border); margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <a class="back-link" href="index.html">← 索引页</a>
+  <h1>🧪 傻瓜式最终测试</h1>
+  <div class="tagline">手把手教你从头到尾测一遍 · 每步都有详细操作和预期结果</div>
+  <div class="meta">2026-07-12 · HEAD: 7c431f9 · UI 晨光暖色改造完成后最终验证</div>
+</div>
+
+<div class="container">
+
+  <!-- 统计 -->
+  <div class="metrics-grid">
+    <div class="metric-card green"><div class="metric-value" id="stat-pass">0</div><div class="metric-label">✅ 通过</div></div>
+    <div class="metric-card red"><div class="metric-value" id="stat-fail">0</div><div class="metric-label">❌ Bug</div></div>
+    <div class="metric-card orange"><div class="metric-value" id="stat-skip">0</div><div class="metric-label">⏸ 跳过</div></div>
+    <div class="metric-card gray"><div class="metric-value" id="stat-pending">0</div><div class="metric-label">⏳ 待测</div></div>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-fill" style="width:0%; background: var(--primary);">0%</div></div>
+  <div class="global-actions">
+    <button class="btn btn-reset" onclick="resetAll()">↺ 重置全部</button>
+  </div>
+
+  <!-- 准备工作 -->
+  <div class="prep-box">
+    <h3>🚀 测试前准备（5 分钟）</h3>
+    <ol>
+      <li>启动后端：<code>cd apps/api && pnpm run build && node --enable-source-maps dist/src/main</code>，确认 <code>http://127.0.0.1:3000/api/v1/health</code> 返回 <code>{"status":"ok"}</code></li>
+      <li>启动 Admin：<code>cd apps/admin && pnpm dev</code>，打开 <code>http://localhost:3001</code></li>
+      <li>编译小程序：<code>pnpm --filter miniapp dev:weapp</code>，然后用微信开发者工具打开 <code>apps/miniapp</code></li>
+      <li>确认数据库 seed 数据：<code>cd apps/api && npx tsx prisma/seed-e2e-supplement.ts</code>（幂等，可重复跑）</li>
+    </ol>
+    <h3>📋 测试账号</h3>
+    <table class="account-table">
+      <thead><tr><th>登录方式</th><th>账号/code</th><th>身份</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td>小程序</td><td><code>test_zhangsan</code></td><td>邻居755446 · 阳光花园 verified</td><td>主要测试账号（已认证）</td></tr>
+        <tr><td>小程序</td><td><code>test_lisi</code></td><td>邻居770268 · 阳光花园 verified</td><td>辅助账号（已认证，帮忙/买卖）</td></tr>
+        <tr><td>Admin</td><td><code>zhangsan_admin</code> / <code>admin123</code></td><td>platform_admin</td><td>平台管理员</td></tr>
+        <tr><td>Admin</td><td><code>committee_admin</code> / <code>admin123</code></td><td>committee_admin · 阳光花园</td><td>业委会管理员</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px; color:var(--text-secondary); margin-top:8px;">
+      💡 小程序登录方法：打开 login 页，在临时 code 输入框输入 <code>test_zhangsan</code> 或 <code>test_lisi</code>，点登录。
+    </p>
+  </div>
+
+  <!-- ==================== 模块 1: UI 晨光暖色改造验证 ==================== -->
+  <div class="module-section">
+    <div class="module-header" onclick="toggleModule(this)">
+      <span class="module-num">🎨</span>
+      <span class="module-title">模块 1：UI 晨光暖色改造验证</span>
+      <span class="module-stat" id="mod-stat-1"><span class="pass">0</span>/<span class="pending">0</span></span>
+      <span class="module-toggle">▼</span>
+    </div>
+    <div class="module-body">
+
+      <!-- 1.1 色彩主题 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">1.1</span>
+          <span class="case-title">色彩主题 - 晨光暖色系</span>
+          <span class="case-stat pending" id="stat-1-1">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>登录 <code>test_zhangsan</code>，进入首页（小区事 plaza）</li>
+            <li>观察整体色调：背景应为奶油色（<code>#FFF8EE</code>），非纯白</li>
+            <li>观察页面是否有极淡的纸纹质感（SVG noise，opacity 0.025）</li>
+            <li>切换到「邻里帮」tab，观察主色调为蜜桃橙（<code>#E89B6C</code>），非旧的草木绿</li>
+            <li>切换到「光荣榜」tab，观察 header 区域为蜜桃橙渐变</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>全站色彩为晨光暖色系（奶油底 + 蜜桃橙强调），不再是草木绿。页面有极淡纸纹质感但不影响阅读。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">1.1.1</span>
+            <span class="cp-desc">页面背景为奶油色（#FFF8EE），非纯白 <span class="detail">所有 tab 页面统一</span></span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('1-1-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('1-1-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('1-1-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">1.1.2</span>
+            <span class="cp-desc">纸纹背景可见且不影响性能 <span class="detail">滚动流畅，无明显卡顿</span></span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('1-1-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('1-1-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('1-1-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">1.1.3</span>
+            <span class="cp-desc">光荣榜 header 为蜜桃橙渐变 <span class="detail">#E89B6C → #D9854A</span></span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('1-1-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('1-1-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('1-1-3','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="1-1" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 1.2 Icon 组件 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">1.2</span>
+          <span class="case-title">Icon 组件 - SVG 图标渲染</span>
+          <span class="case-stat pending" id="stat-1-2">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>在首页（小区事）观察宫格入口图标 - 应为手绘风格 SVG 图标，非 emoji</li>
+            <li>进入「邻里帮」，观察事件卡片上的类型图标（求助/公益/寻物等）</li>
+            <li>进入「我的」页，观察各功能入口图标</li>
+            <li>进入事件详情页，观察操作栏图标（点赞/评论/分享等）</li>
+            <li>确认所有图标清晰可见、无裂图、大小一致</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>全站 emoji 已替换为 SVG Icon 组件，图标清晰、风格统一、无裂图。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">1.2.1</span>
+            <span class="cp-desc">首页宫格图标为 SVG，非 emoji <span class="detail">9 个入口图标全部渲染正常</span></span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('1-2-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('1-2-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('1-2-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">1.2.2</span>
+            <span class="cp-desc">事件卡片类型图标渲染正常 <span class="detail">求助/公益/寻物/反馈/讨论 5 种</span></span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('1-2-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('1-2-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('1-2-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">1.2.3</span>
+            <span class="cp-desc">「我的」页功能入口图标渲染正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('1-2-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('1-2-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('1-2-3','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="1-2" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 1.3 tabBar -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">1.3</span>
+          <span class="case-title">tabBar - 重绘 PNG 图标</span>
+          <span class="case-stat pending" id="stat-1-3">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>观察底部 tabBar 的 4 个 tab：小区事 / 邻里帮 / 光荣榜 / 我的</li>
+            <li>确认每个 tab 有默认态和选中态两张图标</li>
+            <li>点击各 tab，观察图标切换是否正常</li>
+            <li>确认 tabBar 背景色为奶油色（适配晨光暖色主题）</li>
+            <li>确认图标清晰不模糊</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>tabBar 8 张 PNG（4 tab × 2 态）全部重绘，背景色适配，图标清晰。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">1.3.1</span>
+            <span class="cp-desc">tabBar 4 个 tab 图标全部渲染正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('1-3-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('1-3-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('1-3-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">1.3.2</span>
+            <span class="cp-desc">tabBar 背景色为奶油色 <span class="detail">与页面背景协调</span></span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('1-3-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('1-3-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('1-3-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="1-3" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 1.4 SCSS 微调 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">1.4</span>
+          <span class="case-title">SCSS 微调效果 - 宫格/社区条/空状态</span>
+          <span class="case-stat pending" id="stat-1-4">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>首页宫格区域：应有奶油色底 + 描边 + 角落装饰</li>
+            <li>plaza 社区条（顶部小区名称区域）：奶油色底</li>
+            <li>光荣榜 header：蜜桃橙渐变</li>
+            <li>找一个空状态页面（如没有通知时的通知页）：空状态图标应放大显示</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>各处 SCSS 微调生效，视觉层次分明，暖色系协调。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">1.4.1</span>
+            <span class="cp-desc">首页宫格奶油色底+描边+角落装饰正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('1-4-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('1-4-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('1-4-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">1.4.2</span>
+            <span class="cp-desc">空状态图标放大显示正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('1-4-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('1-4-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('1-4-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="1-4" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 模块 2: 认证与小区 ==================== -->
+  <div class="module-section">
+    <div class="module-header" onclick="toggleModule(this)">
+      <span class="module-num">🔐</span>
+      <span class="module-title">模块 2：认证与小区</span>
+      <span class="module-stat" id="mod-stat-2"><span class="pass">0</span>/<span class="pending">0</span></span>
+      <span class="module-toggle">▼</span>
+    </div>
+    <div class="module-body">
+
+      <!-- 2.1 登录 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">2.1</span>
+          <span class="case-title">微信登录流程</span>
+          <span class="case-stat pending" id="stat-2-1">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>清除小程序缓存（开发者工具 → 清缓存 → 全部清除）</li>
+            <li>重新打开小程序，应自动跳转到 login 页</li>
+            <li>在临时 code 输入框输入 <code>test_zhangsan</code>，点登录</li>
+            <li>确认登录成功，跳转到首页（小区事 plaza）</li>
+            <li>切换到「我的」tab，确认显示昵称「邻居755446」、已认证状态</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>登录成功，用户信息正确，已认证标识显示。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">2.1.1</span>
+            <span class="cp-desc">登录跳转正常，首页加载成功</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('2-1-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('2-1-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('2-1-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">2.1.2</span>
+            <span class="cp-desc">「我的」页显示正确昵称和认证状态</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('2-1-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('2-1-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('2-1-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="2-1" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 2.2 小区切换 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">2.2</span>
+          <span class="case-title">小区切换与隔离</span>
+          <span class="case-stat pending" id="stat-2-2">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>在首页点击顶部小区名称，进入小区选择页</li>
+            <li>确认显示「阳光花园」为当前小区</li>
+            <li>确认有「碧水湾」等其他小区可选</li>
+            <li>点「申请新小区」，进入申请页，填写信息并提交</li>
+            <li>确认提交成功，跳转到我的申请页</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>小区切换正常，数据按小区隔离，申请小区流程闭环。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">2.2.1</span>
+            <span class="cp-desc">小区选择页显示当前小区和可选列表</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('2-2-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('2-2-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('2-2-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">2.2.2</span>
+            <span class="cp-desc">申请新小区提交成功</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('2-2-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('2-2-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('2-2-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="2-2" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 2.3 Admin 审批小区申请 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">2.3</span>
+          <span class="case-title">Admin 审批小区申请（pending 数据已补齐）</span>
+          <span class="case-stat pending" id="stat-2-3">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>浏览器打开 <code>http://localhost:3001</code>，用 <code>zhangsan_admin</code> / <code>admin123</code> 登录</li>
+            <li>进入「小区管理」→「申请审批」</li>
+            <li>确认有一条「翠湖天地」的 pending 申请 <span class="tip">（seed-e2e-supplement 补齐的数据）</span></li>
+            <li>点击「通过」，确认状态变为 approved</li>
+            <li>回到小程序，重新打开小区选择页，确认「翠湖天地」出现在列表中</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>Admin 审批闭环：pending 申请 → 审批通过 → 小程序可见新小区。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">2.3.1</span>
+            <span class="cp-desc">Admin 看到翠湖天地 pending 申请</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('2-3-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('2-3-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('2-3-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">2.3.2</span>
+            <span class="cp-desc">审批通过后小程序可见新小区</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('2-3-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('2-3-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('2-3-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="2-3" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 模块 3: 事件互助 ==================== -->
+  <div class="module-section">
+    <div class="module-header" onclick="toggleModule(this)">
+      <span class="module-num">🤝</span>
+      <span class="module-title">模块 3：事件互助</span>
+      <span class="module-stat" id="mod-stat-3"><span class="pass">0</span>/<span class="pending">0</span></span>
+      <span class="module-toggle">▼</span>
+    </div>
+    <div class="module-body">
+
+      <!-- 3.1 发布求助 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">3.1</span>
+          <span class="case-title">发布求助事件（完整闭环）</span>
+          <span class="case-stat pending" id="stat-3-1">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>用 <code>test_zhangsan</code> 登录，进入「邻里帮」tab</li>
+            <li>点击底部「发布」按钮，选择「求助」类型</li>
+            <li>填写标题（如「测试求助：帮忙搬东西」）、描述、地点</li>
+            <li>设置报酬（如 50 元），点提交</li>
+            <li>确认提交成功，自动跳转到事件详情页</li>
+            <li>确认详情页显示标题、描述、报酬、状态为「待响应」</li>
+            <li>返回列表页，确认新事件出现在列表顶部</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>求助事件发布成功，列表和详情页数据一致。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">3.1.1</span>
+            <span class="cp-desc">发布表单填写正常，提交成功</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('3-1-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('3-1-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('3-1-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">3.1.2</span>
+            <span class="cp-desc">详情页数据正确，状态为待响应</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('3-1-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('3-1-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('3-1-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">3.1.3</span>
+            <span class="cp-desc">列表页新事件出现在顶部</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('3-1-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('3-1-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('3-1-3','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="3-1" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 3.2 响应求助 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">3.2</span>
+          <span class="case-title">响应求助 → 选帮手 → 确认完成 → 发花（完整闭环）</span>
+          <span class="case-stat pending" id="stat-3-2">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>切换到 <code>test_lisi</code> 登录</li>
+            <li>进入「邻里帮」，找到 3.1 中 <code>test_zhangsan</code> 发布的求助</li>
+            <li>点击进入详情，点「我来帮忙」按钮响应</li>
+            <li>确认响应成功，状态变为「进行中」</li>
+            <li>切回 <code>test_zhangsan</code>，进入该事件详情</li>
+            <li>确认看到李四的响应，点「选为帮手」</li>
+            <li>确认状态变为「进行中」，帮手信息显示</li>
+            <li>双方各自点「确认完成」，状态变为「已完成」</li>
+            <li>确认帮手（李四）获得小红花 <span class="tip">（在光荣榜查看）</span></li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>互助完整闭环：发布 → 响应 → 选帮手 → 双方确认 → 发花。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">3.2.1</span>
+            <span class="cp-desc">李四响应成功，状态更新</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('3-2-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('3-2-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('3-2-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">3.2.2</span>
+            <span class="cp-desc">张三选帮手成功，状态变为进行中</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('3-2-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('3-2-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('3-2-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">3.2.3</span>
+            <span class="cp-desc">双方确认完成，李四获得小红花</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('3-2-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('3-2-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('3-2-3','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="3-2" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 3.3 公益活动发花 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">3.3</span>
+          <span class="case-title">公益活动发花（completed 数据已补齐）</span>
+          <span class="case-stat pending" id="stat-3-3">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>用 <code>test_zhangsan</code> 登录，进入「邻里帮」</li>
+            <li>找到类型为「公益」的已完成事件 <span class="tip">（seed 补齐的 completed 公益活动，3 个参与者）</span></li>
+            <li>进入详情页，确认状态为「已完成」</li>
+            <li>确认可以看到参与者列表（3 人）</li>
+            <li>逐个点「发花」按钮，给每个参与者发小红花</li>
+            <li>确认发花成功，光荣榜中参与者的小红花数增加</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>公益活动 completed 状态可发花，3 个参与者各获小红花。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">3.3.1</span>
+            <span class="cp-desc">公益活动 completed 状态可见参与者列表</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('3-3-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('3-3-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('3-3-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">3.3.2</span>
+            <span class="cp-desc">逐个发花成功，光荣榜数据更新</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('3-3-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('3-3-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('3-3-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="3-3" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 模块 4: 闲置流转 ==================== -->
+  <div class="module-section">
+    <div class="module-header" onclick="toggleModule(this)">
+      <span class="module-num">♻️</span>
+      <span class="module-title">模块 4：闲置流转</span>
+      <span class="module-stat" id="mod-stat-4"><span class="pass">0</span>/<span class="pending">0</span></span>
+      <span class="module-toggle">▼</span>
+    </div>
+    <div class="module-body">
+
+      <!-- 4.1 闲置列表与分页 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">4.1</span>
+          <span class="case-title">闲置列表与分页加载（14 条数据已补齐）</span>
+          <span class="case-stat pending" id="stat-4-1">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>进入「邻里帮」→ 点「闲置」入口或切换到闲置列表</li>
+            <li>确认列表显示闲置商品（应有 14 条以上）</li>
+            <li>向下滚动，确认触发分页加载（默认每页 10 条）</li>
+            <li>确认第二页数据加载正常，无重复</li>
+            <li>确认每条闲置显示标题、价格、状态标签正常</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>闲置列表 14 条，分页加载正常，第二页无重复。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">4.1.1</span>
+            <span class="cp-desc">列表显示 14 条闲置商品</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('4-1-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('4-1-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('4-1-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">4.1.2</span>
+            <span class="cp-desc">分页加载正常，第二页无重复</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('4-1-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('4-1-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('4-1-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="4-1" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 4.2 闲置交易闭环 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">4.2</span>
+          <span class="case-title">闲置交易完整闭环（发布→意向→选买家→已售→互评）</span>
+          <span class="case-stat pending" id="stat-4-2">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>用 <code>test_zhangsan</code> 发布一个闲置商品（如「测试闲置：蓝牙音箱」50 元）</li>
+            <li>切换到 <code>test_lisi</code>，进入该闲置详情</li>
+            <li>点「我想要」按钮，提交购买意向</li>
+            <li>切回 <code>test_zhangsan</code>，进入该闲置详情</li>
+            <li>确认看到李四的意向，点「选为买家」</li>
+            <li>点「标记已售」，确认状态变为「已售」</li>
+            <li>双方互评（张三评李四、李四评张三）</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>闲置交易完整闭环：发布 → 意向 → 选买家 → 已售 → 互评。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">4.2.1</span>
+            <span class="cp-desc">李四提交「我想要」意向成功</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('4-2-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('4-2-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('4-2-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">4.2.2</span>
+            <span class="cp-desc">张三选买家 + 标记已售成功</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('4-2-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('4-2-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('4-2-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">4.2.3</span>
+            <span class="cp-desc">双方互评成功</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('4-2-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('4-2-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('4-2-3','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="4-2" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 模块 5: 议事讨论 ==================== -->
+  <div class="module-section">
+    <div class="module-header" onclick="toggleModule(this)">
+      <span class="module-num">📋</span>
+      <span class="module-title">模块 5：议事讨论</span>
+      <span class="module-stat" id="mod-stat-5"><span class="pass">0</span>/<span class="pending">0</span></span>
+      <span class="module-toggle">▼</span>
+    </div>
+    <div class="module-body">
+
+      <!-- 5.1 议题列表与分页 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">5.1</span>
+          <span class="case-title">议题列表与分页加载（14 条数据已补齐）</span>
+          <span class="case-stat pending" id="stat-5-1">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>进入「小区事」tab，找到议事榜入口</li>
+            <li>确认议题列表显示（应有 14 条以上）</li>
+            <li>向下滚动，确认分页加载正常</li>
+            <li>确认每条议题显示标题、赞踩数、评论数正常</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>议题列表 14 条，分页加载正常。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">5.1.1</span>
+            <span class="cp-desc">议题列表显示 14 条</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('5-1-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('5-1-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('5-1-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">5.1.2</span>
+            <span class="cp-desc">分页加载正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('5-1-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('5-1-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('5-1-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="5-1" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 5.2 议题评分 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">5.2</span>
+          <span class="case-title">完结议题评分（closed 数据已补齐）</span>
+          <span class="case-stat pending" id="stat-5-2">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>进入议事榜，找到状态为「已完结」的议题 <span class="tip">（seed 补齐的 closed 议题：「小区垃圾分类方案讨论」）</span></li>
+            <li>进入详情页，确认显示「已完结」状态标签</li>
+            <li>确认有评分入口（1-5 星）</li>
+            <li>提交评分（如 4 星），确认评分成功</li>
+            <li>再次提交评分，确认防重复评分提示</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>完结议题可评分、防重复评分。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">5.2.1</span>
+            <span class="cp-desc">完结议题评分入口可见</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('5-2-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('5-2-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('5-2-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">5.2.2</span>
+            <span class="cp-desc">提交评分成功</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('5-2-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('5-2-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('5-2-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">5.2.3</span>
+            <span class="cp-desc">防重复评分生效</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('5-2-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('5-2-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('5-2-3','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="5-2" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 5.3 议题合并建议 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">5.3</span>
+          <span class="case-title">议题合并建议（数据已补齐）</span>
+          <span class="case-stat pending" id="stat-5-3">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>浏览器打开 Admin <code>http://localhost:3001</code>，用 <code>zhangsan_admin</code> 登录</li>
+            <li>进入「议事管理」→「合并建议」</li>
+            <li>确认有 1 条 pending 合并建议 <span class="tip">（seed 补齐：2 个相似快递柜议题）</span></li>
+            <li>点击「通过」或「拒绝」，确认状态更新</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>Admin 可看到合并建议，审批操作正常。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">5.3.1</span>
+            <span class="cp-desc">Admin 看到合并建议列表</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('5-3-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('5-3-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('5-3-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">5.3.2</span>
+            <span class="cp-desc">审批操作成功（通过/拒绝）</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('5-3-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('5-3-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('5-3-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="5-3" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 模块 6: 业委会 ==================== -->
+  <div class="module-section">
+    <div class="module-header" onclick="toggleModule(this)">
+      <span class="module-num">🏛️</span>
+      <span class="module-title">模块 6：业委会</span>
+      <span class="module-stat" id="mod-stat-6"><span class="pass">0</span>/<span class="pending">0</span></span>
+      <span class="module-toggle">▼</span>
+    </div>
+    <div class="module-body">
+
+      <!-- 6.1 公告图片轮播 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">6.1</span>
+          <span class="case-title">公告图片轮播（带图公告已补齐）</span>
+          <span class="case-stat pending" id="stat-6-1">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>进入「小区事」tab，找到业委会公告入口</li>
+            <li>找到标题为「小区绿化改造工程进展（附图）」的公告 <span class="tip">（seed 补齐的带 3 张图公告）</span></li>
+            <li>进入详情页，确认图片轮播组件显示</li>
+            <li>左右滑动图片，确认轮播切换正常</li>
+            <li>点击图片可放大预览（如支持）</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>带图公告图片轮播正常，可滑动切换。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">6.1.1</span>
+            <span class="cp-desc">带图公告显示图片轮播组件</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('6-1-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('6-1-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('6-1-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">6.1.2</span>
+            <span class="cp-desc">图片轮播切换正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('6-1-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('6-1-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('6-1-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="6-1" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 6.2 业委会成员 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">6.2</span>
+          <span class="case-title">业委会成员与身份认领</span>
+          <span class="case-stat pending" id="stat-6-2">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>进入业委会页面，确认显示成员列表（主任/副主任/委员）</li>
+            <li>确认有「认领」按钮的未认领成员</li>
+            <li>点击认领，确认认领流程正常</li>
+            <li>确认已认领成员显示认领者信息</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>业委会成员列表正常，身份认领流程闭环。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">6.2.1</span>
+            <span class="cp-desc">成员列表显示正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('6-2-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('6-2-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('6-2-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">6.2.2</span>
+            <span class="cp-desc">身份认领流程正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('6-2-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('6-2-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('6-2-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="6-2" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 模块 7: 激励体系 ==================== -->
+  <div class="module-section">
+    <div class="module-header" onclick="toggleModule(this)">
+      <span class="module-num">🏆</span>
+      <span class="module-title">模块 7：激励体系（排行+勋章）</span>
+      <span class="module-stat" id="mod-stat-7"><span class="pass">0</span>/<span class="pending">0</span></span>
+      <span class="module-toggle">▼</span>
+    </div>
+    <div class="module-body">
+
+      <!-- 7.1 光荣榜 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">7.1</span>
+          <span class="case-title">光荣榜与未上榜用户处理</span>
+          <span class="case-stat pending" id="stat-7-1">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>切换到「光荣榜」tab</li>
+            <li>确认蜜桃橙渐变 header 显示正常</li>
+            <li>确认排行榜列表显示（总榜/月榜切换）</li>
+            <li>确认上榜用户显示昵称、小红花数、互助数</li>
+            <li>切换到 <code>test_lisi</code> 登录（如果李四不在榜单），确认未上榜用户的展示</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>光荣榜显示正常，未上榜用户有合理展示。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">7.1.1</span>
+            <span class="cp-desc">光荣榜 header 蜜桃橙渐变正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('7-1-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('7-1-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('7-1-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">7.1.2</span>
+            <span class="cp-desc">排行榜列表显示正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('7-1-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('7-1-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('7-1-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">7.1.3</span>
+            <span class="cp-desc">未上榜用户展示正常 <span class="detail">test_lisi 如不在榜单</span></span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('7-1-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('7-1-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('7-1-3','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="7-1" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 7.2 勋章 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">7.2</span>
+          <span class="case-title">勋章展示</span>
+          <span class="case-stat pending" id="stat-7-2">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>进入「我的」页，找到「我的勋章」入口</li>
+            <li>点击进入勋章页</li>
+            <li>确认勋章列表显示（已获得的勋章高亮）</li>
+            <li>确认未获得的勋章灰显</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>勋章页展示正常，已获/未获区分明确。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">7.2.1</span>
+            <span class="cp-desc">勋章列表显示正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('7-2-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('7-2-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('7-2-1','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="7-2" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 模块 8: Admin 后台 ==================== -->
+  <div class="module-section">
+    <div class="module-header" onclick="toggleModule(this)">
+      <span class="module-num">🛠️</span>
+      <span class="module-title">模块 8：Admin 后台</span>
+      <span class="module-stat" id="mod-stat-8"><span class="pass">0</span>/<span class="pending">0</span></span>
+      <span class="module-toggle">▼</span>
+    </div>
+    <div class="module-body">
+
+      <!-- 8.1 committee_admin 权限 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">8.1</span>
+          <span class="case-title">committee_admin 账号权限（数据已补齐）</span>
+          <span class="case-stat pending" id="stat-8-1">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>退出 Admin，用 <code>committee_admin</code> / <code>admin123</code> 登录</li>
+            <li>确认菜单只显示业委会管理员可见的功能（比 platform_admin 少）</li>
+            <li>确认无法访问 platform_admin 专属页面（如系统设置）</li>
+            <li>确认可以管理本小区（阳光花园）的公告、议题等</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>committee_admin 权限正确隔离，只能管理本小区。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">8.1.1</span>
+            <span class="cp-desc">committee_admin 登录成功，菜单正确</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('8-1-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('8-1-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('8-1-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">8.1.2</span>
+            <span class="cp-desc">权限隔离正常，无法访问 platform 专属页</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('8-1-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('8-1-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('8-1-2','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="8-1" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <!-- 8.2 内容审核 -->
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">8.2</span>
+          <span class="case-title">内容审核流程（manual_review 数据已补齐）</span>
+          <span class="case-stat pending" id="stat-8-2">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>用 <code>zhangsan_admin</code> 登录 Admin</li>
+            <li>进入「内容审核」页面</li>
+            <li>确认有 3 条 manual_review 内容 <span class="tip">（seed 补齐：事件/闲置/议题各 1 条）</span></li>
+            <li>使用类型筛选（事件/闲置/议题），确认筛选正常</li>
+            <li>对一条内容点「通过」，确认状态更新</li>
+            <li>对另一条点「拒绝」，填写拒绝理由，确认状态更新</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>内容审核列表可见 3 条，筛选/通过/拒绝操作正常。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">8.2.1</span>
+            <span class="cp-desc">审核列表显示 3 条 manual_review 内容</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('8-2-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('8-2-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('8-2-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">8.2.2</span>
+            <span class="cp-desc">类型+状态筛选正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('8-2-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('8-2-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('8-2-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">8.2.3</span>
+            <span class="cp-desc">通过审核操作成功</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('8-2-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('8-2-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('8-2-3','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">8.2.4</span>
+            <span class="cp-desc">拒绝审核操作成功</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('8-2-4','pass')">✅</button><button class="cp-btn fail" onclick="setCp('8-2-4','fail')">❌</button><button class="cp-btn skip" onclick="setCp('8-2-4','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="8-2" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 模块 9: 用户主页发布历史 ==================== -->
+  <div class="module-section">
+    <div class="module-header" onclick="toggleModule(this)">
+      <span class="module-num">👤</span>
+      <span class="module-title">模块 9：用户主页发布历史</span>
+      <span class="module-stat" id="mod-stat-9"><span class="pass">0</span>/<span class="pending">0</span></span>
+      <span class="module-toggle">▼</span>
+    </div>
+    <div class="module-body">
+
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">9.1</span>
+          <span class="case-title">用户主页发布历史 tab（新功能）</span>
+          <span class="case-stat pending" id="stat-9-1">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>用 <code>test_zhangsan</code> 登录，进入「我的」页</li>
+            <li>点击头像或昵称，进入用户主页</li>
+            <li>确认显示个人信息 + 统计 + 徽章区域</li>
+            <li>向下滑动，确认有「发布历史」区域</li>
+            <li>确认 3 个 tab：互助 / 闲置 / 议题</li>
+            <li>切换 tab，确认每个 tab 加载对应的发布历史列表</li>
+            <li>点击一个列表项，确认跳转到对应详情页</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>用户主页有发布历史区域，3 tab 切换正常，列表项可点击跳转。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">9.1.1</span>
+            <span class="cp-desc">发布历史区域显示 3 个 tab</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('9-1-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('9-1-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('9-1-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">9.1.2</span>
+            <span class="cp-desc">tab 切换加载列表正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('9-1-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('9-1-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('9-1-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">9.1.3</span>
+            <span class="cp-desc">点击列表项跳转详情页正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('9-1-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('9-1-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('9-1-3','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="9-1" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 导出 -->
+  <div class="export-area">
+    <div class="global-actions">
+      <button class="btn btn-copy" style="background:var(--primary);color:white;" onclick="exportResults()">📋 导出测试结果</button>
+      <button class="btn btn-copy" style="background:var(--info);color:white;" onclick="copyResults()">📋 复制到剪贴板</button>
+    </div>
+    <div id="export-output" class="visible" style="white-space:pre-wrap;"></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>小区帮榜棒 · 傻瓜式最终测试 · 2026-07-12 · HEAD: 7c431f9</p>
+  <p style="margin-top:4px;">9 模块 · 完整闭环测试 · 数据保存在本地浏览器（localStorage）</p>
+</div>
+
+<script>
+const STORAGE_KEY = 'xbb_final_test_v1';
+let results = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(results)); }
+
+function setCp(id, status) {
+  results[id] = status;
+  save();
+  updateUI();
+}
+
+function toggleModule(el) { el.classList.toggle('collapsed'); el.nextElementSibling.classList.toggle('collapsed'); }
+function toggleCase(el) { el.classList.toggle('collapsed'); el.nextElementSibling.classList.toggle('collapsed'); }
+
+function updateUI() {
+  let pass=0, fail=0, skip=0, pending=0;
+  const allCps = document.querySelectorAll('.checkpoint .cp-id');
+  allCps.forEach(el => {
+    const id = el.textContent.trim();
+    const status = results[id] || 'pending';
+    if (status === 'pass') pass++;
+    else if (status === 'fail') fail++;
+    else if (status === 'skip') skip++;
+    else pending++;
+  });
+  const total = allCps.length;
+  const done = pass + fail + skip;
+  const rate = total > 0 ? Math.round(done / total * 100) : 0;
+
+  document.getElementById('stat-pass').textContent = pass;
+  document.getElementById('stat-fail').textContent = fail;
+  document.getElementById('stat-skip').textContent = skip;
+  document.getElementById('stat-pending').textContent = pending;
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = rate + '%';
+  fill.textContent = rate + '%';
+  fill.style.background = fail > 0 ? 'var(--danger)' : 'var(--success)';
+
+  // 更新每个 case 的统计
+  document.querySelectorAll('.case-card').forEach(card => {
+    const caseId = card.querySelector('.case-id').textContent.trim();
+    const cps = card.querySelectorAll('.checkpoint .cp-id');
+    let cp=0, cf=0, cs=0, cpend=0;
+    cps.forEach(el => {
+      const s = results[el.textContent.trim()] || 'pending';
+      if (s==='pass') cp++; else if (s==='fail') cf++; else if (s==='skip') cs++; else cpend++;
+    });
+    const statEl = document.getElementById('stat-' + caseId);
+    if (statEl) {
+      if (cf > 0) { statEl.className = 'case-stat fail'; statEl.textContent = cf + ' Bug'; }
+      else if (cpend > 0) { statEl.className = 'case-stat pending'; statEl.textContent = cpend + ' 待测'; }
+      else if (cp > 0) { statEl.className = 'case-stat pass'; statEl.textContent = cp + ' 通过'; }
+      else { statEl.className = 'case-stat skip'; statEl.textContent = cs + ' 跳过'; }
+    }
+
+    // 显示/隐藏 bug 输入框
+    const bugArea = card.querySelector('.cp-bug');
+    if (bugArea) {
+      if (cf > 0) bugArea.classList.remove('hidden');
+      else bugArea.classList.add('hidden');
+    }
+  });
+
+  // 更新模块统计
+  for (let i = 1; i <= 9; i++) {
+    const modBody = document.querySelector('#mod-stat-' + i);
+    if (!modBody) continue;
+    const section = modBody.closest('.module-section');
+    const cps = section.querySelectorAll('.checkpoint .cp-id');
+    let mp=0, mpend=0;
+    cps.forEach(el => {
+      const s = results[el.textContent.trim()] || 'pending';
+      if (s==='pass') mp++; else mpend++;
+    });
+    modBody.innerHTML = '<span class="pass">' + mp + '</span>/<span class="pending">' + mpend + '</span>';
+  }
+}
+
+function resetAll() {
+  if (!confirm('确定要重置全部测试结果吗？')) return;
+  results = {};
+  save();
+  document.querySelectorAll('.cp-bug').forEach(el => { el.value = ''; });
+  updateUI();
+}
+
+function exportResults() {
+  const text = generateReport();
+  const output = document.getElementById('export-output');
+  output.textContent = text;
+  output.classList.add('visible');
+}
+
+function copyResults() {
+  const text = generateReport();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = '✅ 已复制';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  });
+}
+
+function generateReport() {
+  let lines = [];
+  lines.push('=== 小区帮榜棒 傻瓜式最终测试结果 ===');
+  lines.push('测试时间: ' + new Date().toLocaleString('zh-CN'));
+  lines.push('HEAD: 7c431f9 · 2026-07-12');
+  lines.push('');
+
+  let pass=0, fail=0, skip=0, pending=0;
+  document.querySelectorAll('.checkpoint .cp-id').forEach(el => {
+    const id = el.textContent.trim();
+    const status = results[id] || 'pending';
+    if (status === 'pass') pass++;
+    else if (status === 'fail') fail++;
+    else if (status === 'skip') skip++;
+    else pending++;
+  });
+
+  lines.push('--- 统计 ---');
+  lines.push('✅ 通过: ' + pass);
+  lines.push('❌ Bug: ' + fail);
+  lines.push('⏸ 跳过: ' + skip);
+  lines.push('⏳ 待测: ' + pending);
+  lines.push('');
+
+  // 按模块输出
+  for (let i = 1; i <= 9; i++) {
+    const modEl = document.querySelector('#mod-stat-' + i);
+    if (!modEl) continue;
+    const section = modEl.closest('.module-section');
+    const modTitle = section.querySelector('.module-title').textContent;
+    lines.push('--- ' + modTitle + ' ---');
+    section.querySelectorAll('.case-card').forEach(card => {
+      const caseId = card.querySelector('.case-id').textContent.trim();
+      const caseTitle = card.querySelector('.case-title').textContent;
+      const statEl = document.getElementById('stat-' + caseId);
+      const statText = statEl ? statEl.textContent : '';
+      lines.push(caseId + ' ' + caseTitle + ' [' + statText + ']');
+      card.querySelectorAll('.checkpoint').forEach(cp => {
+        const cpId = cp.querySelector('.cp-id').textContent.trim();
+        const cpDesc = cp.querySelector('.cp-desc').firstChild.textContent.trim();
+        const status = results[cpId] || 'pending';
+        const icon = status === 'pass' ? '✅' : status === 'fail' ? '❌' : status === 'skip' ? '⏸' : '⏳';
+        lines.push('  ' + icon + ' ' + cpId + ' ' + cpDesc);
+      });
+      const bugArea = card.querySelector('.cp-bug');
+      if (bugArea && bugArea.value.trim()) {
+        lines.push('  🐛 Bug: ' + bugArea.value.trim());
+      }
+    });
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+// 初始化
+updateUI();
+</script>
+
+</body>
+</html>
