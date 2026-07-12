@@ -36,9 +36,17 @@ export class AuthService {
     return { token, user: { ...userDto, openid: user.openid } };
   }
 
-  // ponytail: 临时调试登录，按 userId 直接签 JWT，发布前删除
+  // ponytail: 临时调试登录，支持 code（映射 mock_openid_{code}）或直接 UUID，发布前删除
   async devLogin(userId: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    let user = null;
+    try {
+      user = await this.prisma.user.findUnique({ where: { id: userId } });
+    } catch {
+      // 非 UUID 格式，按 openid 查
+    }
+    if (!user) {
+      user = await this.prisma.user.findUnique({ where: { openid: `mock_openid_${userId}` } });
+    }
     if (!user) throw new UnauthorizedException('用户不存在');
     await this.prisma.user.update({
       where: { id: user.id },
