@@ -108,7 +108,7 @@ export default function Plaza() {
   }, [communityId, topicStatus, refreshTick]);
 
   return (
-    <View className="plaza">
+    <View className="plaza page-bg">
       <ScrollView scrollY className="plaza__scroll">
         {/* 小区标识条：一眼确认「这是我家小区」，点击可切换 */}
         <View

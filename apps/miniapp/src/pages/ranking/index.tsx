@@ -74,7 +74,7 @@ export default function Ranking() {
   }));
 
   return (
-    <View className="ranking">
+    <View className="ranking page-bg">
       <View className="ranking__header">
         <View className="ranking__header-title">
           <Icon name="trophy" size={22} /> <Text>好人榜</Text>
