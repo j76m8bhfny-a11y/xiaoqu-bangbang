@@ -178,7 +178,7 @@
   <a class="back-link" href="index.html">← 索引页</a>
   <h1>🧪 傻瓜式最终测试</h1>
   <div class="tagline">手把手教你从头到尾测一遍 · 每步都有详细操作和预期结果</div>
-  <div class="meta">2026-07-12 · HEAD: 7c431f9 · UI 晨光暖色改造完成后最终验证</div>
+  <div class="meta">2026-07-13 · HEAD: f428ad9 · 图文教程模块 (M21) 完成后最终验证</div>
 </div>
 
 <div class="container">
@@ -1134,6 +1134,186 @@
     </div>
   </div>
 
+  <!-- ==================== 模块 10: 图文教程（新增） ==================== -->
+  <div class="module-section">
+    <div class="module-header" onclick="toggleModule(this)">
+      <span class="module-num">📖</span>
+      <span class="module-title">模块 10：图文教程闭环（M21 新增）</span>
+      <span class="module-stat" id="mod-stat-10"><span class="pass">0</span>/<span class="pending">0</span></span>
+      <span class="module-toggle">▼</span>
+    </div>
+    <div class="module-body">
+
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">10.1</span>
+          <span class="case-title">发布教程 -> Admin 审核 -> 发布成功（完整闭环）</span>
+          <span class="case-stat pending" id="stat-10-1">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>用 <code>test_zhangsan</code> 登录，进入「邻里帮」页</li>
+            <li>点击 outer tab 第 3 项「指南」</li>
+            <li>确认显示指南列表（空列表显示「暂无教程」）</li>
+            <li>点击右下角 FAB「发教程」按钮</li>
+            <li>选择分类（使用指南/维修排障/保养维护/其他）</li>
+            <li>填写标题（≤50字）+ 详细描述（≤2000字）+ 上传图片（≤9张）</li>
+            <li>点击「发布」-> 确认提示「发布成功」</li>
+            <li>切换到 Admin 后台 -> 教程管理 -> 找到刚发布的教程（状态=待审核）</li>
+            <li>点击「详情」查看完整内容 -> 点击「通过」</li>
+            <li>回到小程序 -> 邻里帮 -> 指南 tab -> 确认教程出现在列表</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>教程发布后 status=pending_review，Admin 审核通过后 status=published，列表可见。
+            审核通过触发激励（ContributionRecord + guide_1 勋章 + 通知）。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.1.1</span>
+            <span class="cp-desc">指南 tab 显示在邻里帮 outer tab 第 3 项</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-1-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-1-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-1-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.1.2</span>
+            <span class="cp-desc">创建页分类选择器 4 类可选</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-1-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-1-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-1-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.1.3</span>
+            <span class="cp-desc">标题超 50 字 / 图片超 9 张被拦截</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-1-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-1-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-1-3','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.1.4</span>
+            <span class="cp-desc">发布成功后 status=pending_review（Admin 可见）</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-1-4','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-1-4','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-1-4','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.1.5</span>
+            <span class="cp-desc">Admin 审核通过后教程出现在指南列表</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-1-5','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-1-5','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-1-5','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.1.6</span>
+            <span class="cp-desc">首次审核通过颁发 guide_1 勋章（教程分享者）</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-1-6','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-1-6','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-1-6','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="10-1" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">10.2</span>
+          <span class="case-title">详情页互动：点赞 + 收藏 + 评论</span>
+          <span class="case-stat pending" id="stat-10-2">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>在指南列表点击一个已发布教程，进入详情页</li>
+            <li>确认展示：标题 / 分类标签 / 作者 / 浏览数 / 图片 Swiper / 描述</li>
+            <li>点击底部「点赞」按钮 -> 确认图标变色 + 计数+1</li>
+            <li>再次点击 -> 确认取消点赞 + 计数-1</li>
+            <li>点击「收藏」按钮 -> 确认图标变色 + 计数+1</li>
+            <li>在底部输入框写留言 -> 点击发送 -> 确认评论出现在列表</li>
+            <li>点击某条评论的「回复」-> 确认输入框显示「回复 @昵称」</li>
+            <li>发送回复 -> 确认嵌套展示在父评论下方</li>
+            <li>点击评论的「赞」按钮 -> 确认计数变化</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>点赞/收藏 toggle 正常，评论创建即显示，回复嵌套≤2层，评论点赞正常。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.2.1</span>
+            <span class="cp-desc">详情页展示标题/分类/作者/图片/描述完整</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-2-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-2-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-2-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.2.2</span>
+            <span class="cp-desc">访问详情页 viewCount +1</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-2-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-2-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-2-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.2.3</span>
+            <span class="cp-desc">点赞 toggle 正常（图标变色+计数变化）</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-2-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-2-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-2-3','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.2.4</span>
+            <span class="cp-desc">收藏 toggle 正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-2-4','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-2-4','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-2-4','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.2.5</span>
+            <span class="cp-desc">评论发送成功，列表刷新展示</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-2-5','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-2-5','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-2-5','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.2.6</span>
+            <span class="cp-desc">回复评论嵌套展示正常</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-2-6','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-2-6','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-2-6','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="10-2" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-header" onclick="toggleCase(this)">
+          <span class="case-id">10.3</span>
+          <span class="case-title">编辑/删除教程 + Admin 驳回</span>
+          <span class="case-stat pending" id="stat-10-3">待测</span>
+          <span class="case-toggle">▼</span>
+        </div>
+        <div class="case-body">
+          <div class="steps-title">📝 操作步骤</div>
+          <ol class="steps">
+            <li>用 <code>test_zhangsan</code> 发布一个新教程（pending_review 状态）</li>
+            <li>进入详情页 -> 确认显示「编辑」「删除」按钮</li>
+            <li>点击「编辑」-> 修改标题 -> 保存 -> 确认提示「修改成功」</li>
+            <li>切换到 Admin -> 教程管理 -> 找到该教程 -> 点击「驳回」-> 填写驳回原因</li>
+            <li>回到小程序 -> 进入该教程详情页 -> 确认显示驳回原因</li>
+            <li>确认 rejected 状态的教程可编辑修改</li>
+            <li>再发布一个教程 -> Admin 审核通过 -> 回详情页确认「编辑」按钮消失（published 锁定）</li>
+            <li>点击「删除」-> 确认弹窗 -> 确认删除 -> navigateBack</li>
+          </ol>
+          <div class="expected-box">
+            <strong>预期：</strong>pending_review 可编辑/删除，published 锁定不可编辑，rejected 显示原因且可编辑修改。非作者访问 pending/rejected 教程返回 404。
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.3.1</span>
+            <span class="cp-desc">pending_review 详情页显示编辑/删除按钮</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-3-1','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-3-1','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-3-1','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.3.2</span>
+            <span class="cp-desc">编辑修改提交成功</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-3-2','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-3-2','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-3-2','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.3.3</span>
+            <span class="cp-desc">Admin 驳回后详情页显示驳回原因</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-3-3','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-3-3','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-3-3','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.3.4</span>
+            <span class="cp-desc">published 状态教程编辑按钮消失</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-3-4','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-3-4','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-3-4','skip')">⏸</button></div>
+          </div>
+          <div class="checkpoint">
+            <span class="cp-id">10.3.5</span>
+            <span class="cp-desc">删除教程成功 + navigateBack</span>
+            <div class="cp-actions"><button class="cp-btn pass" onclick="setCp('10-3-5','pass')">✅</button><button class="cp-btn fail" onclick="setCp('10-3-5','fail')">❌</button><button class="cp-btn skip" onclick="setCp('10-3-5','skip')">⏸</button></div>
+          </div>
+          <textarea class="cp-bug hidden" data-cp="10-3" placeholder="发现 bug 请描述..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- 导出 -->
   <div class="export-area">
     <div class="global-actions">
@@ -1146,8 +1326,8 @@
 </div>
 
 <div class="footer">
-  <p>小区帮榜棒 · 傻瓜式最终测试 · 2026-07-12 · HEAD: 7c431f9</p>
-  <p style="margin-top:4px;">9 模块 · 完整闭环测试 · 数据保存在本地浏览器（localStorage）</p>
+  <p>小区帮榜棒 · 傻瓜式最终测试 · 2026-07-13 · HEAD: f428ad9</p>
+  <p style="margin-top:4px;">10 模块 · 完整闭环测试 · 数据保存在本地浏览器（localStorage）</p>
 </div>
 
 <script>
@@ -1258,7 +1438,7 @@ function generateReport() {
   let lines = [];
   lines.push('=== 小区帮榜棒 傻瓜式最终测试结果 ===');
   lines.push('测试时间: ' + new Date().toLocaleString('zh-CN'));
-  lines.push('HEAD: 7c431f9 · 2026-07-12');
+  lines.push('HEAD: f428ad9 · 2026-07-13');
   lines.push('');
 
   let pass=0, fail=0, skip=0, pending=0;
