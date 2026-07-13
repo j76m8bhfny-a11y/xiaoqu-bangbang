@@ -89,7 +89,7 @@ export default function Settings() {
               </View>
               <Text className="settings__menu-label">关于我们</Text>
             </View>
-            <Text className="settings__menu-value">小区帮榜棒 v1.0.0</Text>
+            <Text className="settings__menu-value">左邻右帮 v1.0.0</Text>
           </View>
         </View>
 

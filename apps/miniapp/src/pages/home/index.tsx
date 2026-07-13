@@ -118,9 +118,7 @@ export default function Home() {
   );
 
   useShareAppMessage(() => ({
-    title: communityName
-      ? `${communityName}的邻居都在用「小区帮榜棒」`
-      : '邻里互助，从小区帮榜棒开始',
+    title: communityName ? `${communityName}的邻居都在用「左邻右帮」` : '邻里互助，从左邻右帮开始',
     path: '/pages/home/index',
   }));
 
@@ -185,7 +183,7 @@ export default function Home() {
   const handleMenuClick = (item: MenuItem) => {
     if (item.id === 'about') {
       Taro.showModal({
-        title: '小区帮榜棒',
+        title: '左邻右帮',
         content: '邻里互助，共建美好社区\n版本：1.0.0',
         showCancel: false,
       });

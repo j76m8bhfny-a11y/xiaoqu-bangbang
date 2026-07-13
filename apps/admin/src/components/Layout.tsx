@@ -156,7 +156,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             overflow: 'hidden',
           }}
         >
-          {collapsed ? '帮' : '小区帮榜棒'}
+          {collapsed ? '帮' : '左邻右帮'}
         </div>
         <Menu
           theme="dark"

@@ -57,7 +57,7 @@ export default function GuideDetail() {
   }, [commentsData]);
 
   useShareAppMessage(() => ({
-    title: item ? `${item.title} - 小区帮榜棒` : '小区帮榜棒',
+    title: item ? `${item.title} - 左邻右帮` : '左邻右帮',
     path: `/pages/guide-detail/index?id=${id}`,
   }));
 

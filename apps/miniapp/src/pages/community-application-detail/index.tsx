@@ -31,7 +31,7 @@ export default function CommunityApplicationDetail() {
   );
 
   useShareAppMessage(() => ({
-    title: data ? `请为「${data.name}」助力开通小区帮榜棒` : '小区帮榜棒',
+    title: data ? `请为「${data.name}」助力开通左邻右帮` : '左邻右帮',
     path: `/pages/community-application-detail/index?id=${id}`,
   }));
 

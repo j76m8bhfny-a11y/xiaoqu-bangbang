@@ -69,7 +69,7 @@ export default function CommitteeAnnouncement() {
   useShareAppMessage(() => {
     if (shareConfig && !shareConfig.canShare) {
       Taro.showToast({ title: shareConfig.disabledReason ?? '无法分享', icon: 'none' });
-      return { title: '小区帮榜棒', path: '/pages/home/index' };
+      return { title: '左邻右帮', path: '/pages/home/index' };
     }
     if (shareConfig) {
       return {
@@ -79,7 +79,7 @@ export default function CommitteeAnnouncement() {
       };
     }
     return {
-      title: announcement ? `${announcement.title} - 小区帮榜棒` : '小区帮榜棒',
+      title: announcement ? `${announcement.title} - 左邻右帮` : '左邻右帮',
       path: `/pages/committee-announcement/index?id=${id}`,
     };
   });

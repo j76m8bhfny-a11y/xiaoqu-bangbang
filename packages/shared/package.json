@@ -2,7 +2,7 @@
   "name": "@xiaoqu-bangbang/shared",
   "version": "0.1.0",
   "private": true,
-  "description": "小区帮榜棒 - 共享类型、枚举与 API DTO",
+  "description": "左邻右帮 - 共享类型、枚举与 API DTO",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {

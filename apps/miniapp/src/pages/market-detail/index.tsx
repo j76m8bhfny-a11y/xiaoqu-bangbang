@@ -112,7 +112,7 @@ export default function MarketDetail() {
   useShareAppMessage(() => {
     if (shareConfig && !shareConfig.canShare) {
       Taro.showToast({ title: shareConfig.disabledReason ?? '无法分享', icon: 'none' });
-      return { title: '小区帮榜棒', path: '/pages/home/index' };
+      return { title: '左邻右帮', path: '/pages/home/index' };
     }
     if (shareConfig) {
       return {
@@ -122,7 +122,7 @@ export default function MarketDetail() {
       };
     }
     return {
-      title: item ? `${item.title} - 小区帮榜棒` : '小区帮榜棒',
+      title: item ? `${item.title} - 左邻右帮` : '左邻右帮',
       path: `/pages/market-detail/index?id=${id}`,
     };
   });

@@ -81,7 +81,7 @@ export default defineAppConfig({
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#F5F8F2',
-    navigationBarTitleText: '小区帮榜棒',
+    navigationBarTitleText: '左邻右帮',
     navigationBarTextStyle: 'black',
   },
 });

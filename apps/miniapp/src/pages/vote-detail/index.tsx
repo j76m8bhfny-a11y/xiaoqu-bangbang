@@ -72,7 +72,7 @@ export default function VoteDetail() {
   useShareAppMessage(() => {
     if (shareConfig && !shareConfig.canShare) {
       Taro.showToast({ title: shareConfig.disabledReason ?? '无法分享', icon: 'none' });
-      return { title: '小区帮榜棒', path: '/pages/home/index' };
+      return { title: '左邻右帮', path: '/pages/home/index' };
     }
     if (shareConfig) {
       return {
@@ -82,7 +82,7 @@ export default function VoteDetail() {
       };
     }
     return {
-      title: vote ? `${vote.title} - 小区帮榜棒` : '小区帮榜棒',
+      title: vote ? `${vote.title} - 左邻右帮` : '左邻右帮',
       path: `/pages/vote-detail/index?id=${id}`,
     };
   });

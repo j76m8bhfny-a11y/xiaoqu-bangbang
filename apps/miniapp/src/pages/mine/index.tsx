@@ -65,9 +65,7 @@ export default function Mine() {
   });
 
   useShareAppMessage(() => ({
-    title: communityName
-      ? `${communityName}的邻居都在用「小区帮榜棒」`
-      : '邻里互助，从小区帮榜棒开始',
+    title: communityName ? `${communityName}的邻居都在用「左邻右帮」` : '邻里互助，从左邻右帮开始',
     path: '/pages/home/index',
   }));
 
@@ -87,7 +85,7 @@ export default function Mine() {
     if (item.id === 'invite') {
       Taro.showModal({
         title: '邀请邻居',
-        content: '点击右上角"···"，选择"转发"，把小区帮榜棒分享给邻居吧～',
+        content: '点击右上角"···"，选择"转发"，把左邻右帮分享给邻居吧～',
         showCancel: false,
         confirmText: '知道了',
       });
@@ -95,7 +93,7 @@ export default function Mine() {
     }
     if (item.id === 'about') {
       Taro.showModal({
-        title: '小区帮榜棒',
+        title: '左邻右帮',
         content: '邻里互助，共建美好社区\n版本：1.0.0',
         showCancel: false,
       });

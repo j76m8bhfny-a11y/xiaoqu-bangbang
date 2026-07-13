@@ -1,4 +1,4 @@
-// ===== 小区帮榜棒 - 共享 API DTO 类型 =====
+// ===== 左邻右帮 - 共享 API DTO 类型 =====
 
 import type {
   EventType,

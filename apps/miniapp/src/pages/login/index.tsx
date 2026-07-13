@@ -85,7 +85,7 @@ export default function Login() {
         <View className="login__logo">
           <Icon name="house" size={48} color="#5B9E6F" />
         </View>
-        <Text className="login__title">小区帮榜棒</Text>
+        <Text className="login__title">左邻右帮</Text>
         <Text className="login__subtitle">让小区里的好事，被看见</Text>
         <View className="login__btn login__btn--wechat" onTap={handleWechatLogin}>
           <Text className="login__btn-text">{loading ? '登录中...' : '微信一键登录'}</Text>

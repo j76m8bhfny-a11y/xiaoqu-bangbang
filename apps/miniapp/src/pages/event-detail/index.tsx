@@ -159,7 +159,7 @@ export default function EventDetail() {
   useShareAppMessage(() => {
     if (shareConfig && !shareConfig.canShare) {
       Taro.showToast({ title: shareConfig.disabledReason ?? '无法分享', icon: 'none' });
-      return { title: '小区帮榜棒', path: '/pages/home/index' };
+      return { title: '左邻右帮', path: '/pages/home/index' };
     }
     if (shareConfig) {
       return {
@@ -169,7 +169,7 @@ export default function EventDetail() {
       };
     }
     return {
-      title: event ? `${event.title} - 小区帮榜棒` : '小区帮榜棒',
+      title: event ? `${event.title} - 左邻右帮` : '左邻右帮',
       path: `/pages/event-detail/index?id=${id}`,
     };
   });

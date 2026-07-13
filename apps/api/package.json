@@ -2,7 +2,7 @@
   "name": "@xiaoqu-bangbang/api",
   "version": "0.1.0",
   "private": true,
-  "description": "小区帮榜棒 - NestJS 后端 API",
+  "description": "左邻右帮 - NestJS 后端 API",
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",

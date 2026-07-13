@@ -69,10 +69,10 @@ export default function SettingsPage() {
               style={{ maxWidth: 600 }}
             >
               <Form.Item name="appName" label="应用名称">
-                <Input placeholder="小区帮榜棒" />
+                <Input placeholder="左邻右帮" />
               </Form.Item>
               <Form.Item name="defaultShareTitle" label="默认分享标题">
-                <Input placeholder="小区帮榜棒 - 邻里互助" />
+                <Input placeholder="左邻右帮 - 邻里互助" />
               </Form.Item>
               <Form.Item name="defaultShareImage" label="默认分享图片URL">
                 <Input placeholder="https://..." />
