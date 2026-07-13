@@ -155,6 +155,8 @@ export enum ReportTargetType {
   USER = 'user',
   TOPIC = 'topic',
   TOPIC_COMMENT = 'topic_comment',
+  GUIDE = 'guide',
+  GUIDE_COMMENT = 'guide_comment',
   VOTE = 'vote',
 }
 
@@ -215,6 +217,7 @@ export enum ContributionAction {
   // ponytail: 预留枚举值，当前未使用但未来可能需要
   MARKET = 'market',
   GOOD_REVIEW = 'good_review',
+  GUIDE = 'guide',
   MANUAL = 'manual',
 }
 
@@ -223,6 +226,7 @@ export enum ContributionSourceType {
   EVENT = 'event',
   MARKET = 'market',
   FEEDBACK = 'feedback',
+  GUIDE = 'guide',
   MANUAL = 'manual',
 }
 
@@ -243,6 +247,7 @@ export enum PeriodType {
 export enum BadgeSourceType {
   EVENT = 'event',
   MARKET = 'market',
+  GUIDE = 'guide',
   MANUAL = 'manual',
 }
 
@@ -440,4 +445,19 @@ export enum CommunityApplicationStatus {
   PENDING = 'pending',
   APPROVED = 'approved',
   REJECTED = 'rejected',
+}
+
+/** 图文教程状态 */
+export enum GuideStatus {
+  PENDING_REVIEW = 'pending_review',
+  PUBLISHED = 'published',
+  REJECTED = 'rejected',
+}
+
+/** 图文教程分类 */
+export enum GuideCategory {
+  USAGE_GUIDE = 'usage_guide',
+  REPAIR = 'repair',
+  MAINTENANCE = 'maintenance',
+  OTHER = 'other',
 }

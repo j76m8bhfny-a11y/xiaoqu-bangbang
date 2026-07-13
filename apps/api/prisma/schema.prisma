@@ -68,6 +68,12 @@ model User {
   communityApplications   CommunityApplication[]        @relation("ApplicationApplicant")
   communityApplicationSupports CommunityApplicationSupport[] @relation("ApplicationSupporter")
   skills                     UserSkill[]
+  guides                     Guide[]
+  guideReviews               Guide[]                       @relation("GuideReviewer")
+  guideLikes                 GuideLike[]
+  guideFavorites             GuideFavorite[]
+  guideComments              GuideComment[]
+  guideCommentLikes          GuideCommentLike[]
 
   @@index([phone])
   @@index([currentCommunityId])
@@ -124,6 +130,7 @@ model Community {
   adminUsers             AdminUser[]
   topics                 Topic[]
   topicMergeSuggestions  TopicMergeSuggestion[]
+  guides                 Guide[]
 
   @@map("communities")
 }
@@ -1123,4 +1130,102 @@ model CommunityApplicationSupport {
   @@unique([applicationId, userId])
   @@index([userId])
   @@map("community_application_supports")
+}
+
+// ============================
+// 图文教程 (Guide)
+// ============================
+
+model Guide {
+  id             String    @id @default(uuid()) @db.Uuid
+  communityId    String    @map("community_id") @db.Uuid
+  authorId       String    @map("author_id") @db.Uuid
+  title          String
+  description     String
+  images         Json      @default("[]")
+  category       String    @default("other") // usage_guide/repair/maintenance/other
+  status         String    @default("pending_review") // pending_review/published/rejected
+  reviewedBy     String?   @map("reviewed_by") @db.Uuid
+  reviewedAt     DateTime? @map("reviewed_at")
+  rejectedReason String?   @map("rejected_reason")
+  viewCount      Int       @default(0) @map("view_count")
+  likeCount      Int       @default(0) @map("like_count")
+  favoriteCount  Int       @default(0) @map("favorite_count")
+  commentCount   Int       @default(0) @map("comment_count")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  community  Community     @relation(fields: [communityId], references: [id])
+  author     User          @relation(fields: [authorId], references: [id])
+  reviewer   User?         @relation("GuideReviewer", fields: [reviewedBy], references: [id])
+  likes      GuideLike[]
+  favorites  GuideFavorite[]
+  comments   GuideComment[]
+
+  @@index([communityId, category, status, createdAt])
+  @@index([authorId])
+  @@map("guides")
+}
+
+model GuideLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  guideId   String   @map("guide_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  guide Guide @relation(fields: [guideId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([guideId, userId])
+  @@map("guide_likes")
+}
+
+model GuideFavorite {
+  id        String   @id @default(uuid()) @db.Uuid
+  guideId   String   @map("guide_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  guide Guide @relation(fields: [guideId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([guideId, userId])
+  @@map("guide_favorites")
+}
+
+model GuideComment {
+  id        String    @id @default(uuid()) @db.Uuid
+  guideId   String    @map("guide_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  parentId  String?   @map("parent_id") @db.Uuid
+  content   String
+  likeCount Int       @default(0) @map("like_count")
+  replyCount Int      @default(0) @map("reply_count")
+  status    String    @default("visible") // visible/hidden/deleted
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  guide   Guide          @relation(fields: [guideId], references: [id])
+  user    User           @relation(fields: [userId], references: [id])
+  parent  GuideComment?  @relation("GuideCommentReplies", fields: [parentId], references: [id])
+  replies GuideComment[] @relation("GuideCommentReplies")
+  likes   GuideCommentLike[]
+
+  @@index([guideId, createdAt])
+  @@map("guide_comments")
+}
+
+model GuideCommentLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  commentId String   @map("comment_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  comment GuideComment @relation(fields: [commentId], references: [id])
+  user    User         @relation(fields: [userId], references: [id])
+
+  @@unique([commentId, userId])
+  @@map("guide_comment_likes")
 }

@@ -13,6 +13,7 @@ import {
   TeamOutlined,
   LikeOutlined,
   PictureOutlined,
+  BookOutlined,
   ToolOutlined,
   TrophyOutlined,
   WarningOutlined,
@@ -54,6 +55,12 @@ const allMenuItems = [
     roles: ['platform_admin', 'committee_admin'],
   },
   { key: '/market', label: '闲置管理', icon: <ShopOutlined />, roles: ['platform_admin'] },
+  {
+    key: '/guides',
+    label: '教程管理',
+    icon: <BookOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
   { key: '/verifications', label: '用户与认证', icon: <UserOutlined />, roles: ['platform_admin'] },
   {
     key: '/community-applications',

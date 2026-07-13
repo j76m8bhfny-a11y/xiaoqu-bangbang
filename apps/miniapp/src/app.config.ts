@@ -20,6 +20,8 @@ export default defineAppConfig({
     'pages/market-detail/index',
     'pages/event-create/index',
     'pages/market-create/index',
+    'pages/guide-detail/index',
+    'pages/guide-create/index',
     'pages/notifications/index',
     'pages/profile-edit/index',
     'pages/badges/index',

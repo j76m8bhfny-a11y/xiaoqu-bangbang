@@ -42,6 +42,8 @@ import type {
   ClaimStatus,
   AnnouncementStatus,
   AdminRole,
+  GuideStatus,
+  GuideCategory,
 } from './enums';
 
 // ===== 通用响应 =====
@@ -1119,4 +1121,81 @@ export interface MergeSuggestionDto {
   sourceTopic: { id: string; title: string; eventCount: number };
   targetTopic: { id: string; title: string; eventCount: number };
   createdAt: string;
+}
+
+// ===== 图文教程 (Guide) DTOs =====
+
+export interface GuideDto {
+  id: string;
+  communityId: string;
+  authorId: string;
+  authorNickname: string;
+  authorAvatarUrl: string | null;
+  title: string;
+  description: string;
+  images: string[];
+  category: GuideCategory;
+  status: GuideStatus;
+  rejectedReason: string | null;
+  viewCount: number;
+  likeCount: number;
+  favoriteCount: number;
+  commentCount: number;
+  isLiked?: boolean;
+  isFavorited?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GuideDetailDto extends GuideDto {
+  reviewedAt: string | null;
+}
+
+export interface CreateGuideRequest {
+  title: string;
+  description: string;
+  images?: string[];
+  category: GuideCategory;
+}
+
+export interface UpdateGuideRequest {
+  title?: string;
+  description?: string;
+  images?: string[];
+  category?: GuideCategory;
+}
+
+export interface GuideListQuery {
+  category?: GuideCategory;
+  status?: GuideStatus;
+  keyword?: string;
+  authorId?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface GuideCommentDto {
+  id: string;
+  guideId: string;
+  userId: string;
+  userNickname: string;
+  userAvatarUrl: string | null;
+  parentId: string | null;
+  content: string;
+  likeCount: number;
+  replyCount: number;
+  status: string;
+  createdAt: string;
+  isLiked?: boolean;
+  replies?: GuideCommentDto[];
+}
+
+export interface CreateGuideCommentRequest {
+  content: string;
+  parentId?: string;
+}
+
+export interface AdminGuideReviewRequest {
+  action: 'approve' | 'reject';
+  rejectReason?: string;
 }

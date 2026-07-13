@@ -247,6 +247,50 @@ export class RankingsService {
     });
   }
 
+  /**
+   * 图文教程审核通过发 1 朵小红花
+   */
+  async handleGuideApproved(guide: { id: string; communityId: string; authorId: string }) {
+    const flowerCount = 1;
+    await this.prisma.contributionRecord.upsert({
+      where: {
+        userId_sourceType_sourceId_action: {
+          userId: guide.authorId,
+          sourceType: 'guide',
+          sourceId: guide.id,
+          action: 'guide',
+        },
+      },
+      update: {},
+      create: {
+        userId: guide.authorId,
+        communityId: guide.communityId,
+        sourceType: 'guide',
+        sourceId: guide.id,
+        action: 'guide',
+        score: flowerCount,
+        flowerCount,
+        reason: '教程审核通过',
+        occurredAt: new Date(),
+      },
+    });
+
+    await this.checkAndAwardBadges(guide.authorId, guide.communityId, 'guide', guide.id);
+    await this.recalculateRankings(guide.communityId);
+
+    await this.prisma.notification.create({
+      data: {
+        userId: guide.authorId,
+        communityId: guide.communityId,
+        type: 'review_result',
+        title: '教程审核通过',
+        content: '您发布的教程已审核通过，获得 1 朵小红花！',
+        targetType: 'guide',
+        targetId: guide.id,
+      },
+    });
+  }
+
   private getEventAction(eventType: string, rewardType: string): string {
     switch (eventType) {
       case 'help_request':
@@ -304,7 +348,7 @@ export class RankingsService {
     // Count contributions by action category (Standard M10.6)
     const baseWhere = { userId, communityId, status: 'valid' as const };
 
-    const [helpCount, feedbackCount, topicCount, flowerResult] = await Promise.all([
+    const [helpCount, feedbackCount, topicCount, guideCount, flowerResult] = await Promise.all([
       // helper 徽章只算帮手贡献 (reason='完成事件')，不算创建者贡献 (reason='发起事件')
       this.prisma.contributionRecord.count({
         where: {
@@ -318,6 +362,9 @@ export class RankingsService {
       }),
       this.prisma.contributionRecord.count({
         where: { ...baseWhere, action: 'topic' },
+      }),
+      this.prisma.contributionRecord.count({
+        where: { ...baseWhere, action: 'guide' },
       }),
       this.prisma.contributionRecord.aggregate({
         where: baseWhere,
@@ -380,6 +427,28 @@ export class RankingsService {
         name: '议题达人',
         description: '提出5个议题',
       },
+      // 教程类
+      {
+        code: 'guide_1',
+        countType: 'guide' as const,
+        minCount: 1,
+        name: '教程分享者',
+        description: '发布1个教程',
+      },
+      {
+        code: 'guide_5',
+        countType: 'guide' as const,
+        minCount: 5,
+        name: '教程达人',
+        description: '发布5个教程',
+      },
+      {
+        code: 'guide_20',
+        countType: 'guide' as const,
+        minCount: 20,
+        name: '教程专家',
+        description: '发布20个教程',
+      },
       // 小花类
       {
         code: 'flower_10',
@@ -401,6 +470,7 @@ export class RankingsService {
       help: helpCount,
       feedback: feedbackCount,
       topic: topicCount,
+      guide: guideCount,
       flower: totalFlowers,
     };
 

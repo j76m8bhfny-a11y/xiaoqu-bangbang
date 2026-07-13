@@ -1,0 +1,459 @@
+@use '../../styles/tokens.scss' as *;
+
+.guide-detail {
+  min-height: 100vh;
+  background: $color-bg;
+  position: relative;
+
+  &__swiper {
+    width: 100%;
+    height: 560px;
+    border-radius: 0 0 $radius-lg $radius-lg;
+    overflow: hidden;
+
+    &--empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+    }
+  }
+
+  &__slide {
+    width: 100%;
+    height: 100%;
+  }
+
+  &__slide-img {
+    width: 100%;
+    height: 100%;
+  }
+
+  &__swiper-emoji {
+    display: flex;
+    align-items: center;
+    font-size: 120px;
+  }
+
+  &__card {
+    margin: $spacing-sm $spacing-lg;
+    padding: $spacing-md;
+    background: #fff;
+    border-radius: $radius-md;
+    box-shadow: 0 2px 12px rgba(23, 23, 23, 0.05);
+  }
+
+  &__tag-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__category-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: $radius-pill;
+    background: $color-bg;
+  }
+
+  &__category-icon {
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+  }
+
+  &__category-label {
+    font-size: 20px;
+    color: $color-text-secondary;
+  }
+
+  &__status-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 16px;
+    border-radius: $radius-pill;
+  }
+
+  &__status-tag-text {
+    font-size: $font-size-xs - 4;
+    color: #fff;
+    font-weight: $font-weight-medium;
+  }
+
+  &__title {
+    display: block;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+    line-height: 1.4;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__desc {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text;
+    line-height: 1.6;
+    margin-bottom: $spacing-md;
+    white-space: pre-wrap;
+  }
+
+  &__reject-reason {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: $spacing-sm;
+    margin-bottom: $spacing-sm;
+    background: #fff0f0;
+    border-radius: $radius-sm;
+  }
+
+  &__reject-text {
+    font-size: $font-size-sm;
+    color: $color-danger;
+    flex: 1;
+  }
+
+  &__meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__time {
+    font-size: 20px;
+    color: $color-text-secondary;
+  }
+
+  &__view-count {
+    font-size: 20px;
+    color: $color-text-secondary;
+  }
+
+  // 作者信息
+  &__author-card {
+    padding: $spacing-md;
+  }
+
+  &__author-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: $color-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__avatar-emoji {
+    display: flex;
+    align-items: center;
+    font-size: 36px;
+  }
+
+  &__avatar-img {
+    width: 72px;
+    height: 72px;
+  }
+
+  &__nickname {
+    font-size: $font-size-md;
+    font-weight: $font-weight-medium;
+    color: $color-text;
+  }
+
+  // 作者操作栏
+  &__author-actions {
+    margin: $spacing-sm $spacing-lg;
+    padding: $spacing-md;
+    background: #fff;
+    border-radius: $radius-md;
+    box-shadow: 0 2px 12px rgba(23, 23, 23, 0.05);
+    display: flex;
+    gap: $spacing-sm;
+  }
+
+  &__author-btn {
+    flex: 1;
+    height: 80px;
+    border-radius: $radius-pill;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: opacity 0.2s;
+
+    &:active {
+      opacity: 0.7;
+    }
+
+    &--edit {
+      background: $color-bg-green;
+    }
+
+    &--delete {
+      background: #fff0f0;
+    }
+  }
+
+  &__author-btn-text {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-primary-deep;
+
+    &--danger {
+      color: $color-danger;
+    }
+  }
+
+  // 评论区
+  &__comments {
+    padding: $spacing-md $spacing-lg;
+  }
+
+  &__comments-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__comments-title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+
+  &__comments-empty {
+    display: block;
+    text-align: center;
+    padding: $spacing-lg 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__comments-list {
+    max-height: 800px;
+  }
+
+  &__comment {
+    display: flex;
+    gap: $spacing-sm;
+    padding: $spacing-sm 0;
+    border-top: 1px solid $color-border;
+
+    &--reply {
+      padding: $spacing-xs 0;
+      border-top: none;
+    }
+  }
+
+  &__comment-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: $color-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__comment-avatar-img {
+    width: 56px;
+    height: 56px;
+  }
+
+  &__comment-avatar-emoji {
+    display: flex;
+    align-items: center;
+    font-size: 28px;
+  }
+
+  &__comment-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__comment-nickname {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: 4px;
+  }
+
+  &__comment-content {
+    display: block;
+    font-size: $font-size-md;
+    color: $color-text;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  &__comment-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+
+  &__comment-time {
+    font-size: $font-size-xs - 4;
+    color: $color-text-secondary;
+  }
+
+  &__comment-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__comment-action {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__comment-action-text {
+    font-size: $font-size-xs - 4;
+    color: $color-text-secondary;
+  }
+
+  &__replies {
+    margin-top: $spacing-xs;
+    padding-left: $spacing-sm;
+    border-left: 3px solid $color-border;
+  }
+
+  // 底部留白
+  &__bottom-spacer {
+    height: 160px;
+  }
+
+  // 底栏
+  &__bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: $spacing-sm $spacing-lg;
+    padding-bottom: calc(#{$spacing-sm} + env(safe-area-inset-bottom));
+    background: #fff;
+    box-shadow: 0 -2px 12px rgba(23, 23, 23, 0.06);
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    z-index: 100;
+  }
+
+  // 图标按钮（点赞/收藏）
+  &__icon-btn {
+    flex-shrink: 0;
+    min-width: 88px;
+    height: 88px;
+    padding: 0 $spacing-sm;
+    border-radius: $radius-md;
+    background: $color-bg;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    transition: all 0.2s;
+
+    &:active {
+      opacity: 0.7;
+    }
+
+    &--liked {
+      background: $color-bg-green;
+    }
+
+    &--favorited {
+      background: $color-bg-orange;
+    }
+  }
+
+  &__icon-btn-label {
+    font-size: $font-size-xs - 4;
+    color: $color-text-secondary;
+  }
+
+  // 评论输入区
+  &__comment-input-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__reply-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 12px;
+    background: $color-bg;
+    border-radius: $radius-sm $radius-sm 0 0;
+  }
+
+  &__reply-text {
+    font-size: $font-size-xs - 4;
+    color: $color-text-secondary;
+  }
+
+  &__reply-cancel {
+    display: flex;
+    align-items: center;
+    padding: 2px;
+  }
+
+  &__comment-input {
+    flex: 1;
+    height: 72px;
+    padding: 0 $spacing-sm;
+    font-size: $font-size-sm;
+    color: $color-text;
+    background: $color-bg;
+    border-radius: $radius-pill;
+    box-sizing: border-box;
+  }
+
+  &__send-btn {
+    flex-shrink: 0;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: $color-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(74, 140, 94, 0.3);
+    transition: all 0.2s;
+
+    &:active {
+      opacity: 0.85;
+    }
+
+    &--disabled {
+      background: $color-border;
+      box-shadow: none;
+    }
+  }
+}

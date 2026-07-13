@@ -14,3 +14,4 @@ export { reportService } from './report';
 export { topicService } from './topic';
 export { communityApplicationService } from './community-application';
 export { userService } from './user';
+export { guideService } from './guide';

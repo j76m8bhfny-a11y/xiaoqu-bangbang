@@ -3,10 +3,10 @@ import { useState, useEffect, useRef } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useCommunityStore } from '@/store';
 import { EventType } from '@xiaoqu-bangbang/shared';
-import type { MarketItemDto } from '@xiaoqu-bangbang/shared';
-import { eventService, marketService } from '@/services';
+import type { MarketItemDto, GuideDto } from '@xiaoqu-bangbang/shared';
+import { eventService, marketService, guideService } from '@/services';
 import { usePaginatedList, useAuthGuard } from '@/hooks';
-import { mapEventDtoToCardData } from '@/utils/mappers';
+import { mapEventDtoToCardData, GUIDE_CATEGORY_CONFIG } from '@/utils/mappers';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
@@ -16,11 +16,10 @@ import Icon from '@/components/icon';
 import './index.scss';
 
 // S1-7 events 二层 tab 重构：
-// 第一层 outer = 互助 / 闲置；
-// 第二层 = 互助下分类（求助/帮忙/公益/寻宠寻物/搭子），闲置下为 status（在售/已售）。
-// 议题类（public_feedback/discussion）下沉到 plaza，不在此处显示。
+// 第一层 outer = 互助 / 闲置 / 指南；
+// 第二层 = 互助下分类，闲置下为 status，指南下为教程分类。
 
-type OuterTab = 'help' | 'market';
+type OuterTab = 'help' | 'market' | 'guide';
 
 const HELP_FILTERS = [
   { key: 'all', label: '全部' },
@@ -34,6 +33,14 @@ const MARKET_FILTERS = [
   { key: 'all', label: '全部' },
   { key: 'on_sale', label: '在售' },
   { key: 'sold', label: '已售' },
+];
+
+const GUIDE_FILTERS = [
+  { key: 'all', label: '全部' },
+  { key: 'usage_guide', label: '使用指南' },
+  { key: 'repair', label: '维修排障' },
+  { key: 'maintenance', label: '保养维护' },
+  { key: 'other', label: '其他' },
 ];
 
 export default function Events() {
@@ -50,18 +57,15 @@ export default function Events() {
     initialTabParam && initialTabParam !== 'my' ? initialTabParam : 'all',
   );
   const [marketFilter, setMarketFilter] = useState<string>('all');
+  const [guideFilter, setGuideFilter] = useState<string>('all');
   const [searchText, setSearchText] = useState('');
-  // 搜索对老人是次要功能：默认收起为图标，点击才展开输入框，让首屏聚焦列表与发布。
   const [searchOpen, setSearchOpen] = useState(false);
 
   // ===== 互助 (events) 列表 =====
-  // communityId 由后端 currentCommunityId guard 注入，前端不再透传。
   const helpList = usePaginatedList(
     (page, pageSize) =>
       eventService.list({
         type: helpFilter === 'all' ? undefined : (helpFilter as EventType),
-        // 议题类事件(public_feedback/discussion)属于「小区事」议题，不在邻里帮互助列表展示；
-        // 选具体分类时 type 已限定，无需再排除。
         excludeTypes: helpFilter === 'all' ? 'public_feedback,discussion' : undefined,
         keyword: searchText || undefined,
         page,
@@ -83,13 +87,22 @@ export default function Events() {
     [communityId, marketFilter, searchText, outer],
   );
 
+  // ===== 指南 (guide) 列表 =====
+  const guideList = usePaginatedList(
+    (page, pageSize) =>
+      guideService.list({
+        category: guideFilter === 'all' ? undefined : guideFilter,
+        keyword: searchText || undefined,
+        page,
+        pageSize,
+      }),
+    [communityId, guideFilter, searchText, outer],
+  );
+
   // refreshTick：由 useDidShow 触发自增，驱动下方 useEffect 重新拉取列表。
-  // 用函数式 setState 触发，避免在 useDidShow 里直接调 refresh 的闭包陷阱。
   const [refreshTick, setRefreshTick] = useState(0);
   const firstShowRef = useRef(true);
 
-  // 发布/编辑后 navigateBack 回到本页，useEffect 的依赖未变不会刷新。
-  // 用页面 didShow 生命周期兜底刷新；跳过首次显示，避免与首次 mount 的拉取重复。
   useDidShow(() => {
     if (firstShowRef.current) {
       firstShowRef.current = false;
@@ -101,33 +114,51 @@ export default function Events() {
   useEffect(() => {
     if (!communityId) return;
     if (outer === 'help') helpList.refresh();
-    else marketList.refresh();
-  }, [communityId, outer, helpFilter, marketFilter, searchText, refreshTick]);
+    else if (outer === 'market') marketList.refresh();
+    else guideList.refresh();
+  }, [communityId, outer, helpFilter, marketFilter, guideFilter, searchText, refreshTick]);
 
   const isHelp = outer === 'help';
-  const list = isHelp ? helpList : marketList;
-  const filters = isHelp ? HELP_FILTERS : MARKET_FILTERS;
-  const currentFilter = isHelp ? helpFilter : marketFilter;
-  const setCurrentFilter = isHelp ? setHelpFilter : setMarketFilter;
+  const isGuide = outer === 'guide';
+  const list = isHelp ? helpList : isGuide ? guideList : marketList;
+  const filters = isHelp ? HELP_FILTERS : isGuide ? GUIDE_FILTERS : MARKET_FILTERS;
+  const currentFilter = isHelp ? helpFilter : isGuide ? guideFilter : marketFilter;
+  const setCurrentFilter = isHelp ? setHelpFilter : isGuide ? setGuideFilter : setMarketFilter;
 
   const helpCards = helpList.items.map(mapEventDtoToCardData);
   const marketItems = marketList.items as MarketItemDto[];
+  const guideItems = guideList.items as GuideDto[];
+
+  const searchPlaceholder = isHelp
+    ? '搜索互助事件...'
+    : isGuide
+      ? '搜索教程...'
+      : '搜索闲置物品...';
+  const emptyIcon = isHelp ? 'handshake' : isGuide ? 'book' : 'box';
+  const emptyText = isHelp ? '暂无互助事件' : isGuide ? '暂无教程' : '暂无闲置物品';
+  const fabLabel = isHelp ? '发互助' : isGuide ? '发教程' : '发闲置';
+  const fabUrl = isHelp
+    ? '/pages/event-create/index'
+    : isGuide
+      ? '/pages/guide-create/index'
+      : '/pages/market-create/index';
 
   return (
-    <View className="events">
+    <View className="events page-bg">
       <View className="events__header">
         <View className="events__header-title">
           <Icon name="handshake" size={22} /> <Text>邻里互助</Text>
         </View>
-        <Text className="events__header-sub">求助、帮忙、闲置流转</Text>
+        <Text className="events__header-sub">求助、帮忙、闲置流转、教程</Text>
       </View>
 
-      {/* 第一层：互助 / 闲置 */}
+      {/* 第一层：互助 / 闲置 / 指南 */}
       <View className="events__outer-tabs">
         {(
           [
             { k: 'help', label: '互助' },
             { k: 'market', label: '闲置' },
+            { k: 'guide', label: '指南' },
           ] as const
         ).map((o) => (
           <View
@@ -140,7 +171,7 @@ export default function Events() {
         ))}
       </View>
 
-      {/* 第二层 filter + 搜索图标（搜索默认收起） */}
+      {/* 第二层 filter + 搜索图标 */}
       <View className="events__filter-row">
         <ScrollView scrollX className="events__filter-scroll">
           <View className="events__filter-list">
@@ -177,7 +208,7 @@ export default function Events() {
             </View>
             <Input
               className="events__search-input"
-              placeholder={isHelp ? '搜索互助事件...' : '搜索闲置物品...'}
+              placeholder={searchPlaceholder}
               placeholderClass="events__search-placeholder"
               value={searchText}
               focus
@@ -202,12 +233,10 @@ export default function Events() {
         {list.loading && <Loading />}
         {list.error && <ErrorState message={list.error.message} onRetry={list.refresh} />}
         {!list.loading && !list.error && list.items.length === 0 && (
-          <EmptyState
-            icon={isHelp ? 'handshake' : 'box'}
-            text={isHelp ? '暂无互助事件' : '暂无闲置物品'}
-          />
+          <EmptyState icon={emptyIcon} text={emptyText} />
         )}
 
+        {/* 互助列表 */}
         {!list.loading && !list.error && isHelp && (
           <BlurredList
             items={helpCards}
@@ -222,9 +251,11 @@ export default function Events() {
           />
         )}
 
+        {/* 闲置列表 */}
         {!list.loading &&
           !list.error &&
           !isHelp &&
+          !isGuide &&
           marketItems.map((it) => (
             <View
               key={it.id}
@@ -256,6 +287,40 @@ export default function Events() {
             </View>
           ))}
 
+        {/* 教程列表 */}
+        {!list.loading &&
+          !list.error &&
+          isGuide &&
+          guideItems.map((it) => (
+            <View
+              key={it.id}
+              className="events__market-item"
+              onClick={() => Taro.navigateTo({ url: `/pages/guide-detail/index?id=${it.id}` })}
+            >
+              {it.images?.[0] ? (
+                <Image className="events__market-img" src={it.images[0]} mode="aspectFill" />
+              ) : (
+                <View className="events__market-img events__market-img--empty">
+                  <View className="events__market-img-emoji">
+                    <Icon name="book" size={32} />
+                  </View>
+                </View>
+              )}
+              <View className="events__market-body">
+                <Text className="events__market-title">{it.title}</Text>
+                <Text className="events__market-desc">
+                  {GUIDE_CATEGORY_CONFIG[it.category]?.label ?? it.category}
+                </Text>
+                <Text className="events__market-seller">{it.authorNickname}</Text>
+              </View>
+              <View className="events__market-side">
+                <Text className="events__market-price events__market-price--free">
+                  {it.likeCount} 赞
+                </Text>
+              </View>
+            </View>
+          ))}
+
         {list.loadingMore && (
           <View className="events__loading-more">
             <Loading text="加载更多..." />
@@ -264,19 +329,12 @@ export default function Events() {
         <View className="events__bottom-spacer" />
       </ScrollView>
 
-      {/* FAB：互助 → event-create；闲置 → market-create */}
-      <View
-        className="events__fab"
-        onClick={() =>
-          Taro.navigateTo({
-            url: isHelp ? '/pages/event-create/index' : '/pages/market-create/index',
-          })
-        }
-      >
+      {/* FAB */}
+      <View className="events__fab" onClick={() => Taro.navigateTo({ url: fabUrl })}>
         <View className="events__fab-inner">
           <Text className="events__fab-plus">+</Text>
         </View>
-        <Text className="events__fab-label">{isHelp ? '发互助' : '发闲置'}</Text>
+        <Text className="events__fab-label">{fabLabel}</Text>
       </View>
     </View>
   );

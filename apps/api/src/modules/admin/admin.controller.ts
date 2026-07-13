@@ -1206,4 +1206,55 @@ export class AdminController {
     const data = await this.adminService.rejectCommunityApplication(id, adminUserId, body.reason);
     return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
+
+  // === Guide 审核 ===
+
+  @Get('guides')
+  async listGuides(
+    @CurrentCommunityId() communityId: string,
+    @Query('status') status?: string,
+    @Query('category') category?: string,
+    @Query('keyword') keyword?: string,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ) {
+    const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
+    const { items, total } = await this.adminService.getGuides(
+      communityId,
+      { status, category, keyword },
+      { skip, take },
+    );
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
+  }
+
+  @Get('guides/:id')
+  async getGuide(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
+    const data = await this.adminService.getGuideById(id, communityId);
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
+  }
+
+  @Post('guides/:id/approve')
+  async approveGuide(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.approveGuide(userId, id, communityId);
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
+  }
+
+  @Post('guides/:id/reject')
+  async rejectGuide(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @CurrentCommunityId() communityId: string,
+    @Body('reason') reason?: string,
+  ) {
+    const data = await this.adminService.rejectGuide(userId, id, communityId, reason);
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
+  }
 }

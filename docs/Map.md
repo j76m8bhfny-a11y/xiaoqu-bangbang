@@ -1,7 +1,7 @@
 # 小区帮榜棒 — 全局地图 (Map)
 
 > 锁版基线文档。本文件描述产品当前真实形态，作为 Spec.md 与 Standard.md 的上位索引。
-> 最后扫描日期: 2026-07-05 | 版本: v0.2.0 (对齐 PRD v0.7.0)
+> 最后扫描日期: 2026-07-13 | 版本: v0.2.1 (对齐 PRD v0.7.0, 新增图文教程模块)
 
 ---
 
@@ -44,19 +44,19 @@ xiaoqu-bangbang-main/
 
 ### 2.3 关键代码位置
 
-| 资源                       | 路径                                                                      |
-| -------------------------- | ------------------------------------------------------------------------- |
-| 共享契约 (DTO/枚举/错误码) | `packages/shared/src/{api.ts, enums.ts, index.ts}`                        |
-| 数据库 Schema              | `apps/api/prisma/schema.prisma` (49 张表)                                 |
-| 后端模块                   | `apps/api/src/modules/*` (19 个模块)                                      |
-| 后端测试                   | `apps/api/test/*.spec.ts` (9 个) + `apps/api/test/extra/*.spec.ts` (8 个) |
-| 小程序页面                 | `apps/miniapp/src/pages/*` (33 个注册页, 另有 1 个已注释保留: mine)       |
-| 小程序状态                 | `apps/miniapp/src/store/{auth,community,notification}.ts`                 |
-| 小程序服务层               | `apps/miniapp/src/services/*` (15 个 Service 文件)                        |
-| 小程序契约适配             | `apps/miniapp/src/utils/mappers.ts` (DTO → 展示模型)                      |
-| Admin 页面                 | `apps/admin/src/app/*` (20 个 page.tsx, 含根重定向, 19 功能页)            |
-| 迁移文件                   | `apps/api/prisma/migrations/` (8 次迁移)                                  |
-| 种子数据                   | `apps/api/prisma/seed*.ts` (3 份)                                         |
+| 资源                       | 路径                                                                       |
+| -------------------------- | -------------------------------------------------------------------------- |
+| 共享契约 (DTO/枚举/错误码) | `packages/shared/src/{api.ts, enums.ts, index.ts}`                         |
+| 数据库 Schema              | `apps/api/prisma/schema.prisma` (54 张表)                                  |
+| 后端模块                   | `apps/api/src/modules/*` (20 个模块)                                       |
+| 后端测试                   | `apps/api/test/*.spec.ts` (10 个) + `apps/api/test/extra/*.spec.ts` (8 个) |
+| 小程序页面                 | `apps/miniapp/src/pages/*` (35 个注册页, 另有 1 个已注释保留: mine)        |
+| 小程序状态                 | `apps/miniapp/src/store/{auth,community,notification}.ts`                  |
+| 小程序服务层               | `apps/miniapp/src/services/*` (16 个 Service 文件)                         |
+| 小程序契约适配             | `apps/miniapp/src/utils/mappers.ts` (DTO → 展示模型)                       |
+| Admin 页面                 | `apps/admin/src/app/*` (21 个 page.tsx, 含根重定向, 20 功能页)             |
+| 迁移文件                   | `apps/api/prisma/migrations/` (8 次迁移)                                   |
+| 种子数据                   | `apps/api/prisma/seed*.ts` (3 份)                                          |
 
 ### 2.4 启动命令速查
 
@@ -92,27 +92,28 @@ xiaoqu-bangbang-main/
 
 ### 3.2 核心业务实体
 
-| 术语     | 代码标识                | 含义                                                                                                                           |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| 小区     | `Community`             | 互助的最小地理单元, 所有业务数据按小区隔离                                                                                     |
-| 社群     | `SocialGroup`           | 小区内的兴趣/楼栋群入口 (可见性分 public/verified_only); 小程序端已上线, 见 plaza 社群入口卡片                                 |
-| 事件     | `Event`                 | 邻里互助的基本单元 (求助/公益/寻物/反馈/讨论 5 类, 分互助类和议事类两大类)                                                     |
-| 闲置     | `MarketItem`            | 二手物品 (出售/免费/交换, 含成色等级)                                                                                          |
-| 议题     | `Topic`                 | 社区公共议题, 关联多个事件, 支持赞踩/评分/讨论                                                                                 |
-| 投票     | `Vote`                  | 社区投票 (单选/多选, 结果可见性可控)                                                                                           |
-| 业委会   | `CommitteeMember`       | 业委会成员, 支持身份认领                                                                                                       |
-| 公告     | `CommitteeAnnouncement` | 业委会发布的官方信息                                                                                                           |
-| 小红花   | `flowerCount`           | 贡献度积分单位, 四套激励体系各自发放 (互助/议事/议题/小区创建)                                                                 |
-| 贡献分   | `score`                 | 排行榜积分, 由小红花等汇总                                                                                                     |
-| 勋章     | `Badge`                 | 贡献成就 (互助: helper_1/5/20, flower_10/50; 议事: feedback_5/20; 议题: topic_1/5; 特殊: first_owner_top30, founder, seed)     |
-| 排行榜   | `RankingSnapshot`       | 按月/总榜的排名快照                                                                                                            |
-| 小区申请 | `CommunityApplication`  | 用户申请新开小区, 支持邻居助力                                                                                                 |
-| 举报     | `Report`                | 对事件/评论/闲置/议题/投票/用户的举报 (8 种目标: event/event_comment/market_item/market_comment/topic/topic_comment/vote/user) |
-| Banner   | `Banner`                | 运营位轮播图 (首页/事件列表/闲置列表)                                                                                          |
-| 服务商   | `ServiceProvider`       | 小区推荐的便民服务                                                                                                             |
-| 通知     | `Notification`          | 站内消息 (9 种类型: review_result/event_response/completion/badge/feedback/vote/announcement/topic_closed/system)              |
-| 分享卡片 | `ShareCardConfig`       | 分享到微信会话的卡片配置                                                                                                       |
-| AI审核   | `AiReviewLog`           | 内容自动审核记录 (Mock 实现)                                                                                                   |
+| 术语     | 代码标识                | 含义                                                                                                                                                         |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 小区     | `Community`             | 互助的最小地理单元, 所有业务数据按小区隔离                                                                                                                   |
+| 社群     | `SocialGroup`           | 小区内的兴趣/楼栋群入口 (可见性分 public/verified_only); 小程序端已上线, 见 plaza 社群入口卡片                                                               |
+| 事件     | `Event`                 | 邻里互助的基本单元 (求助/公益/寻物/反馈/讨论 5 类, 分互助类和议事类两大类)                                                                                   |
+| 闲置     | `MarketItem`            | 二手物品 (出售/免费/交换, 含成色等级)                                                                                                                        |
+| 教程     | `Guide`                 | 图文教程 (使用指南/维修排障/保养维护/其他 4 类, Admin 人工审核)                                                                                              |
+| 议题     | `Topic`                 | 社区公共议题, 关联多个事件, 支持赞踩/评分/讨论                                                                                                               |
+| 投票     | `Vote`                  | 社区投票 (单选/多选, 结果可见性可控)                                                                                                                         |
+| 业委会   | `CommitteeMember`       | 业委会成员, 支持身份认领                                                                                                                                     |
+| 公告     | `CommitteeAnnouncement` | 业委会发布的官方信息                                                                                                                                         |
+| 小红花   | `flowerCount`           | 贡献度积分单位, 五套激励体系各自发放 (互助/议事/议题/小区创建/教程)                                                                                          |
+| 贡献分   | `score`                 | 排行榜积分, 由小红花等汇总                                                                                                                                   |
+| 勋章     | `Badge`                 | 贡献成就 (互助: helper_1/5/20, flower_10/50; 议事: feedback_5/20; 议题: topic_1/5; 教程: guide_1/5/20; 特殊: first_owner_top30, founder, seed)               |
+| 排行榜   | `RankingSnapshot`       | 按月/总榜的排名快照                                                                                                                                          |
+| 小区申请 | `CommunityApplication`  | 用户申请新开小区, 支持邻居助力                                                                                                                               |
+| 举报     | `Report`                | 对事件/评论/闲置/议题/投票/教程/教程评论的举报 (10 种目标: event/event_comment/market_item/market_comment/topic/topic_comment/vote/guide/guide_comment/user) |
+| Banner   | `Banner`                | 运营位轮播图 (首页/事件列表/闲置列表)                                                                                                                        |
+| 服务商   | `ServiceProvider`       | 小区推荐的便民服务                                                                                                                                           |
+| 通知     | `Notification`          | 站内消息 (9 种类型: review_result/event_response/completion/badge/feedback/vote/announcement/topic_closed/system)                                            |
+| 分享卡片 | `ShareCardConfig`       | 分享到微信会话的卡片配置                                                                                                                                     |
+| AI审核   | `AiReviewLog`           | 内容自动审核记录 (Mock 实现)                                                                                                                                 |
 
 ### 3.3 事件类型 (EventType)
 
@@ -135,23 +136,24 @@ xiaoqu-bangbang-main/
 | 闲置           | `pending_review` → `on_sale` → `sold` / `closed` / `rejected`                                                                             |
 | 议题           | `pending_review` → `open` → `closed` (完结, 含总结和评分) / `rejected` ← `closed` 可被管理员 reopen (清空关闭信息和已有评分, 回到 `open`) |
 | 投票           | `draft` → `published` → `closed`                                                                                                          |
+| 教程           | `pending_review` -> `published` (Admin 审核通过, 触发激励) / `rejected` (含驳回原因)                                                      |
 | 业主认证       | `unverified` → `pending` → `verified` / `rejected` / `manual_review`                                                                      |
 | 小区申请       | `pending` → `approved` / `rejected`                                                                                                       |
 | AI 审核        | `pending` → `pass` / `reject` / `manual_review`                                                                                           |
 
 ### 3.5 技术术语
 
-| 术语           | 含义                                                                                                  |
-| -------------- | ----------------------------------------------------------------------------------------------------- |
-| 小区数据隔离   | 所有业务数据按 `communityId` 过滤, `CurrentCommunityGuard` 强制要求已选小区                           |
-| 匿名脱敏       | `maskAnonymous()` 对非本人隐藏事件 `creator`, 本人保留 `creatorId`                                    |
-| 契约单一真相源 | `packages/shared/src/api.ts` 是前后端共享的 DTO 唯一定义点                                            |
-| 双方确认完成   | 事件需 creator + helper 都确认才算 `completed`, 触发积分/勋章                                         |
-| 幂等发徽章     | 前 30 名认证业主颁发 `first_owner_top30`, 重复发放会被唯一约束拦截                                    |
-| occurredAt     | 贡献记录时间 (事件完成/审核通过那一刻写入), 区别于事件创建时间 `createdAt`; 月榜按此字段过滤当月贡献  |
-| 评论嵌套限制   | 事件/闲置/议题评论嵌套最多 2 层, 第 3 层返回 400 (R15)                                                |
-| 四套激励体系   | 互助 (事件完成)、议事 (事件审核通过)、议题 (议题审核通过)、小区创建 (申请通过), 各自独立计算          |
-| 事件自动过期   | open/in_progress/processing 超 30 天无新响应自动转 closed; EventsCron 每天凌晨 3 点执行 (P-78 已实现) |
+| 术语           | 含义                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 小区数据隔离   | 所有业务数据按 `communityId` 过滤, `CurrentCommunityGuard` 强制要求已选小区                                         |
+| 匿名脱敏       | `maskAnonymous()` 对非本人隐藏事件 `creator`, 本人保留 `creatorId`                                                  |
+| 契约单一真相源 | `packages/shared/src/api.ts` 是前后端共享的 DTO 唯一定义点                                                          |
+| 双方确认完成   | 事件需 creator + helper 都确认才算 `completed`, 触发积分/勋章                                                       |
+| 幂等发徽章     | 前 30 名认证业主颁发 `first_owner_top30`, 重复发放会被唯一约束拦截                                                  |
+| occurredAt     | 贡献记录时间 (事件完成/审核通过那一刻写入), 区别于事件创建时间 `createdAt`; 月榜按此字段过滤当月贡献                |
+| 评论嵌套限制   | 事件/闲置/议题评论嵌套最多 2 层, 第 3 层返回 400 (R15)                                                              |
+| 五套激励体系   | 互助 (事件完成)、议事 (事件审核通过)、议题 (议题审核通过)、小区创建 (申请通过)、教程 (Admin 审核通过), 各自独立计算 |
+| 事件自动过期   | open/in_progress/processing 超 30 天无新响应自动转 closed; EventsCron 每天凌晨 3 点执行 (P-78 已实现)               |
 
 ---
 
@@ -220,13 +222,14 @@ xiaoqu-bangbang-main/
         ┌────────────────┼────────────────┐
         ▼                ▼                ▼
    apps/api          apps/miniapp      apps/admin
-   (19 模块)          (33 页面)         (19 功能页)
+   (20 模块)          (35 页面)         (20 功能页)
         │                │                │
         ├─ auth          ├─ login         ├─ dashboard
         ├─ communities   ├─ community-*   ├─ reviews
         ├─ verifications ├─ verify        ├─ events
         ├─ events        ├─ events/*      ├─ topics
         ├─ market        ├─ market/*      ├─ market
+        ├─ guides        ├─ guide*        ├─ guides
         ├─ topics        ├─ topic*        ├─ verifications
         ├─ votes         ├─ vote*         ├─ community-applications
         ├─ committee     ├─ committee*    ├─ committee*
@@ -248,7 +251,7 @@ xiaoqu-bangbang-main/
 **依赖分层** (自底向上):
 
 1. **地基层**: auth → communities → verifications (+ ocr + ai-review)
-2. **业务层**: events, market, topics, votes, committee, community-applications
+2. **业务层**: events, market, topics, votes, committee, community-applications, guides
 3. **激励层**: rankings, notifications, share
 4. **支撑层**: banners, serviceProviders, upload, reports
 5. **后台层**: admin (聚合所有模块的管理端)

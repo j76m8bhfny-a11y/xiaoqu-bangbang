@@ -882,6 +882,10 @@ async function seed() {
     // 议题类
     { code: 'topic_1', name: '议题提出者', description: '提出1个议题' },
     { code: 'topic_5', name: '议题达人', description: '提出5个议题' },
+    // 教程类
+    { code: 'guide_1', name: '教程分享者', description: '发布1个教程' },
+    { code: 'guide_5', name: '教程达人', description: '发布5个教程' },
+    { code: 'guide_20', name: '教程专家', description: '发布20个教程' },
     // 小花类
     { code: 'flower_10', name: '花开满园', description: '累计获得10朵小红花' },
     { code: 'flower_50', name: '花团锦簇', description: '累计获得50朵小红花' },
