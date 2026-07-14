@@ -7,8 +7,6 @@
 .plaza {
   min-height: 100vh;
   background: $color-bg;
-  position: relative;
-  z-index: 1;
 
   &__scroll {
     height: 100vh;
