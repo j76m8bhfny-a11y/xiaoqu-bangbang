@@ -1,4 +1,5 @@
 import { View, Text } from '@tarojs/components';
+import Taro from '@tarojs/taro';
 import './index.scss';
 import Icon from '@/components/icon';
 
@@ -17,7 +18,7 @@ const AD_CONTENT = {
 export default function AdPopup({ visible, onClose }: AdPopupProps) {
   if (!visible) return null;
   return (
-    <View className="ad-popup" onClick={onClose}>
+    <View className="ad-popup">
       <View className="ad-popup__card" catchMove>
         <View className="ad-popup__close" onClick={onClose}>
           <View className="ad-popup__close-icon">
@@ -30,7 +31,10 @@ export default function AdPopup({ visible, onClose }: AdPopupProps) {
           </View>
           <Text className="ad-popup__title">{AD_CONTENT.title}</Text>
           <Text className="ad-popup__subtitle">{AD_CONTENT.subtitle}</Text>
-          <View className="ad-popup__cta" onClick={onClose}>
+          <View
+            className="ad-popup__cta"
+            onClick={() => Taro.switchTab({ url: '/pages/ranking/index' })}
+          >
             <Text className="ad-popup__cta-text">{AD_CONTENT.ctaText}</Text>
           </View>
         </View>

@@ -43,7 +43,7 @@ export default defineAppConfig({
     'pages/user-profile/index',
   ],
   // tab 顺序：小区事（首屏）/ 邻里帮 / 光荣榜 / 我的（挪到最右）
-  // 文案通俗化：公共反馈→小区事、邻里互助→邻里帮、棒帮榜→光荣榜
+  // 文案通俗化：公共反馈->小区事、邻里互助->邻里帮、棒帮榜->光荣榜
   // ponytail: 图标沿用现有彩色 png（selectedColor 只作用于文字）；
   //           统一矢量图标重绘作为后续单独任务。
   tabBar: {

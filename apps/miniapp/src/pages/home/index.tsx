@@ -194,7 +194,7 @@ export default function Home() {
   };
 
   return (
-    <View className="home page-bg">
+    <View className="home">
       <ScrollView scrollY className="home__scroll">
         {/* 用户卡片 */}
         <View className="home__header">

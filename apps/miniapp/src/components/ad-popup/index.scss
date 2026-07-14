@@ -1,3 +1,5 @@
+@use '../../styles/tokens.scss' as *;
+
 .ad-popup {
   position: fixed;
   top: 0;
@@ -14,25 +16,25 @@
 .ad-popup__card {
   position: relative;
   width: 80%;
-  max-width: 300px;
+  max-width: 600px;
   background: linear-gradient(135deg, #eaf4ec 0%, #fbf0dd 100%);
-  border-radius: 16px;
-  padding: 32px 24px 24px;
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-lg $spacing-lg;
 }
 
 .ad-popup__close {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 36px;
-  height: 36px;
+  top: $spacing-xs;
+  right: $spacing-xs;
+  width: 72px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .ad-popup__close-icon {
-  font-size: 18px;
+  font-size: $font-size-lg;
   color: #999;
 }
 
@@ -41,35 +43,35 @@
 }
 
 .ad-popup__emoji {
-  font-size: 40px;
+  font-size: 80px;
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: $spacing-sm;
 }
 
 .ad-popup__title {
-  font-size: 20px;
+  font-size: $font-size-xl;
   font-weight: 700;
   color: #2c3e50;
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: $spacing-xs;
 }
 
 .ad-popup__subtitle {
-  font-size: 14px;
+  font-size: $font-size-sm;
   color: #7f8c8d;
   display: block;
-  margin-bottom: 20px;
+  margin-bottom: $spacing-lg;
 }
 
 .ad-popup__cta {
   display: inline-block;
   background: #5b9e6f;
-  padding: 8px 32px;
-  border-radius: 20px;
+  padding: $spacing-xs $spacing-xl;
+  border-radius: $radius-pill;
 }
 
 .ad-popup__cta-text {
   color: #fff;
-  font-size: 14px;
+  font-size: $font-size-sm;
   font-weight: 600;
 }
