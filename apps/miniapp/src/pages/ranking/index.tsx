@@ -151,7 +151,9 @@ export default function Ranking() {
                       <Icon name="flower" size={16} color="#E89B6C" />{' '}
                       <Text>{top3[1].flowerCount}</Text>
                     </View>
-                    <View className="ranking__podium-bar ranking__podium-bar--second" />
+                    <View className="ranking__podium-bar ranking__podium-bar--second">
+                      <Text>2</Text>
+                    </View>
                   </View>
 
                   {/* 第1名 */}
@@ -171,7 +173,9 @@ export default function Ranking() {
                       <Icon name="flower" size={16} color="#E89B6C" />{' '}
                       <Text>{top3[0].flowerCount}</Text>
                     </View>
-                    <View className="ranking__podium-bar ranking__podium-bar--first" />
+                    <View className="ranking__podium-bar ranking__podium-bar--first">
+                      <Text>1</Text>
+                    </View>
                   </View>
 
                   {/* 第3名 */}
@@ -191,7 +195,9 @@ export default function Ranking() {
                       <Icon name="flower" size={16} color="#E89B6C" />{' '}
                       <Text>{top3[2].flowerCount}</Text>
                     </View>
-                    <View className="ranking__podium-bar ranking__podium-bar--third" />
+                    <View className="ranking__podium-bar ranking__podium-bar--third">
+                      <Text>3</Text>
+                    </View>
                   </View>
                 </View>
               )}
@@ -221,7 +227,7 @@ export default function Ranking() {
               {/* 我的排名 */}
               {myRank && (
                 <View className="ranking__my-rank">
-                  <View className="ranking__list-avatar">
+                  <View className="ranking__my-rank-avatar">
                     <Text className="ranking__list-avatar-text">我</Text>
                   </View>
                   <View className="ranking__list-info">
