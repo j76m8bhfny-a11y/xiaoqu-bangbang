@@ -1,13 +1,5 @@
-import type {
-  EventDto,
-  RankingItemDto,
-  BannerDto,
-  ServiceProviderDto,
-} from '@xiaoqu-bangbang/shared';
+import type { EventDto } from '@xiaoqu-bangbang/shared';
 import type { EventCardData } from '@/components/event-card';
-import type { RankingUser } from '@/components/ranking-top3';
-import type { BannerItem } from '@/components/banner-carousel';
-import type { ServiceProviderData } from '@/components/service-card';
 
 export const EVENT_TYPE_CONFIG: Record<
   string,
@@ -90,61 +82,6 @@ export function mapEventDtoToCardData(dto: EventDto): EventCardData {
     thanksCount: dto.thanksCount,
     ctaText: cfg.ctaText,
     ctaColor: cfg.ctaColor,
-  };
-}
-
-export function mapRankingItemToUser(dto: RankingItemDto): RankingUser {
-  return {
-    id: dto.userId,
-    nickname: dto.nickname,
-    avatarUrl: dto.avatarUrl || '',
-    flowerCount: dto.flowerCount,
-    helpCount: dto.helpCount,
-  };
-}
-
-export function mapBannerDtoToItem(dto: BannerDto): BannerItem {
-  const colorMap: Record<string, { bg: string; accent: string }> = {
-    event: { bg: '#eaf4ec', accent: '#5b9e6f' },
-    market: { bg: '#fbf0dd', accent: '#e0a458' },
-    announcement: { bg: '#eaf4ec', accent: '#5b9e6f' },
-  };
-  const colors = colorMap[dto.linkType] || { bg: '#eaf4ec', accent: '#5b9e6f' };
-  return {
-    id: dto.id,
-    title: dto.title,
-    subtitle: dto.subtitle ?? undefined,
-    ctaText: '去看看',
-    bgColor: colors.bg,
-    accentColor: colors.accent,
-    linkType: dto.linkType,
-    linkId: dto.linkId ?? undefined,
-    linkUrl: dto.linkUrl ?? undefined,
-  };
-}
-
-export function mapServiceProviderDto(dto: ServiceProviderDto): ServiceProviderData {
-  const categoryLabels: Record<string, string> = {
-    repair: '维修',
-    cleaning: '保洁',
-    lock: '开锁',
-    home_appliance: '家电',
-    moving: '搬家',
-    pet: '宠物',
-    other: '其他',
-  };
-  const sourceLabels: Record<string, string> = {
-    platform: '平台',
-    committee: '业委会',
-    community: '邻居',
-  };
-  return {
-    id: dto.id,
-    name: dto.name,
-    category: dto.category,
-    categoryLabel: categoryLabels[dto.category] || dto.category,
-    description: dto.description,
-    recommendationSource: sourceLabels[dto.recommendationSource] || dto.recommendationSource,
   };
 }
 
