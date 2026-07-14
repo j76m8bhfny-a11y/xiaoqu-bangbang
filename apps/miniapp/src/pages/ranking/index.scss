@@ -3,10 +3,12 @@
 .ranking {
   min-height: 100vh;
   background: $color-bg;
+  position: relative;
+  z-index: 1;
 
   &__header {
-    margin: $spacing-lg $spacing-md 0;
-    padding: 20px $spacing-lg;
+    margin: $spacing-lg $spacing-lg 0;
+    padding: $spacing-lg;
     border-radius: $radius-lg;
     background: linear-gradient(135deg, $color-accent, $color-accent-deep);
     box-shadow: $shadow-warm;
