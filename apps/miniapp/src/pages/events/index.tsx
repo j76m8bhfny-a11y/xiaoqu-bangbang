@@ -144,7 +144,7 @@ export default function Events() {
       : '/pages/market-create/index';
 
   return (
-    <View className="events page-bg">
+    <View className="events">
       <View className="events__header">
         <View className="events__header-title">
           <Icon name="handshake" size={22} /> <Text>邻里互助</Text>
