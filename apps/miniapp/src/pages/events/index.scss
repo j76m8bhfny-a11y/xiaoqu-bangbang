@@ -5,22 +5,27 @@
   background: $color-bg;
 
   &__header {
-    padding: $spacing-lg $spacing-lg $spacing-sm;
+    margin: $spacing-lg $spacing-lg 0;
+    padding: 20px $spacing-lg;
+    border-radius: $radius-lg;
+    background: linear-gradient(135deg, $color-primary, $color-primary-deep);
+    box-shadow: $shadow-card;
+    overflow: hidden;
   }
 
   &__header-title {
     display: flex;
     align-items: center;
-    display: block;
+    gap: $spacing-xs;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-text;
+    color: #fff;
   }
 
   &__header-sub {
     display: block;
     font-size: $font-size-xs;
-    color: $color-text-secondary;
+    color: rgba(255, 255, 255, 0.8);
     margin-top: 4px;
   }
 

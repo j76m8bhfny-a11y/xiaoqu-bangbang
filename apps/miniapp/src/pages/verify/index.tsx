@@ -135,6 +135,19 @@ export default function Verify() {
   return (
     <View className="verify">
       <ScrollView scrollY className="verify__body">
+        {/* ===== Benefits Card ===== */}
+        <View className="verify__benefits">
+          <Text className="verify__benefits-title">认证权益</Text>
+          {['发布互助和闲置', '发起议题和投票', '查看完整联系方式', '获得小红花奖励'].map((b) => (
+            <View key={b} className="verify__benefit-item">
+              <View className="verify__benefit-check">
+                <Icon name="check" size={12} color="#5B9E6F" />
+              </View>
+              <Text className="verify__benefit-text">{b}</Text>
+            </View>
+          ))}
+        </View>
+
         {/* ===== Form Section ===== */}
         <View className="verify__card">
           <Text className="verify__section-title">材料类型</Text>

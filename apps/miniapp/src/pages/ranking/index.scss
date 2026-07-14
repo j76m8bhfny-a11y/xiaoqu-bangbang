@@ -5,22 +5,29 @@
   background: $color-bg;
 
   &__header {
-    padding: $spacing-lg $spacing-md $spacing-sm;
+    margin: $spacing-lg $spacing-md 0;
+    padding: 20px $spacing-lg;
+    border-radius: $radius-lg;
+    background: linear-gradient(135deg, $color-accent, $color-accent-deep);
+    box-shadow: $shadow-warm;
+    overflow: hidden;
+    text-align: center;
   }
 
   &__header-title {
     display: flex;
     align-items: center;
-    display: block;
+    justify-content: center;
+    gap: $spacing-xs;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-text;
+    color: #fff;
   }
 
   &__header-sub {
     display: block;
     font-size: $font-size-xs;
-    color: $color-text-secondary;
+    color: rgba(255, 255, 255, 0.85);
     margin-top: 4px;
   }
 
@@ -185,17 +192,17 @@
 
     &--first {
       height: 120px;
-      background: linear-gradient(180deg, $color-primary, $color-primary-deep);
+      background: linear-gradient(180deg, $color-accent-soft, $color-accent);
     }
 
     &--second {
       height: 90px;
-      background: linear-gradient(180deg, $color-accent, #c98a3f);
+      background: linear-gradient(180deg, $color-cream, $color-cream-deep);
     }
 
     &--third {
       height: 70px;
-      background: linear-gradient(180deg, $color-primary-soft, $color-primary);
+      background: linear-gradient(180deg, $color-bg-green, $color-primary-soft);
     }
   }
 

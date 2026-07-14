@@ -11,7 +11,10 @@ $color-primary: #5b9e6f; // 主色：草绿（点缀/选中/链接）
 $color-primary-deep: #4a8c5e; // 主色加深：按钮底色，配白字对比达标
 $color-primary-soft: #a8d5b5; // 主色浅：标签/浅底
 $color-accent: #e89b6c; // 点缀暖色：蜜桃橙（提醒/奖励/装饰）
+$color-accent-deep: #d48050; // 点缀加深：渐变收尾
+$color-accent-soft: #fbf0dd; // 点缀浅底（accent 配套）
 $color-cream: #fff3d6; // 奶油色：宫格卡片底色
+$color-cream-deep: #f3ead0; // 奶油深色：渐变收尾
 $color-dark: #171717; // 深墨黑
 
 // ── 文字 ──
@@ -57,4 +60,5 @@ $line-height-base: 1.6; // 正文行距放宽，好读
 
 // ── 阴影（淡、柔）──
 $shadow-card: 0 4px 20px rgba(91, 158, 111, 0.08); // 卡片淡阴影，带一点主色调
+$shadow-warm: 0 4px 16px rgba(232, 155, 108, 0.1); // 暖色卡片阴影
 $shadow-btn: 0 6px 16px rgba(74, 140, 94, 0.24); // 主按钮阴影

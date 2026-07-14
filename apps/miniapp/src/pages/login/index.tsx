@@ -88,6 +88,7 @@ export default function Login() {
         <Text className="login__title">左邻右帮</Text>
         <Text className="login__subtitle">让小区里的好事，被看见</Text>
         <View className="login__btn login__btn--wechat" onTap={handleWechatLogin}>
+          <Text className="login__btn-icon">💬</Text>
           <Text className="login__btn-text">{loading ? '登录中...' : '微信一键登录'}</Text>
         </View>
         <Text className="login__hint">登录即代表同意《用户协议》和《隐私政策》</Text>

@@ -20,6 +20,50 @@
     margin: 0 $spacing-md $spacing-lg;
   }
 
+  // ===== Benefits card =====
+  &__benefits {
+    background: #fff;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    box-shadow: $shadow-card;
+    margin: 0 $spacing-md $spacing-lg;
+  }
+
+  &__benefits-title {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__benefit-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-xs;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__benefit-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: $color-bg-green;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__benefit-text {
+    font-size: $font-size-sm;
+    color: $color-text;
+  }
+
   &__section-title {
     display: flex;
     align-items: center;

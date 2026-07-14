@@ -134,7 +134,7 @@
 
   &__vote-btn {
     flex-shrink: 0;
-    background: $color-accent;
+    background: $color-primary;
     border-radius: $radius-pill;
     padding: $spacing-sm $spacing-lg;
   }
@@ -173,7 +173,7 @@
   }
 
   &__topic-create {
-    background: $color-primary-deep;
+    background: $color-accent;
     border-radius: $radius-pill;
     padding: $spacing-xs $spacing-lg;
   }
