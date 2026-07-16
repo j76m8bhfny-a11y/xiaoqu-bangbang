@@ -15,20 +15,25 @@ import './index.scss';
 // 入口分层：业委会卡片（公告/入口）→ 待投票 → 议题列表 → 发起议题 CTA。
 // 闲置（market）下沉到 events tab；议题（topic）取代旧 event-type=public_feedback/discussion。
 
-// 启动广告弹窗：模块级变量保证每次启动只弹一次
-let adPopupShown = false;
+// 启动广告弹窗：按月持久化，每月最多弹一次
+const AD_POPUP_KEY = () => {
+  const d = new Date();
+  return `ad_popup_ranking_${d.getFullYear()}-${d.getMonth() + 1}`;
+};
 
 export default function Plaza() {
   useAuthGuard();
   const communityId = useCommunityStore((s) => s.currentCommunityId);
-  const communityName = useCommunityStore((s) => s.currentCommunityName);
 
-  // 启动广告弹窗
+  // 启动广告弹窗：当月未看过才弹
   const [adVisible, setAdVisible] = useState(false);
   useEffect(() => {
-    if (!adPopupShown) {
-      adPopupShown = true;
-      const timer = setTimeout(() => setAdVisible(true), 300);
+    const key = AD_POPUP_KEY();
+    if (!Taro.getStorageSync(key)) {
+      const timer = setTimeout(() => {
+        setAdVisible(true);
+        Taro.setStorageSync(key, true);
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -110,93 +115,46 @@ export default function Plaza() {
   return (
     <View className="plaza">
       <ScrollView scrollY className="plaza__scroll">
-        {/* 小区标识条：一眼确认「这是我家小区」，点击可切换 */}
-        <View
-          className="plaza__community-bar"
-          onClick={() => Taro.navigateTo({ url: '/pages/community-select/index' })}
-        >
-          <View className="plaza__community-name">
-            <Icon name="house" size={16} /> <Text>{communityName ?? '我的小区'}</Text>
-          </View>
-          <Text className="plaza__community-switch">切换 ›</Text>
-        </View>
-
-        {/* 业委会公告 */}
-        <View className="plaza__card plaza__committee">
-          <View className="plaza__card-header">
-            <View className="plaza__card-title">
-              <Icon name="megaphone" size={18} /> <Text>业委会通知</Text>
-            </View>
-            <Text
-              className="plaza__card-more"
-              onClick={() => Taro.navigateTo({ url: '/pages/committee/index' })}
-            >
-              进入 ›
-            </Text>
-          </View>
-          {latestAnnouncement ? (
-            <View
-              className="plaza__committee-item"
-              onClick={() =>
-                Taro.navigateTo({
-                  url: `/pages/committee-announcement/index?id=${latestAnnouncement.id}`,
-                })
-              }
-            >
-              <Text className="plaza__committee-title">{latestAnnouncement.title}</Text>
-              <Text className="plaza__committee-date">
-                {new Date(latestAnnouncement.publishedAt).toLocaleDateString()}
-              </Text>
-            </View>
-          ) : (
-            <Text className="plaza__empty-line">暂无公告</Text>
-          )}
-        </View>
-
-        {/* 待投票 */}
-        {activeVotes.length > 0 && (
-          <View className="plaza__card">
+        {/* 业委会通知 + 社群入口 左右排列 */}
+        <View className="plaza__dual-card">
+          <View className="plaza__card plaza__committee plaza__dual-item">
             <View className="plaza__card-header">
               <View className="plaza__card-title">
-                <Icon name="vote" size={18} /> <Text>进行中投票</Text>
+                <Icon name="megaphone" size={18} /> <Text>业委会</Text>
               </View>
-              <Text
-                className="plaza__card-more"
-                onClick={() => Taro.navigateTo({ url: '/pages/votes/index' })}
-              >
-                查看全部 ›
-              </Text>
             </View>
-            {activeVotes.map((v) => (
+            {latestAnnouncement ? (
               <View
-                key={v.id}
-                className="plaza__vote-item"
-                onClick={() => Taro.navigateTo({ url: `/pages/vote-detail/index?id=${v.id}` })}
+                className="plaza__committee-item"
+                onClick={() =>
+                  Taro.navigateTo({
+                    url: `/pages/committee-announcement/index?id=${latestAnnouncement.id}`,
+                  })
+                }
               >
-                <View className="plaza__vote-detail">
-                  <Text className="plaza__vote-title">{v.title}</Text>
-                  <Text className="plaza__vote-meta">
-                    截止 {new Date(v.endAt).toLocaleDateString()}
-                  </Text>
-                </View>
-                <View className="plaza__vote-btn">
-                  <Text className="plaza__vote-btn-text">去投票</Text>
-                </View>
+                <Text className="plaza__committee-title">{latestAnnouncement.title}</Text>
+                <Text className="plaza__committee-date">
+                  {new Date(latestAnnouncement.publishedAt).toLocaleDateString()}
+                </Text>
               </View>
-            ))}
+            ) : (
+              <Text className="plaza__empty-line">暂无公告</Text>
+            )}
           </View>
-        )}
 
-        {/* 社群入口 */}
-        <View
-          className="plaza__card plaza__social-entry"
-          onClick={() => Taro.navigateTo({ url: '/pages/social-groups/index' })}
-        >
-          <View className="plaza__card-header">
-            <View className="plaza__card-title">
-              <Icon name="people" size={18} /> <Text>社群</Text>
+          <View
+            className="plaza__card plaza__committee plaza__dual-item"
+            onClick={() => Taro.navigateTo({ url: '/pages/social-groups/index' })}
+          >
+            <View className="plaza__card-header">
+              <View className="plaza__card-title">
+                <Icon name="people" size={18} /> <Text>社群</Text>
+              </View>
             </View>
-            <Text className="plaza__card-more">进入 ›</Text>
+            <View className="plaza__committee-item">
+              <Text className="plaza__committee-title">邻里社群</Text>
+              <Text className="plaza__committee-date">加入兴趣群组</Text>
+            </View>
           </View>
         </View>
 

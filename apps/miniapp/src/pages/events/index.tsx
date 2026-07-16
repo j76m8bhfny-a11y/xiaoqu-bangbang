@@ -10,7 +10,7 @@ import { mapEventDtoToCardData, GUIDE_CATEGORY_CONFIG } from '@/utils/mappers';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
-import EventCard from '../../components/event-card';
+import MasonryEventCard from '@/components/masonry-card';
 import BlurredList from '@/components/blurred-list';
 import Icon from '@/components/icon';
 import './index.scss';
@@ -146,29 +146,29 @@ export default function Events() {
   return (
     <View className="events">
       <View className="events__header">
-        <View className="events__header-title">
-          <Icon name="handshake" size={22} /> <Text>邻里互助</Text>
-        </View>
-        <Text className="events__header-sub">求助、帮忙、闲置流转、教程</Text>
-      </View>
-
-      {/* 第一层：互助 / 闲置 / 指南 */}
-      <View className="events__outer-tabs">
-        {(
-          [
-            { k: 'help', label: '互助' },
-            { k: 'market', label: '闲置' },
-            { k: 'guide', label: '指南' },
-          ] as const
-        ).map((o) => (
-          <View
-            key={o.k}
-            className={`events__outer-tab ${outer === o.k ? 'events__outer-tab--active' : ''}`}
-            onClick={() => setOuter(o.k as OuterTab)}
-          >
-            <Text className="events__outer-tab-text">{o.label}</Text>
+        <View className="events__header-row">
+          <View className="events__header-title">
+            <Icon name="handshake" size={22} /> <Text>邻里互助</Text>
           </View>
-        ))}
+          <Text className="events__header-sub">求助、帮忙、闲置流转、教程</Text>
+        </View>
+        <View className="events__outer-tabs">
+          {(
+            [
+              { k: 'help', label: '互助' },
+              { k: 'market', label: '闲置' },
+              { k: 'guide', label: '指南' },
+            ] as const
+          ).map((o) => (
+            <View
+              key={o.k}
+              className={`events__outer-tab ${outer === o.k ? 'events__outer-tab--active' : ''}`}
+              onClick={() => setOuter(o.k as OuterTab)}
+            >
+              <Text className="events__outer-tab-text">{o.label}</Text>
+            </View>
+          ))}
+        </View>
       </View>
 
       {/* 第二层 filter + 搜索图标 */}
@@ -236,19 +236,21 @@ export default function Events() {
           <EmptyState icon={emptyIcon} text={emptyText} />
         )}
 
-        {/* 互助列表 */}
+        {/* 互助列表 - 瀑布流 */}
         {!list.loading && !list.error && isHelp && (
-          <BlurredList
-            items={helpCards}
-            previewCount={3}
-            renderItem={(event) => (
-              <EventCard
-                key={event.id}
-                data={event}
-                onClick={(id) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` })}
-              />
-            )}
-          />
+          <View className="events__masonry">
+            <BlurredList
+              items={helpCards}
+              previewCount={3}
+              renderItem={(event) => (
+                <MasonryEventCard
+                  key={event.id}
+                  data={event}
+                  onClick={(id) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` })}
+                />
+              )}
+            />
+          </View>
         )}
 
         {/* 闲置列表 */}

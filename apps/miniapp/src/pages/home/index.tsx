@@ -70,6 +70,7 @@ const MENU_ITEMS: MenuItem[][] = [
     { id: 'my_services', label: '我的服务', icon: 'wrench' },
   ],
   [
+    { id: 'community_switch', label: '切换小区', icon: 'house' },
     { id: 'community_apply', label: '申请开通小区', icon: 'community' },
     { id: 'my_applications', label: '我的小区申请', icon: 'documents' },
     { id: 'invite', label: '邀请邻居', icon: 'envelope' },
@@ -87,6 +88,7 @@ const MENU_ROUTES: Record<string, string> = {
   settings: '/pages/settings/index',
   community_apply: '/pages/community-apply/index',
   my_applications: '/pages/my-applications/index',
+  community_switch: '/pages/community-select/index',
 };
 
 export default function Home() {

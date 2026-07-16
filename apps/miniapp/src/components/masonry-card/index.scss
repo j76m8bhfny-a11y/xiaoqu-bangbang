@@ -1,0 +1,84 @@
+@use '../../styles/tokens.scss' as *;
+
+.masonry-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: $color-card;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+  box-sizing: border-box;
+  break-inside: avoid;
+  transition: transform 0.15s;
+  padding: $spacing-lg $spacing-md;
+  margin-bottom: $spacing-md;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:nth-child(3n + 1) {
+    min-height: 300px;
+  }
+
+  &:nth-child(3n + 2) {
+    min-height: 240px;
+  }
+
+  &:nth-child(3n) {
+    min-height: 270px;
+  }
+
+  &__tag {
+    align-self: flex-start;
+    padding: 2px 8px;
+    border-radius: $radius-pill;
+    margin-bottom: $spacing-md;
+  }
+
+  &__title {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+    line-height: 1.6;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-xs;
+    margin-top: $spacing-md;
+  }
+
+  &__name {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  &__stats {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    flex-shrink: 0;
+  }
+
+  &__stat {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__stat-text {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+}

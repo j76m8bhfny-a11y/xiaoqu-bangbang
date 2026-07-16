@@ -34,17 +34,19 @@
   &__tabs {
     display: flex;
     margin: $spacing-md $spacing-lg 0;
-    gap: $spacing-xs;
+    background: #fff;
+    border-radius: $radius-pill;
+    padding: 6px;
+    box-shadow: $shadow-card;
   }
 
   &__tab {
     flex: 1;
     display: flex;
     justify-content: center;
-    padding: $spacing-sm;
-    border-radius: $radius-md;
-    background: #fff;
-    box-shadow: $shadow-card;
+    padding: $spacing-xs 0;
+    border-radius: $radius-pill;
+    transition: all 0.2s;
 
     &--active {
       background: $color-accent;

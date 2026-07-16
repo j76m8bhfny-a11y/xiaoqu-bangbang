@@ -39,8 +39,7 @@
   // ── 通用卡片 ──
   &__card {
     background: $color-card;
-    margin: $spacing-sm $spacing-lg;
-    padding: $spacing-lg;
+    padding: $spacing-md;
     border-radius: $radius-md;
     box-shadow: $shadow-card;
   }
@@ -48,6 +47,18 @@
   // 业委会通知：草绿左描边，突出「官方、重要」
   &__committee {
     border-left: 8px solid $color-primary;
+  }
+
+  // 左右双卡片
+  &__dual-card {
+    display: flex;
+    gap: $spacing-sm;
+    margin: $spacing-sm $spacing-lg;
+  }
+
+  &__dual-item {
+    flex: 1;
+    min-width: 0;
   }
 
   &__card-header {
