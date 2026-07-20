@@ -12,6 +12,9 @@ import type {
   EventApplicationDto,
   MatchedSkillDto,
   EventRateDto,
+  PetFeedMeta,
+  PetWalkMeta,
+  PetLostMeta,
 } from '@xiaoqu-bangbang/shared';
 import {
   EventType,
@@ -19,6 +22,7 @@ import {
   RewardType,
   EventStatus,
   ApplicationStatus,
+  PetSubType,
 } from '@xiaoqu-bangbang/shared';
 import { EVENT_TYPE_CONFIG, EVENT_STATUS_LABELS } from '@/utils/mappers';
 import './index.scss';
@@ -49,6 +53,16 @@ const EVENT_TYPE_TO_ACTION: Record<string, ActionType> = {
   [EventType.LOST_FOUND]: ActionType.PROVIDE_CLUE,
   [EventType.PUBLIC_FEEDBACK]: ActionType.FOLLOW,
   [EventType.DISCUSSION]: ActionType.PARTICIPATE_DISCUSSION,
+};
+
+// ponytail: petMeta 展示用的 label 映射，上限 M22 三种 subType，新增字段时同步加
+const PET_TYPE_LABELS: Record<string, string> = { cat: '猫', dog: '狗', fish: '鱼', other: '其他' };
+const DOG_SIZE_LABELS: Record<string, string> = { small: '小型', medium: '中型', large: '大型' };
+const TIME_SLOT_LABELS: Record<string, string> = {
+  morning: '早上',
+  noon: '中午',
+  evening: '傍晚',
+  night: '夜间',
 };
 
 const ACTION_TYPE_LABELS: Record<string, string> = {
@@ -528,6 +542,147 @@ export default function EventDetail() {
                 </SwiperItem>
               ))}
             </Swiper>
+          </View>
+        )}
+
+        {event.type === EventType.PET_HELP && event.petMeta && event.subType && (
+          <View className="pet-meta">
+            <Text className="section-title">详细信息</Text>
+            {event.subType === PetSubType.FEED &&
+              (() => {
+                const m = event.petMeta as PetFeedMeta;
+                return (
+                  <>
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">宠物种类</Text>
+                      <Text className="pet-meta__value">
+                        {PET_TYPE_LABELS[m.petType] ?? m.petType}
+                      </Text>
+                    </View>
+                    {m.petName && (
+                      <View className="pet-meta__row">
+                        <Text className="pet-meta__label">名字</Text>
+                        <Text className="pet-meta__value">{m.petName}</Text>
+                      </View>
+                    )}
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">喂食次数/天</Text>
+                      <Text className="pet-meta__value">{m.feedsPerDay}</Text>
+                    </View>
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">总天数</Text>
+                      <Text className="pet-meta__value">{m.totalDays}</Text>
+                    </View>
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">起止日期</Text>
+                      <Text className="pet-meta__value">
+                        {m.dateRange.start} ~ {m.dateRange.end}
+                      </Text>
+                    </View>
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">需要清理</Text>
+                      <Text className="pet-meta__value">{m.needClean ? '是' : '否'}</Text>
+                    </View>
+                  </>
+                );
+              })()}
+            {event.subType === PetSubType.WALK &&
+              (() => {
+                const m = event.petMeta as PetWalkMeta;
+                return (
+                  <>
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">狗的体型</Text>
+                      <Text className="pet-meta__value">
+                        {DOG_SIZE_LABELS[m.dogSize] ?? m.dogSize}
+                      </Text>
+                    </View>
+                    {m.dogName && (
+                      <View className="pet-meta__row">
+                        <Text className="pet-meta__label">名字</Text>
+                        <Text className="pet-meta__value">{m.dogName}</Text>
+                      </View>
+                    )}
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">每天次数</Text>
+                      <Text className="pet-meta__value">{m.timesPerDay}</Text>
+                    </View>
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">每次时长</Text>
+                      <Text className="pet-meta__value">{m.durationPerTime} 分钟</Text>
+                    </View>
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">时间段</Text>
+                      <Text className="pet-meta__value">
+                        {m.timeSlots.map((s) => TIME_SLOT_LABELS[s] ?? s).join('、')}
+                      </Text>
+                    </View>
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">需要牵引绳</Text>
+                      <Text className="pet-meta__value">{m.needGear ? '是' : '否'}</Text>
+                    </View>
+                  </>
+                );
+              })()}
+            {event.subType === PetSubType.LOST &&
+              (() => {
+                const m = event.petMeta as PetLostMeta;
+                return (
+                  <>
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">种类</Text>
+                      <Text className="pet-meta__value">{m.petType}</Text>
+                    </View>
+                    {m.breed && (
+                      <View className="pet-meta__row">
+                        <Text className="pet-meta__label">品种</Text>
+                        <Text className="pet-meta__value">{m.breed}</Text>
+                      </View>
+                    )}
+                    {m.name && (
+                      <View className="pet-meta__row">
+                        <Text className="pet-meta__label">名字</Text>
+                        <Text className="pet-meta__value">{m.name}</Text>
+                      </View>
+                    )}
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">走丢地点</Text>
+                      <Text className="pet-meta__value">{m.lostLocation}</Text>
+                    </View>
+                    <View className="pet-meta__row">
+                      <Text className="pet-meta__label">走丢时间</Text>
+                      <Text className="pet-meta__value">{m.lostTime}</Text>
+                    </View>
+                    {m.appearance && (
+                      <View className="pet-meta__row">
+                        <Text className="pet-meta__label">外观</Text>
+                        <Text className="pet-meta__value">{m.appearance}</Text>
+                      </View>
+                    )}
+                    {m.photos && m.photos.length > 0 && (
+                      <View className="pet-meta__photos">
+                        {m.photos.map((p, i) => (
+                          <Image
+                            key={i}
+                            className="pet-meta__photo"
+                            src={p}
+                            mode="aspectFill"
+                            onClick={() =>
+                              Taro.previewMedia({
+                                sources: m.photos!.map((src) => ({
+                                  url: src,
+                                  type: 'image' as const,
+                                })),
+                                current: i,
+                              })
+                            }
+                          />
+                        ))}
+                      </View>
+                    )}
+                  </>
+                );
+              })()}
           </View>
         )}
 

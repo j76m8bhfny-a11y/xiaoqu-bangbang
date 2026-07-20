@@ -1066,3 +1066,51 @@
     color: $color-text-secondary;
   }
 }
+
+// ponytail: petMeta 详细信息展示区，上限 M22 三种 subType
+.pet-meta {
+  margin: $spacing-sm $spacing-md 0;
+  padding: $spacing-md;
+  background: #fff;
+  border-radius: $radius-md;
+
+  .section-title {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__row {
+    display: flex;
+    align-items: flex-start;
+    padding: $spacing-xs 0;
+    font-size: $font-size-sm;
+  }
+
+  &__label {
+    flex: 0 0 90px;
+    color: $color-text-secondary;
+  }
+
+  &__value {
+    flex: 1;
+    color: $color-text;
+    word-break: break-all;
+  }
+
+  &__photos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-top: $spacing-sm;
+  }
+
+  &__photo {
+    width: 100px;
+    height: 100px;
+    border-radius: $radius-sm;
+    background: $color-bg;
+  }
+}
