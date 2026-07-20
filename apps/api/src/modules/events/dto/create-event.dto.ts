@@ -9,7 +9,14 @@ import {
 } from 'class-validator';
 
 export class CreateEventDto {
-  @IsEnum(['help_request', 'public_welfare', 'lost_found', 'public_feedback', 'discussion'])
+  @IsEnum([
+    'help_request',
+    'public_welfare',
+    'pet_help',
+    'lost_found',
+    'public_feedback',
+    'discussion',
+  ])
   type: string;
 
   @IsString()
@@ -68,4 +75,11 @@ export class CreateEventDto {
   @IsOptional()
   @IsNumber()
   capacity?: number;
+
+  @IsOptional()
+  @IsEnum(['feed', 'walk', 'lost'])
+  subType?: string;
+
+  @IsOptional()
+  petMeta?: Record<string, any>;
 }

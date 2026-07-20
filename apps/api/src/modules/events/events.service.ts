@@ -38,7 +38,9 @@ export class EventsService {
     };
 
     if (query?.type) {
-      where.type = query.type;
+      // M22: 支持 type=a,b,c 多类型联合查询
+      const types = query.type.split(',').filter(Boolean);
+      where.type = types.length > 1 ? { in: types } : query.type;
     } else if (query?.excludeTypes && query.excludeTypes.length > 0) {
       where.type = { notIn: query.excludeTypes };
     }
@@ -119,8 +121,11 @@ export class EventsService {
       deletedAt: null,
     };
 
-    if (query?.type) where.type = query.type;
-    else if (query?.excludeTypes && query.excludeTypes.length > 0)
+    if (query?.type) {
+      // M22: 支持 type=a,b,c 多类型联合查询
+      const types = query.type.split(',').filter(Boolean);
+      where.type = types.length > 1 ? { in: types } : query.type;
+    } else if (query?.excludeTypes && query.excludeTypes.length > 0)
       where.type = { notIn: query.excludeTypes };
     if (query?.status) where.status = query.status;
     if (query?.keyword) {
@@ -204,6 +209,29 @@ export class EventsService {
       throw new BadRequestException('非议事类事件不能挂议题');
     }
 
+    // M22: pet_help 子分类校验
+    if (dto.type === 'pet_help') {
+      if (!dto.subType) {
+        throw new BadRequestException('pet_help 类型必须指定 subType');
+      }
+      // feed/walk 需要业主认证，lost 不需要
+      if (dto.subType === 'feed' || dto.subType === 'walk') {
+        const member = await this.prisma.communityMember.findUnique({
+          where: { userId_communityId: { userId: userId, communityId } },
+        });
+        if (!member || member.verifyStatus !== 'verified') {
+          throw new ForbiddenException({
+            code: 40301,
+            message: '需要业主认证后才能创建代喂/代遛',
+          });
+        }
+      }
+      // feed/walk 不允许 photos 字段
+      if ((dto.subType === 'feed' || dto.subType === 'walk') && dto.petMeta?.photos) {
+        throw new BadRequestException('feed/walk 不支持图片上传');
+      }
+    }
+
     // Run AI review on content - use a temp id for logging before creation
     const tempId = crypto.randomUUID();
     const aiResult = await this.aiReviewService.reviewText(
@@ -269,6 +297,8 @@ export class EventsService {
         topicId: dto.topicId ?? null,
         capacity: dto.capacity ?? null,
         aiComment,
+        subType: dto.type === 'pet_help' ? dto.subType : null,
+        petMeta: dto.type === 'pet_help' ? (dto.petMeta as any) : null,
         status,
         aiReviewStatus,
         aiReviewResult: aiResult as any,
