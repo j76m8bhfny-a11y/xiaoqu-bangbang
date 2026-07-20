@@ -7,20 +7,21 @@ import type { GroupBuyDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
 const STATUS_LABELS: Record<string, string> = {
+  pending_review: '审核中',
   open: '进行中',
-  bid_closed: '已截止',
-  purchasing: '采购中',
-  delivered: '已交付',
+  closed_for_bid: '已截单',
+  purchased: '已采购',
+  completed: '已完成',
   closed: '已关闭',
-  cancelled: '已取消',
+  rejected: '已拒绝',
 };
 
 const ITEM_STATUS_LABELS: Record<string, string> = {
   pending: '待确认',
   confirmed: '已确认',
-  rejected: '已拒绝',
+  purchased: '已采购',
   delivered: '已交付',
-  cancelled: '已取消',
+  rejected: '已拒绝',
 };
 
 const DELIVERY_LABELS: Record<string, string> = {
@@ -157,7 +158,7 @@ const GroupBuyDetail = () => {
   const hasResponded = groupBuy.items.some((it) => it.requesterId === currentUserId);
   const canRespond = !isInitiator && groupBuy.status === 'open' && !hasResponded;
   const hasConfirmedItems = groupBuy.items.some((it) => it.status === 'confirmed');
-  const isClosed = groupBuy.status === 'closed' || groupBuy.status === 'cancelled';
+  const isClosed = groupBuy.status === 'closed' || groupBuy.status === 'rejected';
 
   return (
     <View className="gb-detail">
@@ -319,7 +320,7 @@ const GroupBuyDetail = () => {
               截止接单
             </Button>
           )}
-          {groupBuy.status === 'bid_closed' && hasConfirmedItems && (
+          {groupBuy.status === 'closed_for_bid' && hasConfirmedItems && (
             <Button className="gb-detail__control-btn" onClick={handlePurchased}>
               已采购
             </Button>
