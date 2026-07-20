@@ -1,4 +1,4 @@
-import type { EventDto } from '@xiaoqu-bangbang/shared';
+import type { EventDto, PetSubType } from '@xiaoqu-bangbang/shared';
 import type { EventCardData } from '@/components/event-card';
 
 export const EVENT_TYPE_CONFIG: Record<
@@ -29,6 +29,16 @@ export const EVENT_TYPE_CONFIG: Record<
     ctaText: '我要报名',
     ctaColor: '#4A8C5E',
   },
+  pet_help: {
+    label: '宠物帮帮',
+    color: '#9A5A12',
+    bgColor: '#FBF0DD',
+    ctaText: '我来帮',
+    ctaColor: '#4A8C5E',
+  },
+  // pet_help 子分类 label/ctaText 覆盖（color/bgColor 继承主分类）
+  // M23 阶段加 group_buy.seek / group_buy.offer
+  // @deprecated lost_found 已迁移到 pet_help + subType=lost
   lost_found: {
     label: '寻宠寻物',
     color: '#9A5A12',
@@ -52,6 +62,13 @@ export const EVENT_TYPE_CONFIG: Record<
   },
 };
 
+// pet_help 子分类覆盖（只改 label + ctaText，配色继承主分类）
+const PET_HELP_SUBTYPE_OVERRIDE: Record<PetSubType, { label: string; ctaText: string }> = {
+  feed: { label: '代喂', ctaText: '我来代喂' },
+  walk: { label: '代遛', ctaText: '我来代遛' },
+  lost: { label: '寻宠', ctaText: '提供线索' },
+};
+
 export const EVENT_STATUS_LABELS: Record<string, string> = {
   pending_review: '审核中',
   open: '进行中',
@@ -64,10 +81,15 @@ export const EVENT_STATUS_LABELS: Record<string, string> = {
 
 export function mapEventDtoToCardData(dto: EventDto): EventCardData {
   const cfg = EVENT_TYPE_CONFIG[dto.type] || EVENT_TYPE_CONFIG.discussion;
+  // pet_help 子分类覆盖 label/ctaText（color/bgColor 继承主分类）
+  const subOverride =
+    dto.type === 'pet_help' && dto.subType
+      ? PET_HELP_SUBTYPE_OVERRIDE[dto.subType as PetSubType]
+      : undefined;
   return {
     id: dto.id,
     type: dto.type,
-    typeLabel: cfg.label,
+    typeLabel: subOverride?.label ?? cfg.label,
     typeColor: cfg.color,
     typeBgColor: cfg.bgColor,
     statusLabel: EVENT_STATUS_LABELS[dto.status] || dto.status,
@@ -80,7 +102,7 @@ export function mapEventDtoToCardData(dto: EventDto): EventCardData {
     likeCount: dto.likeCount,
     commentCount: dto.commentCount,
     thanksCount: dto.thanksCount,
-    ctaText: cfg.ctaText,
+    ctaText: subOverride?.ctaText ?? cfg.ctaText,
     ctaColor: cfg.ctaColor,
   };
 }

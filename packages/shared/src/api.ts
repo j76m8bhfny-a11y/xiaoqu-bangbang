@@ -309,7 +309,8 @@ export interface EventParticipantDto {
 }
 
 export interface EventListQuery {
-  type?: EventType;
+  // 支持单类型 'help_request' 或多类型逗号分隔 'help_request,public_welfare,pet_help'
+  type?: string;
   status?: EventStatus;
   keyword?: string;
   excludeTypes?: string; // 逗号分隔的 EventType 列表
