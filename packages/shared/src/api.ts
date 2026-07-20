@@ -2,6 +2,7 @@
 
 import type {
   EventType,
+  PetSubType,
   EventStatus,
   AiReviewStatus,
   RewardType,
@@ -198,6 +199,45 @@ export interface SubmitVerificationResponse {
 
 // ===== 事件 =====
 
+/** 代喂专属字段 */
+export interface PetFeedMeta {
+  petType: 'cat' | 'dog' | 'fish' | 'other';
+  petName?: string;
+  feedsPerDay: number;
+  totalDays: number;
+  dateRange: { start: string; end: string };
+  needClean: boolean;
+  rewardType: RewardType;
+  note?: string;
+}
+
+/** 代遛专属字段 */
+export interface PetWalkMeta {
+  dogSize: 'small' | 'medium' | 'large';
+  dogName?: string;
+  timesPerDay: number;
+  durationPerTime: number;
+  timeSlots: Array<'morning' | 'noon' | 'evening' | 'night'>;
+  needGear: boolean;
+  rewardType: RewardType;
+  note?: string;
+}
+
+/** 寻宠专属字段 */
+export interface PetLostMeta {
+  petType: string;
+  breed?: string;
+  name?: string;
+  lostLocation: string;
+  lostTime: string;
+  appearance?: string;
+  photos?: string[];
+  rewardType: RewardType;
+  note?: string;
+}
+
+export type PetMeta = PetFeedMeta | PetWalkMeta | PetLostMeta;
+
 export interface CreateEventRequest {
   type: EventType;
   title: string;
@@ -213,6 +253,8 @@ export interface CreateEventRequest {
   isAnonymous?: boolean;
   visibility?: Visibility;
   topicId?: string;
+  subType?: PetSubType;
+  petMeta?: PetMeta;
 }
 
 export interface EventDto {
@@ -251,6 +293,8 @@ export interface EventDto {
   };
   createdAt: string;
   updatedAt: string;
+  subType?: PetSubType | null;
+  petMeta?: PetMeta | null;
 }
 
 export interface EventParticipantDto {

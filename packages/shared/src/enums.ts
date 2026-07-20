@@ -51,9 +51,18 @@ export enum EventType {
   /** @deprecated help_offer 已废弃，前端不再允许创建，仅兼容历史数据 */
   HELP_OFFER = 'help_offer',
   PUBLIC_WELFARE = 'public_welfare',
+  PET_HELP = 'pet_help',
+  /** @deprecated lost_found 已迁移到 pet_help + subType=lost */
   LOST_FOUND = 'lost_found',
   PUBLIC_FEEDBACK = 'public_feedback',
   DISCUSSION = 'discussion',
+}
+
+/** 宠物帮帮子分类 */
+export enum PetSubType {
+  FEED = 'feed',
+  WALK = 'walk',
+  LOST = 'lost',
 }
 
 /** 事件状态 */
