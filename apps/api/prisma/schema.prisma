@@ -238,7 +238,9 @@ model Event {
   id               String    @id @default(uuid()) @db.Uuid
   communityId      String    @map("community_id") @db.Uuid
   creatorId        String    @map("creator_id") @db.Uuid
-  type             String // help_request/public_welfare/lost_found/public_feedback/discussion (help_offer 已废弃，仅兼容历史数据)
+  type             String // help_request/public_welfare/pet_help/public_feedback/discussion (lost_found 已迁移至 pet_help+subType=lost; help_offer 已废弃)
+  subType          String?  @map("sub_type") // pet_help 子分类: feed/walk/lost; 其他类型为 null
+  petMeta          Json?    @map("pet_meta") // pet_help 专属字段 JSON
   title            String
   description      String
   images           Json      @default("[]")
@@ -281,6 +283,7 @@ model Event {
   topicComments           TopicComment[]
 
   @@index([communityId, type, status, createdAt])
+  @@index([communityId, type, subType, status, createdAt])
   @@index([creatorId])
   @@index([selectedHelperId])
   @@index([aiReviewStatus])
