@@ -470,3 +470,36 @@ export enum GuideCategory {
   MAINTENANCE = 'maintenance',
   OTHER = 'other',
 }
+
+/** 购物拼拼方向 */
+export enum GroupBuyType {
+  SEEK = 'seek',
+  OFFER = 'offer',
+}
+
+/** 购物拼拼主表状态 */
+export enum GroupBuyStatus {
+  PENDING_REVIEW = 'pending_review',
+  OPEN = 'open',
+  CLOSED_FOR_BID = 'closed_for_bid',
+  PURCHASED = 'purchased',
+  COMPLETED = 'completed',
+  CLOSED = 'closed',
+  REJECTED = 'rejected',
+}
+
+/** 购物拼拼 item 状态 */
+export enum GroupBuyItemStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  PURCHASED = 'purchased',
+  DELIVERED = 'delivered',
+  REJECTED = 'rejected',
+}
+
+/** 交付方式 */
+export enum GroupBuyDeliveryMethod {
+  SELF_PICKUP = 'self_pickup',
+  DOOR_DROP = 'door_drop',
+  SPOT = 'spot',
+}

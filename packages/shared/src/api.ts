@@ -45,6 +45,10 @@ import type {
   AdminRole,
   GuideStatus,
   GuideCategory,
+  GroupBuyType,
+  GroupBuyStatus,
+  GroupBuyItemStatus,
+  GroupBuyDeliveryMethod,
 } from './enums';
 
 // ===== 通用响应 =====
@@ -1243,4 +1247,87 @@ export interface CreateGuideCommentRequest {
 export interface AdminGuideReviewRequest {
   action: 'approve' | 'reject';
   rejectReason?: string;
+}
+
+// ===== 购物拼拼 (GroupBuy) DTOs =====
+
+/** 购物拼拼商品项（创建时填） */
+export interface GroupBuyItemInput {
+  name: string;
+  qty?: number;
+  note?: string;
+}
+
+/** 创建购物拼拼请求 */
+export interface CreateGroupBuyRequest {
+  type: GroupBuyType;
+  location: string;
+  departAt?: string; // offer 必填
+  bidCloseAt?: string; // offer 必填
+  quota?: number; // offer 必填，默认 5
+  serviceFee?: string; // free/negotiable/具体金额
+  deliveryMethod: GroupBuyDeliveryMethod;
+  note?: string;
+  items?: GroupBuyItemInput[]; // seek 必填 ≥1
+}
+
+/** 购物拼拼商品项 DTO */
+export interface GroupBuyItemDto {
+  id: string;
+  groupBuyId: string;
+  requesterId: string;
+  requester?: { id: string; nickname: string; avatarUrl: string | null };
+  name: string;
+  qty: number;
+  note?: string | null;
+  status: GroupBuyItemStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 购物拼拼 DTO */
+export interface GroupBuyDto {
+  id: string;
+  communityId: string;
+  initiatorId: string;
+  initiator?: { id: string; nickname: string; avatarUrl: string | null };
+  type: GroupBuyType;
+  location: string;
+  departAt: string | null;
+  bidCloseAt: string | null;
+  quota: number;
+  serviceFee: string;
+  deliveryMethod: GroupBuyDeliveryMethod;
+  note: string | null;
+  status: GroupBuyStatus;
+  aiReviewStatus: AiReviewStatus;
+  aiReviewReason: string | null;
+  items: GroupBuyItemDto[];
+  _count?: { items: number };
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 响应购物拼拼 */
+export interface RespondGroupBuyRequest {
+  name: string;
+  qty?: number;
+  note?: string;
+}
+
+/** Feed 聚合端点统一卡片 DTO */
+export interface FeedItemDto {
+  id: string;
+  sourceType: 'event' | 'group_buy';
+  type: string; // EventType 或 GroupBuyType
+  subType?: string | null;
+  title: string;
+  subtitle?: string | null;
+  status: string;
+  stats: {
+    likeCount?: number;
+    commentCount?: number;
+    responseCount?: number;
+  };
+  createdAt: string;
 }
