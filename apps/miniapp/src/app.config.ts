@@ -19,6 +19,7 @@ export default defineAppConfig({
     'pages/event-detail/index',
     'pages/market-detail/index',
     'pages/event-create/index',
+    'pages/pet-create/index',
     'pages/market-create/index',
     'pages/guide-detail/index',
     'pages/guide-create/index',
