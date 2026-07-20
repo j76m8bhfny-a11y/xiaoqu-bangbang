@@ -74,6 +74,8 @@ model User {
   guideFavorites             GuideFavorite[]
   guideComments              GuideComment[]
   guideCommentLikes          GuideCommentLike[]
+  groupBuysInitiated         GroupBuy[]                    @relation("GroupBuyInitiator")
+  groupBuyItems              GroupBuyItem[]                @relation("GroupBuyItemRequester")
 
   @@index([phone])
   @@index([currentCommunityId])
@@ -131,6 +133,7 @@ model Community {
   topics                 Topic[]
   topicMergeSuggestions  TopicMergeSuggestion[]
   guides                 Guide[]
+  groupBuys              GroupBuy[]
 
   @@map("communities")
 }
@@ -1231,4 +1234,51 @@ model GuideCommentLike {
 
   @@unique([commentId, userId])
   @@map("guide_comment_likes")
+}
+
+model GroupBuy {
+  id              String   @id @default(uuid()) @db.Uuid
+  communityId     String   @map("community_id") @db.Uuid
+  initiatorId     String   @map("initiator_id") @db.Uuid
+  type            String   // seek | offer
+  location        String
+  departAt        DateTime? @map("depart_at")
+  bidCloseAt      DateTime? @map("bid_close_at")
+  quota           Int      @default(5)
+  serviceFee      String   @default("free") @map("service_fee")
+  deliveryMethod  String   @map("delivery_method") // self_pickup | door_drop | spot
+  note            String?
+  status          String   @default("pending_review")
+  aiReviewStatus  String   @default("pending") @map("ai_review_status")
+  aiReviewReason  String?  @map("ai_review_reason")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  community       Community     @relation(fields: [communityId], references: [id])
+  initiator      User          @relation("GroupBuyInitiator", fields: [initiatorId], references: [id])
+  items          GroupBuyItem[]
+
+  @@index([communityId, type, status, createdAt])
+  @@index([initiatorId])
+  @@map("group_buys")
+}
+
+model GroupBuyItem {
+  id           String   @id @default(uuid()) @db.Uuid
+  groupBuyId   String   @map("group_buy_id") @db.Uuid
+  requesterId  String   @map("requester_id") @db.Uuid
+  name         String
+  qty          Int      @default(1)
+  note         String?
+  status       String   @default("pending")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  groupBuy    GroupBuy @relation(fields: [groupBuyId], references: [id], onDelete: Cascade)
+  requester   User     @relation("GroupBuyItemRequester", fields: [requesterId], references: [id])
+
+  @@unique([groupBuyId, requesterId])
+  @@index([groupBuyId, status])
+  @@map("group_buy_items")
 }
