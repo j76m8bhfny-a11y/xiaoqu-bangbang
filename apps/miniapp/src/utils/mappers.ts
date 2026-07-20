@@ -1,4 +1,4 @@
-import type { EventDto, PetSubType } from '@xiaoqu-bangbang/shared';
+import type { EventDto, PetSubType, FeedItemDto, GroupBuyDto } from '@xiaoqu-bangbang/shared';
 import type { EventCardData } from '@/components/event-card';
 
 export const EVENT_TYPE_CONFIG: Record<
@@ -69,6 +69,30 @@ const PET_HELP_SUBTYPE_OVERRIDE: Record<PetSubType, { label: string; ctaText: st
   lost: { label: '寻宠', ctaText: '提供线索' },
 };
 
+// M23: 购物拼拼子类型 label（seek=求代购 / offer=代购方）
+const GROUP_BUY_TYPE_LABELS: Record<string, { label: string; ctaText: string }> = {
+  seek: { label: '求代购', ctaText: '参与拼单' },
+  offer: { label: '代购方', ctaText: '查看详情' },
+};
+
+// M23: 购物拼拼配色（沿用 pet_help 暖橙语义：需求类需要关注）
+const GROUP_BUY_TYPE_CONFIG = {
+  color: '#9A5A12',
+  bgColor: '#FBF0DD',
+  ctaColor: '#4A8C5E',
+};
+
+// M23: 购物拼拼主表状态 label
+const GROUP_BUY_STATUS_LABELS: Record<string, string> = {
+  pending_review: '审核中',
+  open: '报名中',
+  closed_for_bid: '已截单',
+  purchased: '已采购',
+  completed: '已完成',
+  closed: '已关闭',
+  rejected: '已拒绝',
+};
+
 export const EVENT_STATUS_LABELS: Record<string, string> = {
   pending_review: '审核中',
   open: '进行中',
@@ -104,6 +128,95 @@ export function mapEventDtoToCardData(dto: EventDto): EventCardData {
     thanksCount: dto.thanksCount,
     ctaText: subOverride?.ctaText ?? cfg.ctaText,
     ctaColor: cfg.ctaColor,
+    sourceType: 'event',
+  };
+}
+
+// M23: FeedItemDto -> EventCardData
+// /feed/all 聚合端点返回的统一卡片 DTO，按 sourceType 分别映射 label/配色。
+export function mapFeedItemDtoToCardData(dto: FeedItemDto): EventCardData {
+  if (dto.sourceType === 'group_buy') {
+    const sub = GROUP_BUY_TYPE_LABELS[dto.type] ?? {
+      label: '购物拼拼',
+      ctaText: '查看详情',
+    };
+    return {
+      id: dto.id,
+      type: dto.type,
+      typeLabel: sub.label,
+      typeColor: GROUP_BUY_TYPE_CONFIG.color,
+      typeBgColor: GROUP_BUY_TYPE_CONFIG.bgColor,
+      statusLabel: GROUP_BUY_STATUS_LABELS[dto.status] || dto.status,
+      title: dto.title,
+      description: dto.subtitle ?? '',
+      creatorName: '邻居',
+      createdAt: formatRelativeTime(dto.createdAt),
+      likeCount: dto.stats?.likeCount ?? 0,
+      commentCount: dto.stats?.commentCount ?? 0,
+      // responseCount 在购物拼拼语境里=报名人数，映射到 thanksCount 位展示热度
+      thanksCount: dto.stats?.responseCount ?? 0,
+      ctaText: sub.ctaText,
+      ctaColor: GROUP_BUY_TYPE_CONFIG.ctaColor,
+      sourceType: 'group_buy',
+    };
+  }
+
+  // event 分支
+  const cfg = EVENT_TYPE_CONFIG[dto.type] || EVENT_TYPE_CONFIG.discussion;
+  const subOverride =
+    dto.type === 'pet_help' && dto.subType
+      ? PET_HELP_SUBTYPE_OVERRIDE[dto.subType as PetSubType]
+      : undefined;
+  return {
+    id: dto.id,
+    type: dto.type,
+    typeLabel: subOverride?.label ?? cfg.label,
+    typeColor: cfg.color,
+    typeBgColor: cfg.bgColor,
+    statusLabel: EVENT_STATUS_LABELS[dto.status] || dto.status,
+    title: dto.title,
+    description: dto.subtitle ?? '',
+    creatorName: '邻居',
+    createdAt: formatRelativeTime(dto.createdAt),
+    likeCount: dto.stats?.likeCount ?? 0,
+    commentCount: dto.stats?.commentCount ?? 0,
+    thanksCount: dto.stats?.responseCount ?? 0,
+    ctaText: subOverride?.ctaText ?? cfg.ctaText,
+    ctaColor: cfg.ctaColor,
+    sourceType: 'event',
+  };
+}
+
+// M23: GroupBuyDto -> EventCardData
+// 直接调用 /group-buys 端点时使用（如点击「购物拼拼」filter 单独拉取）。
+export function mapGroupBuyDtoToCardData(dto: GroupBuyDto): EventCardData {
+  const sub = GROUP_BUY_TYPE_LABELS[dto.type] ?? {
+    label: '购物拼拼',
+    ctaText: '查看详情',
+  };
+  const title =
+    dto.type === 'offer'
+      ? `${dto.location}${dto.departAt ? ' ' + dto.departAt.slice(0, 10) : ''}`
+      : `拼单-${dto.location}`;
+  return {
+    id: dto.id,
+    type: dto.type,
+    typeLabel: sub.label,
+    typeColor: GROUP_BUY_TYPE_CONFIG.color,
+    typeBgColor: GROUP_BUY_TYPE_CONFIG.bgColor,
+    statusLabel: GROUP_BUY_STATUS_LABELS[dto.status] || dto.status,
+    title,
+    description: dto.note ?? '',
+    creatorName: dto.initiator?.nickname ?? '邻居',
+    creatorAvatarUrl: dto.initiator?.avatarUrl ?? undefined,
+    createdAt: formatRelativeTime(dto.createdAt),
+    likeCount: 0,
+    commentCount: 0,
+    // 报名 item 数作为热度展示
+    thanksCount: dto._count?.items ?? dto.items?.length ?? 0,
+    ctaText: sub.ctaText,
+    ctaColor: GROUP_BUY_TYPE_CONFIG.ctaColor,
+    sourceType: 'group_buy',
   };
 }
 

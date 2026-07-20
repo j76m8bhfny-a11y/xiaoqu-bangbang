@@ -3,9 +3,21 @@ import { useState, useEffect, useRef } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useCommunityStore, useAuthStore } from '@/store';
 import type { MarketItemDto, GuideDto } from '@xiaoqu-bangbang/shared';
-import { eventService, marketService, guideService } from '@/services';
+import {
+  eventService,
+  marketService,
+  guideService,
+  feedService,
+  groupBuyService,
+} from '@/services';
 import { usePaginatedList, useAuthGuard } from '@/hooks';
-import { mapEventDtoToCardData, GUIDE_CATEGORY_CONFIG } from '@/utils/mappers';
+import {
+  mapEventDtoToCardData,
+  mapFeedItemDtoToCardData,
+  mapGroupBuyDtoToCardData,
+  GUIDE_CATEGORY_CONFIG,
+} from '@/utils/mappers';
+import type { EventCardData } from '@/components/event-card';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
@@ -25,7 +37,7 @@ const HELP_FILTERS = [
   { key: 'help_request', label: '求助' },
   { key: 'public_welfare', label: '公益' },
   { key: 'pet_help', label: '宠物帮帮' },
-  // M23 阶段会加：{ key: 'group_buy', label: '购物拼拼' },
+  { key: 'group_buy', label: '购物拼拼' },
 ];
 
 const MARKET_FILTERS = [
@@ -63,15 +75,26 @@ export default function Events() {
   const [searchOpen, setSearchOpen] = useState(false);
 
   // ===== 互助 (events) 列表 =====
-  const helpList = usePaginatedList(
-    (page, pageSize) =>
-      eventService.list({
-        // M22 阶段：all = 3 种类型联合查询（M23 阶段改调 /feed/all 含 group_buy）
-        type: helpFilter === 'all' ? 'help_request,public_welfare,pet_help' : helpFilter,
+  // M23: all 走 /feed/all 聚合端点（含 group_buy）；group_buy 单独走 /group-buys；
+  // 其余按 event 类型走 /events。统一映射成 EventCardData 供瀑布流渲染。
+  const helpList = usePaginatedList<EventCardData>(
+    async (page, pageSize) => {
+      if (helpFilter === 'all') {
+        const result = await feedService.all({ page, pageSize });
+        return { ...result, items: result.items.map(mapFeedItemDtoToCardData) };
+      }
+      if (helpFilter === 'group_buy') {
+        const result = await groupBuyService.list({ page, pageSize });
+        return { ...result, items: result.items.map(mapGroupBuyDtoToCardData) };
+      }
+      const result = await eventService.list({
+        type: helpFilter,
         keyword: searchText || undefined,
         page,
         pageSize,
-      }),
+      });
+      return { ...result, items: result.items.map(mapEventDtoToCardData) };
+    },
     [communityId, helpFilter, searchText, outer],
   );
 
@@ -126,22 +149,44 @@ export default function Events() {
   const currentFilter = isHelp ? helpFilter : isGuide ? guideFilter : marketFilter;
   const setCurrentFilter = isHelp ? setHelpFilter : isGuide ? setGuideFilter : setMarketFilter;
 
-  const realCards = helpList.items.map(mapEventDtoToCardData);
+  // M23: helpList 已在 fetcher 里映射成 EventCardData，直接用即可
   const marketItems = marketList.items as MarketItemDto[];
   const guideItems = guideList.items as GuideDto[];
 
   const searchPlaceholder = isHelp
-    ? '搜索互助事件...'
+    ? helpFilter === 'group_buy'
+      ? '搜索拼单...'
+      : '搜索互助事件...'
     : isGuide
       ? '搜索教程...'
       : '搜索闲置物品...';
-  const emptyIcon = isHelp ? 'handshake' : isGuide ? 'book' : 'box';
-  const emptyText = isHelp ? '暂无互助事件' : isGuide ? '暂无教程' : '暂无闲置物品';
-  const fabLabel = isHelp ? '发互助' : isGuide ? '发教程' : '发闲置';
+  const emptyIcon = isHelp
+    ? helpFilter === 'group_buy'
+      ? 'cart'
+      : 'handshake'
+    : isGuide
+      ? 'book'
+      : 'box';
+  const emptyText = isHelp
+    ? helpFilter === 'group_buy'
+      ? '暂无拼单'
+      : '暂无互助事件'
+    : isGuide
+      ? '暂无教程'
+      : '暂无闲置物品';
+  const fabLabel = isHelp
+    ? helpFilter === 'group_buy'
+      ? '发拼单'
+      : '发互助'
+    : isGuide
+      ? '发教程'
+      : '发闲置';
   const fabUrl = isHelp
     ? helpFilter === 'pet_help'
       ? '/pages/pet-create/index'
-      : '/pages/event-create/index'
+      : helpFilter === 'group_buy'
+        ? '/pages/group-buy-create/index'
+        : '/pages/event-create/index'
     : isGuide
       ? '/pages/guide-create/index'
       : '/pages/market-create/index';
@@ -243,13 +288,20 @@ export default function Events() {
         {!list.loading && !list.error && isHelp && (
           <View className={`events__masonry ${isLocked ? 'events__masonry--locked' : ''}`}>
             <BlurredList
-              items={realCards}
+              items={helpList.items}
               previewCount={3}
               renderItem={(event) => (
                 <MasonryEventCard
                   key={event.id}
                   data={event}
-                  onClick={(id) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` })}
+                  onClick={(id) => {
+                    // M23: group_buy 卡片跳转拼单详情，其余跳事件详情
+                    const url =
+                      event.sourceType === 'group_buy'
+                        ? `/pages/group-buy-detail/index?id=${id}`
+                        : `/pages/event-detail/index?id=${id}`;
+                    Taro.navigateTo({ url });
+                  }}
                 />
               )}
             />
