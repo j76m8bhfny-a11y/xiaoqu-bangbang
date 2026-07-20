@@ -3,7 +3,6 @@
 .masonry-card {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   background: $color-card;
   border-radius: $radius-md;
   box-shadow: $shadow-card;
@@ -12,21 +11,10 @@
   transition: transform 0.15s;
   padding: $spacing-lg $spacing-md;
   margin-bottom: $spacing-md;
+  min-height: 200px;
 
   &:active {
     transform: scale(0.98);
-  }
-
-  &:nth-child(3n + 1) {
-    min-height: 300px;
-  }
-
-  &:nth-child(3n + 2) {
-    min-height: 240px;
-  }
-
-  &:nth-child(3n) {
-    min-height: 270px;
   }
 
   &__tag {
@@ -37,13 +25,11 @@
   }
 
   &__title {
-    flex: 1;
-    display: flex;
-    align-items: center;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
     color: $color-text;
     line-height: 1.6;
+    margin-bottom: auto;
   }
 
   &__footer {

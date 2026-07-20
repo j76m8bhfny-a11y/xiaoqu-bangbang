@@ -4,6 +4,7 @@
   &__veil-wrap {
     position: relative;
     margin-top: 16rpx;
+    column-span: all;
   }
 
   &__veil-items {
@@ -13,6 +14,8 @@
     opacity: 0.6;
     max-height: 600rpx;
     overflow: hidden;
+    column-count: 2;
+    column-gap: 12rpx;
   }
 
   &__veil {

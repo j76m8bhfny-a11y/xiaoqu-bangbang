@@ -254,9 +254,15 @@
     column-gap: $spacing-sm;
     padding: $spacing-sm 0;
 
-    .bl {
-      column-count: 2;
-      column-gap: $spacing-sm;
+    // 未认证时：BlurredList 返回 .bl 容器包裹卡片
+    // 外层不再分列，由 .bl 自己管理 column-count:2，避免嵌套多列导致宽度坍缩
+    &--locked {
+      column-count: 1;
+
+      .bl {
+        column-count: 2;
+        column-gap: $spacing-sm;
+      }
     }
   }
 

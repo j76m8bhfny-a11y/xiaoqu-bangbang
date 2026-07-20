@@ -1,23 +1,38 @@
 @use '../../styles/tokens.scss' as *;
 
 .ranking {
-  min-height: 100vh;
+  height: 100vh;
   background: $color-bg;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  // 隐藏所有滚动条
+  ::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 
   &__header {
-    margin: $spacing-lg $spacing-lg 0;
-    padding: $spacing-lg;
+    margin: $spacing-md $spacing-lg 0;
+    padding: $spacing-md;
     border-radius: $radius-lg;
     background: linear-gradient(135deg, $color-accent, $color-accent-deep);
     box-shadow: $shadow-warm;
     overflow: hidden;
-    text-align: center;
+  }
+
+  &__header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-xs;
   }
 
   &__header-title {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: $spacing-xs;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
@@ -25,48 +40,45 @@
   }
 
   &__header-sub {
-    display: block;
     font-size: $font-size-xs;
-    color: rgba(255, 255, 255, 0.85);
-    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.8);
   }
 
-  &__tabs {
+  // 第一层 tab：排行榜/勋章墙，内嵌 header 底部（与邻里互助一致）
+  &__outer-tabs {
     display: flex;
-    margin: $spacing-md $spacing-lg 0;
-    background: #fff;
+    margin-top: $spacing-sm;
+    background: rgba(255, 255, 255, 0.15);
     border-radius: $radius-pill;
-    padding: 6px;
-    box-shadow: $shadow-card;
+    padding: 4px;
   }
 
-  &__tab {
+  &__outer-tab {
     flex: 1;
-    display: flex;
-    justify-content: center;
+    text-align: center;
     padding: $spacing-xs 0;
     border-radius: $radius-pill;
     transition: all 0.2s;
 
     &--active {
-      background: $color-accent;
-      box-shadow: 0 2px 12px rgba(232, 155, 108, 0.3);
+      background: #fff;
     }
   }
 
-  &__tab-text {
+  &__outer-tab-text {
     font-size: $font-size-sm;
+    color: rgba(255, 255, 255, 0.7);
     font-weight: $font-weight-medium;
-    color: $color-text-secondary;
+  }
 
-    &--active {
-      color: #fff;
-      font-weight: $font-weight-bold;
-    }
+  &__outer-tab--active &__outer-tab-text {
+    color: $color-accent;
+    font-weight: $font-weight-bold;
   }
 
   &__content {
-    height: calc(100vh - 220px);
+    flex: 1;
+    min-height: 0;
   }
 
   &__period {

@@ -76,33 +76,25 @@ export default function Ranking() {
   return (
     <View className="ranking">
       <View className="ranking__header">
-        <View className="ranking__header-title">
-          <Icon name="trophy" size={22} /> <Text>好人榜</Text>
+        <View className="ranking__header-row">
+          <View className="ranking__header-title">
+            <Icon name="trophy" size={22} /> <Text>好人榜</Text>
+          </View>
+          <Text className="ranking__header-sub">每一朵小花，都是一份温暖</Text>
         </View>
-        <Text className="ranking__header-sub">每一朵小花，都是一份温暖</Text>
-      </View>
-
-      {/* Tab切换 */}
-      <View className="ranking__tabs">
-        <View
-          className={`ranking__tab ${activeTab === 'ranking' ? 'ranking__tab--active' : ''}`}
-          onClick={() => setActiveTab('ranking')}
-        >
-          <Text
-            className={`ranking__tab-text ${activeTab === 'ranking' ? 'ranking__tab-text--active' : ''}`}
+        <View className="ranking__outer-tabs">
+          <View
+            className={`ranking__outer-tab ${activeTab === 'ranking' ? 'ranking__outer-tab--active' : ''}`}
+            onClick={() => setActiveTab('ranking')}
           >
-            排行榜
-          </Text>
-        </View>
-        <View
-          className={`ranking__tab ${activeTab === 'badges' ? 'ranking__tab--active' : ''}`}
-          onClick={() => setActiveTab('badges')}
-        >
-          <Text
-            className={`ranking__tab-text ${activeTab === 'badges' ? 'ranking__tab-text--active' : ''}`}
+            <Text className="ranking__outer-tab-text">排行榜</Text>
+          </View>
+          <View
+            className={`ranking__outer-tab ${activeTab === 'badges' ? 'ranking__outer-tab--active' : ''}`}
+            onClick={() => setActiveTab('badges')}
           >
-            勋章墙
-          </Text>
+            <Text className="ranking__outer-tab-text">勋章墙</Text>
+          </View>
         </View>
       </View>
 
