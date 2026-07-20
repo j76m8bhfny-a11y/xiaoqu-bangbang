@@ -6,6 +6,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RankingsService } from '../rankings/rankings.service';
 import { maybeAwardFirstOwnerBadge } from '../verifications/verifications.service';
@@ -2011,7 +2012,7 @@ export class AdminService {
     query: { status?: string; type?: string },
     pagination?: { skip: number; take: number },
   ) {
-    const where: any = { communityId, deletedAt: null };
+    const where: Prisma.GroupBuyWhereInput = { communityId, deletedAt: null };
     if (query.status) where.status = query.status;
     if (query.type) where.type = query.type;
     return this.prisma.groupBuy.findMany({
@@ -2034,7 +2035,7 @@ export class AdminService {
   }
 
   async countGroupBuys(communityId: string, query: { status?: string; type?: string }) {
-    const where: any = { communityId, deletedAt: null };
+    const where: Prisma.GroupBuyWhereInput = { communityId, deletedAt: null };
     if (query.status) where.status = query.status;
     if (query.type) where.type = query.type;
     return this.prisma.groupBuy.count({ where });
@@ -2068,9 +2069,10 @@ export class AdminService {
       select: { communityId: true },
     });
     if (!gb || gb.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
-    await this.prisma.groupBuy.update({ where: { id }, data: { status: 'cancelled' } });
+    // spec §3.7: 下架违规内容 status -> closed（'cancelled' 不在 GroupBuyStatus 枚举内）
+    await this.prisma.groupBuy.update({ where: { id }, data: { status: 'closed' } });
     await this.logAudit(adminId, 'takedown_group_buy', 'group_buy', id);
-    return { id, status: 'cancelled' };
+    return { id, status: 'closed' };
   }
 
   // === System Settings ===

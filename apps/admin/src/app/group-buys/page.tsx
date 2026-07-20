@@ -22,7 +22,6 @@ const statusLabels: Record<string, string> = {
   completed: '已完成',
   rejected: '已拒绝',
   closed: '已关闭',
-  cancelled: '已下架',
 };
 
 const statusColors: Record<string, string> = {
@@ -33,7 +32,6 @@ const statusColors: Record<string, string> = {
   completed: 'default',
   rejected: 'red',
   closed: 'default',
-  cancelled: 'red',
 };
 
 const itemStatusLabels: Record<string, string> = {
@@ -130,7 +128,7 @@ export default function GroupBuysPage() {
           >
             详情
           </Button>
-          {record.status !== 'cancelled' && record.status !== 'closed' && (
+          {record.status !== 'closed' && record.status !== 'rejected' && (
             <Button
               size="small"
               type="link"

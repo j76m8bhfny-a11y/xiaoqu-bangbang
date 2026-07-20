@@ -8,6 +8,10 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiReviewService } from '../ai-review/ai-review.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { Prisma } from '@prisma/client';
+import type { CreateGroupBuyDto } from './dto/create-group-buy.dto';
+import type { UpdateGroupBuyDto } from './dto/update-group-buy.dto';
+import type { RespondGroupBuyDto } from './dto/respond-group-buy.dto';
 
 @Injectable()
 export class GroupBuysService {
@@ -17,7 +21,7 @@ export class GroupBuysService {
     private notifications: NotificationsService,
   ) {}
 
-  async create(userId: string, communityId: string, dto: any) {
+  async create(userId: string, communityId: string, dto: CreateGroupBuyDto) {
     // seek 必填 items≥1
     if (dto.type === 'seek' && (!dto.items || dto.items.length === 0)) {
       throw new BadRequestException('seek 类型必须至少填写 1 个商品');
@@ -83,21 +87,23 @@ export class GroupBuysService {
     return groupBuy;
   }
 
-  async findAll(query: any, communityId: string) {
-    const page = Number(query.page) || 1;
-    const pageSize = Number(query.pageSize) || 20;
-    const where: any = {
+  async findAll(
+    query: { type?: string; status?: string; skip: number; take: number },
+    communityId: string,
+  ) {
+    const where: Prisma.GroupBuyWhereInput = {
       communityId,
       deletedAt: null,
       status: { in: ['open', 'closed_for_bid', 'purchased', 'completed'] },
     };
     if (query.type) where.type = query.type;
+    if (query.status) where.status = query.status;
     const [items, total] = await Promise.all([
       this.prisma.groupBuy.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
+        skip: query.skip,
+        take: query.take,
         include: {
           _count: { select: { items: true } },
           items: { select: { id: true, requesterId: true, status: true } },
@@ -105,7 +111,7 @@ export class GroupBuysService {
       }),
       this.prisma.groupBuy.count({ where }),
     ]);
-    return { items, total, page, pageSize };
+    return { items, total };
   }
 
   async findOne(id: string, communityId: string) {
@@ -122,7 +128,7 @@ export class GroupBuysService {
     return gb;
   }
 
-  async update(userId: string, id: string, communityId: string, dto: any) {
+  async update(userId: string, id: string, communityId: string, dto: UpdateGroupBuyDto) {
     const gb = await this.findOne(id, communityId);
     if (gb.initiatorId !== userId) throw new ForbiddenException('仅发起人可编辑');
     if (!['pending_review', 'open'].includes(gb.status)) {
@@ -154,7 +160,7 @@ export class GroupBuysService {
     });
   }
 
-  async respond(userId: string, id: string, communityId: string, dto: any) {
+  async respond(userId: string, id: string, communityId: string, dto: RespondGroupBuyDto) {
     const gb = await this.findOne(id, communityId);
     if (gb.status !== 'open') throw new BadRequestException('当前状态不可响应');
 
@@ -277,6 +283,7 @@ export class GroupBuysService {
   async close(userId: string, id: string, communityId: string) {
     const gb = await this.findOne(id, communityId);
     if (gb.initiatorId !== userId) throw new ForbiddenException('仅主买人可关闭');
+    // ponytail: 通知逻辑暂缓 - 同 closeBid
     return this.prisma.groupBuy.update({ where: { id }, data: { status: 'closed' } });
   }
 }

@@ -11,10 +11,13 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentCommunityGuard } from '../../common/guards/current-community.guard';
+import { VerifiedMemberGuard } from '../../common/guards/verified-member.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CurrentCommunityId } from '../../common/decorators/current-community.decorator';
+import { getPaginationParams } from '../../common/helpers/pagination';
 import { GroupBuysService } from './group-buys.service';
 import { CreateGroupBuyDto } from './dto/create-group-buy.dto';
+import { UpdateGroupBuyDto } from './dto/update-group-buy.dto';
 import { RespondGroupBuyDto } from './dto/respond-group-buy.dto';
 
 @Controller('group-buys')
@@ -23,6 +26,7 @@ export class GroupBuysController {
   constructor(private service: GroupBuysService) {}
 
   @Post()
+  @UseGuards(VerifiedMemberGuard)
   async create(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -36,10 +40,14 @@ export class GroupBuysController {
   async findAll(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
-    @Query() query: any,
+    @Query('type') type?: string,
+    @Query('status') status?: string,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
   ) {
-    const data = await this.service.findAll(query, communityId);
-    return { code: 0, message: 'ok', data };
+    const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
+    const data = await this.service.findAll({ type, status, skip, take }, communityId);
+    return { code: 0, message: 'ok', data: { ...data, page: p, pageSize: ps } };
   }
 
   @Get(':id')
@@ -53,17 +61,19 @@ export class GroupBuysController {
   }
 
   @Patch(':id')
+  @UseGuards(VerifiedMemberGuard)
   async update(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
     @Param('id') id: string,
-    @Body() dto: any,
+    @Body() dto: UpdateGroupBuyDto,
   ) {
     const data = await this.service.update(userId, id, communityId, dto);
     return { code: 0, message: 'ok', data };
   }
 
   @Post(':id/respond')
+  @UseGuards(VerifiedMemberGuard)
   async respond(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -76,6 +86,7 @@ export class GroupBuysController {
 
   @Post(':id/items/:itemId/confirm')
   @HttpCode(200)
+  @UseGuards(VerifiedMemberGuard)
   async confirmItem(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -88,6 +99,7 @@ export class GroupBuysController {
 
   @Post(':id/items/:itemId/reject')
   @HttpCode(200)
+  @UseGuards(VerifiedMemberGuard)
   async rejectItem(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -100,6 +112,7 @@ export class GroupBuysController {
 
   @Post(':id/close-bid')
   @HttpCode(200)
+  @UseGuards(VerifiedMemberGuard)
   async closeBid(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -111,6 +124,7 @@ export class GroupBuysController {
 
   @Post(':id/purchased')
   @HttpCode(200)
+  @UseGuards(VerifiedMemberGuard)
   async purchased(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -122,6 +136,7 @@ export class GroupBuysController {
 
   @Post(':id/items/:itemId/deliver')
   @HttpCode(200)
+  @UseGuards(VerifiedMemberGuard)
   async deliver(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -134,6 +149,7 @@ export class GroupBuysController {
 
   @Post(':id/cancel-response')
   @HttpCode(200)
+  @UseGuards(VerifiedMemberGuard)
   async cancelResponse(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
@@ -145,6 +161,7 @@ export class GroupBuysController {
 
   @Post(':id/close')
   @HttpCode(200)
+  @UseGuards(VerifiedMemberGuard)
   async close(
     @CurrentUser('userId') userId: string,
     @CurrentCommunityId() communityId: string,
