@@ -29,6 +29,7 @@ export default defineAppConfig({
     'pages/badges/index',
     'pages/event-edit/index',
     'pages/market-edit/index',
+    'pages/group-buy-create/index',
     'pages/votes/index',
     'pages/vote-detail/index',
     'pages/committee/index',
