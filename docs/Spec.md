@@ -2,7 +2,7 @@
 
 > 锁版基线文档。将产品拆解为相互独立的子模块任务树, 每个模块明确交付闭环。
 > 上位索引: Map.md | 验收标准: Standard.md
-> 最后扫描日期: 2026-07-05 | 版本: v0.2.0 (对齐 PRD v0.7.0)
+> 最后扫描日期: 2026-07-20 | 版本: v0.3.0 (对齐 PRD v0.8.0, 新增 M22 宠物帮帮 + M23 购物拼拼)
 
 ---
 
@@ -103,7 +103,7 @@
 
 **职责**: 互助事件全生命周期: 发布/响应/选帮手/完成确认/评价/评论/点赞/感谢/收藏/举报/反馈日志
 
-> **事件分互助类和议事类两大类**, 各自走不同生命周期。互助类 (help_request/public_welfare/lost_found) 走"响应→选帮手→双方确认→completed"; 议事类 (public_feedback/discussion) 走"审核通过→open→closed", 禁用 in_progress/processing/completed。详见 PRD §5.6。
+> **事件分互助类和议事类两大类**, 各自走不同生命周期。互助类 (help_request/public_welfare/pet_help) 走"响应→选帮手→双方确认→completed"; 议事类 (public_feedback/discussion) 走"审核通过→open→closed", 禁用 in_progress/processing/completed。详见 PRD §5.6。
 
 **依赖**: [M1, M2, M3]
 
@@ -297,7 +297,7 @@
 - **M10.3** 勋章列表: `GET /badges` (公开, 无需登录)
 - **M10.4** 我的勋章: `GET /me/badges` (含贡献记录)
 - **M10.5** 积分规则 (四套激励体系, 各自独立计算):
-  - **互助激励** (互助类事件完成时): help_request 帮手 1 朵/创建者 0 朵; public_welfare 帮手 5 朵/创建者 5 朵; lost_found 帮手 2 朵/创建者 0 朵
+  - **互助激励** (互助类事件完成时): help_request 帮手 1 朵/创建者 0 朵; public_welfare 帮手 5 朵/创建者 5 朵; pet_help.lost 帮手 2 朵/创建者 0 朵; pet_help.feed/walk 帮手 1 朵/创建者 0 朵; group_buy 主买人 1 朵/发起者 0 朵（详见 PRD §5.4）
   - **议事激励** (议事类事件通过审核时): 创建者 1 朵 (feedback)
   - **议题激励** (议题通过 AI 审核时): 创建者 1 朵 (topic)
   - **小区创建激励** (小区申请通过时): 申请人 community_founding (score=10) + founder 徽章; 助力人 community_founding (score=5) + seed 徽章
@@ -628,6 +628,104 @@
 | ③共享契约 | 无                                                                                     |
 | ④测试     | `pnpm test` 全局通过                                                                   |
 | ⑤验收证据 | `docker compose up -d` 后 `pnpm db:migrate` + `pnpm db:seed` 成功 / `pnpm lint` 无错误 |
+
+---
+
+## M22. 宠物帮帮 (pet-help) - 🆕 v0.8.0 新增
+
+**职责**: 宠物相关互助（代喂/代遛/寻宠），作为 EventType=pet_help 的子分类。挂在"邻里帮"tab filter 下。
+
+**依赖**: [M4, M3, M11]
+
+### 任务树
+
+- **M22.1** EventType 新增: `PET_HELP = 'pet_help'`（packages/shared/src/enums.ts），老 `LOST_FOUND` 标记 `@deprecated`
+- **M22.2** subType 枚举: `PetSubType = 'feed' | 'walk' | 'lost'`（扩展字段，存 events.subType）
+- **M22.3** 老数据迁移: `LOST_FOUND` -> `PET_HELP` + `subType=lost`（Prisma 迁移脚本，迁移后 LOST_FOUND 类型事件计数为 0）
+- **M22.4** 后端 API:
+  - `POST /events` 支持 type=pet_help + subType
+  - `GET /events?type=pet_help` 列表过滤
+  - `GET /events?type=help_request,public_welfare,pet_help,group_buy` "全部" filter 联合查询（需支持 group_buy 跨表合并，见 M23.7）
+  - subType 字段校验（feed/walk 需 verifyStatus=verified，lost 无限制）
+- **M22.5** 创建字段校验:
+  - feed: petType/petName/feedsPerDay/totalDays/dateRange/needClean/rewardType/note（**8 字段，不支持图片**）
+  - walk: dogSize/dogName/timesPerDay/durationPerTime/timeSlots/needGear/rewardType/note（**8 字段，不支持图片**）
+  - lost: petType/breed/name/lostLocation/lostTime/appearance/photos/rewardType/note（**9 字段，支持多图上传**）
+- **M22.6** 前端 filter 改造: events 页 filter 改为 全部/求助/公益/宠物帮帮/购物拼拼（移除"我能帮忙"）；"全部"调用联合查询（含 pet_help + group_buy）
+- **M22.7** 卡片 typeLabel: 根据 subType 显示"代喂"/"代遛"/"寻宠"（mapEventDtoToCardData 扩展）
+- **M22.8** 小程序创建页: `/pages/pet-create/index?type=feed|walk|lost`（3 套独立表单字段，feed/walk 无图片上传，lost 支持多图）
+- **M22.9** 小程序编辑页: `/pages/pet-edit/index?id=xxx`（字段特殊，独立编辑页）
+- **M22.10** 详情页复用: `/pages/event-detail/index?id=xxx`（沿用现有 event 详情页，支持子分类字段展示）
+- **M22.11** 业主认证前置: 创建 feed/walk 时校验 verifyStatus=verified，未认证跳转 `/pages/verify/index`；创建 lost 不需要认证
+- **M22.12** 管理端: 复用现有 event 管理页（加 pet_help filter），沿用审核流程
+- **M22.13** 通知触发: 发布推邻居 + 有人响应推发布者（沿用现有 event 通知）
+- **M22.14** 帮手机制:
+  - feed/walk: 单帮手流程（沿用 help_request 完成确认机制）
+  - lost: **多帮手流程**（沿用 EventParticipant 表 + 逐个确认发花，迁移自老 lost_found 多帮手实现）
+
+### 交付闭环
+
+| 产物      | 内容                                                                                                    |
+| --------- | ------------------------------------------------------------------------------------------------------- |
+| ①后端 API | `apps/api/src/modules/events/` 扩展（EventType+subType 校验 + 列表过滤）                                |
+| ②前端页面 | `miniapp/pages/pet-create/` + `miniapp/pages/pet-edit/` + `events` filter 改造                          |
+| ③共享契约 | `EventType.PET_HELP`, `PetSubType`, `CreatePetEventRequest`（按 subType 分支）                          |
+| ④测试     | `apps/api/test/event-pet-help.spec.ts`（含认证前置 + subType 校验 + 老数据迁移）                        |
+| ⑤验收证据 | 3 个子分类创建成功 + 未认证创建 feed/walk 被拒 + 老数据 LOST_FOUND 迁移后查询正常 + lost 多帮手流程正常 |
+
+---
+
+## M23. 购物拼拼 (group-buy) - 🆕 v0.8.0 新增
+
+**职责**: 邻居间拼买/代买信息同步工具（不做资金结算）。独立表 group_buys，挂在"邻里帮"tab filter 下。
+
+**依赖**: [M4, M11, M17, M18, M19]
+
+### 任务树
+
+- **M23.1** 数据模型: 新增 `GroupBuy` 表（type/subType/initiatorId/location/departAt/bidCloseAt/quota/serviceFee/deliveryMethod/note/status/communityId/aiReviewStatus/aiReviewReason）+ `GroupBuyItem` 表（groupBuyId/requesterId/name/qty/note/status）
+- **M23.2** 枚举: `GroupBuyType = 'seek' | 'offer'`, `GroupBuyItemStatus = 'pending' | 'confirmed' | 'purchased' | 'delivered'`, `GroupBuyStatus = 'pending_review' | 'open' | 'closed_for_bid' | 'purchased' | 'completed' | 'closed' | 'rejected'`
+- **M23.3** 后端 API:
+  - `POST /group-buys` 创建（type=seek 必填 items≥1，type=offer 必填 quota+departAt+bidCloseAt），**创建触发 AiReview 服务（沿用 event AiReview，全局开关可关）**
+  - `GET /group-buys?type=seek|offer` 列表（支持 communityId 隔离，仅返回 status=open~completed）
+  - `GET /group-buys/:id` 详情
+  - `PATCH /group-buys/:id` 编辑（**编辑触发 AiReview**）
+  - `POST /group-buys/:id/respond` 响应（填商品+数量，创建 GroupBuyItem）
+  - `POST /group-buys/:id/items/:itemId/confirm` 主买人确认响应（item: pending -> confirmed）
+  - `POST /group-buys/:id/items/:itemId/reject` 主买人拒绝响应（item: pending -> rejected，释放名额）
+  - `POST /group-buys/:id/close-bid` 主买人截止接单（open -> closed_for_bid）
+  - `POST /group-buys/:id/purchased` 主买人标记已购回（closed_for_bid -> purchased）
+  - `POST /group-buys/:id/items/:itemId/deliver` 标记已交付（item -> delivered，**全部 item.delivered 后自动转 completed**）
+  - `POST /group-buys/:id/cancel-response` 响应人取消响应（截止前）
+  - `POST /group-buys/:id/close` 主买人关闭（任意状态 -> closed）
+- **M23.4** 名额校验: 按**响应人数**计（一个响应人占一个名额，不管响应几个商品），满额拒绝新响应；拒绝响应释放名额
+- **M23.5** 状态机校验:
+  - pending_review -> open（审核通过）
+  - open -> closed_for_bid（主买人操作）
+  - closed_for_bid -> purchased（主买人操作）
+  - purchased -> completed（**自动触发**：所有 item.status=delivered 时）
+  - 任意 -> closed（主买人关闭）
+  - 跳过状态返回 400
+- **M23.6** 通知触发:
+  - 主买人截止接单 -> 推所有响应人
+  - 主买人标记已购回 -> 推所有响应人
+  - 发布/有人响应不推送
+- **M23.7** 前端列表 filter: events 页 filter 增加"购物拼拼"，调用 `GET /group-buys` 并合并到互助瀑布流；"全部"filter 需联合查询 events + group_buys（见 M22.4）
+- **M23.8** 卡片展示: 复用 MasonryEventCard，typeLabel="求代购"/"代购方"，title 智能拼接（seek: 商品名；offer: 地点+时间）
+- **M23.9** 小程序创建页: `/pages/group-buy-create/index?type=seek|offer`（2 套独立表单）
+- **M23.10** 小程序详情页: `/pages/group-buy-detail/index?id=xxx`（含响应操作"我要加入"填商品+数量 + 主买人视角的 confirm/reject/deliver 按钮）
+- **M23.11** 小程序编辑页: `/pages/group-buy-edit/index?id=xxx`
+- **M23.12** 管理端: 新建独立管理页（列表 + 详情，字段与 event 不同，复用没意义）；沿用 AiReview 审核（复用 event 的 AiReview 服务，不单独建审核流程）
+
+### 交付闭环
+
+| 产物      | 内容                                                                                                                 |
+| --------- | -------------------------------------------------------------------------------------------------------------------- |
+| ①后端 API | `apps/api/src/modules/group-buys/` (GroupBuyController + GroupBuyService，注入 AiReviewService)                      |
+| ②前端页面 | `miniapp/pages/group-buy-create/` + `miniapp/pages/group-buy-detail/` + `miniapp/pages/group-buy-edit/`              |
+| ③共享契约 | `GroupBuyDto`, `GroupBuyItemDto`, `CreateGroupBuyRequest`, `RespondGroupBuyRequest`                                  |
+| ④测试     | `apps/api/test/group-buy.spec.ts`（状态机 + 名额 + 响应 + 取消 + 自动 completed + AiReview 触发）                    |
+| ⑤验收证据 | 两个方向创建成功 + 名额满拒绝 + 状态流转完整 + 响应人可取消 + 通知触发正确 + 自动 completed 验证 + AiReview 调用日志 |
 
 ---
 
