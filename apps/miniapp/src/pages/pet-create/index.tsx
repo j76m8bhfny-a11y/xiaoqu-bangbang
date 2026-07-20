@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Taro from '@tarojs/taro';
 import {
   View,
@@ -14,10 +14,9 @@ import {
   Button,
 } from '@tarojs/components';
 import { useAuthStore } from '@/store/auth';
+import { eventService } from '@/services';
 import { getFields, FieldConfig } from './field-configs';
 import './index.scss';
-
-const API = process.env.TARO_APP_API || 'http://localhost:3000';
 
 const PetCreate: React.FC = () => {
   const subType = Taro.getCurrentInstance().router?.params?.type || 'feed';
@@ -25,17 +24,25 @@ const PetCreate: React.FC = () => {
   const [form, setForm] = useState<Record<string, any>>({});
   // ponytail: verifyStatus 在 user 对象上（非 store 顶层），参考 event-create 的取值方式
   const verifyStatus = useAuthStore((s) => s.user?.verifyStatus);
+  // M22 review fix: 用 useEffect + ref 避免重复渲染触发多次弹窗
+  const hasRedirected = useRef(false);
+  useEffect(() => {
+    if (hasRedirected.current) return;
+    if ((subType === 'feed' || subType === 'walk') && verifyStatus !== 'verified') {
+      hasRedirected.current = true;
+      Taro.showModal({
+        title: '需要业主认证',
+        content: '代喂/代遛需要业主认证后才能发布，是否前往认证？',
+        success: (res) => {
+          if (res.confirm) Taro.redirectTo({ url: '/pages/verify/index' });
+          else Taro.navigateBack();
+        },
+      });
+    }
+  }, [subType, verifyStatus]);
 
-  // 业主认证前置（feed/walk）
+  // 业主认证未通过时（feed/walk）不渲染表单
   if ((subType === 'feed' || subType === 'walk') && verifyStatus !== 'verified') {
-    Taro.showModal({
-      title: '需要业主认证',
-      content: '代喂/代遛需要业主认证后才能发布，是否前往认证？',
-      success: (res) => {
-        if (res.confirm) Taro.redirectTo({ url: '/pages/verify/index' });
-        else Taro.navigateBack();
-      },
-    });
     return null;
   }
 
@@ -71,23 +78,11 @@ const PetCreate: React.FC = () => {
       petMeta,
     };
     try {
-      const res = await Taro.request({
-        url: `${API}/api/v1/events`,
-        method: 'POST',
-        header: {
-          Authorization: `Bearer ${Taro.getStorageSync('token')}`,
-          'Content-Type': 'application/json',
-        },
-        data: payload,
-      });
-      if (res.data?.code === 0) {
-        Taro.showToast({ title: '发布成功', icon: 'success' });
-        setTimeout(() => Taro.navigateBack(), 1500);
-      } else {
-        Taro.showToast({ title: res.data?.message || '发布失败', icon: 'none' });
-      }
-    } catch (e) {
-      Taro.showToast({ title: '网络错误', icon: 'none' });
+      const event = await eventService.create(payload);
+      Taro.showToast({ title: '发布成功', icon: 'success' });
+      setTimeout(() => Taro.navigateBack(), 1500);
+    } catch (e: any) {
+      Taro.showToast({ title: e?.message || '发布失败', icon: 'none' });
     }
   };
 

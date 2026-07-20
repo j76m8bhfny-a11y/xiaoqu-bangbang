@@ -13,10 +13,9 @@ import {
   Switch,
   Button,
 } from '@tarojs/components';
+import { eventService } from '@/services';
 import { getFields, FieldConfig } from '../pet-create/field-configs';
 import './index.scss';
-
-const API = process.env.TARO_APP_API || 'http://localhost:3000';
 
 const PetEdit: React.FC = () => {
   const eventId = Taro.getCurrentInstance().router?.params?.id;
@@ -26,20 +25,16 @@ const PetEdit: React.FC = () => {
 
   useEffect(() => {
     if (!eventId) return;
-    Taro.request({
-      url: `${API}/api/v1/events/${eventId}`,
-      method: 'GET',
-      header: { Authorization: `Bearer ${Taro.getStorageSync('token')}` },
-    }).then((res) => {
-      if (res.data?.code === 0) {
-        const eventData = res.data.data;
+    eventService
+      .getById(eventId)
+      .then((eventData) => {
         setEvent(eventData);
         setForm(eventData.petMeta || {});
-      } else {
+      })
+      .catch(() => {
         Taro.showToast({ title: '加载失败', icon: 'none' });
-      }
-      setLoading(false);
-    });
+      })
+      .finally(() => setLoading(false));
   }, [eventId]);
 
   const setField = (name: string, value: any) => {
@@ -62,23 +57,11 @@ const PetEdit: React.FC = () => {
       if (form[f.name] !== undefined) petMeta[f.name] = form[f.name];
     }
     try {
-      const res = await Taro.request({
-        url: `${API}/api/v1/events/${eventId}`,
-        method: 'PATCH',
-        header: {
-          Authorization: `Bearer ${Taro.getStorageSync('token')}`,
-          'Content-Type': 'application/json',
-        },
-        data: { petMeta },
-      });
-      if (res.data?.code === 0) {
-        Taro.showToast({ title: '保存成功', icon: 'success' });
-        setTimeout(() => Taro.navigateBack(), 1500);
-      } else {
-        Taro.showToast({ title: res.data?.message || '保存失败', icon: 'none' });
-      }
-    } catch (e) {
-      Taro.showToast({ title: '网络错误', icon: 'none' });
+      await eventService.update(eventId!, { petMeta });
+      Taro.showToast({ title: '保存成功', icon: 'success' });
+      setTimeout(() => Taro.navigateBack(), 1500);
+    } catch (e: any) {
+      Taro.showToast({ title: e?.message || '保存失败', icon: 'none' });
     }
   };
 

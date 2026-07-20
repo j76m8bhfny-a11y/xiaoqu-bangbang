@@ -451,6 +451,7 @@ export class EventsService {
     }
 
     // P-19: 有人响应后禁止编辑核心内容
+    // M22: petMeta 也算核心字段（宠物详细信息），subType 不允许通过 update 改类型
     const coreFields = [
       'type',
       'title',
@@ -458,6 +459,8 @@ export class EventsService {
       'rewardType',
       'rewardAmount',
       'expectedTime',
+      'petMeta',
+      'subType',
     ];
     const editingCore = coreFields.some((f) => dto[f] !== undefined);
     if (editingCore) {
@@ -480,6 +483,8 @@ export class EventsService {
     if (dto.expectedTime !== undefined)
       updateData.expectedTime = dto.expectedTime ? new Date(dto.expectedTime) : null;
     if (dto.isAnonymous !== undefined) updateData.isAnonymous = dto.isAnonymous;
+    // M22: pet_help 事件编辑 petMeta 字段（subType 不允许改，避免类型切换）
+    if (dto.petMeta !== undefined) updateData.petMeta = dto.petMeta as any;
 
     // Re-run AI review if content changed
     if (dto.title !== undefined || dto.description !== undefined) {

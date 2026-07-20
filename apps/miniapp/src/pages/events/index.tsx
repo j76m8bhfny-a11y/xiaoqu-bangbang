@@ -12,7 +12,6 @@ import EmptyState from '@/components/empty-state';
 import MasonryEventCard from '@/components/masonry-card';
 import BlurredList from '@/components/blurred-list';
 import Icon from '@/components/icon';
-import type { EventCardData } from '@/components/event-card';
 import './index.scss';
 
 // S1-7 events 二层 tab 重构：
@@ -41,147 +40,6 @@ const GUIDE_FILTERS = [
   { key: 'repair', label: '维修排障' },
   { key: 'maintenance', label: '保养维护' },
   { key: 'other', label: '其他' },
-];
-
-// TODO: 临时 mock 数据，测试瀑布流高度错落 + 模糊预览效果后删除
-const MOCK_CARDS: EventCardData[] = [
-  {
-    id: 'mock-1',
-    type: 'help_request',
-    typeLabel: '求助',
-    typeColor: '#d9534f',
-    typeBgColor: '#fdeaea',
-    statusLabel: '进行中',
-    title: '谁家有多余的猫粮？我家猫咪断粮了',
-    description: '',
-    creatorName: '王阿姨',
-    createdAt: '今天',
-    likeCount: 3,
-    commentCount: 5,
-    thanksCount: 2,
-    ctaText: '我能帮忙',
-    ctaColor: '#5b9e6f',
-  },
-  {
-    id: 'mock-2',
-    type: 'help_offer',
-    typeLabel: '我能帮忙',
-    typeColor: '#5b9e6f',
-    typeBgColor: '#eaf4ec',
-    statusLabel: '进行中',
-    title:
-      '免费教老年人用智能手机，周末下午在小区凉亭，手把手教微信聊天、视频通话、健康码出示等常用操作',
-    description: '',
-    creatorName: '李师傅',
-    createdAt: '今天',
-    likeCount: 12,
-    commentCount: 3,
-    thanksCount: 8,
-    ctaText: '联系TA',
-    ctaColor: '#5b9e6f',
-  },
-  {
-    id: 'mock-3',
-    type: 'lost_found',
-    typeLabel: '寻宠',
-    typeColor: '#e89b6c',
-    typeBgColor: '#fbf0dd',
-    statusLabel: '进行中',
-    title: '在3号楼附近走丢一只橘猫，名叫大橘',
-    description: '',
-    creatorName: '小张',
-    createdAt: '昨天',
-    likeCount: 5,
-    commentCount: 2,
-    thanksCount: 1,
-    ctaText: '有线索',
-    ctaColor: '#5b9e6f',
-  },
-  {
-    id: 'mock-4',
-    type: 'public_welfare',
-    typeLabel: '公益',
-    typeColor: '#5b9e6f',
-    typeBgColor: '#eaf4ec',
-    statusLabel: '进行中',
-    title: '周六小区义卖，欢迎大家捐闲置物品',
-    description: '',
-    creatorName: '业委会',
-    createdAt: '昨天',
-    likeCount: 8,
-    commentCount: 4,
-    thanksCount: 3,
-    ctaText: '我要捐',
-    ctaColor: '#5b9e6f',
-  },
-  {
-    id: 'mock-5',
-    type: 'help_request',
-    typeLabel: '求助',
-    typeColor: '#d9534f',
-    typeBgColor: '#fdeaea',
-    statusLabel: '进行中',
-    title: '家里水管漏了，有没有认识的师傅推荐一下，急',
-    description: '',
-    creatorName: '赵先生',
-    createdAt: '2天前',
-    likeCount: 2,
-    commentCount: 6,
-    thanksCount: 0,
-    ctaText: '我能帮忙',
-    ctaColor: '#5b9e6f',
-  },
-  {
-    id: 'mock-6',
-    type: 'help_offer',
-    typeLabel: '我能帮忙',
-    typeColor: '#5b9e6f',
-    typeBgColor: '#eaf4ec',
-    statusLabel: '进行中',
-    title: '代取快递，每次1元，当天可取',
-    description: '',
-    creatorName: '小陈',
-    createdAt: '2天前',
-    likeCount: 4,
-    commentCount: 1,
-    thanksCount: 2,
-    ctaText: '联系TA',
-    ctaColor: '#5b9e6f',
-  },
-  {
-    id: 'mock-7',
-    type: 'help_request',
-    typeLabel: '求助',
-    typeColor: '#d9534f',
-    typeBgColor: '#fdeaea',
-    statusLabel: '进行中',
-    title: '老人独居在家，想找人帮忙搬个柜子到5楼，谢谢',
-    description: '',
-    creatorName: '刘奶奶',
-    createdAt: '3天前',
-    likeCount: 6,
-    commentCount: 3,
-    thanksCount: 4,
-    ctaText: '我能帮忙',
-    ctaColor: '#5b9e6f',
-  },
-  {
-    id: 'mock-8',
-    type: 'public_welfare',
-    typeLabel: '公益',
-    typeColor: '#5b9e6f',
-    typeBgColor: '#eaf4ec',
-    statusLabel: '进行中',
-    title: '旧衣物回收，环保又公益',
-    description: '',
-    creatorName: '环保小组',
-    createdAt: '3天前',
-    likeCount: 7,
-    commentCount: 0,
-    thanksCount: 5,
-    ctaText: '我要捐',
-    ctaColor: '#5b9e6f',
-  },
 ];
 
 export default function Events() {
@@ -269,8 +127,6 @@ export default function Events() {
   const setCurrentFilter = isHelp ? setHelpFilter : isGuide ? setGuideFilter : setMarketFilter;
 
   const realCards = helpList.items.map(mapEventDtoToCardData);
-  // TODO: 临时 mock 数据，真实数据不足 5 条时补充到 8 条，测试瀑布流 + 模糊预览后删除
-  const helpCards = realCards.length >= 5 ? realCards : [...realCards, ...MOCK_CARDS].slice(0, 8);
   const marketItems = marketList.items as MarketItemDto[];
   const guideItems = guideList.items as GuideDto[];
 
@@ -387,7 +243,7 @@ export default function Events() {
         {!list.loading && !list.error && isHelp && (
           <View className={`events__masonry ${isLocked ? 'events__masonry--locked' : ''}`}>
             <BlurredList
-              items={helpCards}
+              items={realCards}
               previewCount={3}
               renderItem={(event) => (
                 <MasonryEventCard
