@@ -26,6 +26,7 @@ import { CommunityApplicationsModule } from './modules/community-applications/co
 import { UsersModule } from './modules/users/users.module';
 import { GuidesModule } from './modules/guides/guides.module';
 import { GroupBuysModule } from './modules/group-buys/group-buys.module';
+import { FeedModule } from './modules/feed/feed.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { HealthController } from './health.controller';
 
@@ -60,6 +61,7 @@ import { HealthController } from './health.controller';
     UsersModule,
     GuidesModule,
     GroupBuysModule,
+    FeedModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })
