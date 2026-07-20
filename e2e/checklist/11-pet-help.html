@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⑪ 宠物帮帮 - E2E 检查点测试单</title>
+<style>
+  :root {
+    --primary: #5B9E6F;
+    --primary-light: #E8F5ED;
+    --accent: #F5A623;
+    --danger: #E74C3C;
+    --warning: #F39C12;
+    --success: #27AE60;
+    --info: #3498DB;
+    --bg: #FAFBF7;
+    --card-bg: #FFFFFF;
+    --text: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --border: #E5E7EB;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+
+  .hero {
+    background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%);
+    color: white;
+    padding: 40px 0 32px;
+    text-align: center;
+    position: relative;
+  }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; }
+  .hero h1 { font-size: 28px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.8; }
+
+  .section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .section-header {
+    background: var(--primary-light);
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-header .num {
+    background: var(--primary);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .section-header .count {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+  .section-body { padding: 8px 0; }
+  .checkpoint {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .checkpoint:last-child { border-bottom: none; }
+  .checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .checkbox.checked { background: var(--success); border-color: var(--success); }
+  .checkbox.checked::after { content: '✓'; color: white; font-size: 14px; font-weight: bold; }
+  .checkpoint-content { flex: 1; }
+  .checkpoint-id { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
+  .checkpoint-desc { color: var(--text); }
+  .checkpoint-detail { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 6px;
+  }
+  .badge-api { background: #E3F2FD; color: #1565C0; }
+  .badge-ui { background: #F3E5F5; color: #7B1FA2; }
+  .badge-admin { background: #FFF3E0; color: #E65100; }
+
+  .progress-bar-container {
+    background: var(--border);
+    border-radius: 20px;
+    height: 22px;
+    overflow: hidden;
+    margin: 16px 0 4px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), var(--primary));
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    transition: width 0.3s;
+    min-width: 40px;
+  }
+
+  .summary { margin: 20px 0; }
+  .summary-stats { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .stat { text-align: center; padding: 12px 24px; background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .stat-value { font-size: 24px; font-weight: 700; }
+  .stat-label { font-size: 12px; color: var(--text-secondary); }
+  .stat.pass .stat-value { color: var(--success); }
+  .stat.fail .stat-value { color: var(--danger); }
+  .stat.skip .stat-value { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <a class="back-link" href="../checklist/index.html">← 返回索引</a>
+  <h1>⑪ 宠物帮帮 (Pet Help)</h1>
+  <p class="tagline">代喂 / 代遛 / 寻宠 -> 响应 -> 完成（单/多帮手）</p>
+  <p class="meta">模块: M22 | EventType: pet_help | 子分类: feed/walk/lost | 老 lost_found 迁移至 pet_help.lost</p>
+</div>
+
+<div class="container">
+  <div class="summary">
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="progressBar" style="width: 0%;">0%</div>
+    </div>
+    <div class="summary-stats">
+      <div class="stat pass"><div class="stat-value" id="passCount">0</div><div class="stat-label">通过</div></div>
+      <div class="stat fail"><div class="stat-value" id="failCount">0</div><div class="stat-label">失败</div></div>
+      <div class="stat skip"><div class="stat-value" id="skipCount">0</div><div class="stat-label">跳过</div></div>
+      <div class="stat"><div class="stat-value" id="totalCount">0</div><div class="stat-label">总计</div></div>
+    </div>
+  </div>
+
+  <!-- 1. 创建代喂 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">1</span>
+      <span>创建代喂 (feed)</span>
+      <span class="count" id="count-1">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-001</div>
+          <div class="checkpoint-desc">认证用户在邻里帮 filter=pet_help -> FAB -> /pages/pet-create/index -> 选"代喂" <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-002</div>
+          <div class="checkpoint-desc">填宠物种类(猫/狗/鱼/其他) + 宠物名 + 喂食次数/天 + 总天数 + 起止日期 + 清理猫砂开关 + 报酬 + 备注 -> 提交成功 <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /events (type=pet_help, subType=feed) -> status=pending_review 或 open（看 AI 审核）</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-003</div>
+          <div class="checkpoint-desc">未认证用户点 FAB 创建代喂 -> 跳认证页 <span class="badge badge-ui">UI</span></div>
+          <div class="checkpoint-detail">代喂/代遛业主认证前置；寻宠不需要</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-004</div>
+          <div class="checkpoint-desc">代喂表单不支持图片上传（无图片字段） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-005</div>
+          <div class="checkpoint-desc">关键字段缺失（宠物种类/喂食次数/总天数）-> 后端返回 400 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-006</div>
+          <div class="checkpoint-desc">AI 审核通过 -> status=open；AI 拒绝 -> status=rejected；不确定 -> pending_review <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 创建代遛 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">2</span>
+      <span>创建代遛 (walk)</span>
+      <span class="count" id="count-2">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-007</div>
+          <div class="checkpoint-desc">选"代遛" -> 表单字段切换：狗体型/狗名/每天次数/每次时长/时间段多选/牵引绳开关/报酬/备注 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-008</div>
+          <div class="checkpoint-desc">时间段多选（早晨/中午/傍晚/夜间）-> 提交后详情正确展示 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-009</div>
+          <div class="checkpoint-desc">狗体型必填 -> 缺失返回 400 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-010</div>
+          <div class="checkpoint-desc">未认证用户创建代遛 -> 跳认证页 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-011</div>
+          <div class="checkpoint-desc">代遛表单不支持图片上传 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-012</div>
+          <div class="checkpoint-desc">报酬类型切换（免费/面议/具体金额）-> 详情页对应展示 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 创建寻宠 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">3</span>
+      <span>创建寻宠 (lost)</span>
+      <span class="count" id="count-3">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-013</div>
+          <div class="checkpoint-desc">选"寻宠" -> 表单字段：宠物种类/品种/名字/走丢地点/走丢时间/外观特征/照片/酬谢/备注 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-014</div>
+          <div class="checkpoint-desc">寻宠支持照片多张上传（≤9 张） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-015</div>
+          <div class="checkpoint-desc">未认证用户也能创建寻宠（无认证前置） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-016</div>
+          <div class="checkpoint-desc">走丢地点 + 走丢时间 + 宠物种类 必填 -> 缺失返回 400 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-017</div>
+          <div class="checkpoint-desc">酬谢字段沿用 rewardType（免费/面议/具体金额） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-018</div>
+          <div class="checkpoint-desc">老 lost_found 数据迁移后通过寻宠 filter 可见（subType=lost） <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">迁移规则：type=pet_help + subType=lost</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 列表展示与 filter -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">4</span>
+      <span>列表展示与 filter</span>
+      <span class="count" id="count-4">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-019</div>
+          <div class="checkpoint-desc">邻里帮 filter 出现第 4 项"宠物帮帮" <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-020</div>
+          <div class="checkpoint-desc">filter=pet_help 列表展示 type=pet_help 的卡片 <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">GET /events?type=pet_help</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-021</div>
+          <div class="checkpoint-desc">filter=全部 列表包含 pet_help（与 help_request/public_welfare/group_buy 联合查询） <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">GET /feed/all</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-022</div>
+          <div class="checkpoint-desc">卡片 typeLabel 显示"代喂"/"代遛"/"寻宠"（根据 subType） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-023</div>
+          <div class="checkpoint-desc">卡片 CTA 文案"联系 TA" -> 点击进详情页 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 详情页与响应 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">5</span>
+      <span>详情页与响应</span>
+      <span class="count" id="count-5">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-024</div>
+          <div class="checkpoint-desc">详情页展示子分类标签 + 对应字段（代喂/代遛/寻宠 字段差异化展示） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-025</div>
+          <div class="checkpoint-desc">寻宠详情展示照片 Swiper（多张可滑动） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-026</div>
+          <div class="checkpoint-desc">点"联系 TA" -> 创建 EventParticipant / 响应记录 -> 通知推给发布者 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-027</div>
+          <div class="checkpoint-desc">发布者详情页可见响应人列表 + 响应数 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-028</div>
+          <div class="checkpoint-desc">小区隔离：A 小区看不到 B 小区的 pet_help <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">R2 红线验证</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-029</div>
+          <div class="checkpoint-desc">非作者编辑/删除 -> 后端返回 403 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 单帮手完成流程 (feed/walk) -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">6</span>
+      <span>单帮手完成流程 (feed/walk)</span>
+      <span class="count" id="count-6">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-030</div>
+          <div class="checkpoint-desc">代喂/代遛：发布者选 1 个响应人为帮手 -> EventParticipant.status=confirmed <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-031</div>
+          <div class="checkpoint-desc">单帮手不可选多人 -> 第二个确认返回 400 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-032</div>
+          <div class="checkpoint-desc">帮手完成后双方确认 -> event.status=completed <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">R11 双方确认流程</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-033</div>
+          <div class="checkpoint-desc">完成后给帮手发花：feed=1 朵，walk=1 朵 <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">ContributionService.awardFlower</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-034</div>
+          <div class="checkpoint-desc">创建者（发布代喂/代遛的人）不发花 <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">PRD §4.21 激励表</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. 多帮手完成流程 (lost) -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">7</span>
+      <span>多帮手完成流程 (lost)</span>
+      <span class="count" id="count-7">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-035</div>
+          <div class="checkpoint-desc">寻宠：多个邻居响应（可同时多人） -> 多条 EventParticipant pending <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-036</div>
+          <div class="checkpoint-desc">发布者逐个确认线索提供者 -> 每确认一个立即发花（2 朵/人） <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">PRD §4.21 激励表：寻宠 2 朵</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-037</div>
+          <div class="checkpoint-desc">发布者可拒绝某些响应人 -> rejected 不发花 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-038</div>
+          <div class="checkpoint-desc">全部确认后 -> event.status=completed <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-039</div>
+          <div class="checkpoint-desc">寻宠创建者不发花（只发布信息） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-040</div>
+          <div class="checkpoint-desc">完成后排行榜重算（recalculateRankings） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Admin 管理 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">8</span>
+      <span>Admin 管理</span>
+      <span class="count" id="count-8">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-041</div>
+          <div class="checkpoint-desc">Admin 后台事件管理页加 pet_help filter <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-042</div>
+          <div class="checkpoint-desc">Admin 可查看 pet_help 详情 + 子分类标签 <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-043</div>
+          <div class="checkpoint-desc">Admin 审核通过/驳回 pet_help 内容（沿用现有 event 审核） <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-044</div>
+          <div class="checkpoint-desc">Admin 可下架违规 pet_help -> status=closed <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">PH-045</div>
+          <div class="checkpoint-desc">pet_help 可被举报（targetType=event） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 60px;"></div>
+</div>
+
+<script>
+function toggleSection(header) {
+  var body = header.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? '' : 'none';
+}
+
+function toggleCheck(checkbox) {
+  checkbox.classList.toggle('checked');
+  updateProgress();
+}
+
+function updateProgress() {
+  var sections = document.querySelectorAll('.section');
+  var total = 0, passed = 0;
+  sections.forEach(function(section, idx) {
+    var checks = section.querySelectorAll('.checkbox');
+    var sectionPassed = section.querySelectorAll('.checkbox.checked').length;
+    total += checks.length;
+    passed += sectionPassed;
+    var countEl = document.getElementById('count-' + (idx + 1));
+    if (countEl) countEl.textContent = sectionPassed + '/' + checks.length;
+  });
+  var percent = total > 0 ? Math.round((passed / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = percent + '%';
+  document.getElementById('progressBar').textContent = percent + '%';
+  document.getElementById('passCount').textContent = passed;
+  document.getElementById('failCount').textContent = 0;
+  document.getElementById('skipCount').textContent = 0;
+  document.getElementById('totalCount').textContent = total;
+}
+
+updateProgress();
+</script>
+
+</body>
+</html>
