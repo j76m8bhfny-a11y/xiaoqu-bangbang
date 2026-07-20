@@ -30,6 +30,8 @@ export default defineAppConfig({
     'pages/event-edit/index',
     'pages/market-edit/index',
     'pages/group-buy-create/index',
+    'pages/group-buy-detail/index',
+    'pages/group-buy-edit/index',
     'pages/votes/index',
     'pages/vote-detail/index',
     'pages/committee/index',
