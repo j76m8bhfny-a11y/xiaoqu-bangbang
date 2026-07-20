@@ -993,6 +993,42 @@ export class AdminController {
     return { code: ErrorCodes.SUCCESS, message: 'ok', data };
   }
 
+  // === Group Buy Management ===
+  @Get('group-buys')
+  async getGroupBuys(
+    @CurrentCommunityId() communityId: string,
+    @Query() query: { status?: string; type?: string },
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ) {
+    const { page: p, pageSize: ps, skip, take } = getPaginationParams(page, pageSize);
+    const [items, total] = await Promise.all([
+      this.adminService.getGroupBuys(communityId, query, { skip, take }),
+      this.adminService.countGroupBuys(communityId, query),
+    ]);
+    return {
+      code: ErrorCodes.SUCCESS,
+      message: 'ok',
+      data: { items, page: p, pageSize: ps, total },
+    };
+  }
+
+  @Get('group-buys/:id')
+  async getGroupBuyDetail(@Param('id') id: string, @CurrentCommunityId() communityId: string) {
+    const data = await this.adminService.getGroupBuyDetail(id, communityId);
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
+  }
+
+  @Post('group-buys/:id/takedown')
+  async takedownGroupBuy(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.adminService.takedownGroupBuy(userId, id, communityId);
+    return { code: ErrorCodes.SUCCESS, message: 'ok', data };
+  }
+
   // === System Settings ===
   @Get('settings')
   async getSettings() {

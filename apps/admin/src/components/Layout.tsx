@@ -56,6 +56,12 @@ const allMenuItems = [
   },
   { key: '/market', label: '闲置管理', icon: <ShopOutlined />, roles: ['platform_admin'] },
   {
+    key: '/group-buys',
+    label: '拼单管理',
+    icon: <ShopOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
+  {
     key: '/guides',
     label: '教程管理',
     icon: <BookOutlined />,

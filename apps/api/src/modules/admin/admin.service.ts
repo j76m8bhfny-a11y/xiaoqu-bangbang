@@ -2005,6 +2005,74 @@ export class AdminService {
     return { id, status: 'rejected' };
   }
 
+  // === Group Buys ===
+  async getGroupBuys(
+    communityId: string,
+    query: { status?: string; type?: string },
+    pagination?: { skip: number; take: number },
+  ) {
+    const where: any = { communityId, deletedAt: null };
+    if (query.status) where.status = query.status;
+    if (query.type) where.type = query.type;
+    return this.prisma.groupBuy.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        type: true,
+        location: true,
+        departAt: true,
+        quota: true,
+        status: true,
+        createdAt: true,
+        initiator: { select: { id: true, nickname: true } },
+        _count: { select: { items: true } },
+      },
+      skip: pagination?.skip,
+      take: pagination?.take,
+    });
+  }
+
+  async countGroupBuys(communityId: string, query: { status?: string; type?: string }) {
+    const where: any = { communityId, deletedAt: null };
+    if (query.status) where.status = query.status;
+    if (query.type) where.type = query.type;
+    return this.prisma.groupBuy.count({ where });
+  }
+
+  async getGroupBuyDetail(id: string, communityId: string) {
+    const gb = await this.prisma.groupBuy.findUnique({
+      where: { id },
+      include: {
+        initiator: { select: { id: true, nickname: true } },
+        items: {
+          select: {
+            id: true,
+            name: true,
+            qty: true,
+            note: true,
+            status: true,
+            createdAt: true,
+            requester: { select: { id: true, nickname: true } },
+          },
+        },
+      },
+    });
+    if (!gb || gb.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    return gb;
+  }
+
+  async takedownGroupBuy(adminId: string, id: string, communityId: string) {
+    const gb = await this.prisma.groupBuy.findUnique({
+      where: { id },
+      select: { communityId: true },
+    });
+    if (!gb || gb.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    await this.prisma.groupBuy.update({ where: { id }, data: { status: 'cancelled' } });
+    await this.logAudit(adminId, 'takedown_group_buy', 'group_buy', id);
+    return { id, status: 'cancelled' };
+  }
+
   // === System Settings ===
   // P-193: ponytail: getSettings 返回 Record<string, string> 而非 SystemSettingsDto，因为 DB 中所有值存为字符串
   // 前端手动 Number() 转换数字字段。升级路径: service 层映射到 SystemSettingsDto
