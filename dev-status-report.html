@@ -742,6 +742,62 @@
       </div>
     </div>
   </div>
+    <!-- M22+M23 E2E 测试结果 (2026-07-21) -->
+    <div class="card" style="border-left:4px solid var(--primary);">
+      <h4 style="margin-bottom:12px; color:var(--primary);">🧪 M22+M23 E2E 测试结果（2026-07-21）</h4>
+      <p style="font-size:14px; margin-bottom:12px; color:var(--text-secondary);">90 检查点（11-pet-help 45 + 12-group-buy 45），API 类 curl + Admin Playwright 已测，UI 类待 weapp-dev-mcp。详细结果见 <code>e2e/results/m22-m23-e2e-results.md</code>。</p>
+
+      <div class="feature-grid" style="margin-bottom:12px;">
+        <div class="feature-item">
+          <span class="feature-emoji">✅</span>
+          <div class="feature-info">
+            <h4>pass 58 项</h4>
+            <p>API 类 47 + Admin 类 9 + 举报 1 + 间接 1</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">🟡</span>
+          <div class="feature-info">
+            <h4>pass(部分) 3 项</h4>
+            <p>AI reject 路径无 pending 数据触发</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">⏳</span>
+          <div class="feature-info">
+            <h4>skip 27 项</h4>
+            <p>UI 类待 weapp-dev-mcp 连接稳定</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">❌</span>
+          <div class="feature-info">
+            <h4>finding 2 项</h4>
+            <p>PH-009/016 petMeta 内部不校验（待确认）</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#FEF3C7; border-left:3px solid #F59E0B; padding:10px 14px; margin-bottom:10px; font-size:13px; color:#92400E; border-radius:4px;">
+        <strong>🐛 已修复 4 个 bug（commit 08de26b，后端 287/287 单测无回归）：</strong>
+        <ul style="margin:6px 0 0 16px; padding:0;">
+          <li><strong>M22 Bug1 Critical</strong>: selectParticipant 不支持寻宠多帮手（pet_help+lost 被 400 拒绝）→ events.service.ts:855 加 pet_help+lost 分支</li>
+          <li><strong>M22 Bug2 Major</strong>: 寻宠线索人发花 1 朵（应 2 朵）→ rankings.service getEventAction 加 pet_help 分支（subType=lost → lost_found action）</li>
+          <li><strong>M23 Bug3 Critical</strong>: seek 创建多商品 UNIQUE 冲突 500 → schema GroupBuyItem @@unique 改为含 name + respond 显式防重复</li>
+          <li><strong>M23 Bug4 Major</strong>: group_buy 完成不发花（原 ponytail TODO）→ rankings 加 handleGroupBuyCompletion（主买人 1 朵）+ group-buys.service deliver 事务后发花</li>
+        </ul>
+      </div>
+
+      <div style="background:#FEE2E2; border-left:3px solid #EF4444; padding:10px 14px; font-size:13px; color:#991B1B; border-radius:4px;">
+        <strong>⚠️ 待确认 Findings（非阻塞）：</strong>
+        <ul style="margin:6px 0 0 16px; padding:0;">
+          <li><strong>PH-009/016</strong>: petMeta 内部字段（dogSize/petType/lostLocation）后端不校验，缺失不 400。需确认 PRD 是否要求后端校验 petMeta 内部结构</li>
+          <li><strong>PH-037</strong>: events 模块无 reject application 接口（寻宠发布者无法明确拒绝响应人，只能不选）</li>
+          <li><strong>GB-045</strong>: Admin takedown API 不校验 group_buy 状态（UI 已隐藏按钮，API 层无守卫）</li>
+        </ul>
+      </div>
+    </div>
+
 </div>
 
 <!-- 核心业务链路 -->

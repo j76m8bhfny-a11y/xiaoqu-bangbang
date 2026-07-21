@@ -185,14 +185,14 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-001</div>
+          <div class="checkpoint-id">PH-001</div> ⏳ skip
           <div class="checkpoint-desc">认证用户在邻里帮 filter=pet_help -> FAB -> /pages/pet-create/index -> 选"代喂" <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-002</div>
+          <div class="checkpoint-id">PH-002</div> ✅
           <div class="checkpoint-desc">填宠物种类(猫/狗/鱼/其他) + 宠物名 + 喂食次数/天 + 总天数 + 起止日期 + 清理猫砂开关 + 报酬 + 备注 -> 提交成功 <span class="badge badge-api">API</span></div>
           <div class="checkpoint-detail">POST /events (type=pet_help, subType=feed) -> status=pending_review 或 open（看 AI 审核）</div>
         </div>
@@ -200,7 +200,7 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-003</div>
+          <div class="checkpoint-id">PH-003</div> ✅
           <div class="checkpoint-desc">未认证用户点 FAB 创建代喂 -> 跳认证页 <span class="badge badge-ui">UI</span></div>
           <div class="checkpoint-detail">代喂/代遛业主认证前置；寻宠不需要</div>
         </div>
@@ -208,21 +208,21 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-004</div>
+          <div class="checkpoint-id">PH-004</div> ⏳ skip
           <div class="checkpoint-desc">代喂表单不支持图片上传（无图片字段） <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-005</div>
+          <div class="checkpoint-id">PH-005</div> ✅
           <div class="checkpoint-desc">关键字段缺失（宠物种类/喂食次数/总天数）-> 后端返回 400 <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-006</div>
+          <div class="checkpoint-id">PH-006</div> 🟡 pass(部分)
           <div class="checkpoint-desc">AI 审核通过 -> status=open；AI 拒绝 -> status=rejected；不确定 -> pending_review <span class="badge badge-api">API</span></div>
         </div>
       </div>
@@ -240,42 +240,42 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-007</div>
+          <div class="checkpoint-id">PH-007</div> ⏳ skip
           <div class="checkpoint-desc">选"代遛" -> 表单字段切换：狗体型/狗名/每天次数/每次时长/时间段多选/牵引绳开关/报酬/备注 <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-008</div>
+          <div class="checkpoint-id">PH-008</div> ✅
           <div class="checkpoint-desc">时间段多选（早晨/中午/傍晚/夜间）-> 提交后详情正确展示 <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-009</div>
+          <div class="checkpoint-id">PH-009</div> ❌ fail
           <div class="checkpoint-desc">狗体型必填 -> 缺失返回 400 <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-010</div>
+          <div class="checkpoint-id">PH-010</div> ⏳ skip
           <div class="checkpoint-desc">未认证用户创建代遛 -> 跳认证页 <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-011</div>
+          <div class="checkpoint-id">PH-011</div> ✅
           <div class="checkpoint-desc">代遛表单不支持图片上传 <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-012</div>
+          <div class="checkpoint-id">PH-012</div> ⏳ skip
           <div class="checkpoint-desc">报酬类型切换（免费/面议/具体金额）-> 详情页对应展示 <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
@@ -293,42 +293,42 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-013</div>
+          <div class="checkpoint-id">PH-013</div> ⏳ skip
           <div class="checkpoint-desc">选"寻宠" -> 表单字段：宠物种类/品种/名字/走丢地点/走丢时间/外观特征/照片/酬谢/备注 <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-014</div>
+          <div class="checkpoint-id">PH-014</div> ⏳ skip
           <div class="checkpoint-desc">寻宠支持照片多张上传（≤9 张） <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-015</div>
+          <div class="checkpoint-id">PH-015</div> ✅
           <div class="checkpoint-desc">未认证用户也能创建寻宠（无认证前置） <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-016</div>
+          <div class="checkpoint-id">PH-016</div> ❌ fail
           <div class="checkpoint-desc">走丢地点 + 走丢时间 + 宠物种类 必填 -> 缺失返回 400 <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-017</div>
+          <div class="checkpoint-id">PH-017</div> ✅
           <div class="checkpoint-desc">酬谢字段沿用 rewardType（免费/面议/具体金额） <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-018</div>
+          <div class="checkpoint-id">PH-018</div> ⏳ skip
           <div class="checkpoint-desc">老 lost_found 数据迁移后通过寻宠 filter 可见（subType=lost） <span class="badge badge-api">API</span></div>
           <div class="checkpoint-detail">迁移规则：type=pet_help + subType=lost</div>
         </div>
@@ -347,14 +347,14 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-019</div>
+          <div class="checkpoint-id">PH-019</div> ⏳ skip
           <div class="checkpoint-desc">邻里帮 filter 出现第 4 项"宠物帮帮" <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-020</div>
+          <div class="checkpoint-id">PH-020</div> ✅
           <div class="checkpoint-desc">filter=pet_help 列表展示 type=pet_help 的卡片 <span class="badge badge-api">API</span></div>
           <div class="checkpoint-detail">GET /events?type=pet_help</div>
         </div>
@@ -362,7 +362,7 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-021</div>
+          <div class="checkpoint-id">PH-021</div> ✅
           <div class="checkpoint-desc">filter=全部 列表包含 pet_help（与 help_request/public_welfare/group_buy 联合查询） <span class="badge badge-api">API</span></div>
           <div class="checkpoint-detail">GET /feed/all</div>
         </div>
@@ -370,14 +370,14 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-022</div>
+          <div class="checkpoint-id">PH-022</div> ⏳ skip
           <div class="checkpoint-desc">卡片 typeLabel 显示"代喂"/"代遛"/"寻宠"（根据 subType） <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-023</div>
+          <div class="checkpoint-id">PH-023</div> ⏳ skip
           <div class="checkpoint-desc">卡片 CTA 文案"联系 TA" -> 点击进详情页 <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
@@ -395,35 +395,35 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-024</div>
+          <div class="checkpoint-id">PH-024</div> ⏳ skip
           <div class="checkpoint-desc">详情页展示子分类标签 + 对应字段（代喂/代遛/寻宠 字段差异化展示） <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-025</div>
+          <div class="checkpoint-id">PH-025</div> ⏳ skip
           <div class="checkpoint-desc">寻宠详情展示照片 Swiper（多张可滑动） <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-026</div>
+          <div class="checkpoint-id">PH-026</div> ✅
           <div class="checkpoint-desc">点"联系 TA" -> 创建 EventParticipant / 响应记录 -> 通知推给发布者 <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-027</div>
+          <div class="checkpoint-id">PH-027</div> ⏳ skip
           <div class="checkpoint-desc">发布者详情页可见响应人列表 + 响应数 <span class="badge badge-ui">UI</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-028</div>
+          <div class="checkpoint-id">PH-028</div> ✅
           <div class="checkpoint-desc">小区隔离：A 小区看不到 B 小区的 pet_help <span class="badge badge-api">API</span></div>
           <div class="checkpoint-detail">R2 红线验证</div>
         </div>
@@ -431,7 +431,7 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-029</div>
+          <div class="checkpoint-id">PH-029</div> ✅
           <div class="checkpoint-desc">非作者编辑/删除 -> 后端返回 403 <span class="badge badge-api">API</span></div>
         </div>
       </div>
@@ -449,21 +449,21 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-030</div>
+          <div class="checkpoint-id">PH-030</div> ✅
           <div class="checkpoint-desc">代喂/代遛：发布者选 1 个响应人为帮手 -> EventParticipant.status=confirmed <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-031</div>
+          <div class="checkpoint-id">PH-031</div> ✅
           <div class="checkpoint-desc">单帮手不可选多人 -> 第二个确认返回 400 <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-032</div>
+          <div class="checkpoint-id">PH-032</div> ✅
           <div class="checkpoint-desc">帮手完成后双方确认 -> event.status=completed <span class="badge badge-api">API</span></div>
           <div class="checkpoint-detail">R11 双方确认流程</div>
         </div>
@@ -471,7 +471,7 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-033</div>
+          <div class="checkpoint-id">PH-033</div> ✅
           <div class="checkpoint-desc">完成后给帮手发花：feed=1 朵，walk=1 朵 <span class="badge badge-api">API</span></div>
           <div class="checkpoint-detail">ContributionService.awardFlower</div>
         </div>
@@ -479,7 +479,7 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-034</div>
+          <div class="checkpoint-id">PH-034</div> ✅
           <div class="checkpoint-desc">创建者（发布代喂/代遛的人）不发花 <span class="badge badge-api">API</span></div>
           <div class="checkpoint-detail">PRD §4.21 激励表</div>
         </div>
@@ -498,14 +498,14 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-035</div>
+          <div class="checkpoint-id">PH-035</div> ✅
           <div class="checkpoint-desc">寻宠：多个邻居响应（可同时多人） -> 多条 EventParticipant pending <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-036</div>
+          <div class="checkpoint-id">PH-036</div> ✅
           <div class="checkpoint-desc">发布者逐个确认线索提供者 -> 每确认一个立即发花（2 朵/人） <span class="badge badge-api">API</span></div>
           <div class="checkpoint-detail">PRD §4.21 激励表：寻宠 2 朵</div>
         </div>
@@ -513,28 +513,28 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-037</div>
+          <div class="checkpoint-id">PH-037</div> ⏳ skip
           <div class="checkpoint-desc">发布者可拒绝某些响应人 -> rejected 不发花 <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-038</div>
+          <div class="checkpoint-id">PH-038</div> ✅
           <div class="checkpoint-desc">全部确认后 -> event.status=completed <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-039</div>
+          <div class="checkpoint-id">PH-039</div> ✅
           <div class="checkpoint-desc">寻宠创建者不发花（只发布信息） <span class="badge badge-api">API</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-040</div>
+          <div class="checkpoint-id">PH-040</div> ✅
           <div class="checkpoint-desc">完成后排行榜重算（recalculateRankings） <span class="badge badge-api">API</span></div>
         </div>
       </div>
@@ -552,35 +552,35 @@
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-041</div>
+          <div class="checkpoint-id">PH-041</div> ✅
           <div class="checkpoint-desc">Admin 后台事件管理页加 pet_help filter <span class="badge badge-admin">Admin</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-042</div>
+          <div class="checkpoint-id">PH-042</div> ✅
           <div class="checkpoint-desc">Admin 可查看 pet_help 详情 + 子分类标签 <span class="badge badge-admin">Admin</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-043</div>
+          <div class="checkpoint-id">PH-043</div> 🟡 pass(部分)
           <div class="checkpoint-desc">Admin 审核通过/驳回 pet_help 内容（沿用现有 event 审核） <span class="badge badge-admin">Admin</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-044</div>
+          <div class="checkpoint-id">PH-044</div> ✅
           <div class="checkpoint-desc">Admin 可下架违规 pet_help -> status=closed <span class="badge badge-admin">Admin</span></div>
         </div>
       </div>
       <div class="checkpoint">
         <div class="checkbox" onclick="toggleCheck(this)"></div>
         <div class="checkpoint-content">
-          <div class="checkpoint-id">PH-045</div>
+          <div class="checkpoint-id">PH-045</div> ✅
           <div class="checkpoint-desc">pet_help 可被举报（targetType=event） <span class="badge badge-api">API</span></div>
         </div>
       </div>
