@@ -271,3 +271,90 @@
 - ❌ finding: 3 (PH-009, PH-016 petMeta 内部不校验; GB-045 API 不校验状态)
 - ⏳ skip: 26 (UI 类待 weapp-dev-mcp 连接稳定)
 - 🐛 修复: 4 个 bug (M22 Bug1 Critical + M22 Bug2 Major + M23 Bug3 Critical + M23 Bug4 Major)
+
+## 🐛 M22 前端 Bug 清单（weapp-dev-mcp UI 层受阻，Agent 读码识别）
+
+### Critical（5 个，UI 链路阻断）
+
+#### M22-FE-1: pet-create FAB 未传 subType，只能创建代喂
+
+- 文件: apps/miniapp/src/pages/events/index.tsx:184-192
+- FAB 跳转 /pages/pet-create/index 不带 ?type 参数，pet-create 默认 subType=feed
+- 影响: 代遛/寻宠无创建入口，walk/lost 流程无法 E2E 验证
+
+#### M22-FE-2: EVENT_TYPE_TO_ACTION 缺 PET_HELP，CTA 按钮无响应
+
+- 文件: apps/miniapp/src/pages/event-detail/index.tsx:49-56
+- 映射表无 PET_HELP，handleCta 取 actionType=undefined 直接 return
+- 影响: feed/walk/lost 的"响应"动作完全无法触发
+
+#### M22-FE-3: isHelperType 排除 PET_HELP，feed/walk 无法选帮手
+
+- 文件: apps/miniapp/src/pages/event-detail/index.tsx:457
+- isHelperType = (event.type === HELP_REQUEST)，PET_HELP 不匹配
+- 影响: 单帮手 selectHelper UI 全链路不可用（选择按钮/已选标签/确认完成按钮都不渲染）
+
+#### M22-FE-4: isMultiHelperType 排除 PET_HELP，lost 无法用多帮手流程
+
+- 文件: apps/miniapp/src/pages/event-detail/index.tsx:458-459
+- 仍按 deprecated LOST_FOUND 判断，PET_HELP+lost 不匹配
+- 影响: 寻宠 selectParticipant + confirmParticipant UI 不可用
+
+#### M22-FE-5: pet-create 图片存本地临时路径未上传
+
+- 文件: apps/miniapp/src/pages/pet-create/index.tsx:156-168（pet-edit 同样）
+- res.tempFilePaths (wxfile://tmp_xxx) 直接存 petMeta.photos，未调 upload
+- 项目已有 image-picker 组件用 http.upload 上传远端 URL
+- 影响: 寻宠照片跨设备/重开/清缓存后无法显示
+
+### Major（4 个，编辑态不完整）
+
+#### M22-FE-6: event-detail 编辑按钮跳通用 event-edit，无法编辑 petMeta
+
+- 文件: apps/miniapp/src/pages/event-detail/index.tsx:1214-1215
+- PET_HELP 编辑应跳 pet-edit 但实际跳 event-edit（无 petMeta 字段）
+
+#### M22-FE-7: pet-edit date-range 输入框未回填
+
+- 文件: apps/miniapp/src/pages/pet-edit/index.tsx:120-134
+- Input 无 value 属性，编辑态看不见已有日期
+
+#### M22-FE-8: pet-edit checkbox 不回填已选项
+
+- 文件: apps/miniapp/src/pages/pet-edit/index.tsx:105-115
+- Checkbox 无 checked 绑定（radio 有），代遛 timeSlots 编辑时不勾选
+
+#### M22-FE-9: pet-edit image 字段无预览/删除
+
+- 文件: apps/miniapp/src/pages/pet-edit/index.tsx:135-147
+- 无已有图片列表展示，选图覆盖而非追加
+
+### Minor（5 个，体验问题）
+
+#### M22-FE-10: event-detail 顶部标签显示"宠物帮帮"非子分类
+
+- 文件: event-detail/index.tsx:466-471（列表卡片按 subType 显示，详情页统一"宠物帮帮"）
+
+#### M22-FE-11: event-detail CTA 文案"我来帮"非按子分类
+
+- 文件: event-detail/index.tsx:1313-1317（卡片显示"我来代喂"等，详情页统一"我来帮"）
+
+#### M22-FE-12: TIME_SLOT_LABELS 与表单 label 不一致
+
+- 详情页 morning='早上' vs 表单 label='早晨'
+
+#### M22-FE-13: Taro.chooseImage 已废弃
+
+- 应迁移到 Taro.chooseMedia（image-picker 已用）
+
+#### M22-FE-14: 图片选择覆盖非追加
+
+- setField(f.name, res.tempFilePaths) 是赋值不是 [...old, ...new]
+
+### M22 前端无问题项（已确认正确）
+
+- petMeta 字段命名与 shared 类型一一对应
+- radio/switch/number 字段回填正确
+- 业主认证拦截逻辑（feed/walk 拦截, lost 放行）与后端一致
+- 列表卡片 typeLabel 映射完整（feed->代喂/walk->代遛/lost->寻宠）
+- FEED_FIELDS 不含图片字段（与后端契约一致）
