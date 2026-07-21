@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiReviewService } from '../ai-review/ai-review.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { RankingsService } from '../rankings/rankings.service';
 import { Prisma } from '@prisma/client';
 import type { CreateGroupBuyDto } from './dto/create-group-buy.dto';
 import type { UpdateGroupBuyDto } from './dto/update-group-buy.dto';
@@ -19,6 +20,7 @@ export class GroupBuysService {
     private prisma: PrismaService,
     private aiReview: AiReviewService,
     private notifications: NotificationsService,
+    private rankingsService: RankingsService,
   ) {}
 
   async create(userId: string, communityId: string, dto: CreateGroupBuyDto) {
@@ -166,6 +168,11 @@ export class GroupBuysService {
 
     // 名额校验（事务内 count）
     return this.prisma.$transaction(async (tx) => {
+      // GB-022: 同一用户对同一拼单不可重复响应（rejected 的释放名额可重响应）
+      const existing = await tx.groupBuyItem.findFirst({
+        where: { groupBuyId: id, requesterId: userId, status: { not: 'rejected' } },
+      });
+      if (existing) throw new ConflictException('已响应过，不可重复响应');
       const responderCount = await tx.groupBuyItem.count({
         where: { groupBuyId: id, status: { not: 'rejected' } },
       });
@@ -252,7 +259,7 @@ export class GroupBuysService {
       throw new BadRequestException('item 状态不可 deliver');
     }
     // 事务：更新 item + 检查是否全部 delivered + 自动 completed
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const updatedItem = await tx.groupBuyItem.update({
         where: { id: itemId },
         data: { status: 'delivered' },
@@ -260,13 +267,22 @@ export class GroupBuysService {
       const remaining = await tx.groupBuyItem.count({
         where: { groupBuyId: gbId, status: { notIn: ['delivered', 'rejected'] } },
       });
+      let justCompleted = false;
       if (remaining === 0) {
         await tx.groupBuy.update({ where: { id: gbId }, data: { status: 'completed' } });
-        // ponytail: TODO 发花逻辑 - 注入 ContributionService 调用 awardFlower(initiatorId, 'group_buy', gbId)
-        // 上限：完整接入后删除 TODO
+        justCompleted = true;
       }
-      return updatedItem;
+      return { updatedItem, justCompleted };
     });
+    // 事务后发花（避免事务内外部连接死锁）：主买人 1 朵 + 排行榜重算
+    if (result.justCompleted) {
+      await this.rankingsService.handleGroupBuyCompletion({
+        id: gbId,
+        communityId: gb.communityId,
+        initiatorId: gb.initiatorId,
+      });
+    }
+    return result.updatedItem;
   }
 
   async cancelResponse(userId: string, id: string, communityId: string) {

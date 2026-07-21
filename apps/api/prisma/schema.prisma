@@ -1278,7 +1278,7 @@ model GroupBuyItem {
   groupBuy    GroupBuy @relation(fields: [groupBuyId], references: [id], onDelete: Cascade)
   requester   User     @relation("GroupBuyItemRequester", fields: [requesterId], references: [id])
 
-  @@unique([groupBuyId, requesterId])
+  @@unique([groupBuyId, requesterId, name])
   @@index([groupBuyId, status])
   @@map("group_buy_items")
 }

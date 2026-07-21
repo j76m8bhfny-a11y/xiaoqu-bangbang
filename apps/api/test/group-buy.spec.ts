@@ -65,6 +65,14 @@ describe('Feature: 购物拼拼 (M23)', () => {
   afterAll(async () => {
     await prisma.groupBuyItem.deleteMany({});
     await prisma.groupBuy.deleteMany({ where: { communityId } });
+    // Bug 4 修复后 deliver 会创建 contribution_records + notifications + RankingSnapshot，需清理避免 community/user FK 报错
+    await prisma.contributionRecord.deleteMany({ where: { sourceType: 'group_buy' } });
+    await prisma.notification.deleteMany({ where: { targetType: 'group_buy' } });
+    await prisma.rankingSnapshot.deleteMany({ where: { communityId } });
+    // rankingSnapshot 还有 user_id FK，删测试 user 创建的快照
+    await prisma.rankingSnapshot.deleteMany({
+      where: { userId: { in: [initiatorId, responderId, responder2Id] } },
+    });
     await prisma.communityMember.deleteMany({ where: { communityId } });
     await prisma.community.delete({ where: { id: communityId } });
     await prisma.user.deleteMany({

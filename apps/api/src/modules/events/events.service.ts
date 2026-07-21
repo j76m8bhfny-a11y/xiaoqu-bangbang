@@ -824,6 +824,7 @@ export class EventsService {
         selectedHelperId: event.selectedHelperId,
         type: event.type,
         rewardType: event.rewardType,
+        subType: event.subType,
       });
 
       return completed;
@@ -852,7 +853,12 @@ export class EventsService {
     if (event.creatorId !== creatorId) {
       throw new ForbiddenException('只有创建者可以选择参与者');
     }
-    if (event.type !== 'public_welfare' && event.type !== 'lost_found') {
+    // M22: pet_help + subType=lost (寻宠) 也走多帮手流程（多人提供线索）
+    if (
+      event.type !== 'public_welfare' &&
+      event.type !== 'lost_found' &&
+      !(event.type === 'pet_help' && event.subType === 'lost')
+    ) {
       throw new BadRequestException('该事件类型不支持多帮手选择');
     }
     if (event.status === 'completed' || event.status === 'closed') {
@@ -971,6 +977,7 @@ export class EventsService {
         communityId: event.communityId,
         type: event.type,
         rewardType: event.rewardType,
+        subType: event.subType,
       },
       participant.userId,
     );
@@ -995,6 +1002,7 @@ export class EventsService {
         selectedHelperId: null,
         type: event.type,
         rewardType: event.rewardType,
+        subType: event.subType,
       });
     }
 

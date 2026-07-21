@@ -16,6 +16,7 @@ export class RankingsService {
     selectedHelperId: string | null;
     type: string;
     rewardType: string;
+    subType?: string | null;
   }) {
     // 1. Helper contribution (单帮手场景，多帮手由 confirmParticipant 逐个调用 handleHelperCompletion)
     if (event.selectedHelperId) {
@@ -30,10 +31,16 @@ export class RankingsService {
    * 单个帮手完成: 花朵 + 徽章 + 通知（多帮手逐个调用）
    */
   async handleHelperCompletion(
-    event: { id: string; communityId: string; type: string; rewardType: string },
+    event: {
+      id: string;
+      communityId: string;
+      type: string;
+      rewardType: string;
+      subType?: string | null;
+    },
     helperId: string,
   ) {
-    const action = this.getEventAction(event.type, event.rewardType);
+    const action = this.getEventAction(event.type, event.rewardType, event.subType);
     const flowerCount = this.getFlowerCount(action);
 
     // P-276: 使用 upsert 防止重复记录
@@ -142,6 +149,56 @@ export class RankingsService {
    * 议事类事件审核通过时触发 (Map.md §3.4: pending_review → open 即发激励)
    * 创建者得 1 朵花 (action='feedback') + type='feedback' 通知
    */
+  async handleGroupBuyCompletion(groupBuy: {
+    id: string;
+    communityId: string;
+    initiatorId: string;
+  }) {
+    await this.prisma.contributionRecord.upsert({
+      where: {
+        userId_sourceType_sourceId_action: {
+          userId: groupBuy.initiatorId,
+          sourceType: 'group_buy',
+          sourceId: groupBuy.id,
+          action: 'group_buy',
+        },
+      },
+      update: {},
+      create: {
+        userId: groupBuy.initiatorId,
+        communityId: groupBuy.communityId,
+        sourceType: 'group_buy',
+        sourceId: groupBuy.id,
+        action: 'group_buy',
+        score: 1,
+        flowerCount: 1,
+        reason: '完成拼单',
+        occurredAt: new Date(),
+      },
+    });
+
+    await this.checkAndAwardBadges(
+      groupBuy.initiatorId,
+      groupBuy.communityId,
+      'group_buy',
+      groupBuy.id,
+    );
+
+    await this.recalculateRankings(groupBuy.communityId);
+
+    await this.prisma.notification.create({
+      data: {
+        userId: groupBuy.initiatorId,
+        communityId: groupBuy.communityId,
+        type: 'completion',
+        title: '拼单已完成',
+        content: '您的拼单已全部交付完成，获得小红花奖励！',
+        targetType: 'group_buy',
+        targetId: groupBuy.id,
+      },
+    });
+  }
+
   async handleEventApproved(event: {
     id: string;
     communityId: string;
@@ -291,7 +348,7 @@ export class RankingsService {
     });
   }
 
-  private getEventAction(eventType: string, rewardType: string): string {
+  private getEventAction(eventType: string, rewardType: string, subType?: string | null): string {
     switch (eventType) {
       case 'help_request':
         return rewardType === 'free' || rewardType === 'none' ? 'help_free' : 'help_paid';
@@ -302,6 +359,13 @@ export class RankingsService {
         return 'public_welfare';
       case 'lost_found':
         return 'lost_found';
+      // M22: pet_help 按 subType 区分激励 (lost=2朵走 lost_found, feed/walk=1朵)
+      case 'pet_help':
+        return subType === 'lost'
+          ? 'lost_found'
+          : rewardType === 'free' || rewardType === 'none'
+            ? 'help_free'
+            : 'help_paid';
       case 'public_feedback':
       case 'discussion':
         return 'feedback';
