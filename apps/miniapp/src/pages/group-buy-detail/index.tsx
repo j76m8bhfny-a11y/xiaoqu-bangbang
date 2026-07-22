@@ -3,19 +3,11 @@ import Taro from '@tarojs/taro';
 import { View, Text, Input, Textarea, Button } from '@tarojs/components';
 import { groupBuyService } from '@/services';
 import { useAuthStore } from '@/store';
+import { GROUP_BUY_TYPE_LABELS, GROUP_BUY_STATUS_LABELS } from '@/utils/mappers';
 import type { GroupBuyDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
-const STATUS_LABELS: Record<string, string> = {
-  pending_review: '审核中',
-  open: '进行中',
-  closed_for_bid: '已截单',
-  purchased: '已采购',
-  completed: '已完成',
-  closed: '已关闭',
-  rejected: '已拒绝',
-};
-
+// FE-9/10: 类型/状态文案复用 mappers，避免与卡片不一致；item 状态与交付方式为详情页特有
 const ITEM_STATUS_LABELS: Record<string, string> = {
   pending: '待确认',
   confirmed: '已确认',
@@ -30,10 +22,13 @@ const DELIVERY_LABELS: Record<string, string> = {
   spot: '集中点',
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  seek: '求代购',
-  offer: '代购方',
-};
+// 后端 departAt 返回 ISO，详情展示与编辑回填统一转 YYYY-MM-DD HH:mm
+function formatDateTime(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 const GroupBuyDetail = () => {
   const id = Taro.getCurrentInstance().router?.params?.id ?? '';
@@ -155,10 +150,20 @@ const GroupBuyDetail = () => {
   }
 
   const isInitiator = groupBuy.initiatorId === currentUserId;
-  const hasResponded = groupBuy.items.some((it) => it.requesterId === currentUserId);
-  const canRespond = !isInitiator && groupBuy.status === 'open' && !hasResponded;
+  // FE-5: hasResponded 排除 rejected（被拒后可重响应）
+  const hasResponded = groupBuy.items.some(
+    (it) => it.requesterId === currentUserId && it.status !== 'rejected',
+  );
+  // FE-6: offer 名额满则隐藏响应表单
+  const activeCount = groupBuy.items.filter((it) => it.status !== 'rejected').length;
+  const quotaFull = groupBuy.type === 'offer' && activeCount >= groupBuy.quota;
+  const canRespond = !isInitiator && groupBuy.status === 'open' && !hasResponded && !quotaFull;
   const hasConfirmedItems = groupBuy.items.some((it) => it.status === 'confirmed');
+  // 控制区整体在终态 closed/rejected 隐藏
   const isClosed = groupBuy.status === 'closed' || groupBuy.status === 'rejected';
+  // FE-3: 编辑按钮仅 open/pending_review 可点（与后端 update 限制一致）
+  const canEdit = ['pending_review', 'open'].includes(groupBuy.status);
+  const typeLabel = GROUP_BUY_TYPE_LABELS[groupBuy.type]?.label || groupBuy.type;
 
   return (
     <View className="gb-detail">
@@ -166,13 +171,11 @@ const GroupBuyDetail = () => {
       <View className="gb-detail__header">
         <View className="gb-detail__tags">
           <View className="gb-detail__type-tag">
-            <Text className="gb-detail__type-tag-text">
-              {TYPE_LABELS[groupBuy.type] || groupBuy.type}
-            </Text>
+            <Text className="gb-detail__type-tag-text">{typeLabel}</Text>
           </View>
           <View className="gb-detail__status-tag">
             <Text className="gb-detail__status-tag-text">
-              {STATUS_LABELS[groupBuy.status] || groupBuy.status}
+              {GROUP_BUY_STATUS_LABELS[groupBuy.status] || groupBuy.status}
             </Text>
           </View>
         </View>
@@ -190,14 +193,14 @@ const GroupBuyDetail = () => {
         {groupBuy.departAt && (
           <View className="gb-detail__info-card">
             <Text className="gb-detail__info-label">出发时间</Text>
-            <Text className="gb-detail__info-value">{groupBuy.departAt}</Text>
+            <Text className="gb-detail__info-value">{formatDateTime(groupBuy.departAt)}</Text>
           </View>
         )}
 
         {groupBuy.bidCloseAt && (
           <View className="gb-detail__info-card">
             <Text className="gb-detail__info-label">截止接单</Text>
-            <Text className="gb-detail__info-value">{groupBuy.bidCloseAt}</Text>
+            <Text className="gb-detail__info-value">{formatDateTime(groupBuy.bidCloseAt)}</Text>
           </View>
         )}
 
@@ -251,7 +254,8 @@ const GroupBuyDetail = () => {
               {item.note && <Text className="gb-detail__item-note">{item.note}</Text>}
               {isInitiator && (
                 <View className="gb-detail__item-actions">
-                  {item.status === 'pending' && (
+                  {/* FE-8: 排除发起人自己的 item（seek 初始需求，无需确认/拒绝） */}
+                  {item.requesterId !== currentUserId && item.status === 'pending' && (
                     <>
                       <Button size="mini" onClick={() => handleConfirmItem(item.id)}>
                         确认
@@ -261,7 +265,8 @@ const GroupBuyDetail = () => {
                       </Button>
                     </>
                   )}
-                  {item.status === 'confirmed' && (
+                  {/* FE-4: 已交付按钮仅在 purchased 状态显示，避免跳过状态机 */}
+                  {item.status === 'confirmed' && groupBuy.status === 'purchased' && (
                     <Button size="mini" onClick={() => handleDeliverItem(item.id)}>
                       已交付
                     </Button>
@@ -325,12 +330,14 @@ const GroupBuyDetail = () => {
               已采购
             </Button>
           )}
-          <Button
-            className="gb-detail__control-btn gb-detail__control-btn--edit"
-            onClick={() => Taro.navigateTo({ url: `/pages/group-buy-edit/index?id=${id}` })}
-          >
-            编辑
-          </Button>
+          {canEdit && (
+            <Button
+              className="gb-detail__control-btn gb-detail__control-btn--edit"
+              onClick={() => Taro.navigateTo({ url: `/pages/group-buy-edit/index?id=${id}` })}
+            >
+              编辑
+            </Button>
+          )}
           <Button
             className="gb-detail__control-btn gb-detail__control-btn--close"
             onClick={handleClose}

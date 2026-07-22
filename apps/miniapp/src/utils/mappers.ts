@@ -70,7 +70,7 @@ const PET_HELP_SUBTYPE_OVERRIDE: Record<PetSubType, { label: string; ctaText: st
 };
 
 // M23: 购物拼拼子类型 label（seek=求代购 / offer=代购方）
-const GROUP_BUY_TYPE_LABELS: Record<string, { label: string; ctaText: string }> = {
+export const GROUP_BUY_TYPE_LABELS: Record<string, { label: string; ctaText: string }> = {
   seek: { label: '求代购', ctaText: '参与拼单' },
   offer: { label: '代购方', ctaText: '查看详情' },
 };
@@ -83,7 +83,7 @@ const GROUP_BUY_TYPE_CONFIG = {
 };
 
 // M23: 购物拼拼主表状态 label
-const GROUP_BUY_STATUS_LABELS: Record<string, string> = {
+export const GROUP_BUY_STATUS_LABELS: Record<string, string> = {
   pending_review: '审核中',
   open: '报名中',
   closed_for_bid: '已截单',

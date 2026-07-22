@@ -4,13 +4,16 @@ import { View, Text, Input, Textarea, Radio, RadioGroup, Label, Button } from '@
 import { groupBuyService } from '@/services';
 import './index.scss';
 
+const DATETIME_RE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
+
 const GroupBuyCreate = () => {
-  const type = Taro.getCurrentInstance().router?.params?.type || 'seek';
+  const [type, setType] = useState(Taro.getCurrentInstance().router?.params?.type || 'seek');
   const [form, setForm] = useState<any>({
     location: '',
+    locationCustom: '',
     deliveryMethod: 'self_pickup',
     note: '',
-    items: type === 'seek' ? [{ name: '', qty: 1, note: '' }] : [],
+    items: [{ name: '', qty: 1, note: '' }],
     departAt: '',
     bidCloseAt: '',
     quota: 5,
@@ -19,7 +22,8 @@ const GroupBuyCreate = () => {
   const setField = (name: string, value: any) => setForm({ ...form, [name]: value });
 
   const handleSubmit = async () => {
-    if (!form.location) {
+    const location = form.location === '其他' ? form.locationCustom || '其他' : form.location;
+    if (!form.location || (form.location === '其他' && !form.locationCustom.trim())) {
       Taro.showToast({ title: '请选择采购地点', icon: 'none' });
       return;
     }
@@ -30,14 +34,28 @@ const GroupBuyCreate = () => {
       Taro.showToast({ title: '请填写商品名', icon: 'none' });
       return;
     }
+    // FE-11: seek item qty >= 1
+    if (type === 'seek' && form.items.some((i: any) => !i.qty || i.qty < 1)) {
+      Taro.showToast({ title: '商品数量需≥1', icon: 'none' });
+      return;
+    }
     if (type === 'offer') {
       if (!form.departAt || !form.bidCloseAt || !form.quota) {
         Taro.showToast({ title: '请填写出发时间/截止时间/名额', icon: 'none' });
         return;
       }
+      // FE-7: 时间格式校验
+      if (!DATETIME_RE.test(form.departAt) || !DATETIME_RE.test(form.bidCloseAt)) {
+        Taro.showToast({ title: '时间格式应为 YYYY-MM-DD HH:mm', icon: 'none' });
+        return;
+      }
     }
     try {
-      await groupBuyService.create({ type, ...form });
+      // FE-2: seek 不传 quota，让后端 ?? 999 生效
+      const payload: any = { type, ...form, location };
+      if (type === 'seek') delete payload.quota;
+      delete payload.locationCustom;
+      await groupBuyService.create(payload);
       Taro.showToast({ title: '发布成功', icon: 'success' });
       setTimeout(() => Taro.navigateBack(), 1500);
     } catch (e: any) {
@@ -48,6 +66,21 @@ const GroupBuyCreate = () => {
   return (
     <View className="gb-create">
       <View className="form">
+        {/* FE-1: seek/offer 类型切换（覆盖 URL type 默认 seek） */}
+        <View className="form-item">
+          <Text className="label">类型 *</Text>
+          <RadioGroup onChange={(e) => setType(e.detail.value)}>
+            <Label className="radio-label">
+              <Radio value="seek" checked={type === 'seek'} />
+              求代购
+            </Label>
+            <Label className="radio-label">
+              <Radio value="offer" checked={type === 'offer'} />
+              代购方
+            </Label>
+          </RadioGroup>
+        </View>
+
         <View className="form-item">
           <Text className="label">采购地点 *</Text>
           <RadioGroup onChange={(e) => setField('location', e.detail.value)}>
@@ -64,6 +97,14 @@ const GroupBuyCreate = () => {
               其他
             </Label>
           </RadioGroup>
+          {/* N4: 选"其他"显示自定义文本输入 */}
+          {form.location === '其他' && (
+            <Input
+              placeholder="请输入采购地点"
+              value={form.locationCustom}
+              onInput={(e) => setField('locationCustom', e.detail.value)}
+            />
+          )}
         </View>
 
         {type === 'seek' && (

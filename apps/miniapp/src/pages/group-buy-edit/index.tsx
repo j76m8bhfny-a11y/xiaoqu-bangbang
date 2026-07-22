@@ -5,6 +5,16 @@ import { groupBuyService } from '@/services';
 import type { GroupBuyDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
+const DATETIME_RE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
+const PRESET_LOCATIONS = ['山姆', 'Costco'];
+
+function formatDateTime(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 const GroupBuyEdit = () => {
   const id = Taro.getCurrentInstance().router?.params?.id ?? '';
   const [groupBuy, setGroupBuy] = useState<GroupBuyDto | null>(null);
@@ -18,10 +28,14 @@ const GroupBuyEdit = () => {
       .getById(id)
       .then((data) => {
         setGroupBuy(data);
+        // N4: 已有地点非预设值则归入"其他"+自定义文本
+        const isPreset = PRESET_LOCATIONS.includes(data.location);
         setForm({
-          location: data.location,
-          departAt: data.departAt || '',
-          bidCloseAt: data.bidCloseAt || '',
+          location: isPreset ? data.location : '其他',
+          locationCustom: isPreset ? '' : data.location,
+          // departAt/bidCloseAt 后端返回 ISO，回填转 YYYY-MM-DD HH:mm 供正则校验通过
+          departAt: data.departAt ? formatDateTime(data.departAt) : '',
+          bidCloseAt: data.bidCloseAt ? formatDateTime(data.bidCloseAt) : '',
           quota: data.quota,
           deliveryMethod: data.deliveryMethod,
           note: data.note || '',
@@ -36,7 +50,8 @@ const GroupBuyEdit = () => {
   const setField = (name: string, value: any) => setForm({ ...form, [name]: value });
 
   const handleSave = async () => {
-    if (!form.location) {
+    const location = form.location === '其他' ? form.locationCustom || '其他' : form.location;
+    if (!form.location || (form.location === '其他' && !form.locationCustom.trim())) {
       Taro.showToast({ title: '请选择采购地点', icon: 'none' });
       return;
     }
@@ -45,10 +60,17 @@ const GroupBuyEdit = () => {
         Taro.showToast({ title: '请填写出发时间/截止时间/名额', icon: 'none' });
         return;
       }
+      // FE-7: 时间格式校验
+      if (!DATETIME_RE.test(form.departAt) || !DATETIME_RE.test(form.bidCloseAt)) {
+        Taro.showToast({ title: '时间格式应为 YYYY-MM-DD HH:mm', icon: 'none' });
+        return;
+      }
     }
     setSaving(true);
     try {
-      await groupBuyService.update(id, form);
+      const payload: any = { ...form, location };
+      delete payload.locationCustom;
+      await groupBuyService.update(id, payload);
       Taro.showToast({ title: '保存成功', icon: 'success' });
       setTimeout(() => Taro.navigateBack(), 1500);
     } catch (e: any) {
@@ -80,6 +102,13 @@ const GroupBuyEdit = () => {
               其他
             </Label>
           </RadioGroup>
+          {form.location === '其他' && (
+            <Input
+              placeholder="请输入采购地点"
+              value={form.locationCustom}
+              onInput={(e) => setField('locationCustom', e.detail.value)}
+            />
+          )}
         </View>
 
         {groupBuy.type === 'offer' && (
