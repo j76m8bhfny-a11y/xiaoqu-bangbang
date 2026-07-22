@@ -2066,9 +2066,13 @@ export class AdminService {
   async takedownGroupBuy(adminId: string, id: string, communityId: string) {
     const gb = await this.prisma.groupBuy.findUnique({
       where: { id },
-      select: { communityId: true },
+      select: { communityId: true, status: true },
     });
     if (!gb || gb.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    // ④: 状态守卫，已 closed 不可重复下架（GB-045 finding 修复）
+    if (gb.status === 'closed') {
+      throw new BadRequestException('该拼单已下架，不可重复操作');
+    }
     // spec §3.7: 下架违规内容 status -> closed（'cancelled' 不在 GroupBuyStatus 枚举内）
     await this.prisma.groupBuy.update({ where: { id }, data: { status: 'closed' } });
     await this.logAudit(adminId, 'takedown_group_buy', 'group_buy', id);
