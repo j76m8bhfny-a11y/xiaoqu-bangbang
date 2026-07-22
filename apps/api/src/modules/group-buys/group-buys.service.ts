@@ -71,6 +71,8 @@ export class GroupBuysService {
         status,
         aiReviewStatus,
         // items 只对 seek 创建时入库
+        // ①A: 发起人自己的需求清单初始即 delivered，不参与 confirm/deliver 流程
+        // （否则永远 pending 阻塞自动 completed，求代购卡死完不成）
         items:
           dto.type === 'seek' && dto.items
             ? {
@@ -79,6 +81,7 @@ export class GroupBuysService {
                   name: it.name,
                   qty: it.qty ?? 1,
                   note: it.note ?? null,
+                  status: 'delivered',
                 })),
               }
             : undefined,

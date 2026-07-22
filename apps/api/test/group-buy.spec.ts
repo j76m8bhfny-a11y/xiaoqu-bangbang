@@ -97,6 +97,25 @@ describe('Feature: 购物拼拼 (M23)', () => {
       expect(res.body.data.status).toBe('open'); // AiReview 默认 pass
     });
 
+    it('seek 创建后发起人 item 初始状态为 delivered（①A 不卡死 completed）', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/api/v1/group-buys')
+        .set('Authorization', `Bearer ${initiatorToken}`)
+        .send({
+          type: 'seek',
+          location: '山姆',
+          deliveryMethod: 'self_pickup',
+          items: [{ name: '咖啡', qty: 2 }],
+        });
+      const detail = await request(app.getHttpServer())
+        .get(`/api/v1/group-buys/${created.body.data.id}`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      // 发起人自己填的商品清单初始即 delivered，不参与 confirm/deliver 流程
+      const initiatorItem = detail.body.data.items.find((i: any) => i.requesterId === initiatorId);
+      expect(initiatorItem).toBeDefined();
+      expect(initiatorItem.status).toBe('delivered');
+    });
+
     it('seek 无 items 返回 400', async () => {
       const res = await request(app.getHttpServer())
         .post('/api/v1/group-buys')
