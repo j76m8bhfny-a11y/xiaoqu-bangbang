@@ -358,3 +358,137 @@
 - 业主认证拦截逻辑（feed/walk 拦截, lost 放行）与后端一致
 - 列表卡片 typeLabel 映射完整（feed->代喂/walk->代遛/lost->寻宠）
 - FEED_FIELDS 不含图片字段（与后端契约一致）
+
+## 🐛 M23 前端 Bug 清单（Agent 读码识别，未修复）
+
+### Critical（1 个）
+
+#### M23-FE-1: 创建页缺 seek/offer 类型切换，offer 无法创建
+
+- 文件: apps/miniapp/src/pages/group-buy-create/index.tsx:8 + events/index.tsx:188
+- type 只从 URL 参数读（默认 seek），无 RadioGroup/Tab 切换；FAB 不带 ?type=offer
+- 影响: offer 类型（代购方发布行程）从 UI 完全无法触达
+
+### Major（7 个）
+
+#### M23-FE-2: seek 提交时带 quota:5，后端存 5 而非默认 999
+
+- 文件: group-buy-create/index.tsx:16,40
+- form 初始 quota:5，create 时一并提交；后端 dto.quota ?? 999 因 dto.quota=5 不生效
+- 影响: 违反"seek 不填 quota 默认 999"契约，存进 DB 语义错误
+
+#### M23-FE-3: 编辑按钮在 closed_for_bid/purchased/completed 状态仍显示
+
+- 文件: group-buy-detail/index.tsx:161,328-333
+- isClosed 只检查 closed/rejected，未含 closed_for_bid/purchased/completed
+- 后端 update 限制 ['pending_review','open']，点击保存才 400
+
+#### M23-FE-4: "已交付"按钮在任意拼单状态对 confirmed item 都显示
+
+- 文件: group-buy-detail/index.tsx:264-268
+- 只检查 item.status===confirmed，不检查 groupBuy.status
+- 影响: open/closed_for_bid 状态就能交付，跳过 purchased 直接 completed，破坏状态机
+
+#### M23-FE-5: hasResponded 含 rejected item，被拒用户无法再次响应
+
+- 文件: group-buy-detail/index.tsx:158-159
+- some(it => it.requesterId === currentUserId) 包含 rejected
+- 后端允许 reject 后重响应，前端隐藏"我要加入"区域
+
+#### M23-FE-6: canRespond 未检查 offer 名额，满额仍显示响应表单
+
+- 文件: group-buy-detail/index.tsx:159
+- 无 quota 检查，offer 满额提交才被后端 409 拒绝
+
+#### M23-FE-7: departAt/bidCloseAt 纯文本输入无格式校验
+
+- 文件: group-buy-create/index.tsx:121-134 + group-buy-edit/index.tsx:89-102
+- 无 Picker/正则，输入 "asdf" 后端 new Date() 得 Invalid Date -> 500
+- placeholder "YYYY-MM-DD HH:mm" 与 ISO 格式不一致
+
+#### M23-FE-8: seek 发起人自己的 items 也显示确认/拒绝按钮
+
+- 文件: group-buy-detail/index.tsx:252-263
+- seek 创建时 items 用 requesterId=发起人，前端对 isInitiator+pending 都显示按钮
+- 影响: 发起人可"拒绝"自己的初始需求，减少 hasConfirmedItems 影响 purchased 按钮
+
+### Minor（3 个）
+
+#### M23-FE-9: 卡片 CTA 文案不一致（offer="查看详情"，详情页="我要加入"）
+
+- 文件: utils/mappers.ts:73-76
+
+#### M23-FE-10: 状态文案详情页与卡片不一致（open: "进行中" vs "报名中"）
+
+- 文件: group-buy-detail/index.tsx:11 vs utils/mappers.ts:88
+
+#### M23-FE-11: seek 创建未校验 item qty ≥ 1
+
+- 文件: group-buy-create/index.tsx:86-93,26-32
+- 只查 !i.name，qty=0 让后端 @Min(1) 400 兜底
+
+### M23 前端无问题项（已确认正确）
+
+- seek/offer 必填字段校验（seek items≥1+name, offer departAt+bidCloseAt+quota）
+- "截止接单"按钮仅 open 显示
+- "已采购"按钮仅 closed_for_bid+hasConfirmedItems 显示
+- 响应区域只对非发起人显示
+- 列表卡片 typeLabel（seek->求代购, offer->代购方）
+- 状态文案未用 cancelled（只有 closed）
+- 非 pending item 不显示确认/拒绝（但发起人自己的 item 例外，见 Bug 8）
+- 详情页 STATUS_LABELS 覆盖全部枚举
+- service 层端点路径与后端 controller 一致
+- respond 表单 qty 默认值兜底 || 1
+
+## 前端 Bug 汇总
+
+| 模块     | Critical | Major  | Minor | 合计   |
+| -------- | -------- | ------ | ----- | ------ |
+| M22 前端 | 5        | 4      | 5     | 14     |
+| M23 前端 | 1        | 7      | 3     | 11     |
+| **合计** | **6**    | **11** | **8** | **25** |
+
+### 全局 Bug 识别完成状态
+
+- 后端: 已修 4 个 (commit 08de26b) + 状态机守卫 3 处 (commit f3d9c17) + 待确认 finding 3 个
+- M22 前端: 已识别 14 个 → 已修 (commit 8f1d266)
+- M23 前端: 已识别 11 个 + N4 → 已修 (commit 6531df0)
+- 核实新发现 N1~N4: N1/N4 已修，N2 前端已修(后端设计待确认)，N3 维持设计
+
+## 前端 Bug 修复记录（2026-07-21）
+
+### M22 前端 14 项 ✅ 已修 (commit 8f1d266)
+
+- Critical 5: FE-1 pet-create 加 subType 切换(代喂/代遛/寻宠)；FE-2~4 event-detail 支持 pet_help 状态机(handleCta actionType / isHelperType / isMultiHelperType)；FE-5 寻宠图片走 image-picker 上传远端
+- Major 4: FE-6 PET_HELP 编辑跳 pet-edit；FE-7 date-range 回填 value；FE-8 checkbox 回填 checked；FE-9 image 走 image-picker 预览删除
+- Minor 5: FE-10~11 子分类标签/CTA 文案；FE-12 TIME_SLOT 统一为早上；FE-13 chooseMedia；FE-14 图片追加非覆盖
+
+### M23 前端 11 项 + N4 ✅ 已修 (commit 6531df0)
+
+- Critical 1: FE-1 创建页 seek/offer 类型切换
+- Major 7: FE-2 seek 提交剔除 quota；FE-3 编辑按钮限 open/pending_review；FE-4 已交付限 purchased；FE-5 hasResponded 排 rejected；FE-6 canRespond 查 offer 名额；FE-7 时间正则校验+toast；FE-8 确认/拒绝排除发起人自己 item
+- Minor 3: FE-9~10 复用 mappers 删重复定义；FE-11 seek 校验 qty>=1
+- N4: 采购地点选"其他"加自定义文本输入(create + edit)
+
+### 后端状态机守卫 ✅ 已修 (commit f3d9c17)
+
+- N1: deliver 限 purchased + confirmItem/rejectItem 限 open/closed_for_bid
+- 补 3 个 e2e 守卫测试(open/closed_for_bid deliver、purchased confirm 均应 400)
+
+## 核实中新发现（N1~N4）
+
+- N1 后端 deliver/confirm/reject 不校验 gb.status → 已修(见上)
+- N2 seek 创建时 item.requesterId=发起人 → 前端 FE-8 排除自己 item 已修；后端 seek 初始需求 item 永远 pending 的状态机行为待 PRD 确认
+- N3 seek items 创建后不可编辑 → 维持设计(update dto 无 items 字段，edit 仅改 location/note/交付方式)
+- N4 采购地点"其他"无自定义文本输入 → 已修(违反 GB-009)
+
+## 待确认 finding（未修，需用户拍板）
+
+1. PH-009/016: petMeta 内部字段后端不校验(缺 dogSize/petType 不 400) — PRD 是否要求后端校验？
+2. PH-037: events 模块无 reject application 接口 — 要补吗？
+3. GB-045: Admin takedown API 不校验状态 — 要加 API 守卫吗？
+
+## 验证
+
+- 后端: `cd apps/api && npx vitest run` → 290/290 pass(原 287 + 3 新守卫测试)
+- 前端: 无自动化测试，eslint 0 error(仅 pre-existing any/exhaustive-deps warning)，待人工 UI 清单 26 项验证
