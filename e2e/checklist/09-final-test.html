@@ -1315,6 +1315,81 @@
     </div>
   </div>
 
+  <!-- ==================== M22/M23 推荐测试顺序 ==================== -->
+  <div class="prep-box" style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB); border-left:4px solid #3498DB;">
+    <h3 style="color:#1A5276;">📋 M22/M23 推荐测试顺序（26 项，按关键链路排）</h3>
+    <p style="font-size:13px; margin-bottom:12px;">
+      按下方梯队顺序测，前 8 项是核心创建链路（全过则基本稳），后 18 项是细节。每项前面有检查点 ID，对应模块 11/12 里的条目。
+    </p>
+
+    <div style="background:white; border-radius:8px; padding:10px 14px; margin:8px 0; border-left:3px solid #3498DB;">
+      <strong>第一梯队：入口可见性（2 项，最快）</strong>
+      <ol style="margin:6px 0 0 16px; padding-left:16px; font-size:13px; line-height:1.8;">
+        <li><strong>11-2-1</strong> (PH-019) filter 第 4 项「宠物帮帮」可见</li>
+        <li><strong>12-1-6</strong> (GB-013) filter 第 5 项「购物拼拼」可见</li>
+      </ol>
+      <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">不过 = 入口没了，后面全白测。先确认。</p>
+    </div>
+
+    <div style="background:white; border-radius:8px; padding:10px 14px; margin:8px 0; border-left:3px solid #3498DB;">
+      <strong>第二梯队：创建入口（2 项，验证 Critical 修复 FE-1）</strong>
+      <ol style="margin:6px 0 0 16px; padding-left:16px; font-size:13px; line-height:1.8;">
+        <li><strong>11-1-1</strong> (PH-001) FAB 进 pet-create，可切换代喂/代遛/寻宠</li>
+        <li><strong>12-1-1</strong> (GB-001) FAB 进 group-buy-create，可切换求代购/代购方</li>
+      </ol>
+      <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">代遛/寻宠/代购方之前根本进不去，重点验类型切换。</p>
+    </div>
+
+    <div style="background:white; border-radius:8px; padding:10px 14px; margin:8px 0; border-left:3px solid #3498DB;">
+      <strong>第三梯队：列表展示（2 项）</strong>
+      <ol style="margin:6px 0 0 16px; padding-left:16px; font-size:13px; line-height:1.8;">
+        <li><strong>11-2-2</strong> (PH-022) 卡片 typeLabel 代喂/代遛/寻宠</li>
+        <li><strong>12-2-1</strong> (GB-016) 卡片 typeLabel 求代购/代购方</li>
+      </ol>
+    </div>
+
+    <div style="background:white; border-radius:8px; padding:10px 14px; margin:8px 0; border-left:3px solid #E89B6C;">
+      <strong>第四梯队：创建表单 + 修复点（5 项，重点）</strong>
+      <ol style="margin:6px 0 0 16px; padding-left:16px; font-size:13px; line-height:1.8;">
+        <li><strong>11-1-8</strong> (PH-014) 寻宠照片多张上传 ≤9 张 + 预览/删除 <span style="color:#E89B6C;">修复 FE-5/9/14</span></li>
+        <li><strong>12-1-3</strong> (GB-009) 代购方地点选「其他」可输入自定义 <span style="color:#E89B6C;">修复 N4</span></li>
+        <li><strong>12-1-2</strong> (GB-005) 未认证点 FAB 跳认证页</li>
+        <li><strong>11-1-2</strong> (PH-003) 未认证点代喂 FAB 跳认证页</li>
+        <li><strong>12-2-5</strong> (GB-020) 非发起人「我要加入」表单 <span style="color:#E89B6C;">修复 FE-5/6</span></li>
+      </ol>
+      <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">第 1 项看照片能否跨刷新保留；第 2 项是 N4 地点输入。</p>
+    </div>
+
+    <div style="background:white; border-radius:8px; padding:10px 14px; margin:8px 0; border-left:3px solid #E74C3C;">
+      <strong>第五梯队：详情状态机（5 项，最关键）</strong>
+      <ol style="margin:6px 0 0 16px; padding-left:16px; font-size:13px; line-height:1.8;">
+        <li><strong>12-2-6</strong> (GB-024) 确认/拒绝仅他人 pending，已交付仅 purchased <span style="color:#E74C3C;">修复 FE-4/8</span></li>
+        <li><strong>11-2-4</strong> (PH-024) 详情按 subType 差异化展示 <span style="color:#E74C3C;">修复 FE-10</span></li>
+        <li><strong>11-2-5</strong> (PH-025) 寻宠照片 Swiper 多张可滑 + 预览</li>
+        <li><strong>11-2-6</strong> (PH-027) 寻宠发布者可见响应人列表 + 数量</li>
+        <li><strong>12-2-3</strong> (GB-018) 详情字段齐全 + 响应列表</li>
+      </ol>
+      <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">第 1 项是状态机核心——已交付按钮只在 purchased 出现，不显示自己 item 按钮。</p>
+    </div>
+
+    <div style="background:white; border-radius:8px; padding:10px 14px; margin:8px 0; border-left:3px solid #95A5A6;">
+      <strong>第六~八梯队：响应流程 + 编辑回填（12 项）</strong>
+      <p style="margin:6px 0 0 0; font-size:13px; line-height:1.8;">
+        第六梯队（列表/响应）：<strong>11-2-3</strong> PH-023 · <strong>12-2-2</strong> GB-017 · <strong>12-2-4</strong> GB-019<br>
+        第七梯队（CTA 可用性，FE-2/3/4 修复）：test_lisi 点 CTA 响应 · test_zhangsan「选帮手」· 寻宠「选择参与」<br>
+        第八梯队（编辑回填，FE-6~9）：pet-edit 跳转 · date 回填 · checkbox 回填 · image 预览删除
+      </p>
+    </div>
+
+    <div style="background:#FFF8E1; border-radius:8px; padding:10px 14px; margin:8px 0; border-left:3px solid #F39C12;">
+      <strong>💡 最小可行验证</strong>
+      <p style="margin:4px 0 0 0; font-size:13px; line-height:1.7;">
+        时间紧就跑前 8 项（第一~第四梯队）。这 8 项过了 = 入口、类型切换、图片上传、地点输入几个 Critical 修复都生效，核心创建链路稳了。<br>
+        全 26 项约 40-60 分钟。前置：<code>pnpm dev:api</code>（必须，旧 dist 字段缺失）+ 小程序 <code>pnpm dev:weapp</code> + 账号 <code>test_zhangsan</code>/<code>test_lisi</code>/<code>6e51b113</code>。
+      </p>
+    </div>
+  </div>
+
   <!-- ==================== 模块 11: 宠物帮帮 (M22) ==================== -->
   <div class="module-section">
     <div class="module-header" onclick="toggleModule(this)">
