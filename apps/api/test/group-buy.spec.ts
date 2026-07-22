@@ -261,6 +261,104 @@ describe('Feature: 购物拼拼 (M23)', () => {
     });
   });
 
+  describe('状态机守卫 (N1)', () => {
+    it('open 状态 deliver 返回 400', async () => {
+      const offer = await request(app.getHttpServer())
+        .post('/api/v1/group-buys')
+        .set('Authorization', `Bearer ${initiatorToken}`)
+        .send({
+          type: 'offer',
+          location: '守卫1',
+          departAt: '2026-08-01T10:00:00Z',
+          bidCloseAt: '2026-07-31T20:00:00Z',
+          quota: 1,
+          deliveryMethod: 'self_pickup',
+        });
+      await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/respond`)
+        .set('Authorization', `Bearer ${responderToken}`)
+        .send({ name: '商品', qty: 1 });
+      const detail = await request(app.getHttpServer())
+        .get(`/api/v1/group-buys/${offer.body.data.id}`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      const itemId = detail.body.data.items[0].id;
+      await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/items/${itemId}/confirm`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      // open 状态不可交付（须先 close-bid -> purchased）
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/items/${itemId}/deliver`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      expect(res.status).toBe(400);
+    });
+
+    it('closed_for_bid 状态 deliver 返回 400', async () => {
+      const offer = await request(app.getHttpServer())
+        .post('/api/v1/group-buys')
+        .set('Authorization', `Bearer ${initiatorToken}`)
+        .send({
+          type: 'offer',
+          location: '守卫2',
+          departAt: '2026-08-01T10:00:00Z',
+          bidCloseAt: '2026-07-31T20:00:00Z',
+          quota: 1,
+          deliveryMethod: 'self_pickup',
+        });
+      await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/respond`)
+        .set('Authorization', `Bearer ${responder2Token}`)
+        .send({ name: '商品', qty: 1 });
+      const detail = await request(app.getHttpServer())
+        .get(`/api/v1/group-buys/${offer.body.data.id}`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      const itemId = detail.body.data.items[0].id;
+      await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/items/${itemId}/confirm`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/close-bid`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      // closed_for_bid 状态不可交付（须先 purchased）
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/items/${itemId}/deliver`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      expect(res.status).toBe(400);
+    });
+
+    it('purchased 状态 confirm 返回 400', async () => {
+      const offer = await request(app.getHttpServer())
+        .post('/api/v1/group-buys')
+        .set('Authorization', `Bearer ${initiatorToken}`)
+        .send({
+          type: 'offer',
+          location: '守卫3',
+          departAt: '2026-08-01T10:00:00Z',
+          bidCloseAt: '2026-07-31T20:00:00Z',
+          quota: 1,
+          deliveryMethod: 'self_pickup',
+        });
+      await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/respond`)
+        .set('Authorization', `Bearer ${responderToken}`)
+        .send({ name: '商品', qty: 1 });
+      await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/close-bid`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/purchased`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      const detail = await request(app.getHttpServer())
+        .get(`/api/v1/group-buys/${offer.body.data.id}`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      const itemId = detail.body.data.items[0].id;
+      // purchased 状态不可再 confirm（须在 open/closed_for_bid 阶段处理）
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/group-buys/${offer.body.data.id}/items/${itemId}/confirm`)
+        .set('Authorization', `Bearer ${initiatorToken}`);
+      expect(res.status).toBe(400);
+    });
+  });
+
   describe('取消响应 (M23.6)', () => {
     it('截止前取消成功', async () => {
       const newOffer = await request(app.getHttpServer())

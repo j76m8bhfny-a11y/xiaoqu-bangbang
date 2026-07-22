@@ -202,6 +202,9 @@ export class GroupBuysService {
   async confirmItem(userId: string, gbId: string, itemId: string, communityId: string) {
     const gb = await this.findOne(gbId, communityId);
     if (gb.initiatorId !== userId) throw new ForbiddenException('仅主买人可操作');
+    if (!['open', 'closed_for_bid'].includes(gb.status)) {
+      throw new BadRequestException('当前状态不可确认/拒绝响应');
+    }
     const item = gb.items.find((i) => i.id === itemId);
     if (!item) throw new NotFoundException('item 不存在');
     if (item.status !== 'pending') throw new BadRequestException('item 状态不可 confirm');
@@ -214,6 +217,9 @@ export class GroupBuysService {
   async rejectItem(userId: string, gbId: string, itemId: string, communityId: string) {
     const gb = await this.findOne(gbId, communityId);
     if (gb.initiatorId !== userId) throw new ForbiddenException('仅主买人可操作');
+    if (!['open', 'closed_for_bid'].includes(gb.status)) {
+      throw new BadRequestException('当前状态不可确认/拒绝响应');
+    }
     const item = gb.items.find((i) => i.id === itemId);
     if (!item) throw new NotFoundException('item 不存在');
     if (item.status !== 'pending') throw new BadRequestException('item 状态不可 reject');
@@ -253,6 +259,9 @@ export class GroupBuysService {
   async deliver(userId: string, gbId: string, itemId: string, communityId: string) {
     const gb = await this.findOne(gbId, communityId);
     if (gb.initiatorId !== userId) throw new ForbiddenException('仅主买人可操作');
+    if (gb.status !== 'purchased') {
+      throw new BadRequestException('仅 purchased 状态可交付');
+    }
     const item = gb.items.find((i) => i.id === itemId);
     if (!item) throw new NotFoundException('item 不存在');
     if (!['confirmed', 'purchased'].includes(item.status)) {
