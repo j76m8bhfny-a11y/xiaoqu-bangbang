@@ -178,7 +178,7 @@
   <a class="back-link" href="index.html">← 索引页</a>
   <h1>🧪 傻瓜式最终测试</h1>
   <div class="tagline">手把手教你从头到尾测一遍 · 每步都有详细操作和预期结果</div>
-  <div class="meta">2026-07-21 · HEAD: dfb2c06 · M22 宠物帮帮 + M23 购物拼拼 前端 bug 修复后最终验证</div>
+  <div class="meta">2026-07-21 · HEAD: c8d0237 · M22 宠物帮帮 + M23 购物拼拼 前端 bug 修复后最终验证</div>
 </div>
 
 <div class="container">
@@ -1587,46 +1587,46 @@
     </div>
   </div>
 
-  <!-- ==================== 决策区：需要你拍板 ==================== -->
-  <div class="prep-box" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2); border-left:4px solid #E74C3C;">
-    <h3 style="color:#C0392B;">⚠️ 需要你拍板的 4 件事（白话说明）</h3>
-    <p style="font-size:13px; margin-bottom:12px;">这些不是 bug，是设计层面要你定方向，定了之后我才动手。下面每条都先用大白话说一遍。</p>
+  <!-- ==================== 决策区：已拍板 ==================== -->
+  <div class="prep-box" style="background:linear-gradient(135deg,#E8F5ED,#D5EBDD); border-left:4px solid #27AE60;">
+    <h3 style="color:#1E7E45;">✅ 已拍板的 4 件事（已按 ①A + ②维持 + ③不做 + ④加守卫 执行）</h3>
+    <p style="font-size:13px; margin-bottom:12px;">用户已拍板，代码已改完，后端单测 291/291 pass。以下是决策结果与对应 commit。</p>
 
-    <div style="background:white; border-radius:8px; padding:12px 14px; margin:8px 0; border-left:3px solid #E74C3C;">
-      <strong>① 求代购可能永远「完不成」</strong>
+    <div style="background:white; border-radius:8px; padding:12px 14px; margin:8px 0; border-left:3px solid #27AE60;">
+      <strong>✅ ① 求代购不再卡死 -> 选 A（已修 commit 47305db）</strong>
       <p style="font-size:13px; margin-top:6px; line-height:1.7;">
-        <strong>白话：</strong>发起人自己填的商品清单，在数据库里记的是「发起人」的身份，永远卡在「待确认」状态，不参与确认/交付流程。
-        可拼单要变成「已完成」的条件是「所有商品都交付」，那发起人自己这些条永远交付不了，<strong>求代购就永远卡死完不成</strong>。
-        你定一下：<strong>A.</strong> 发起人自己的商品直接算「已交付」跳过流程；还是 <strong>B.</strong> 本来就不该让发起人填商品，改成纯信息展示不进 items 表？
+        <strong>问题：</strong>发起人自己填的商品清单永远卡在「待确认」，不参与交付，导致求代购永远完不成。<br>
+        <strong>方案：</strong>seek 创建时把发起人 item 初始状态设为 <code>delivered</code>，跳过 confirm/deliver 流程，不再阻塞自动 completed。<br>
+        <strong>验证：</strong>补了 e2e 测试确认发起人 item 初始即 delivered。
       </p>
     </div>
 
-    <div style="background:white; border-radius:8px; padding:12px 14px; margin:8px 0; border-left:3px solid #E74C3C;">
-      <strong>② 宠物表单缺字段不报错</strong>
+    <div style="background:white; border-radius:8px; padding:12px 14px; margin:8px 0; border-left:3px solid #95A5A6;">
+      <strong>⏸️ ② 宠物表单缺字段不报错 -> 维持现状（不改）</strong>
       <p style="font-size:13px; margin-top:6px; line-height:1.7;">
-        <strong>白话：</strong>比如代遛「狗的体型」、寻宠「宠物种类」明明标了必填，但后端不检查，<strong>漏填也能发布成功</strong>（前端拦了，但直接调 API 能绕过）。
-        你定：<strong>A.</strong> 后端补严格校验（前后端都挡）；还是 <strong>B.</strong> 维持现状（信任前端拦，后端不兜底）？
+        <strong>问题：</strong>代遛「狗体型」、寻宠「宠物种类」标了必填，但后端不检查，直接调 API 能绕过。<br>
+        <strong>方案：</strong>信任前端拦截，后端不兜底校验。PH-009/016 finding 关闭。
       </p>
     </div>
 
-    <div style="background:white; border-radius:8px; padding:12px 14px; margin:8px 0; border-left:3px solid #E74C3C;">
-      <strong>③ 没有「拒绝响应人」功能</strong>
+    <div style="background:white; border-radius:8px; padding:12px 14px; margin:8px 0; border-left:3px solid #95A5A6;">
+      <strong>⏸️ ③ 没有「拒绝响应人」功能 -> 不做</strong>
       <p style="font-size:13px; margin-top:6px; line-height:1.7;">
-        <strong>白话：</strong>寻宠多帮手场景，发布者只能「选择」响应人，<strong>没有明确的「拒绝」按钮</strong>把不靠谱的响应人排除掉、不让他发花。
-        目前不操作就晾着（一直 pending）。你定：要不要补一个 reject 接口？
+        <strong>问题：</strong>寻宠多帮手场景，发布者只能「选择」响应人，无明确「拒绝」按钮。<br>
+        <strong>方案：</strong>影响小，不操作就晾着 pending。PH-037 finding 关闭，不补 reject 接口。
       </p>
     </div>
 
-    <div style="background:white; border-radius:8px; padding:12px 14px; margin:8px 0; border-left:3px solid #E74C3C;">
-      <strong>④ Admin 下架接口不查状态</strong>
+    <div style="background:white; border-radius:8px; padding:12px 14px; margin:8px 0; border-left:3px solid #27AE60;">
+      <strong>✅ ④ Admin 下架加状态守卫 -> 已修（commit c8d0237）</strong>
       <p style="font-size:13px; margin-top:6px; line-height:1.7;">
-        <strong>白话：</strong>Admin 点「下架」把拼单关掉，但后端不检查当前状态——<strong>已经关闭的还能再点一次下架</strong>（虽然无害但语义不对）。
-        Admin 前端已经按状态隐藏了按钮，但裸调 API 能绕过。你定：要不要后端加个状态守卫？
+        <strong>问题：</strong>已关闭的拼单还能再点一次下架，语义不对（前端已隐藏按钮，但裸调 API 能绕过）。<br>
+        <strong>方案：</strong>takedownGroupBuy 加守卫，已 closed 拒绝重复下架。GB-045 finding 关闭。
       </p>
     </div>
 
     <p style="font-size:12px; color:var(--text-secondary); margin-top:10px;">
-      💡 我的建议：① 改成 A（发起人 item 跳过 pending 直接 delivered，求代购才能正常闭环）；② 维持现状（前端已拦）；③③ 可以不做（影响小）；④ 加守卫（一行代码，闭合状态机）。等你拍板。
+      📌 决策已全部落地，finding 清零。剩余待办仅「26 项人工 UI 验证」。
     </p>
   </div>
 
@@ -1642,7 +1642,7 @@
 </div>
 
 <div class="footer">
-  <p>左邻右帮 · 傻瓜式最终测试 · 2026-07-21 · HEAD: dfb2c06</p>
+  <p>左邻右帮 · 傻瓜式最终测试 · 2026-07-21 · HEAD: c8d0237</p>
   <p style="margin-top:4px;">12 模块 + 4 项待决策 · 完整闭环测试 · 数据保存在本地浏览器（localStorage）</p>
 </div>
 
@@ -1754,7 +1754,7 @@ function generateReport() {
   let lines = [];
   lines.push('=== 左邻右帮 傻瓜式最终测试结果 ===');
   lines.push('测试时间: ' + new Date().toLocaleString('zh-CN'));
-  lines.push('HEAD: dfb2c06 · 2026-07-21');
+  lines.push('HEAD: c8d0237 · 2026-07-21');
   lines.push('');
 
   let pass=0, fail=0, skip=0, pending=0;

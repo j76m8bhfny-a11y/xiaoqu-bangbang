@@ -450,10 +450,11 @@
 
 ### 全局 Bug 识别完成状态
 
-- 后端: 已修 4 个 (commit 08de26b) + 状态机守卫 3 处 (commit f3d9c17) + 待确认 finding 3 个
-- M22 前端: 已识别 14 个 → 已修 (commit 8f1d266)
-- M23 前端: 已识别 11 个 + N4 → 已修 (commit 6531df0)
-- 核实新发现 N1~N4: N1/N4 已修，N2 前端已修(后端设计待确认)，N3 维持设计
+- 后端: 已修 4 个 (commit 08de26b) + 状态机守卫 3 处 (commit f3d9c17) + seek item delivered (commit 47305db) + takedown 守卫 (commit c8d0237)
+- M22 前端: 已识别 14 个 -> 已修 (commit 8f1d266)
+- M23 前端: 已识别 11 个 + N4 -> 已修 (commit 6531df0)
+- 核实新发现 N1~N4: N1/N2/N4 已修，N3 维持设计
+- finding 全部关闭（①A④已修，②③按用户决策维持现状/不做）
 
 ## 前端 Bug 修复记录（2026-07-21）
 
@@ -482,13 +483,16 @@
 - N3 seek items 创建后不可编辑 → 维持设计(update dto 无 items 字段，edit 仅改 location/note/交付方式)
 - N4 采购地点"其他"无自定义文本输入 → 已修(违反 GB-009)
 
-## 待确认 finding（未修，需用户拍板）
+## 待确认 finding（已拍板，2026-07-21）
 
-1. PH-009/016: petMeta 内部字段后端不校验(缺 dogSize/petType 不 400) — PRD 是否要求后端校验？
-2. PH-037: events 模块无 reject application 接口 — 要补吗？
-3. GB-045: Admin takedown API 不校验状态 — 要加 API 守卫吗？
+用户决策：①A + ②维持现状 + ③不做 + ④加守卫
+
+1. ✅ 已修 ①A (commit 47305db): seek 发起人 item 初始设为 delivered，不再卡 pending 阻塞 completed。补 e2e 测试验证
+2. ⏸️ 维持现状 ②: petMeta 内部字段后端不校验（前端已拦，信任前端不兜底）。PH-009/016 关闭
+3. ⏸️ 不做 ③: 无 reject application 接口（影响小，不操作即晾着 pending）。PH-037 关闭
+4. ✅ 已修 ④ (commit c8d0237): admin takedownGroupBuy 加状态守卫，已 closed 拒绝重复下架。GB-045 关闭
 
 ## 验证
 
-- 后端: `cd apps/api && npx vitest run` → 290/290 pass(原 287 + 3 新守卫测试)
-- 前端: 无自动化测试，eslint 0 error(仅 pre-existing any/exhaustive-deps warning)，待人工 UI 清单 26 项验证
+- 后端: `cd apps/api && npx vitest run` -> 291/291 pass（原 290 + ①A 新测试）
+- 前端: 无自动化测试，eslint 0 error，待人工 UI 清单 26 项验证
