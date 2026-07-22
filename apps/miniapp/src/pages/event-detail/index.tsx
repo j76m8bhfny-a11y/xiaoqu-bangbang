@@ -64,6 +64,17 @@ const TIME_SLOT_LABELS: Record<string, string> = {
   evening: '傍晚',
   night: '夜间',
 };
+// FE-10/11: pet_help 子分类标签与 CTA 文案（详情页按 subType 显示，区别于卡片主分类）
+const PET_SUBTYPE_LABELS: Record<string, string> = {
+  feed: '代喂',
+  walk: '代遛',
+  lost: '寻宠',
+};
+const PET_SUBTYPE_CTA: Record<string, string> = {
+  feed: '我来代喂',
+  walk: '我来代遛',
+  lost: '提供线索',
+};
 
 const ACTION_TYPE_LABELS: Record<string, string> = {
   [ActionType.HELP]: '提供帮助',
@@ -221,7 +232,11 @@ export default function EventDetail() {
 
   const handleCta = useCallback(async () => {
     if (!event || submitting) return;
-    const actionType = EVENT_TYPE_TO_ACTION[event.type];
+    // FE-2: pet_help 按 subType 取 actionType（feed/walk=HELP, lost=PROVIDE_CLUE）
+    let actionType = EVENT_TYPE_TO_ACTION[event.type];
+    if (event.type === EventType.PET_HELP) {
+      actionType = event.subType === PetSubType.LOST ? ActionType.PROVIDE_CLUE : ActionType.HELP;
+    }
     if (!actionType) return;
     setSubmitting(true);
     try {
@@ -454,9 +469,15 @@ export default function EventDetail() {
     event.status === EventStatus.CLOSED ||
     event.status === EventStatus.REJECTED ||
     event.status === EventStatus.PENDING_REVIEW;
-  const isHelperType = event.type === EventType.HELP_REQUEST;
+  // FE-3/4: pet_help 单帮手(feed/walk) 走 selectHelper，多帮手(lost) 走 selectParticipant
+  const isHelperType =
+    event.type === EventType.HELP_REQUEST ||
+    (event.type === EventType.PET_HELP &&
+      (event.subType === PetSubType.FEED || event.subType === PetSubType.WALK));
   const isMultiHelperType =
-    event.type === EventType.PUBLIC_WELFARE || event.type === EventType.LOST_FOUND;
+    event.type === EventType.PUBLIC_WELFARE ||
+    event.type === EventType.LOST_FOUND ||
+    (event.type === EventType.PET_HELP && event.subType === PetSubType.LOST);
   const isPublicFeedback = event.type === EventType.PUBLIC_FEEDBACK;
 
   return (
@@ -467,7 +488,11 @@ export default function EventDetail() {
             className="event-detail__type-tag"
             style={{ backgroundColor: typeConfig.bgColor, color: typeConfig.color }}
           >
-            <Text className="event-detail__type-tag-text">{typeConfig.label}</Text>
+            <Text className="event-detail__type-tag-text">
+              {event.type === EventType.PET_HELP && event.subType
+                ? (PET_SUBTYPE_LABELS[event.subType] ?? typeConfig.label)
+                : typeConfig.label}
+            </Text>
           </View>
           <View className="event-detail__status-tag">
             <Text className="event-detail__status-tag-text">{statusLabel}</Text>
@@ -1212,7 +1237,12 @@ export default function EventDetail() {
                   <View
                     className="event-detail__manage-btn"
                     onClick={() =>
-                      Taro.navigateTo({ url: `/pages/event-edit/index?id=${event.id}` })
+                      Taro.navigateTo({
+                        url:
+                          event.type === EventType.PET_HELP
+                            ? `/pages/pet-edit/index?id=${event.id}`
+                            : `/pages/event-edit/index?id=${event.id}`,
+                      })
                     }
                   >
                     <View className="event-detail__manage-btn-text">
@@ -1313,7 +1343,11 @@ export default function EventDetail() {
               onClick={handleCta}
             >
               <Text className="event-detail__action-btn-cta-text">
-                {submitting ? '提交中...' : typeConfig.ctaText}
+                {submitting
+                  ? '提交中...'
+                  : event.type === EventType.PET_HELP && event.subType
+                    ? (PET_SUBTYPE_CTA[event.subType] ?? typeConfig.ctaText)
+                    : typeConfig.ctaText}
               </Text>
             </View>
           )}

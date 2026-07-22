@@ -62,7 +62,7 @@ export const WALK_FIELDS: FieldConfig[] = [
     type: 'checkbox',
     required: true,
     options: [
-      { label: '早晨', value: 'morning' },
+      { label: '早上', value: 'morning' },
       { label: '中午', value: 'noon' },
       { label: '傍晚', value: 'evening' },
       { label: '夜间', value: 'night' },

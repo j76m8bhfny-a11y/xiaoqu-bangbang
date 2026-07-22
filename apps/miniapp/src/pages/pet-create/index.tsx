@@ -15,11 +15,18 @@ import {
 } from '@tarojs/components';
 import { useAuthStore } from '@/store/auth';
 import { eventService } from '@/services';
+import ImagePicker from '@/components/image-picker';
 import { getFields, FieldConfig } from './field-configs';
 import './index.scss';
 
+const SUB_TYPE_OPTIONS = [
+  { label: '代喂', value: 'feed' },
+  { label: '代遛', value: 'walk' },
+  { label: '寻宠', value: 'lost' },
+];
+
 const PetCreate: React.FC = () => {
-  const subType = Taro.getCurrentInstance().router?.params?.type || 'feed';
+  const [subType, setSubType] = useState(Taro.getCurrentInstance().router?.params?.type || 'feed');
   const fields = getFields(subType);
   const [form, setForm] = useState<Record<string, any>>({});
   // ponytail: verifyStatus 在 user 对象上（非 store 顶层），参考 event-create 的取值方式
@@ -128,7 +135,7 @@ const PetCreate: React.FC = () => {
           <CheckboxGroup onChange={(e) => setField(f.name, e.detail.value)}>
             {f.options!.map((o) => (
               <Label key={o.value} className="checkbox-label">
-                <Checkbox value={o.value} />
+                <Checkbox value={o.value} checked={(form[f.name] || []).includes(o.value)} />
                 {o.label}
               </Label>
             ))}
@@ -143,28 +150,22 @@ const PetCreate: React.FC = () => {
           <View className="date-range">
             <Input
               type="text"
+              value={form[f.name]?.start || ''}
               placeholder="开始日期 如 2026-08-01"
               onInput={(e) => setField(f.name, { ...(form[f.name] || {}), start: e.detail.value })}
             />
             <Input
               type="text"
+              value={form[f.name]?.end || ''}
               placeholder="结束日期 如 2026-08-03"
               onInput={(e) => setField(f.name, { ...(form[f.name] || {}), end: e.detail.value })}
             />
           </View>
         );
       case 'image':
-        // ponytail: 图片上传后续接入现有 image-picker 组件，本期最小实现用 Taro.chooseImage
+        // FE-5: 走 image-picker 组件上传远端 URL（chooseMedia + http.upload + 预览/删除/追加）
         return (
-          <Button
-            size="mini"
-            onClick={async () => {
-              const res = await Taro.chooseImage({ count: 9, sourceType: ['album', 'camera'] });
-              setField(f.name, res.tempFilePaths);
-            }}
-          >
-            选择图片
-          </Button>
+          <ImagePicker images={form[f.name] || []} onChange={(imgs) => setField(f.name, imgs)} />
         );
       default:
         return null;
@@ -174,6 +175,17 @@ const PetCreate: React.FC = () => {
   return (
     <View className="pet-create">
       <View className="form">
+        <View className="form-item">
+          <Text className="label">类型 *</Text>
+          <RadioGroup onChange={(e) => setSubType(e.detail.value)}>
+            {SUB_TYPE_OPTIONS.map((o) => (
+              <Label key={o.value} className="radio-label">
+                <Radio value={o.value} checked={subType === o.value} />
+                {o.label}
+              </Label>
+            ))}
+          </RadioGroup>
+        </View>
         {fields.map((f) => (
           <View key={f.name} className="form-item">
             <Text className="label">

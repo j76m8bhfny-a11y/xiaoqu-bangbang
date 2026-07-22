@@ -14,6 +14,7 @@ import {
   Button,
 } from '@tarojs/components';
 import { eventService } from '@/services';
+import ImagePicker from '@/components/image-picker';
 import { getFields, FieldConfig } from '../pet-create/field-configs';
 import './index.scss';
 
@@ -107,7 +108,7 @@ const PetEdit: React.FC = () => {
           <CheckboxGroup onChange={(e) => setField(f.name, e.detail.value)}>
             {f.options!.map((o) => (
               <Label key={o.value} className="checkbox-label">
-                <Checkbox value={o.value} />
+                <Checkbox value={o.value} checked={(form[f.name] || []).includes(o.value)} />
                 {o.label}
               </Label>
             ))}
@@ -122,28 +123,22 @@ const PetEdit: React.FC = () => {
           <View className="date-range">
             <Input
               type="text"
+              value={form[f.name]?.start || ''}
               placeholder="开始日期 如 2026-08-01"
               onInput={(e) => setField(f.name, { ...(form[f.name] || {}), start: e.detail.value })}
             />
             <Input
               type="text"
+              value={form[f.name]?.end || ''}
               placeholder="结束日期 如 2026-08-03"
               onInput={(e) => setField(f.name, { ...(form[f.name] || {}), end: e.detail.value })}
             />
           </View>
         );
       case 'image':
-        // ponytail: 图片上传后续接入 image-picker 组件，本期最小实现用 Taro.chooseImage
+        // FE-5/9: 走 image-picker 组件上传远端 URL + 预览/删除
         return (
-          <Button
-            size="mini"
-            onClick={async () => {
-              const res = await Taro.chooseImage({ count: 9, sourceType: ['album', 'camera'] });
-              setField(f.name, res.tempFilePaths);
-            }}
-          >
-            选择图片
-          </Button>
+          <ImagePicker images={form[f.name] || []} onChange={(imgs) => setField(f.name, imgs)} />
         );
       default:
         return null;
