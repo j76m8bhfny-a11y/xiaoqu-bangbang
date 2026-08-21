@@ -20,6 +20,7 @@ export interface EventCardData {
   thanksCount: number;
   ctaText: string;
   ctaColor: string;
+  isInactive?: boolean;
   // M23: 用于区分卡片来源，影响点击跳转路由。
   // 未设置时默认按 'event' 处理（兼容历史调用方）。
   sourceType?: 'event' | 'group_buy';

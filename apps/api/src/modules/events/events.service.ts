@@ -45,7 +45,9 @@ export class EventsService {
       where.type = { notIn: query.excludeTypes };
     }
     if (query?.status) {
-      where.status = query.status;
+      // 支持逗号分隔多状态查询，如 'open,in_progress,processing'
+      const statuses = query.status.split(',').filter(Boolean);
+      where.status = statuses.length > 1 ? { in: statuses } : query.status;
     }
     if (query?.keyword) {
       where.OR = [
@@ -83,6 +85,15 @@ export class EventsService {
       orderBy: { createdAt: 'desc' },
       skip: pagination?.skip,
       take: pagination?.take,
+    });
+
+    // 已完成/已关闭事件沉底（与 feed.service.ts 一致）
+    const INACTIVE_STATUSES = new Set(['completed', 'closed']);
+    items.sort((a, b) => {
+      const aInactive = INACTIVE_STATUSES.has(a.status) ? 1 : 0;
+      const bInactive = INACTIVE_STATUSES.has(b.status) ? 1 : 0;
+      if (aInactive !== bInactive) return aInactive - bInactive;
+      return b.createdAt.getTime() - a.createdAt.getTime();
     });
 
     return items.map((item) => this.maskAnonymous(item, viewerUserId));
@@ -139,6 +150,11 @@ export class EventsService {
       if (viewerUserId !== query.creatorId) {
         where.isAnonymous = false;
       }
+    }
+    if (query?.status) {
+      // 支持逗号分隔多状态查询
+      const statuses = query.status.split(',').filter(Boolean);
+      where.status = statuses.length > 1 ? { in: statuses } : query.status;
     }
 
     return this.prisma.event.count({ where });
@@ -651,6 +667,69 @@ export class EventsService {
       userNickname: user?.nickname ?? '',
       userAvatarUrl: user?.avatarUrl ?? null,
     }));
+  }
+
+  async getContactInfo(eventId: string, communityId: string, viewerUserId: string) {
+    const event = await this.prisma.event.findFirst({
+      where: { id: eventId, deletedAt: null },
+    });
+    if (!event) {
+      throw new NotFoundException('事件不存在');
+    }
+    if (event.communityId !== communityId) {
+      throw new ForbiddenException('无权访问该事件');
+    }
+
+    const isCreator = event.creatorId === viewerUserId;
+    const isSelectedHelper = event.selectedHelperId === viewerUserId;
+    const isParticipant = await this.prisma.eventParticipant.findFirst({
+      where: { eventId, userId: viewerUserId },
+    });
+
+    if (!isCreator && !isSelectedHelper && !isParticipant) {
+      throw new ForbiddenException('仅互助双方可查看联系方式');
+    }
+
+    const targetUserId = isCreator
+      ? (event.selectedHelperId ??
+        (isParticipant
+          ? (
+              await this.prisma.eventParticipant.findFirst({
+                where: { eventId, userId: { not: viewerUserId } },
+                orderBy: { createdAt: 'asc' },
+              })
+            )?.userId
+          : null))
+      : event.creatorId;
+
+    if (!targetUserId) {
+      throw new NotFoundException('未找到对方用户');
+    }
+
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: {
+        nickname: true,
+        phone: true,
+        wechatId: true,
+      },
+    });
+
+    if (!targetUser) {
+      throw new NotFoundException('未找到对方用户');
+    }
+
+    // 脱敏：手机号中间4位打码
+    const maskedPhone = targetUser.phone
+      ? targetUser.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
+      : null;
+
+    return {
+      nickname: targetUser.nickname,
+      phone: maskedPhone,
+      rawPhone: isCreator || isSelectedHelper ? targetUser.phone : maskedPhone,
+      wechatId: targetUser.wechatId,
+    };
   }
 
   async selectHelper(

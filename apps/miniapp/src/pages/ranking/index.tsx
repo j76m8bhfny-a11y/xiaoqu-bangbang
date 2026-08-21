@@ -1,5 +1,6 @@
 import { View, Text, ScrollView } from '@tarojs/components';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { switchTab } from '@tarojs/taro';
 import { useCommunityStore } from '@/store';
 import { rankingService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
@@ -8,20 +9,124 @@ import ErrorState from '@/components/error-state';
 import type { RankingItemDto, MyRankingDto } from '@xiaoqu-bangbang/shared';
 import { PeriodType } from '@xiaoqu-bangbang/shared';
 import './index.scss';
-import Icon, { emojiToIconName } from '@/components/icon';
+import Icon, { emojiToIconName, type IconName } from '@/components/icon';
 
 const PERIOD_TABS = [
   { key: PeriodType.MONTH, label: '本月' },
   { key: PeriodType.TOTAL, label: '总榜' },
 ];
 
+const BADGE_ICON_MAP: Record<string, IconName> = {
+  helper_1: 'handshake',
+  helper_5: 'handshake',
+  helper_20: 'trophy',
+  feedback_5: 'megaphone',
+  feedback_20: 'megaphone',
+  topic_1: 'chat',
+  topic_5: 'chat',
+  guide_1: 'books',
+  guide_5: 'books',
+  guide_20: 'books',
+  flower_10: 'flower',
+  flower_50: 'flower',
+  first_owner_top30: 'house',
+  founder: 'community',
+  seed: 'leaf',
+  helpful_neighbor: 'handshake',
+  mutual_aid_star: 'star',
+  community_guardian: 'ribbon',
+};
+
+const BADGE_SEED_NAME: Record<string, string> = {
+  helper_1: '初来乍到',
+  helper_5: '热心邻居',
+  helper_20: '互助达人',
+  feedback_5: '议事参与者',
+  feedback_20: '议事达人',
+  topic_1: '议题提出者',
+  topic_5: '议题达人',
+  guide_1: '教程分享者',
+  guide_5: '教程达人',
+  guide_20: '教程专家',
+  flower_10: '花开满园',
+  flower_50: '花团锦簇',
+  first_owner_top30: '先锋业主',
+  founder: '小区创始人',
+  seed: '种子贡献者',
+  helpful_neighbor: '热心邻居',
+  mutual_aid_star: '互助之星',
+  community_guardian: '社区守护者',
+};
+
+const BADGE_DISPLAY_NAME: Record<string, string> = {
+  helper_1: '破冰邻里',
+  helper_5: '热心邻居',
+  helper_20: '互助达人',
+  feedback_5: '议事参与者',
+  feedback_20: '议事达人',
+  topic_1: '议题提出者',
+  topic_5: '议题达人',
+  guide_1: '知识播种者',
+  guide_5: '教程达人',
+  guide_20: '教程专家',
+  flower_10: '花开满园',
+  flower_50: '花团锦簇',
+  first_owner_top30: '先锋业主',
+  founder: '小区创始人',
+  seed: '种子贡献者',
+  helpful_neighbor: '热心邻居',
+  mutual_aid_star: '互助之星',
+  community_guardian: '社区守护者',
+};
+
+interface BadgeProgress {
+  type: 'help' | 'flower' | 'topic' | 'feedback' | 'guide' | 'other';
+  threshold: number;
+}
+function parseBadgeProgress(code: string): BadgeProgress | null {
+  const m = code.match(/^(helper|flower|topic|feedback|guide)_(\d+)$/);
+  if (!m) return null;
+  const [, type, num] = m;
+  return { type: type as BadgeProgress['type'], threshold: parseInt(num, 10) };
+}
+
+function getBadgeProgressText(code: string, myRank: MyRankingDto | null): string | null {
+  const p = parseBadgeProgress(code);
+  if (!p || !myRank) return null;
+  let current: number;
+  let unit: string;
+  switch (p.type) {
+    case 'help':
+      current = myRank.helpCount;
+      unit = '次互助';
+      break;
+    case 'flower':
+      current = myRank.flowerCount;
+      unit = '朵小花';
+      break;
+    default:
+      return null;
+  }
+  if (current >= p.threshold) return null;
+  return `已${current}${unit}｜目标${p.threshold}${unit}`;
+}
+
+function daysLeftInMonth(): number {
+  const now = new Date();
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  return lastDay - now.getDate();
+}
+
 interface BadgeItem {
   id: string;
   name: string;
+  code: string;
   icon: string;
+  iconMapped: IconName;
+  displayName: string;
   description: string;
   earned: boolean;
-  // icon 来自 API（iconUrl），渲染时用 emojiToIconName 映射
+  progressText: string | null;
 }
 
 export default function Ranking() {
@@ -59,19 +164,52 @@ export default function Ranking() {
     enabled: activeTab === 'badges',
   });
 
+  const { data: myRankForBadges } = useRequest(
+    () => rankingService.getMyRanking({ periodType: PeriodType.TOTAL }),
+    [communityId],
+    { enabled: activeTab === 'badges' && !!communityId },
+  );
+
   const rankingItems: RankingItemDto[] = rankingData?.items ?? [];
   const top3 = rankingItems.slice(0, 3);
   const restList = rankingItems.slice(3);
   const myRank: MyRankingDto | null = myRanking ?? null;
 
+  const gapToPrev = useMemo(() => {
+    if (!myRank || !myRank.rankNo || myRank.rankNo <= 1) return null;
+    const prevRank = rankingItems.find((r) => r.rankNo === myRank.rankNo! - 1);
+    if (!prevRank) return null;
+    return prevRank.flowerCount - myRank.flowerCount;
+  }, [myRank, rankingItems]);
+
+  const progressPercent = useMemo(() => {
+    if (!myRank || top3.length === 0) return 0;
+    const topFlowers = top3[0].flowerCount || 1;
+    return Math.min(100, Math.round((myRank.flowerCount / topFlowers) * 100));
+  }, [myRank, top3]);
+
   const myBadgeIds = new Set((myBadgesData?.items ?? []).map((b) => b.id));
-  const mergedBadges: BadgeItem[] = (badgesData?.items ?? []).map((b) => ({
-    id: b.id,
-    name: b.name,
-    icon: b.icon,
-    description: b.description,
-    earned: myBadgeIds.has(b.id),
-  }));
+  const myRankForProgress: MyRankingDto | null = myRankForBadges ?? null;
+  const mergedBadges: BadgeItem[] = (badgesData?.items ?? []).map((b) => {
+    const code = Object.entries(BADGE_SEED_NAME).find(([, v]) => v === b.name)?.[0] ?? '';
+    const earned = myBadgeIds.has(b.id);
+    return {
+      id: b.id,
+      name: b.name,
+      code,
+      icon: b.icon,
+      iconMapped: BADGE_ICON_MAP[code] ?? emojiToIconName(b.icon),
+      displayName: BADGE_DISPLAY_NAME[code] ?? b.name,
+      description: b.description,
+      earned,
+      progressText: earned ? null : getBadgeProgressText(code, myRankForProgress),
+    };
+  });
+
+  const earnedBadges = mergedBadges.filter((b) => b.earned);
+  const nextBadge = mergedBadges.find((b) => !b.earned && b.progressText);
+  const earnedCount = earnedBadges.length;
+  const totalCount = mergedBadges.length;
 
   return (
     <View className="ranking">
@@ -80,7 +218,7 @@ export default function Ranking() {
           <View className="ranking__header-title">
             <Icon name="trophy" size={22} /> <Text>好人榜</Text>
           </View>
-          <Text className="ranking__header-sub">每一朵小花，都是一份温暖</Text>
+          <Text className="ranking__header-sub">1朵小花 = 1次有效互助</Text>
         </View>
         <View className="ranking__outer-tabs">
           <View
@@ -100,7 +238,6 @@ export default function Ranking() {
 
       {activeTab === 'ranking' ? (
         <ScrollView scrollY className="ranking__content">
-          {/* 周期切换 */}
           <View className="ranking__period">
             {PERIOD_TABS.map((tab) => (
               <View
@@ -123,10 +260,8 @@ export default function Ranking() {
             <ErrorState message={rankingError.message} onRetry={refreshRanking} />
           ) : (
             <>
-              {/* Top3 领奖台 */}
               {top3.length >= 3 && (
                 <View className="ranking__podium">
-                  {/* 第2名 */}
                   <View className="ranking__podium-item ranking__podium-item--second">
                     <View className="ranking__podium-avatar-wrap">
                       <View className="ranking__podium-crown">
@@ -148,7 +283,6 @@ export default function Ranking() {
                     </View>
                   </View>
 
-                  {/* 第1名 */}
                   <View className="ranking__podium-item ranking__podium-item--first">
                     <View className="ranking__podium-avatar-wrap">
                       <View className="ranking__podium-crown ranking__podium-crown--first">
@@ -170,7 +304,6 @@ export default function Ranking() {
                     </View>
                   </View>
 
-                  {/* 第3名 */}
                   <View className="ranking__podium-item ranking__podium-item--third">
                     <View className="ranking__podium-avatar-wrap">
                       <View className="ranking__podium-crown">
@@ -194,7 +327,6 @@ export default function Ranking() {
                 </View>
               )}
 
-              {/* 排名列表 */}
               <View className="ranking__list">
                 {restList.map((user) => (
                   <View key={user.userId} className="ranking__list-item">
@@ -216,23 +348,53 @@ export default function Ranking() {
                 ))}
               </View>
 
-              {/* 我的排名 */}
               {myRank && (
                 <View className="ranking__my-rank">
-                  <View className="ranking__my-rank-avatar">
-                    <Text className="ranking__list-avatar-text">我</Text>
+                  <View className="ranking__my-rank-top">
+                    <View className="ranking__my-rank-avatar">
+                      <Text className="ranking__list-avatar-text">我</Text>
+                    </View>
+                    <View className="ranking__list-info">
+                      <Text className="ranking__list-name">我</Text>
+                      <Text className="ranking__list-help">帮助了{myRank.helpCount}位邻居</Text>
+                    </View>
+                    <Text className="ranking__my-rank-pos">第{myRank.rankNo ?? '--'}名</Text>
+                    <View className="ranking__list-flower-count">
+                      <Icon name="flower" size={14} color="#E89B6C" />{' '}
+                      <Text>{myRank.flowerCount}</Text>
+                    </View>
                   </View>
-                  <View className="ranking__list-info">
-                    <Text className="ranking__list-name">我</Text>
-                    <Text className="ranking__list-help">帮助了{myRank.helpCount}位邻居</Text>
-                  </View>
-                  <Text className="ranking__my-rank-pos">第{myRank.rankNo ?? '--'}名</Text>
-                  <View className="ranking__list-flower-count">
-                    <Icon name="flower" size={14} color="#E89B6C" />{' '}
-                    <Text>{myRank.flowerCount}</Text>
-                  </View>
+                  {gapToPrev !== null && gapToPrev > 0 && (
+                    <View className="ranking__my-rank-gap">
+                      <Icon name="flower" size={12} color="#E89B6C" />
+                      <Text className="ranking__my-rank-gap-text">距上一名还差 {gapToPrev} 朵</Text>
+                    </View>
+                  )}
+                  {top3.length > 0 && myRank.flowerCount > 0 && (
+                    <View className="ranking__my-rank-progress">
+                      <View
+                        className="ranking__my-rank-progress-bar"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </View>
+                  )}
+                  {activePeriod === PeriodType.MONTH && (
+                    <Text className="ranking__my-rank-countdown">
+                      本月还剩 {daysLeftInMonth()} 天
+                    </Text>
+                  )}
                 </View>
               )}
+
+              <View className="ranking__cta">
+                <View
+                  className="ranking__cta-btn"
+                  onClick={() => switchTab({ url: '/pages/events/index' })}
+                >
+                  <Icon name="bulb" size={16} color="#fff" />
+                  <Text className="ranking__cta-btn-text">今天还能帮谁？</Text>
+                </View>
+              </View>
             </>
           )}
 
@@ -245,35 +407,57 @@ export default function Ranking() {
           ) : badgesError ? (
             <ErrorState message={badgesError.message} onRetry={refreshBadges} />
           ) : (
-            <View className="ranking__badges-grid">
-              {mergedBadges.map((badge) => (
-                <View
-                  key={badge.id}
-                  className={`ranking__badge-card ${badge.earned ? 'ranking__badge-card--earned' : ''}`}
-                >
-                  <View
-                    className={`ranking__badge-icon-wrap ${badge.earned ? '' : 'ranking__badge-icon-wrap--locked'}`}
-                  >
-                    <View className="ranking__badge-icon">
-                      <Icon name={emojiToIconName(badge.icon)} size={28} />
-                    </View>
-                  </View>
-                  <Text className="ranking__badge-name">{badge.name}</Text>
-                  <Text className="ranking__badge-desc">{badge.description}</Text>
-                  {badge.earned ? (
-                    <View className="ranking__badge-status ranking__badge-status--earned">
-                      <Text className="ranking__badge-status-text">已获得</Text>
-                    </View>
-                  ) : (
-                    <View className="ranking__badge-status ranking__badge-status--locked">
-                      <Text className="ranking__badge-status-text ranking__badge-status-text--locked">
-                        未解锁
-                      </Text>
-                    </View>
-                  )}
+            <>
+              <View className="ranking__badge-overview">
+                <View className="ranking__badge-overview-row">
+                  <Icon name="trophy" size={20} color="#E89B6C" />
+                  <Text className="ranking__badge-overview-text">
+                    已获得 {earnedCount} 枚勋章{totalCount > 0 ? `／共 ${totalCount} 枚` : ''}
+                  </Text>
                 </View>
-              ))}
-            </View>
+                {nextBadge && (
+                  <View className="ranking__badge-overview-next">
+                    <Text className="ranking__badge-overview-next-text">
+                      🎯 下一枚目标：「{nextBadge.displayName}」
+                      {nextBadge.progressText ? `｜${nextBadge.progressText}` : ''}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <View className="ranking__badges-grid">
+                {mergedBadges.map((badge) => (
+                  <View
+                    key={badge.id}
+                    className={`ranking__badge-card ${badge.earned ? 'ranking__badge-card--earned' : ''}`}
+                  >
+                    <View
+                      className={`ranking__badge-icon-wrap ${badge.earned ? '' : 'ranking__badge-icon-wrap--locked'}`}
+                    >
+                      <View className="ranking__badge-icon">
+                        <Icon name={badge.iconMapped} size={28} />
+                      </View>
+                    </View>
+                    <Text className="ranking__badge-name">{badge.displayName}</Text>
+                    <Text className="ranking__badge-desc">{badge.description}</Text>
+                    {!badge.earned && badge.progressText && (
+                      <Text className="ranking__badge-progress">{badge.progressText}</Text>
+                    )}
+                    {badge.earned ? (
+                      <View className="ranking__badge-status ranking__badge-status--earned">
+                        <Text className="ranking__badge-status-text">✅ 已获得</Text>
+                      </View>
+                    ) : (
+                      <View className="ranking__badge-status ranking__badge-status--locked">
+                        <Text className="ranking__badge-status-text ranking__badge-status-text--locked">
+                          {badge.progressText ? '继续努力' : '未解锁'}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </View>
+            </>
           )}
           <View className="ranking__bottom-spacer" />
         </ScrollView>

@@ -201,30 +201,62 @@
     padding: $spacing-lg;
     border-radius: $radius-md;
     box-shadow: $shadow-card;
-  }
-
-  &__topic-top {
     display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    margin-bottom: $spacing-sm;
+    align-items: stretch;
+    overflow: hidden;
+
+    // B1: 左侧状态色条
+    &--open {
+      border-left: 4px solid $color-primary;
+    }
+    &--closed {
+      border-left: 4px solid $color-border;
+    }
   }
 
-  &__topic-status {
-    font-size: $font-size-xs;
-    padding: 4px 14px;
-    border-radius: $radius-sm;
+  // B1: 状态色条（备用，如需更醒目可加背景色）
+  &__topic-bar {
+    width: 4px;
+    border-radius: 2px;
+    margin-right: $spacing-md;
     flex-shrink: 0;
 
     &--open {
-      background: $color-bg-green;
-      color: $color-primary-deep;
+      background: $color-primary;
     }
-
     &--closed {
       background: $color-border;
-      color: $color-text-secondary;
     }
+  }
+
+  // C1: F 型布局主体
+  &__topic-main {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  &__topic-left {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__topic-date {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__topic-right {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    flex-shrink: 0;
+    margin-left: $spacing-sm;
   }
 
   &__topic-title {
@@ -234,13 +266,41 @@
     flex: 1;
   }
 
-  // 议题数据：4 项均配中文词，flex-wrap 防溢出
+  // 议题数据：图标+数字，去文字（A4）
   &__topic-meta {
     display: flex;
     flex-wrap: wrap;
     gap: $spacing-md;
     font-size: $font-size-sm;
     color: $color-text-secondary;
+  }
+
+  &__topic-metric {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+
+    // A1: 状态文案样式（待响应/已完成）
+    &--status {
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+      opacity: 0.7;
+    }
+
+    // 已完结评分
+    &--rating {
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+  }
+
+  &__topic-metric-label {
+    font-size: 20px;
+    color: $color-text-secondary;
+    opacity: 0.6;
   }
 
   &__bottom-spacer {

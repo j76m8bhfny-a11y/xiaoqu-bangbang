@@ -12,6 +12,78 @@
     padding-bottom: calc(#{$spacing-xl} + env(safe-area-inset-bottom));
   }
 
+  // ===== Status cards (verified / pending) =====
+  &__status-card {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    margin: 0 $spacing-md $spacing-lg;
+    padding: $spacing-lg $spacing-md;
+    border-radius: $radius-md;
+    box-shadow: $shadow-card;
+
+    &--approved {
+      background: $color-bg-green;
+      border: 2px solid $color-primary-soft;
+    }
+
+    &--pending {
+      background: $color-bg-orange;
+      border: 2px solid rgba(232, 155, 108, 0.3);
+    }
+  }
+
+  &__status-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+  }
+
+  &__status-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__status-card-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+
+  &__status-card-desc {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__status-card-date {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  // ===== Re-verify button =====
+  &__reverify {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 $spacing-md $spacing-lg;
+    padding: $spacing-sm;
+    border-radius: $radius-pill;
+    border: 2px solid $color-border;
+    background: #fff;
+  }
+
+  &__reverify-text {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
   &__card {
     background: #fff;
     border-radius: $radius-md;

@@ -278,6 +278,18 @@
     box-shadow: $shadow-card;
     box-sizing: border-box;
     overflow: hidden;
+    // E5: 点击微缩放反馈
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.1s ease;
+
+    &:active {
+      transform: scale(0.98);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    // E3: 闲置卡片左侧橙色竖条
+    border-left: 4px solid #e89b6c;
   }
 
   &__market-img {
@@ -333,6 +345,22 @@
     margin-top: auto;
   }
 
+  // E1: meta 行（昵称+时间）
+  &__market-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    gap: $spacing-sm;
+  }
+
+  &__market-time {
+    font-size: $font-size-xs - 2;
+    color: $color-text-secondary;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
   // 右侧：价格竖直居中
   &__market-side {
     flex-shrink: 0;
@@ -360,5 +388,16 @@
     color: $color-text-secondary;
     padding: 2px 10px;
     border-radius: 8px;
+  }
+
+  // E6: tab 背景色微变（心理锚点）
+  &--help {
+    background: #fafbf7; // 默认草绿底
+  }
+  &--market {
+    background: #fffbf5; // 暖橙底
+  }
+  &--guide {
+    background: #f5fafb; // 浅青底
   }
 }

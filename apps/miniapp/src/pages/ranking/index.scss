@@ -301,13 +301,19 @@
 
   &__my-rank {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     padding: $spacing-sm $spacing-md;
     background: $color-bg-green;
     border-radius: $radius-md;
     margin: $spacing-md $spacing-lg 0;
-    gap: $spacing-sm;
+    gap: $spacing-xs;
     border: 2px solid $color-primary-soft;
+  }
+
+  &__my-rank-top {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
   }
 
   &__my-rank-avatar {
@@ -325,6 +331,66 @@
     font-size: $font-size-sm;
     font-weight: $font-weight-bold;
     color: $color-primary;
+  }
+
+  &__my-rank-gap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-left: 88px;
+  }
+
+  &__my-rank-gap-text {
+    font-size: $font-size-xs;
+    color: $color-accent-deep;
+    font-weight: $font-weight-medium;
+  }
+
+  &__my-rank-progress {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: $radius-pill;
+    margin-left: 88px;
+    margin-right: $spacing-xs;
+    overflow: hidden;
+  }
+
+  &__my-rank-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, $color-primary, $color-accent);
+    border-radius: $radius-pill;
+    transition: width 0.3s ease;
+  }
+
+  &__my-rank-countdown {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    padding-left: 88px;
+  }
+
+  &__cta {
+    padding: $spacing-md $spacing-lg 0;
+  }
+
+  &__cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-md;
+    background: linear-gradient(135deg, $color-primary, $color-primary-deep);
+    border-radius: $radius-pill;
+    box-shadow: $shadow-btn;
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  &__cta-btn-text {
+    font-size: $font-size-sm;
+    color: #fff;
+    font-weight: $font-weight-bold;
   }
 
   &__badges-grid {
@@ -409,6 +475,44 @@
     &--locked {
       color: $color-text-secondary;
     }
+  }
+
+  &__badge-progress {
+    font-size: $font-size-xs;
+    color: $color-accent-deep;
+    font-weight: $font-weight-medium;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  &__badge-overview {
+    margin: $spacing-md $spacing-lg 0;
+    padding: $spacing-sm $spacing-md;
+    background: $color-cream;
+    border-radius: $radius-md;
+    box-shadow: $shadow-warm;
+  }
+
+  &__badge-overview-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+
+  &__badge-overview-text {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+
+  &__badge-overview-next {
+    margin-top: $spacing-xs;
+    padding-left: 30px;
+  }
+
+  &__badge-overview-next-text {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
   }
 
   &__bottom-spacer {

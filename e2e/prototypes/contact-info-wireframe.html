@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>联系方式功能 - 线稿原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+    background: #F0F2F5; padding: 40px 20px; color: #2C3E50;
+  }
+  h1 { text-align: center; font-size: 24px; margin-bottom: 8px; }
+  .subtitle { text-align: center; font-size: 13px; color: #888; margin-bottom: 32px; }
+  .screens { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; }
+  .screen-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; width: 340px; margin-bottom: 32px; }
+  .screen-label { background: #5B9E6F; color: #fff; padding: 10px 16px; font-size: 14px; font-weight: 600; }
+  .screen-label .tag { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; }
+  .phone-frame { background: #FAFBF7; padding: 16px; min-height: 560px; position: relative; }
+  .w-frame { border: 2px dashed #BDC3C7; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fff; }
+  .w-frame--highlight { border-color: #5B9E6F; background: #E8F5ED; }
+  .w-frame--new { border: 2px solid #E89B6C; background: #FFF8EE; border-radius: 8px; padding: 12px; margin-bottom: 12px; position: relative; }
+  .w-label { font-size: 11px; color: #95A5A6; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .w-label--new { color: #E89B6C; font-weight: 600; }
+  .w-input { border: 1px solid #E5E7EB; border-radius: 6px; padding: 8px 12px; font-size: 13px; color: #2C3E50; background: #F9FAFB; min-height: 36px; display: flex; align-items: center; }
+  .w-input--filled { background: #fff; color: #2C3E50; }
+  .w-input--required { border-color: #E89B6C; }
+  .w-button { border: 1px solid #5B9E6F; border-radius: 8px; padding: 10px; text-align: center; font-size: 14px; color: #5B9E6F; font-weight: 600; background: #E8F5ED; }
+  .w-button--primary { background: #5B9E6F; color: #fff; }
+  .w-button--small { padding: 4px 12px; font-size: 12px; border-radius: 16px; display: inline-block; }
+  .w-text { font-size: 13px; color: #2C3E50; line-height: 1.6; }
+  .w-text--muted { color: #95A5A6; font-size: 12px; }
+  .w-text--bold { font-weight: 600; }
+  .w-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .w-row--between { justify-content: space-between; }
+  .w-avatar { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #E5E7EB; background: #F0F2F5; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #888; flex-shrink: 0; }
+  .w-badge { background: #FEF3E0; color: #E89B6C; font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+  .w-badge--green { background: #E8F5ED; color: #5B9E6F; }
+  .w-divider { border-top: 1px solid #E5E7EB; margin: 12px 0; }
+  .w-note { background: #E3F2FD; border-left: 3px solid #3498DB; border-radius: 4px; padding: 8px 12px; font-size: 12px; color: #1A5276; margin: 12px 0; }
+  .w-note--warn { background: #FFF8E1; border-left-color: #F39C12; color: #7F6000; }
+  .w-callout { position: absolute; right: -8px; top: -8px; background: #E89B6C; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .w-contact-card { border: 1px solid #E89B6C; border-radius: 8px; padding: 12px; background: #FFF8EE; margin-top: 8px; }
+  .w-contact-row { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 4px 0; }
+  .w-contact-icon { width: 20px; height: 20px; border: 1px solid #E89B6C; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #E89B6C; flex-shrink: 0; }
+  .w-locked { filter: blur(3px); opacity: 0.5; }
+  .legend { max-width: 720px; margin: 32px auto 0; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .legend h3 { font-size: 15px; margin-bottom: 12px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .legend-box { width: 24px; height: 16px; border-radius: 4px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<h1>联系方式功能 · 线稿原型</h1>
+<div class="subtitle">虚线 = 现有 ｜ 橙色实线 = 新增 ｜ 认证必填 + 选中帮手后互通(仅发布者可见)</div>
+
+<div class="screens">
+
+<!-- ══ 1. 认证页 verify ══ -->
+<div class="screen-card">
+  <div class="screen-label">① 业主认证页 <span class="tag">phone + wechatId 必填</span></div>
+  <div class="phone-frame">
+    <div class="w-text w-text--bold" style="margin-bottom:12px;">业主认证</div>
+
+    <div class="w-frame">
+      <div class="w-label">认证材料（现有）</div>
+      <div class="w-row">
+        <div class="w-input" style="flex:1">房产证</div>
+        <div class="w-input" style="flex:1">租房合同</div>
+      </div>
+    </div>
+
+    <div class="w-frame">
+      <div class="w-label">楼栋/单元/房号（现有）</div>
+      <div class="w-row">
+        <div class="w-input" style="flex:1">3栋</div>
+        <div class="w-input" style="flex:1">2单元</div>
+        <div class="w-input" style="flex:1">501</div>
+      </div>
+    </div>
+
+    <div class="w-frame--new">
+      <div class="w-callout">新增</div>
+      <div class="w-label w-label--new">联系方式（认证必填）</div>
+      <div class="w-note w-note--warn">认证通过后，电话+微信将用于邻里互助联系，仅互选帮手后可见</div>
+      <div class="w-label" style="margin-top:8px;">手机号 *</div>
+      <div class="w-input w-input--required">138****8888</div>
+      <div class="w-label" style="margin-top:8px;">微信号 *</div>
+      <div class="w-input w-input--required">zhangsan_wx</div>
+    </div>
+
+    <div class="w-frame">
+      <div class="w-label">认证材料图片（现有）</div>
+      <div class="w-input" style="height:60px; justify-content:center; color:#95A5A6;">＋ 上传图片</div>
+    </div>
+
+    <div class="w-button w-button--primary">提交认证</div>
+  </div>
+</div>
+
+<!-- ══ 2. 个人信息编辑 profile-edit ══ -->
+<div class="screen-card">
+  <div class="screen-label">② 个人信息编辑 <span class="tag">补 phone 输入</span></div>
+  <div class="phone-frame">
+    <div class="w-text w-text--bold" style="margin-bottom:12px;">编辑资料</div>
+
+    <div class="w-frame">
+      <div class="w-label">头像（现有）</div>
+      <div class="w-avatar" style="width:48px; height:48px;">张</div>
+    </div>
+    <div class="w-frame">
+      <div class="w-label">昵称（现有）</div>
+      <div class="w-input w-input--filled">邻居755446</div>
+    </div>
+    <div class="w-frame">
+      <div class="w-label">简介（现有）</div>
+      <div class="w-input w-input--filled">热爱小区生活</div>
+    </div>
+    <div class="w-frame">
+      <div class="w-label">微信号（现有）</div>
+      <div class="w-input w-input--filled">zhangsan_wx</div>
+    </div>
+
+    <div class="w-frame--new">
+      <div class="w-callout">新增</div>
+      <div class="w-label w-label--new">手机号</div>
+      <div class="w-input w-input--filled">138****8888</div>
+      <div class="w-text--muted" style="margin-top:4px;">选填，未认证用户可提前填写</div>
+    </div>
+
+    <div class="w-divider"></div>
+    <div class="w-button w-button--primary">保存</div>
+  </div>
+</div>
+
+<!-- ══ 3. 事件详情-响应列表（选中前）══ -->
+<div class="screen-card">
+  <div class="screen-label">③ 事件详情-响应列表 <span class="tag">选中前·联系方式锁定</span></div>
+  <div class="phone-frame">
+    <div class="w-text w-text--bold" style="margin-bottom:4px;">代喂猫咪 · 周末两天</div>
+    <div class="w-text--muted" style="margin-bottom:12px;">状态：待响应 · 3 人响应</div>
+    <div class="w-divider"></div>
+    <div class="w-text w-text--bold" style="margin-bottom:8px;">响应者列表</div>
+
+    <div class="w-frame">
+      <div class="w-row w-row--between">
+        <div class="w-row">
+          <div class="w-avatar">李</div>
+          <div>
+            <div class="w-text w-text--bold">李四</div>
+            <div class="w-text--muted">我来帮忙代喂</div>
+          </div>
+        </div>
+        <div class="w-button w-button--small">选择</div>
+      </div>
+      <div class="w-contact-card" style="border-color:#BDC3C7; background:#F9FAFB;">
+        <div class="w-contact-row w-locked">
+          <div class="w-contact-icon" style="border-color:#BDC3C7; color:#BDC3C7;">话</div>
+          <span>***********</span>
+        </div>
+        <div class="w-contact-row w-locked">
+          <div class="w-contact-icon" style="border-color:#BDC3C7; color:#BDC3C7;">微</div>
+          <span>******</span>
+        </div>
+      </div>
+      <div class="w-note" style="margin:6px 0 0; font-size:11px;">选中帮手后解锁联系方式</div>
+    </div>
+
+    <div class="w-frame">
+      <div class="w-row w-row--between">
+        <div class="w-row">
+          <div class="w-avatar">王</div>
+          <div>
+            <div class="w-text w-text--bold">王五</div>
+            <div class="w-text--muted">我有养猫经验</div>
+          </div>
+        </div>
+        <div class="w-button w-button--small">选择</div>
+      </div>
+      <div class="w-contact-card" style="border-color:#BDC3C7; background:#F9FAFB;">
+        <div class="w-contact-row w-locked">
+          <div class="w-contact-icon" style="border-color:#BDC3C7; color:#BDC3C7;">话</div>
+          <span>***********</span>
+        </div>
+        <div class="w-contact-row w-locked">
+          <div class="w-contact-icon" style="border-color:#BDC3C7; color:#BDC3C7;">微</div>
+          <span>******</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 4. 事件详情-选中帮手后 ══ -->
+<div class="screen-card">
+  <div class="screen-label">④ 事件详情-已选帮手 <span class="tag">选中后·双方解锁</span></div>
+  <div class="phone-frame">
+    <div class="w-text w-text--bold" style="margin-bottom:4px;">代喂猫咪 · 周末两天</div>
+    <div class="w-text--muted" style="margin-bottom:12px;">状态：进行中 · 已选帮手</div>
+    <div class="w-divider"></div>
+    <div class="w-text w-text--bold" style="margin-bottom:8px;">已选帮手</div>
+
+    <div class="w-frame w-frame--highlight">
+      <div class="w-row w-row--between">
+        <div class="w-row">
+          <div class="w-avatar">李</div>
+          <div>
+            <div class="w-text w-text--bold">李四 <span class="w-badge w-badge--green">已选</span></div>
+            <div class="w-text--muted">我来帮忙代喂</div>
+          </div>
+        </div>
+        <div class="w-button w-button--small" style="border-color:#27AE60; color:#27AE60;">确认完成</div>
+      </div>
+      <div class="w-contact-card">
+        <div class="w-text--bold" style="font-size:11px; color:#E89B6C; margin-bottom:4px;">联系方式（已解锁）</div>
+        <div class="w-contact-row">
+          <div class="w-contact-icon">话</div>
+          <span class="w-text--bold">138 8888 8888</span>
+          <div class="w-button w-button--small" style="margin-left:auto; font-size:10px;">拨打</div>
+        </div>
+        <div class="w-contact-row">
+          <div class="w-contact-icon">微</div>
+          <span class="w-text--bold">zhangsan_wx</span>
+          <div class="w-button w-button--small" style="margin-left:auto; font-size:10px;">复制</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-note">双方都能看到对方联系方式：发布者看帮手的，帮手看发布者的</div>
+
+    <div class="w-frame" style="margin-top:12px;">
+      <div class="w-label">帮手视角（李四看到的）</div>
+      <div class="w-row">
+        <div class="w-avatar">张</div>
+        <div>
+          <div class="w-text w-text--bold">张三 <span class="w-badge">发布者</span></div>
+        </div>
+      </div>
+      <div class="w-contact-card">
+        <div class="w-contact-row">
+          <div class="w-contact-icon">话</div>
+          <span class="w-text--bold">139 9999 9999</span>
+        </div>
+        <div class="w-contact-row">
+          <div class="w-contact-icon">微</div>
+          <span class="w-text--bold">lisi_wx</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 5. 寻宠多帮手-已选 ══ -->
+<div class="screen-card">
+  <div class="screen-label">⑤ 寻宠多帮手 <span class="tag">各自确认后解锁</span></div>
+  <div class="phone-frame">
+    <div class="w-text w-text--bold" style="margin-bottom:4px;">寻宠：走丢的橘猫</div>
+    <div class="w-text--muted" style="margin-bottom:12px;">状态：进行中 · 2 位线索人</div>
+    <div class="w-divider"></div>
+    <div class="w-text w-text--bold" style="margin-bottom:8px;">参与者列表</div>
+
+    <div class="w-frame w-frame--highlight">
+      <div class="w-row w-row--between">
+        <div class="w-row">
+          <div class="w-avatar">李</div>
+          <div>
+            <div class="w-text w-text--bold">李四 <span class="w-badge w-badge--green">已确认</span></div>
+            <div class="w-text--muted">在 3 栋附近看到过</div>
+          </div>
+        </div>
+      </div>
+      <div class="w-contact-card">
+        <div class="w-contact-row">
+          <div class="w-contact-icon">话</div>
+          <span class="w-text--bold">138 8888 8888</span>
+        </div>
+        <div class="w-contact-row">
+          <div class="w-contact-icon">微</div>
+          <span class="w-text--bold">lisi_wx</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-frame">
+      <div class="w-row w-row--between">
+        <div class="w-row">
+          <div class="w-avatar">王</div>
+          <div>
+            <div class="w-text w-text--bold">王五 <span class="w-badge">待确认</span></div>
+            <div class="w-text--muted">小区东门有猫叫声</div>
+          </div>
+        </div>
+        <div class="w-button w-button--small">确认完成</div>
+      </div>
+      <div class="w-contact-card" style="border-color:#BDC3C7; background:#F9FAFB;">
+        <div class="w-contact-row w-locked">
+          <div class="w-contact-icon" style="border-color:#BDC3C7; color:#BDC3C7;">话</div>
+          <span>***********</span>
+        </div>
+        <div class="w-note" style="margin:6px 0 0; font-size:11px;">确认完成后解锁</div>
+      </div>
+    </div>
+
+    <div class="w-note">多帮手场景：每个参与者「确认完成」后单独解锁该人联系方式</div>
+  </div>
+</div>
+
+<!-- ══ 6. 缺联系方式提示 ══ -->
+<div class="screen-card">
+  <div class="screen-label">⑥ 缺联系方式提示 <span class="tag">边界场景</span></div>
+  <div class="phone-frame">
+    <div class="w-text w-text--bold" style="margin-bottom:4px;">代遛狗狗 · 工作日早晨</div>
+    <div class="w-text--muted" style="margin-bottom:12px;">状态：进行中 · 已选帮手</div>
+    <div class="w-divider"></div>
+
+    <div class="w-frame w-frame--highlight">
+      <div class="w-row">
+        <div class="w-avatar">李</div>
+        <div>
+          <div class="w-text w-text--bold">李四 <span class="w-badge w-badge--green">已选</span></div>
+        </div>
+      </div>
+      <div class="w-contact-card">
+        <div class="w-contact-row">
+          <div class="w-contact-icon">话</div>
+          <span class="w-text--muted" style="font-style:italic;">对方未填写手机号</span>
+        </div>
+        <div class="w-contact-row">
+          <div class="w-contact-icon">微</div>
+          <span class="w-text--bold">lisi_wx</span>
+          <div class="w-button w-button--small" style="margin-left:auto; font-size:10px;">复制</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-note w-note--warn">如果帮手既没电话也没微信，选中时 Toast 提示：「对方尚未填写联系方式，可通过评论留言沟通」</div>
+
+    <div class="w-frame--new" style="margin-top:12px;">
+      <div class="w-callout">新增</div>
+      <div class="w-label w-label--new">发布者选中帮手时（自己没填联系方式）</div>
+      <div class="w-note w-note--warn" style="margin:0;">
+        您尚未填写联系方式，帮手无法联系您<br>
+        <span style="color:#5B9E6F; font-weight:600;">去填写 -></span>
+      </div>
+    </div>
+
+    <div class="w-frame" style="margin-top:12px;">
+      <div class="w-label">响应时（自己没填联系方式）</div>
+      <div class="w-note w-note--warn" style="margin:0;">
+        您尚未填写联系方式，被选中后对方无法联系您<br>
+        <span style="color:#5B9E6F; font-weight:600;">去填写 -></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ══ 图例 ══ -->
+<div class="legend">
+  <h3>图例 & 功能规则</h3>
+  <div class="legend-grid">
+    <div class="legend-item">
+      <div class="legend-box" style="border:2px dashed #BDC3C7; background:#fff;"></div>
+      <span>现有功能</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-box" style="border:2px solid #E89B6C; background:#FFF8EE;"></div>
+      <span>新增功能</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-box" style="border:2px solid #5B9E6F; background:#E8F5ED;"></div>
+      <span>修改/增强</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-box" style="border:1px solid #E89B6C; background:#FFF8EE;"></div>
+      <span>联系方式卡片</span>
+    </div>
+  </div>
+  <div style="margin-top:16px; font-size:13px; line-height:1.8;">
+    <strong>功能规则：</strong><br>
+    1. <strong>认证页</strong>：phone + wechatId 必填，不填无法提交认证<br>
+    2. <strong>个人信息编辑</strong>：phone 选填（已有 wechatId），未认证用户可提前填<br>
+    3. <strong>事件详情-响应阶段</strong>：响应者联系方式模糊锁定（********），仅发布者可见模糊态<br>
+    4. <strong>事件详情-选中帮手后</strong>：双方联系方式互相解锁，发布者看帮手的，帮手看发布者的<br>
+    5. <strong>寻宠多帮手</strong>：每个参与者「确认完成」后单独解锁该人联系方式<br>
+    6. <strong>缺联系方式</strong>：显示「对方未填写」，选中时 Toast 引导填写<br>
+    7. <strong>隐私</strong>：联系方式仅事件相关方（发布者+已选帮手/已确认参与者）可见，其他响应者不可见
+  </div>
+</div>
+
+</body>
+</html>

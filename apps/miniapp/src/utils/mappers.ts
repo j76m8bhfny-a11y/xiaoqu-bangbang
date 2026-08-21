@@ -64,15 +64,15 @@ export const EVENT_TYPE_CONFIG: Record<
 
 // pet_help 子分类覆盖（只改 label + ctaText，配色继承主分类）
 const PET_HELP_SUBTYPE_OVERRIDE: Record<PetSubType, { label: string; ctaText: string }> = {
-  feed: { label: '代喂', ctaText: '我来代喂' },
-  walk: { label: '代遛', ctaText: '我来代遛' },
+  feed: { label: '求代喂', ctaText: '我来代喂' },
+  walk: { label: '求代遛', ctaText: '我来代遛' },
   lost: { label: '寻宠', ctaText: '提供线索' },
 };
 
 // M23: 购物拼拼子类型 label（seek=求代购 / offer=代购方）
 export const GROUP_BUY_TYPE_LABELS: Record<string, { label: string; ctaText: string }> = {
   seek: { label: '求代购', ctaText: '参与拼单' },
-  offer: { label: '代购方', ctaText: '查看详情' },
+  offer: { label: '帮代购', ctaText: '查看详情' },
 };
 
 // M23: 购物拼拼配色（沿用 pet_help 暖橙语义：需求类需要关注）
@@ -128,6 +128,7 @@ export function mapEventDtoToCardData(dto: EventDto): EventCardData {
     thanksCount: dto.thanksCount,
     ctaText: subOverride?.ctaText ?? cfg.ctaText,
     ctaColor: cfg.ctaColor,
+    isInactive: dto.status === 'completed' || dto.status === 'closed',
     sourceType: 'event',
   };
 }
@@ -149,7 +150,7 @@ export function mapFeedItemDtoToCardData(dto: FeedItemDto): EventCardData {
       statusLabel: GROUP_BUY_STATUS_LABELS[dto.status] || dto.status,
       title: dto.title,
       description: dto.subtitle ?? '',
-      creatorName: '邻居',
+      creatorName: dto.creator?.nickname ?? '邻居',
       createdAt: formatRelativeTime(dto.createdAt),
       likeCount: dto.stats?.likeCount ?? 0,
       commentCount: dto.stats?.commentCount ?? 0,
@@ -176,13 +177,14 @@ export function mapFeedItemDtoToCardData(dto: FeedItemDto): EventCardData {
     statusLabel: EVENT_STATUS_LABELS[dto.status] || dto.status,
     title: dto.title,
     description: dto.subtitle ?? '',
-    creatorName: '邻居',
+    creatorName: dto.creator?.nickname ?? '邻居',
     createdAt: formatRelativeTime(dto.createdAt),
     likeCount: dto.stats?.likeCount ?? 0,
     commentCount: dto.stats?.commentCount ?? 0,
     thanksCount: dto.stats?.responseCount ?? 0,
     ctaText: subOverride?.ctaText ?? cfg.ctaText,
     ctaColor: cfg.ctaColor,
+    isInactive: dto.status === 'completed' || dto.status === 'closed',
     sourceType: 'event',
   };
 }
@@ -216,6 +218,7 @@ export function mapGroupBuyDtoToCardData(dto: GroupBuyDto): EventCardData {
     thanksCount: dto._count?.items ?? dto.items?.length ?? 0,
     ctaText: sub.ctaText,
     ctaColor: GROUP_BUY_TYPE_CONFIG.ctaColor,
+    isInactive: dto.status === 'completed' || dto.status === 'closed',
     sourceType: 'group_buy',
   };
 }

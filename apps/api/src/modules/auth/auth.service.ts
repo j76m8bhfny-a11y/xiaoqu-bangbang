@@ -210,6 +210,7 @@ export class AuthService {
       contributionScore: 0,
       badgeCount: 0,
       myActiveEventCount: 0,
+      myCompletedEventCount: 0,
       myActiveMarketCount: 0,
       pendingVotes: [] as Array<{ id: string; title: string; endAt: string }>,
     };
@@ -228,6 +229,7 @@ export class AuthService {
       contributionAgg,
       badgeCount,
       myActiveEventCount,
+      myCompletedEventCount,
       myActiveMarketCount,
       activeVotes,
       myVotedIds,
@@ -248,6 +250,14 @@ export class AuthService {
           creatorId: userId,
           communityId,
           status: { in: ['open', 'in_progress', 'processing'] },
+          deletedAt: null,
+        },
+      }),
+      this.prisma.event.count({
+        where: {
+          creatorId: userId,
+          communityId,
+          status: { in: ['completed', 'closed'] },
           deletedAt: null,
         },
       }),
@@ -284,6 +294,7 @@ export class AuthService {
       contributionScore: contributionAgg._sum.score ?? 0,
       badgeCount,
       myActiveEventCount,
+      myCompletedEventCount,
       myActiveMarketCount,
       pendingVotes,
     };

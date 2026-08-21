@@ -36,7 +36,11 @@ const MATERIAL_LABEL_MAP: Record<MaterialType, string> = {
 
 export default function Verify() {
   const communityId = useCommunityStore((s) => s.currentCommunityId);
+  const user = useAuthStore((s) => s.user);
   const updateUser = useAuthStore((s) => s.updateUser);
+
+  const isVerified = user?.verifyStatus === 'verified';
+  const [showForm, setShowForm] = useState(false);
 
   const [materialType, setMaterialType] = useState<MaterialType>(MaterialType.PROPERTY_CERT);
   const [images, setImages] = useState<string[]>([]);
@@ -52,6 +56,11 @@ export default function Verify() {
     error: recordsError,
     refresh: refreshRecords,
   } = useRequest<{ items: VerificationDto[] }>(() => verificationService.getMine());
+
+  const latestApproved = records?.items?.find((r) => r.status === VerificationStatus.APPROVED);
+  const pendingRecord = records?.items?.find(
+    (r) => r.status === VerificationStatus.PENDING || r.status === VerificationStatus.MANUAL_REVIEW,
+  );
 
   const handleSubmit = async () => {
     if (images.length === 0) {
@@ -84,7 +93,6 @@ export default function Verify() {
         consentVersion: '1.0',
       });
 
-      // 展示 OCR 识别 + 匹配结果
       const parts: string[] = [];
       if (result.ocrSummary) {
         parts.push(
@@ -106,15 +114,14 @@ export default function Verify() {
         confirmText: '知道了',
       });
 
-      // Reset form & refresh records
       setImages([]);
       setBuildingNo('');
       setUnitNo('');
       setRoomNo('');
       setConsentAccepted(false);
+      setShowForm(false);
       refreshRecords();
 
-      // 认证通过 → 立即更新 store，避免发帖时被前端拦截
       if (result.status === 'approved') {
         updateUser({ verifyStatus: 'verified' });
       }
@@ -135,94 +142,142 @@ export default function Verify() {
   return (
     <View className="verify">
       <ScrollView scrollY className="verify__body">
-        {/* ===== Benefits Card ===== */}
-        <View className="verify__benefits">
-          <Text className="verify__benefits-title">认证权益</Text>
-          {['发布互助和闲置', '发起议题和投票', '查看完整联系方式', '获得小红花奖励'].map((b) => (
-            <View key={b} className="verify__benefit-item">
-              <View className="verify__benefit-check">
-                <Icon name="check" size={12} color="#5B9E6F" />
-              </View>
-              <Text className="verify__benefit-text">{b}</Text>
+        {/* Verified status card */}
+        {isVerified && latestApproved && !showForm && (
+          <View className="verify__status-card verify__status-card--approved">
+            <View className="verify__status-card-icon">
+              <Icon name="check-circle" size={32} color="#5B9E6F" />
             </View>
-          ))}
-        </View>
-
-        {/* ===== Form Section ===== */}
-        <View className="verify__card">
-          <Text className="verify__section-title">材料类型</Text>
-          <View className="verify__type-group">
-            {MATERIAL_OPTIONS.map((opt) => (
-              <View
-                key={opt.key}
-                className={`verify__type-pill ${materialType === opt.key ? 'verify__type-pill--active' : ''}`}
-                onClick={() => setMaterialType(opt.key)}
-              >
-                <Text
-                  className={`verify__type-text ${materialType === opt.key ? 'verify__type-text--active' : ''}`}
-                >
-                  <Icon name={opt.icon as any} size={16} /> {opt.label}
+            <View className="verify__status-card-body">
+              <Text className="verify__status-card-title">已认证业主</Text>
+              <Text className="verify__status-card-desc">
+                认证方式：
+                {MATERIAL_LABEL_MAP[latestApproved.materialType] ?? latestApproved.materialType}
+              </Text>
+              {latestApproved.reviewedAt && (
+                <Text className="verify__status-card-date">
+                  通过时间：{formatDate(latestApproved.reviewedAt)}
                 </Text>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Pending status card */}
+        {pendingRecord && !showForm && (
+          <View className="verify__status-card verify__status-card--pending">
+            <View className="verify__status-card-icon">
+              <Icon name="clock" size={32} color="#E89B6C" />
+            </View>
+            <View className="verify__status-card-body">
+              <Text className="verify__status-card-title">认证审核中</Text>
+              <Text className="verify__status-card-desc">
+                提交时间：{formatDate(pendingRecord.createdAt ?? '')}
+              </Text>
+              <Text className="verify__status-card-desc">请耐心等待审核结果</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Benefits Card - hidden when verified */}
+        {!isVerified && !pendingRecord && (
+          <View className="verify__benefits">
+            <Text className="verify__benefits-title">认证权益</Text>
+            {['发布互助和闲置', '发起议题和投票', '查看完整联系方式', '获得小红花奖励'].map((b) => (
+              <View key={b} className="verify__benefit-item">
+                <View className="verify__benefit-check">
+                  <Icon name="check" size={12} color="#5B9E6F" />
+                </View>
+                <Text className="verify__benefit-text">{b}</Text>
               </View>
             ))}
           </View>
+        )}
 
-          <Text className="verify__section-title">楼栋 / 单元 / 房号</Text>
-          <View className="verify__address-row">
-            <Input
-              className="verify__address-input"
-              type="number"
-              placeholder="楼栋号"
-              value={buildingNo}
-              onInput={(e) => setBuildingNo(e.detail.value)}
-            />
-            <Text className="verify__address-sep">栋</Text>
-            <Input
-              className="verify__address-input"
-              type="number"
-              placeholder="单元号(选填)"
-              value={unitNo}
-              onInput={(e) => setUnitNo(e.detail.value)}
-            />
-            <Text className="verify__address-sep">单元</Text>
-            <Input
-              className="verify__address-input"
-              type="number"
-              placeholder="房号"
-              value={roomNo}
-              onInput={(e) => setRoomNo(e.detail.value)}
-            />
-            <Text className="verify__address-sep">室</Text>
-          </View>
-
-          <Text className="verify__section-title">上传材料照片</Text>
-          <ImagePicker images={images} maxCount={1} onChange={setImages} />
-
-          <View
-            className="verify__consent-row"
-            onClick={() => setConsentAccepted(!consentAccepted)}
-          >
-            <View
-              className={`verify__checkbox ${consentAccepted ? 'verify__checkbox--checked' : ''}`}
-            >
-              {consentAccepted && (
-                <View className="verify__checkbox-icon">
-                  <Icon name="check" size={16} color="#FFF" />
+        {/* Form Section - hidden when verified or pending, unless toggled */}
+        {(!isVerified || showForm) && !pendingRecord && (
+          <View className="verify__card">
+            <Text className="verify__section-title">材料类型</Text>
+            <View className="verify__type-group">
+              {MATERIAL_OPTIONS.map((opt) => (
+                <View
+                  key={opt.key}
+                  className={`verify__type-pill ${materialType === opt.key ? 'verify__type-pill--active' : ''}`}
+                  onClick={() => setMaterialType(opt.key)}
+                >
+                  <Text
+                    className={`verify__type-text ${materialType === opt.key ? 'verify__type-text--active' : ''}`}
+                  >
+                    <Icon name={opt.icon as any} size={16} /> {opt.label}
+                  </Text>
                 </View>
-              )}
+              ))}
             </View>
-            <Text className="verify__consent-text">我同意授权认证，并确认所提供信息真实有效</Text>
-          </View>
 
-          <View
-            className={`verify__submit ${submitting ? 'verify__submit--disabled' : ''}`}
-            onClick={submitting ? undefined : handleSubmit}
-          >
-            <Text className="verify__submit-text">{submitting ? '提交中...' : '提交认证'}</Text>
-          </View>
-        </View>
+            <Text className="verify__section-title">楼栋 / 单元 / 房号</Text>
+            <View className="verify__address-row">
+              <Input
+                className="verify__address-input"
+                type="number"
+                placeholder="楼栋号"
+                value={buildingNo}
+                onInput={(e) => setBuildingNo(e.detail.value)}
+              />
+              <Text className="verify__address-sep">栋</Text>
+              <Input
+                className="verify__address-input"
+                type="number"
+                placeholder="单元号(选填)"
+                value={unitNo}
+                onInput={(e) => setUnitNo(e.detail.value)}
+              />
+              <Text className="verify__address-sep">单元</Text>
+              <Input
+                className="verify__address-input"
+                type="number"
+                placeholder="房号"
+                value={roomNo}
+                onInput={(e) => setRoomNo(e.detail.value)}
+              />
+              <Text className="verify__address-sep">室</Text>
+            </View>
 
-        {/* ===== My Verification Records ===== */}
+            <Text className="verify__section-title">上传材料照片</Text>
+            <ImagePicker images={images} maxCount={1} onChange={setImages} />
+
+            <View
+              className="verify__consent-row"
+              onClick={() => setConsentAccepted(!consentAccepted)}
+            >
+              <View
+                className={`verify__checkbox ${consentAccepted ? 'verify__checkbox--checked' : ''}`}
+              >
+                {consentAccepted && (
+                  <View className="verify__checkbox-icon">
+                    <Icon name="check" size={16} color="#FFF" />
+                  </View>
+                )}
+              </View>
+              <Text className="verify__consent-text">我同意授权认证，并确认所提供信息真实有效</Text>
+            </View>
+
+            <View
+              className={`verify__submit ${submitting ? 'verify__submit--disabled' : ''}`}
+              onClick={submitting ? undefined : handleSubmit}
+            >
+              <Text className="verify__submit-text">{submitting ? '提交中...' : '提交认证'}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Re-verify button for verified users */}
+        {isVerified && !showForm && (
+          <View className="verify__reverify" onClick={() => setShowForm(true)}>
+            <Text className="verify__reverify-text">重新提交认证</Text>
+          </View>
+        )}
+
+        {/* Records */}
         <View className="verify__records">
           <Text className="verify__section-title">我的认证记录</Text>
 
@@ -247,8 +302,12 @@ export default function Verify() {
                       <Text className="verify__record-type">
                         {MATERIAL_LABEL_MAP[record.materialType] ?? record.materialType}
                       </Text>
-                      {record.reviewedAt && (
+                      {record.reviewedAt ? (
                         <Text className="verify__record-date">{formatDate(record.reviewedAt)}</Text>
+                      ) : (
+                        <Text className="verify__record-date">
+                          {formatDate(record.createdAt ?? '')}
+                        </Text>
                       )}
                     </View>
                     <View className={`verify__status-tag verify__status-tag--${statusInfo.color}`}>

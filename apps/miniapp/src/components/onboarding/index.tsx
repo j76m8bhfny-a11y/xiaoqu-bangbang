@@ -24,12 +24,11 @@ const STEPS: { emoji: string; title: string; desc: string }[] = [
   },
 ];
 
-export function shouldShowOnboarding(): boolean {
-  try {
-    return !Taro.getStorageSync(STORAGE_KEY);
-  } catch {
-    return false;
-  }
+export function shouldShowOnboarding(isVerified: boolean): boolean {
+  // 已认证用户永不弹（已走完认证流程）
+  if (isVerified) return false;
+  // 未认证用户每次登录都弹，保证认证率（忽略 localStorage 标记）
+  return true;
 }
 
 export function markOnboarded() {

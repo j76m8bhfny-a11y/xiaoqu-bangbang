@@ -12,9 +12,16 @@
   padding: $spacing-lg $spacing-md;
   margin-bottom: $spacing-md;
   min-height: 200px;
+  // E3: 互助卡片左侧绿色竖条
+  border-left: 4px solid $color-primary;
 
   &:active {
     transform: scale(0.98);
+  }
+
+  &--inactive {
+    opacity: 0.5;
+    border-left-color: $color-text-secondary;
   }
 
   &__tag {
@@ -66,5 +73,18 @@
   &__stat-text {
     font-size: $font-size-xs;
     color: $color-text-secondary;
+
+    &--empty {
+      opacity: 0.5;
+      font-style: italic;
+    }
+  }
+
+  // E1: 卡片时间
+  &__time {
+    font-size: $font-size-xs - 2;
+    color: $color-text-secondary;
+    opacity: 0.6;
+    margin-bottom: $spacing-xs;
   }
 }

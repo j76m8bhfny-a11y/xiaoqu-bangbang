@@ -21,5 +21,6 @@ postgres-data/
 *.tsbuildinfo
 apps/api/uploads/
 
-# Claude Code local settings
+# Claude Code / WorkBuddy local settings
 .claude/settings.local.json
+.workbuddy/

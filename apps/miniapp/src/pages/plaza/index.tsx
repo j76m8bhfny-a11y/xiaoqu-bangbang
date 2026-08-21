@@ -11,6 +11,12 @@ import Icon from '@/components/icon';
 import type { TopicDto, VoteDto, CommitteeAnnouncementDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
+// 日期格式化：2026/1/15 -> 2026年1月15日
+function formatCNDate(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
 // S1-6 plaza 改造：从「事件+闲置」混合广场重构为「公共反馈」中心。
 // 入口分层：业委会卡片（公告/入口）→ 待投票 → 议题列表 → 发起议题 CTA。
 // 闲置（market）下沉到 events tab；议题（topic）取代旧 event-type=public_feedback/discussion。
@@ -41,6 +47,9 @@ export default function Plaza() {
   const [topics, setTopics] = useState<TopicDto[]>([]);
   const [topicStatus, setTopicStatus] = useState<'open' | 'closed'>('open');
   const [loadingTopics, setLoadingTopics] = useState(false);
+  // B2-b: tab 数量（分别缓存 open/closed 的总数）
+  const [openCount, setOpenCount] = useState(0);
+  const [closedCount, setClosedCount] = useState(0);
 
   // 发起议题 navigateBack 回本页后，用 didShow 兜底刷新议题列表。
   // 函数式 setState 触发下方议题 useEffect 重拉，跳过首次显示避免与 mount 重复。
@@ -96,10 +105,16 @@ export default function Plaza() {
     if (!communityId) return;
     let cancelled = false;
     setLoadingTopics(true);
-    topicService
-      .list({ status: topicStatus, page: 1, pageSize: 30 })
-      .then((res) => {
-        if (!cancelled) setTopics(res.items ?? []);
+    // 并行拉当前 tab 议题 + 两个 tab 的数量
+    const fetchTopics = topicService.list({ status: topicStatus, page: 1, pageSize: 30 });
+    const fetchOpenCount = topicService.list({ status: 'open', page: 1, pageSize: 1 });
+    const fetchClosedCount = topicService.list({ status: 'closed', page: 1, pageSize: 1 });
+    Promise.all([fetchTopics, fetchOpenCount, fetchClosedCount])
+      .then(([res, openRes, closedRes]) => {
+        if (cancelled) return;
+        setTopics(res.items ?? []);
+        setOpenCount(openRes.total ?? openRes.items?.length ?? 0);
+        setClosedCount(closedRes.total ?? closedRes.items?.length ?? 0);
       })
       .catch((e: any) => {
         Taro.showToast({ title: e.message || '议题加载失败', icon: 'none' });
@@ -134,7 +149,7 @@ export default function Plaza() {
               >
                 <Text className="plaza__committee-title">{latestAnnouncement.title}</Text>
                 <Text className="plaza__committee-date">
-                  {new Date(latestAnnouncement.publishedAt).toLocaleDateString()}
+                  {formatCNDate(latestAnnouncement.publishedAt)}
                 </Text>
               </View>
             ) : (
@@ -161,15 +176,19 @@ export default function Plaza() {
         {/* 议题区 */}
         <View className="plaza__topics-header">
           <View className="plaza__topic-tabs">
-            {(['open', 'closed'] as const).map((s) => (
-              <View
-                key={s}
-                className={`plaza__topic-tab ${topicStatus === s ? 'plaza__topic-tab--active' : ''}`}
-                onClick={() => setTopicStatus(s)}
-              >
-                {s === 'open' ? '进行中' : '已完结'}
-              </View>
-            ))}
+            {(['open', 'closed'] as const).map((s) => {
+              const count = s === 'open' ? openCount : closedCount;
+              return (
+                <View
+                  key={s}
+                  className={`plaza__topic-tab ${topicStatus === s ? 'plaza__topic-tab--active' : ''}`}
+                  onClick={() => setTopicStatus(s)}
+                >
+                  {s === 'open' ? '进行中' : '已完结'}
+                  {count > 0 ? ` ${count}` : ''}
+                </View>
+              );
+            })}
           </View>
           <View
             className="plaza__topic-create"
@@ -183,7 +202,7 @@ export default function Plaza() {
         {!loadingTopics && topics.length === 0 && (
           <EmptyState
             icon="chat"
-            text={topicStatus === 'open' ? '暂无进行中议题' : '暂无已完结议题'}
+            text={topicStatus === 'open' ? '暂无进行中议题\n快去发起一个吧！' : '暂无已完结议题'}
           />
         )}
         {!loadingTopics &&
@@ -192,37 +211,54 @@ export default function Plaza() {
             return (
               <View
                 key={t.id}
-                className="plaza__topic-item"
+                className={`plaza__topic-item ${isOpen ? 'plaza__topic-item--open' : 'plaza__topic-item--closed'}`}
                 onClick={() => Taro.navigateTo({ url: `/pages/topic-detail/index?id=${t.id}` })}
               >
-                <View className="plaza__topic-top">
-                  <Text
-                    className={`plaza__topic-status plaza__topic-status--${isOpen ? 'open' : 'closed'}`}
-                  >
-                    {isOpen ? '进行中' : '已完结'}
-                  </Text>
-                  <Text className="plaza__topic-title">{t.title}</Text>
-                </View>
-                <View className="plaza__topic-meta">
-                  {isOpen ? (
-                    <>
-                      <View className="plaza__topic-metric">
-                        <Icon name="thumbs-up" size={14} /> <Text>赞 {t.likeCount}</Text>
-                      </View>
-                      <View className="plaza__topic-metric">
-                        <Icon name="thumbs-down" size={14} /> <Text>踩 {t.dislikeCount}</Text>
-                      </View>
-                    </>
-                  ) : (
-                    <Text className="plaza__topic-metric">
-                      ⭐ 评分 {t.avgRating?.toFixed(1) ?? '—'}（{t.ratingCount}人）
-                    </Text>
-                  )}
-                  <View className="plaza__topic-metric">
-                    <Icon name="chat" size={14} /> <Text>评论 {t.commentCount}</Text>
+                {/* B1: 左侧状态色条 */}
+                <View
+                  className={`plaza__topic-bar ${isOpen ? 'plaza__topic-bar--open' : 'plaza__topic-bar--closed'}`}
+                />
+
+                {/* C1: F 型布局 - 左上标题 / 左下日期 / 右侧数据 */}
+                <View className="plaza__topic-main">
+                  <View className="plaza__topic-left">
+                    <Text className="plaza__topic-title">{t.title}</Text>
+                    <Text className="plaza__topic-date">{formatCNDate(t.createdAt)}</Text>
                   </View>
-                  <View className="plaza__topic-metric">
-                    <Icon name="clipboard" size={14} /> <Text>事件 {t.eventCount}</Text>
+
+                  <View className="plaza__topic-right">
+                    {isOpen ? (
+                      <>
+                        <View className="plaza__topic-metric">
+                          <Icon name="thumbs-up" size={14} />
+                          <Text>{t.likeCount}</Text>
+                        </View>
+                        <View className="plaza__topic-metric">
+                          <Icon name="thumbs-down" size={14} />
+                          <Text>{t.dislikeCount}</Text>
+                        </View>
+                      </>
+                    ) : (
+                      <View className="plaza__topic-metric plaza__topic-metric--rating">
+                        <Text>{t.avgRating?.toFixed(1) ?? '-'}</Text>
+                        <Text className="plaza__topic-metric-label">评分</Text>
+                      </View>
+                    )}
+                    <View className="plaza__topic-metric">
+                      <Icon name="chat" size={14} />
+                      <Text>{t.commentCount}</Text>
+                    </View>
+                    {/* A1: eventCount>0 显示事件数，否则显示状态文案 */}
+                    {t.eventCount > 0 ? (
+                      <View className="plaza__topic-metric">
+                        <Icon name="clipboard" size={14} />
+                        <Text>{t.eventCount}</Text>
+                      </View>
+                    ) : (
+                      <View className="plaza__topic-metric plaza__topic-metric--status">
+                        <Text>{isOpen ? '待响应' : '已完成'}</Text>
+                      </View>
+                    )}
                   </View>
                 </View>
               </View>

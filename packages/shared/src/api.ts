@@ -131,6 +131,7 @@ export interface MyDashboardDto {
   contributionScore: number;
   badgeCount: number;
   myActiveEventCount: number;
+  myCompletedEventCount: number;
   myActiveMarketCount: number;
   pendingVotes: Array<{ id: string; title: string; endAt: string }>;
 }
@@ -315,7 +316,7 @@ export interface EventParticipantDto {
 export interface EventListQuery {
   // 支持单类型 'help_request' 或多类型逗号分隔 'help_request,public_welfare,pet_help'
   type?: string;
-  status?: EventStatus;
+  status?: string;
   keyword?: string;
   excludeTypes?: string; // 逗号分隔的 EventType 列表
   creatorId?: string;
@@ -1330,4 +1331,5 @@ export interface FeedItemDto {
     responseCount?: number;
   };
   createdAt: string;
+  creator?: { nickname: string };
 }

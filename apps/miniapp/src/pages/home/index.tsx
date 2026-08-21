@@ -8,13 +8,6 @@ import Onboarding, { shouldShowOnboarding } from '@/components/onboarding';
 import Icon, { type IconName } from '@/components/icon';
 import './index.scss';
 
-// 「我的」页（UI 重设计 v2 · 功能宫格样板）：
-// 结构 = 用户卡片 → 数据统计 → 主功能大宫格 → 待办提醒 → 设置类列表。
-// 老年友好：大按钮、图标配文字、草木绿、字号放大、留白充足。
-// ponytail: 功能图标暂用 emoji（彩色直观、老人易认、零成本，且均配文字标签）。
-//           升级路径：后续统一替换为矢量图标集（Lucide/自绘 SVG 组件）。
-
-// 主功能宫格：4 个高频/重要入口，2×2 大方块
 interface GridItem {
   id: string;
   label: string;
@@ -56,29 +49,44 @@ const GRID_ITEMS: GridItem[] = [
   },
 ];
 
-// 设置类列表（次要功能，列表呈现即可）
 interface MenuItem {
   id: string;
   label: string;
   icon: IconName;
 }
 
-const MENU_ITEMS: MenuItem[][] = [
-  [
-    { id: 'notifications', label: '消息通知', icon: 'bell' },
-    { id: 'my_badges', label: '我的勋章', icon: 'medal' },
-    { id: 'my_services', label: '我的服务', icon: 'wrench' },
-  ],
-  [
-    { id: 'community_switch', label: '切换小区', icon: 'house' },
-    { id: 'community_apply', label: '申请开通小区', icon: 'community' },
-    { id: 'my_applications', label: '我的小区申请', icon: 'documents' },
-    { id: 'invite', label: '邀请邻居', icon: 'envelope' },
-  ],
-  [
-    { id: 'settings', label: '设置', icon: 'gear' },
-    { id: 'about', label: '关于我们', icon: 'bulb' },
-  ],
+interface MenuGroup {
+  title: string;
+  collapsable?: boolean;
+  items: MenuItem[];
+}
+
+const MENU_GROUPS: MenuGroup[] = [
+  {
+    title: '通知与服务',
+    items: [
+      { id: 'notifications', label: '消息通知', icon: 'bell' },
+      { id: 'my_badges', label: '我的勋章', icon: 'medal' },
+      { id: 'my_services', label: '我的服务', icon: 'wrench' },
+    ],
+  },
+  {
+    title: '小区管理',
+    items: [
+      { id: 'community_switch', label: '切换小区', icon: 'house' },
+      { id: 'community_apply', label: '申请开通小区', icon: 'community' },
+      { id: 'my_applications', label: '我的小区申请', icon: 'documents' },
+      { id: 'invite', label: '邀请邻居', icon: 'envelope' },
+    ],
+  },
+  {
+    title: '更多',
+    collapsable: true,
+    items: [
+      { id: 'settings', label: '设置', icon: 'gear' },
+      { id: 'about', label: '关于我们', icon: 'bulb' },
+    ],
+  },
 ];
 
 const MENU_ROUTES: Record<string, string> = {
@@ -96,11 +104,14 @@ export default function Home() {
 
   const user = useAuthStore((s) => s.user);
   const communityName = useCommunityStore((s) => s.currentCommunityName);
+  const setPendingEventsFilter = useCommunityStore((s) => s.setPendingEventsFilter);
+  const [moreExpanded, setMoreExpanded] = useState(false);
 
-  // 首次登录新手引导
   const [showOnboarding, setShowOnboarding] = useState(false);
   useEffect(() => {
-    if (user && shouldShowOnboarding()) setShowOnboarding(true);
+    if (user && shouldShowOnboarding(user.verifyStatus === 'verified')) {
+      setShowOnboarding(true);
+    }
   }, [user]);
 
   const { data: myRanking } = useRequest(
@@ -126,17 +137,18 @@ export default function Home() {
 
   const nickname = user?.nickname ?? '邻居';
   const isVerified = user?.verifyStatus === 'verified';
-  const verifyIcon: IconName = isVerified ? 'check-circle' : 'clock';
-  const verifyLabel = isVerified ? '已认证' : '未认证';
+  const verifyIcon: IconName = isVerified ? 'check-circle' : 'lock';
+  const verifyLabel = isVerified ? '业主' : '去认证';
   const verifyClass = isVerified ? 'home__tag--verified' : 'home__tag--unverified';
 
+  const helpCount = myRanking?.helpCount ?? 0;
+
   const stats: { label: string; value: number; icon: IconName }[] = [
-    { label: '帮助次数', value: myRanking?.helpCount ?? 0, icon: 'hands-up' },
+    { label: '帮助次数', value: helpCount, icon: 'hands-up' },
     { label: '小红花', value: myRanking?.flowerCount ?? 0, icon: 'flower' },
     { label: '勋章', value: myRanking?.badgeCount ?? 0, icon: 'medal' },
   ];
 
-  // 待办提醒（dashboard）—— 没数据不渲染
   const todos: {
     key: string;
     icon: IconName;
@@ -151,7 +163,22 @@ export default function Home() {
         icon: 'clipboard',
         label: '进行中互助',
         value: dashboard.myActiveEventCount,
-        onClick: () => Taro.switchTab({ url: '/pages/events/index' }),
+        onClick: () => {
+          setPendingEventsFilter({ filter: 'mine', status: 'open,in_progress,processing' });
+          Taro.switchTab({ url: '/pages/events/index' });
+        },
+      });
+    }
+    if (dashboard.myCompletedEventCount > 0) {
+      todos.push({
+        key: 'completed_event',
+        icon: 'check-circle',
+        label: '已完成互助',
+        value: dashboard.myCompletedEventCount,
+        onClick: () => {
+          setPendingEventsFilter({ filter: 'mine', status: 'completed,closed' });
+          Taro.switchTab({ url: '/pages/events/index' });
+        },
       });
     }
     if (dashboard.pendingVotes && dashboard.pendingVotes.length > 0) {
@@ -198,7 +225,7 @@ export default function Home() {
   return (
     <View className="home">
       <ScrollView scrollY className="home__scroll">
-        {/* 用户卡片 */}
+        {/* User Card + Stats */}
         <View className="home__header">
           <View
             className="home__user"
@@ -214,7 +241,15 @@ export default function Home() {
             <View className="home__user-detail">
               <Text className="home__user-name">{nickname}</Text>
               <View className="home__tags">
-                <View className={`home__tag ${verifyClass}`}>
+                <View
+                  className={`home__tag ${verifyClass}`}
+                  onClick={(e) => {
+                    if (!isVerified) {
+                      e.stopPropagation();
+                      Taro.navigateTo({ url: '/pages/verify/index' });
+                    }
+                  }}
+                >
                   <Icon name={verifyIcon} size={14} />
                   <Text className="home__tag-text">{verifyLabel}</Text>
                 </View>
@@ -229,7 +264,6 @@ export default function Home() {
             <Text className="home__user-arrow">›</Text>
           </View>
 
-          {/* 数据统计 */}
           <View className="home__stats">
             {stats.map((stat) => (
               <View key={stat.label} className="home__stat">
@@ -241,9 +275,13 @@ export default function Home() {
               </View>
             ))}
           </View>
+
+          <Text className="home__greeting">
+            {helpCount > 0 ? `本月你帮助了${helpCount}位邻居` : '还没有帮助过邻居，去邻里帮看看？'}
+          </Text>
         </View>
 
-        {/* 主功能大宫格 */}
+        {/* Grid */}
         <View className="home__grid">
           {GRID_ITEMS.map((item) => (
             <View key={item.id} className="home__grid-item" onClick={() => handleGridClick(item)}>
@@ -256,7 +294,7 @@ export default function Home() {
           ))}
         </View>
 
-        {/* 待办提醒 */}
+        {/* Todos */}
         {todos.length > 0 && (
           <View className="home__todos">
             <Text className="home__section-title">待办提醒</Text>
@@ -276,42 +314,59 @@ export default function Home() {
           </View>
         )}
 
-        {/* 设置类列表 */}
-        {MENU_ITEMS.map((group, gi) => (
-          <View key={gi} className="home__menu-group">
-            {group.map((item) =>
-              item.id === 'invite' ? (
-                <Button
-                  key={item.id}
-                  className="home__menu-item home__menu-item--share"
-                  openType="share"
-                >
-                  <View className="home__menu-left">
-                    <View className="home__menu-icon">
-                      <Icon name={item.icon} size={22} />
+        {/* Menu Groups */}
+        {MENU_GROUPS.map((group, gi) => {
+          const isCollapsed = group.collapsable && !moreExpanded;
+          return (
+            <View key={gi} className="home__menu-group">
+              <View
+                className="home__group-header"
+                onClick={() => group.collapsable && setMoreExpanded(!moreExpanded)}
+              >
+                <Text className="home__group-title">{group.title}</Text>
+                {group.collapsable && (
+                  <Text
+                    className={`home__group-arrow ${moreExpanded ? 'home__group-arrow--expanded' : ''}`}
+                  >
+                    ›
+                  </Text>
+                )}
+              </View>
+              {!isCollapsed &&
+                group.items.map((item) =>
+                  item.id === 'invite' ? (
+                    <Button
+                      key={item.id}
+                      className="home__menu-item home__menu-item--share"
+                      openType="share"
+                    >
+                      <View className="home__menu-left">
+                        <View className="home__menu-icon">
+                          <Icon name={item.icon} size={22} />
+                        </View>
+                        <Text className="home__menu-label">{item.label}</Text>
+                      </View>
+                      <Text className="home__menu-arrow">›</Text>
+                    </Button>
+                  ) : (
+                    <View
+                      key={item.id}
+                      className="home__menu-item"
+                      onClick={() => handleMenuClick(item)}
+                    >
+                      <View className="home__menu-left">
+                        <View className="home__menu-icon">
+                          <Icon name={item.icon} size={22} />
+                        </View>
+                        <Text className="home__menu-label">{item.label}</Text>
+                      </View>
+                      <Text className="home__menu-arrow">›</Text>
                     </View>
-                    <Text className="home__menu-label">{item.label}</Text>
-                  </View>
-                  <Text className="home__menu-arrow">›</Text>
-                </Button>
-              ) : (
-                <View
-                  key={item.id}
-                  className="home__menu-item"
-                  onClick={() => handleMenuClick(item)}
-                >
-                  <View className="home__menu-left">
-                    <View className="home__menu-icon">
-                      <Icon name={item.icon} size={22} />
-                    </View>
-                    <Text className="home__menu-label">{item.label}</Text>
-                  </View>
-                  <Text className="home__menu-arrow">›</Text>
-                </View>
-              ),
-            )}
-          </View>
-        ))}
+                  ),
+                )}
+            </View>
+          );
+        })}
 
         <View className="home__bottom-spacer" />
       </ScrollView>

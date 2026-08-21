@@ -48,7 +48,7 @@
     padding: $spacing-sm $spacing-md 0;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-text;
+    color: #1d2129;
     line-height: 1.4;
   }
 
@@ -90,30 +90,30 @@
 
   &__nickname {
     font-size: $font-size-sm;
-    color: $color-text;
+    color: #1d2129;
     font-weight: $font-weight-medium;
   }
 
   &__dot {
     font-size: $font-size-xs;
-    color: $color-text-secondary;
+    color: #86909c;
   }
 
   &__time {
     font-size: $font-size-xs;
-    color: $color-text-secondary;
+    color: #86909c;
   }
 
   &__location {
     font-size: $font-size-xs;
-    color: $color-text-secondary;
+    color: #86909c;
   }
 
   &__description {
     display: block;
     padding: $spacing-xs $spacing-md $spacing-md;
     font-size: $font-size-md;
-    color: $color-text;
+    color: #1d2129;
     line-height: 1.7;
     white-space: pre-wrap;
     word-break: break-word;
@@ -192,7 +192,7 @@
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
-    color: $color-text;
+    color: #1d2129;
     margin-bottom: $spacing-sm;
   }
 
@@ -200,8 +200,8 @@
     display: block;
     text-align: center;
     padding: $spacing-lg 0;
-    font-size: $font-size-sm;
-    color: $color-text-secondary;
+    font-size: $font-size-xs;
+    color: #86909c;
   }
 
   &__comment {
@@ -306,7 +306,8 @@
   }
 
   &__lifecycle-btn--confirm {
-    background: $color-primary;
+    background: linear-gradient(135deg, $color-accent, $color-accent-deep);
+    box-shadow: 0 4px 12px rgba(232, 155, 108, 0.3);
   }
 
   &__lifecycle-btn--request {
@@ -641,7 +642,7 @@
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
-    color: $color-text;
+    color: #1d2129;
     margin-bottom: $spacing-sm;
   }
 
@@ -816,7 +817,7 @@
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
-    color: $color-text;
+    color: #1d2129;
     margin-bottom: $spacing-sm;
   }
 
@@ -913,7 +914,7 @@
     display: block;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
-    color: $color-text;
+    color: #1d2129;
     margin-bottom: $spacing-sm;
   }
 
@@ -1065,23 +1066,501 @@
     font-size: $font-size-sm;
     color: $color-text-secondary;
   }
-}
 
-// ponytail: petMeta 详细信息展示区，上限 M22 三种 subType
-.pet-meta {
-  margin: $spacing-sm $spacing-md 0;
-  padding: $spacing-md;
-  background: #fff;
-  border-radius: $radius-md;
+  // ===== L4+L5: Hero card =====
+  &__hero {
+    position: relative;
+    background: $color-card;
+    border-radius: 0 0 $radius-lg $radius-lg;
+    padding: $spacing-md $spacing-md $spacing-sm;
+    box-shadow: $shadow-card;
+    margin-bottom: $spacing-lg;
+    min-height: 160px;
+    overflow: hidden;
+  }
 
-  .section-title {
-    display: block;
-    font-size: $font-size-md;
-    font-weight: $font-weight-bold;
+  &__hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+  }
+
+  &__hero-bg--pet-walk {
+    background: linear-gradient(135deg, #fff3d6 0%, #eaf4ec 100%);
+  }
+
+  &__hero-bg--pet-feed {
+    background: linear-gradient(135deg, #fff8ee 0%, #fbf0dd 100%);
+  }
+
+  &__hero-bg--pet-lost {
+    background: linear-gradient(135deg, #fff8ee 0%, #fce4e4 100%);
+  }
+
+  &__hero-emoji {
+    position: absolute;
+    right: 20px;
+    bottom: 10px;
+    font-size: 80px;
+    opacity: 0.15;
+    z-index: 0;
+    line-height: 1;
+  }
+
+  &__hero-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__hero-badge {
+    position: absolute;
+    top: $spacing-md;
+    right: $spacing-md;
+    padding: 4px 16px;
+    border-radius: $radius-pill;
+    background: rgba(0, 0, 0, 0.06);
+    z-index: 2;
+  }
+
+  &__hero-badge-text {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+  }
+
+  // ===== L1: Key info with semantic colors =====
+  &__key-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-top: $spacing-sm;
+  }
+
+  &__key-info-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 16px;
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+
+    &--time {
+      background: rgba(53, 134, 255, 0.1);
+    }
+    &--location {
+      background: rgba(91, 158, 111, 0.1);
+    }
+    &--reward {
+      background: rgba(232, 155, 108, 0.06);
+      border: 1px dashed rgba(232, 155, 108, 0.4);
+    }
+  }
+
+  &__key-info-text {
+    font-size: $font-size-xs;
     color: $color-text;
+    font-weight: $font-weight-medium;
+  }
+
+  // ===== Time bar visualization =====
+  &__time-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: $spacing-xs;
+    padding: 6px 16px;
+    border-radius: 12px;
+    background: rgba(53, 134, 255, 0.06);
+  }
+
+  &__time-bar-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__time-bar-start,
+  &__time-bar-end {
+    font-size: $font-size-xs;
+    color: #3586ff;
+    font-weight: $font-weight-medium;
+    flex-shrink: 0;
+  }
+
+  &__time-bar-track {
+    flex: 1;
+    height: 2px;
+    background: rgba(53, 134, 255, 0.2);
+    border-radius: 1px;
+    position: relative;
+  }
+
+  &__time-bar-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3586ff;
+  }
+
+  &__time-bar-duration {
+    font-size: 20px;
+    color: #86909c;
+    text-align: center;
+  }
+
+  // ===== L2: Description collapse =====
+  &__desc-wrap {
+    padding: 0 $spacing-md $spacing-sm;
+  }
+
+  &__description {
+    display: block;
+    font-size: $font-size-sm;
+    color: #1d2129;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+
+    &--collapsed {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+
+  &__desc-toggle {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: $spacing-xs;
+  }
+
+  &__desc-toggle-text {
+    font-size: $font-size-xs;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  // ===== M5: Section title =====
+  &__section {
+    padding: 0 $spacing-md $spacing-lg;
+  }
+
+  &__section-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: #1d2129;
     margin-bottom: $spacing-sm;
   }
 
+  // ===== H2: Contact button =====
+  &__contact-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 $spacing-md $spacing-sm;
+    padding: $spacing-sm;
+    border-radius: $radius-pill;
+    background: $color-bg-green;
+    border: 2px solid $color-primary-soft;
+    transition: all 0.2s;
+
+    &:active {
+      opacity: 0.7;
+    }
+
+    &--contacted {
+      background: #f0f0f0;
+      border-color: #e0e0e0;
+    }
+  }
+
+  &__contact-btn-text {
+    font-size: $font-size-sm;
+    color: $color-primary-deep;
+    font-weight: $font-weight-medium;
+  }
+
+  &__contact-btn-text--contacted {
+    color: $color-text-secondary;
+  }
+
+  // ===== H2: Contact BottomSheet =====
+  &__contact {
+    padding: $spacing-sm 0;
+  }
+
+  &__contact-name {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm 0;
+  }
+
+  &__contact-name-text {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+
+  &__contact-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md 0;
+    border-bottom: 1px solid rgba(232, 224, 208, 0.3);
+  }
+
+  &__contact-item-left {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__contact-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__contact-item-label {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__contact-item-value {
+    font-size: $font-size-md;
+    color: $color-text;
+    font-weight: $font-weight-medium;
+  }
+
+  &__contact-item-action {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 20px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__contact-item-action-text {
+    font-size: $font-size-xs;
+    color: #fff;
+    font-weight: $font-weight-bold;
+  }
+
+  &__contact-empty {
+    display: block;
+    text-align: center;
+    padding: $spacing-lg 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__contact-privacy {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: $spacing-sm 0;
+  }
+
+  &__contact-privacy-text {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  // ===== P1: Respondents horizontal scroll =====
+  &__respondents {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-xs 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  &__respondent-avatar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    width: 80px;
+  }
+
+  &__respondent-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 3px solid transparent;
+
+    &--selected {
+      border-color: $color-primary;
+    }
+  }
+
+  &__respondent-avatar-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+  }
+
+  &__respondent-avatar-emoji {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__respondent-name {
+    font-size: 20px;
+    color: $color-text-secondary;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  &__respondent-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: $color-bg-green;
+    flex-shrink: 0;
+  }
+
+  &__respondent-more-text {
+    font-size: $font-size-xs;
+    color: $color-primary;
+    font-weight: $font-weight-bold;
+  }
+}
+
+// ponytail: petMeta 宠物身份证卡片，上限 M22 三种 subType
+.pet-meta {
+  position: relative;
+  margin: 0 $spacing-md $spacing-lg;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, #fff8ee 0%, #eaf4ec 100%);
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: #1d2129;
+    margin-bottom: $spacing-sm;
+  }
+
+  // Right corner paw watermark
+  &__watermark {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 60px;
+    opacity: 0.08;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  // Tag-based info layout
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-sm;
+    line-height: 1.8;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 14px;
+    border-radius: 12px;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+
+    &--type {
+      background: #fff3d6;
+      color: #8b6914;
+    }
+    &--size {
+      background: #eaf4ec;
+      color: #4a8c5e;
+    }
+    &--schedule {
+      background: #e8f0fe;
+      color: #3586ff;
+    }
+    &--duration {
+      background: #f0e8fe;
+      color: #7b4fc0;
+    }
+    &--gear {
+      background: #fce4e4;
+      color: #c04040;
+    }
+    &--food {
+      background: #fff3d6;
+      color: #8b6914;
+    }
+    &--days {
+      background: #eaf4ec;
+      color: #4a8c5e;
+    }
+    &--clean {
+      background: #e8f0fe;
+      color: #3586ff;
+    }
+  }
+
+  // Warning highlight for special notes
+  &__warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: $spacing-xs;
+    padding: 8px 14px;
+    border-radius: 12px;
+    background: rgba(232, 155, 108, 0.1);
+  }
+
+  &__warning-text {
+    font-size: $font-size-xs;
+    color: #d48050;
+    font-weight: $font-weight-medium;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  // Legacy row layout (for feed/lost types still using rows)
   &__row {
     display: flex;
     align-items: flex-start;
@@ -1091,12 +1570,14 @@
 
   &__label {
     flex: 0 0 90px;
-    color: $color-text-secondary;
+    color: #86909c;
+    font-size: $font-size-xs;
   }
 
   &__value {
     flex: 1;
-    color: $color-text;
+    color: #1d2129;
+    font-weight: $font-weight-medium;
     word-break: break-all;
   }
 

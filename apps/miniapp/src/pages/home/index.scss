@@ -1,8 +1,5 @@
 @use '../../styles/tokens.scss' as *;
 
-// 「我的」页 v2 · 功能宫格样板
-// 草木绿、大按钮、圆润卡片、字号放大、留白充足。
-
 .home {
   min-height: 100vh;
   background: $color-bg;
@@ -12,7 +9,7 @@
     box-sizing: border-box;
   }
 
-  // ── 顶部：用户卡片 + 统计 ──
+  // ── User Card + Stats ──
   &__header {
     margin: $spacing-lg $spacing-lg 0;
     background: linear-gradient(135deg, $color-primary 0%, $color-primary-deep 100%);
@@ -78,6 +75,14 @@
     border-radius: $radius-pill;
     background: rgba(255, 255, 255, 0.22);
 
+    &--verified {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    &--unverified {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
     &--community {
       background: rgba(255, 255, 255, 0.18);
     }
@@ -94,7 +99,6 @@
     flex-shrink: 0;
   }
 
-  // 统计条：卡片内浅色分隔区
   &__stats {
     display: flex;
     margin-top: $spacing-lg;
@@ -125,7 +129,14 @@
     color: rgba(255, 255, 255, 0.85);
   }
 
-  // ── 主功能大宫格 2×2 ──
+  &__greeting {
+    display: block;
+    margin-top: $spacing-sm;
+    font-size: $font-size-xs;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  // ── Grid 2x2 ──
   &__grid {
     display: flex;
     flex-wrap: wrap;
@@ -182,7 +193,7 @@
     color: $color-text-secondary;
   }
 
-  // ── 待办提醒 ──
+  // ── Todos ──
   &__todos {
     margin: $spacing-xl $spacing-lg 0;
   }
@@ -240,7 +251,7 @@
     color: $color-text-secondary;
   }
 
-  // ── 设置类列表 ──
+  // ── Menu Groups ──
   &__menu-group {
     margin: $spacing-lg $spacing-lg 0;
     background: $color-card;
@@ -249,22 +260,44 @@
     box-shadow: $shadow-card;
   }
 
+  &__group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-sm $spacing-lg 0;
+  }
+
+  &__group-title {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__group-arrow {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    transition: transform 0.2s;
+
+    &--expanded {
+      transform: rotate(90deg);
+    }
+  }
+
   &__menu-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: $spacing-md $spacing-lg;
-    min-height: 96px; // ≈48pt 触控高度
+    min-height: 96px;
     box-sizing: border-box;
     background: $color-card;
 
-    // 覆盖 Button 默认样式
     &::after {
       border: none;
     }
 
     & + & {
-      border-top: 2px solid $color-border;
+      border-top: 2px solid rgba(232, 224, 208, 0.3);
     }
 
     &--share {

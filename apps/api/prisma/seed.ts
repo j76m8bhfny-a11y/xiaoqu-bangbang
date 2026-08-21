@@ -107,6 +107,10 @@ const UB_3 = 'ae000000-0000-0000-0000-000000000003';
 // Admin Users
 const ADMIN_ZHANGSAN_ID = 'af000000-0000-0000-0000-000000000001';
 
+// Verifications
+const VERIF_ZHANGSAN_ID = 'b2000000-0000-0000-0000-000000000001';
+const VERIF_LISI_ID = 'b2000000-0000-0000-0000-000000000002';
+
 async function seed() {
   console.log('Seeding database...');
 
@@ -1130,6 +1134,51 @@ async function seed() {
       role: 'platform_admin',
       communityId: COMMUNITY_YANGGUANG_ID,
       status: 'active',
+    },
+  });
+
+  // ============================================================
+  // 16. Verifications (for seed verified users)
+  // ============================================================
+  console.log('Creating verifications...');
+
+  await prisma.verification.upsert({
+    where: { id: VERIF_ZHANGSAN_ID },
+    update: {},
+    create: {
+      id: VERIF_ZHANGSAN_ID,
+      userId: USER_ZHANGSAN_ID,
+      communityId: COMMUNITY_YANGGUANG_ID,
+      materialType: 'property_cert',
+      originalFileUrl: null,
+      maskedFileUrl: null,
+      status: 'approved',
+      consentSnapshot: {
+        consentAccepted: true,
+        consentVersion: '1.0',
+        acceptedAt: '2026-01-10T08:00:00.000Z',
+      },
+      reviewedAt: new Date('2026-01-10T12:00:00.000Z'),
+    },
+  });
+
+  await prisma.verification.upsert({
+    where: { id: VERIF_LISI_ID },
+    update: {},
+    create: {
+      id: VERIF_LISI_ID,
+      userId: USER_LISI_ID,
+      communityId: COMMUNITY_YANGGUANG_ID,
+      materialType: 'property_cert',
+      originalFileUrl: null,
+      maskedFileUrl: null,
+      status: 'approved',
+      consentSnapshot: {
+        consentAccepted: true,
+        consentVersion: '1.0',
+        acceptedAt: '2026-01-12T08:00:00.000Z',
+      },
+      reviewedAt: new Date('2026-01-12T12:00:00.000Z'),
     },
   });
 

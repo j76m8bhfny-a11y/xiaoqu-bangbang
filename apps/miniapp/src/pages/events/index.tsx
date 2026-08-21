@@ -30,14 +30,30 @@ import './index.scss';
 // 第一层 outer = 互助 / 闲置 / 指南；
 // 第二层 = 互助下分类，闲置下为 status，指南下为教程分类。
 
+// E1: 相对时间（复用 mappers 同款逻辑）
+function relTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 0) return '刚刚';
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return '刚刚';
+  if (min < 60) return `${min}分钟前`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}小时前`;
+  const day = Math.floor(hr / 24);
+  if (day === 1) return '昨天';
+  if (day < 30) return `${day}天前`;
+  return `${Math.floor(day / 30)}个月前`;
+}
+
 type OuterTab = 'help' | 'market' | 'guide';
 
 const HELP_FILTERS = [
   { key: 'all', label: '全部' },
+  { key: 'mine', label: '我的' },
   { key: 'help_request', label: '求助' },
   { key: 'public_welfare', label: '公益' },
-  { key: 'pet_help', label: '宠物帮帮' },
-  { key: 'group_buy', label: '购物拼拼' },
+  { key: 'pet_help', label: '宠帮' },
+  { key: 'group_buy', label: '拼购' },
 ];
 
 const MARKET_FILTERS = [
@@ -58,6 +74,9 @@ export default function Events() {
   useAuthGuard();
 
   const communityId = useCommunityStore((s) => s.currentCommunityId);
+  const pendingEventsFilter = useCommunityStore((s) => s.pendingEventsFilter);
+  const setPendingEventsFilter = useCommunityStore((s) => s.setPendingEventsFilter);
+  const currentUserId = useAuthStore((s) => s.user?.id);
   const verifyStatus = useAuthStore((s) => s.user?.verifyStatus);
   const isLocked = verifyStatus !== 'verified';
   const routerParams = Taro.getCurrentInstance().router?.params;
@@ -69,6 +88,7 @@ export default function Events() {
   const [helpFilter, setHelpFilter] = useState<string>(
     initialTabParam && initialTabParam !== 'my' ? initialTabParam : 'all',
   );
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [marketFilter, setMarketFilter] = useState<string>('all');
   const [guideFilter, setGuideFilter] = useState<string>('all');
   const [searchText, setSearchText] = useState('');
@@ -88,14 +108,16 @@ export default function Events() {
         return { ...result, items: result.items.map(mapGroupBuyDtoToCardData) };
       }
       const result = await eventService.list({
-        type: helpFilter,
+        type: helpFilter === 'mine' ? undefined : helpFilter,
+        creatorId: helpFilter === 'mine' ? currentUserId : undefined,
+        status: helpFilter === 'mine' ? statusFilter : undefined,
         keyword: searchText || undefined,
         page,
         pageSize,
       });
       return { ...result, items: result.items.map(mapEventDtoToCardData) };
     },
-    [communityId, helpFilter, searchText, outer],
+    [communityId, helpFilter, statusFilter, searchText, outer, currentUserId],
   );
 
   // ===== 闲置 (market) 列表 =====
@@ -128,6 +150,13 @@ export default function Events() {
   const firstShowRef = useRef(true);
 
   useDidShow(() => {
+    if (pendingEventsFilter) {
+      setOuter('help');
+      setHelpFilter(pendingEventsFilter.filter);
+      setStatusFilter(pendingEventsFilter.status);
+      setPendingEventsFilter(null);
+      return;
+    }
     if (firstShowRef.current) {
       firstShowRef.current = false;
       return;
@@ -140,14 +169,29 @@ export default function Events() {
     if (outer === 'help') helpList.refresh();
     else if (outer === 'market') marketList.refresh();
     else guideList.refresh();
-  }, [communityId, outer, helpFilter, marketFilter, guideFilter, searchText, refreshTick]);
+  }, [
+    communityId,
+    outer,
+    helpFilter,
+    statusFilter,
+    marketFilter,
+    guideFilter,
+    searchText,
+    refreshTick,
+  ]);
 
   const isHelp = outer === 'help';
   const isGuide = outer === 'guide';
   const list = isHelp ? helpList : isGuide ? guideList : marketList;
   const filters = isHelp ? HELP_FILTERS : isGuide ? GUIDE_FILTERS : MARKET_FILTERS;
   const currentFilter = isHelp ? helpFilter : isGuide ? guideFilter : marketFilter;
-  const setCurrentFilter = isHelp ? setHelpFilter : isGuide ? setGuideFilter : setMarketFilter;
+  const setCurrentFilter = (key: string) => {
+    if (isHelp) {
+      setHelpFilter(key);
+      setStatusFilter(undefined);
+    } else if (isGuide) setGuideFilter(key);
+    else setMarketFilter(key);
+  };
 
   // M23: helpList 已在 fetcher 里映射成 EventCardData，直接用即可
   const marketItems = marketList.items as MarketItemDto[];
@@ -169,11 +213,17 @@ export default function Events() {
       : 'box';
   const emptyText = isHelp
     ? helpFilter === 'group_buy'
-      ? '暂无拼单'
-      : '暂无互助事件'
+      ? '暂无拼单\n发起一个邻里拼单吧'
+      : helpFilter === 'mine'
+        ? statusFilter === 'completed,closed'
+          ? '暂无已完成的互助'
+          : '暂无进行中的互助\n去帮帮邻居吧'
+        : helpFilter === 'pet_help'
+          ? '暂无宠物帮帮\n邻居的宠物需要你帮忙吗？'
+          : '暂无互助事件\n邻居们可能需要你的帮助'
     : isGuide
-      ? '暂无教程'
-      : '暂无闲置物品';
+      ? '暂无教程\n分享你的生活经验吧'
+      : '暂无闲置物品\n整理一下发布出来吧';
   const fabLabel = isHelp
     ? helpFilter === 'group_buy'
       ? '发拼单'
@@ -192,7 +242,7 @@ export default function Events() {
       : '/pages/market-create/index';
 
   return (
-    <View className="events">
+    <View className={`events events--${outer}`}>
       <View className="events__header">
         <View className="events__header-row">
           <View className="events__header-title">
@@ -331,7 +381,10 @@ export default function Events() {
               <View className="events__market-body">
                 <Text className="events__market-title">{it.title}</Text>
                 <Text className="events__market-desc">{it.description}</Text>
-                <Text className="events__market-seller">{it.sellerNickname}</Text>
+                <View className="events__market-meta">
+                  <Text className="events__market-seller">{it.sellerNickname}</Text>
+                  <Text className="events__market-time">{relTime(it.updatedAt)}</Text>
+                </View>
               </View>
               <View className="events__market-side">
                 <Text
@@ -368,7 +421,10 @@ export default function Events() {
                 <Text className="events__market-desc">
                   {GUIDE_CATEGORY_CONFIG[it.category]?.label ?? it.category}
                 </Text>
-                <Text className="events__market-seller">{it.authorNickname}</Text>
+                <View className="events__market-meta">
+                  <Text className="events__market-seller">{it.authorNickname}</Text>
+                  <Text className="events__market-time">{relTime(it.createdAt)}</Text>
+                </View>
               </View>
               <View className="events__market-side">
                 <Text className="events__market-price events__market-price--free">

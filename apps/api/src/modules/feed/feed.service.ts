@@ -28,6 +28,7 @@ export class FeedService {
           commentCount: true,
           _count: { select: { applications: true } },
           createdAt: true,
+          creator: { select: { nickname: true } },
         },
       }),
       this.prisma.groupBuy.findMany({
@@ -47,6 +48,7 @@ export class FeedService {
           status: true,
           items: { select: { id: true, status: true } },
           createdAt: true,
+          initiator: { select: { nickname: true } },
         },
       }),
     ]);
@@ -66,6 +68,7 @@ export class FeedService {
         responseCount: e._count.applications,
       },
       createdAt: e.createdAt,
+      creator: e.creator,
     }));
     const gbItems = groupBuys.map((g) => ({
       id: g.id,
@@ -83,14 +86,18 @@ export class FeedService {
       status: g.status,
       stats: { responseCount: g.items.filter((i) => i.status !== 'rejected').length },
       createdAt: g.createdAt,
+      creator: g.initiator,
     }));
 
     // 合并 + 排序 + 分页
-    // ponytail: 内存合并分页在 page>3 时性能下降。当前小区数据量小（<1000 条），YAGNI。
-    // 升级路径：后续改用 Postgres UNION ALL 跨表查询。
-    const merged = [...eventItems, ...gbItems].sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    );
+    // 已完成/已关闭事件排到最后，活跃事件在前
+    const INACTIVE_STATUSES = new Set(['completed', 'closed']);
+    const merged = [...eventItems, ...gbItems].sort((a, b) => {
+      const aInactive = INACTIVE_STATUSES.has(a.status) ? 1 : 0;
+      const bInactive = INACTIVE_STATUSES.has(b.status) ? 1 : 0;
+      if (aInactive !== bInactive) return aInactive - bInactive;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
     const start = (page - 1) * pageSize;
     return {
       items: merged.slice(start, start + pageSize),

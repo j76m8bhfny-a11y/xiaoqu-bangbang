@@ -20,5 +20,6 @@
   &__text {
     font-size: $font-size-sm;
     color: $color-text-secondary;
+    white-space: pre-line;
   }
 }
