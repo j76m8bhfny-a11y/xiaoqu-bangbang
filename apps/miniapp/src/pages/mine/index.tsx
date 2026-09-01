@@ -20,13 +20,15 @@ interface MenuGroup {
   items: MenuItem[];
 }
 
-const MY_ACTIVITIES = [
-  {
-    id: 'a1',
-    title: '我发布的求助',
-    icon: 'help' as IconName,
-    page: '/pages/events/index?tab=my_help',
-  },
+interface ActivityItem {
+  id: string;
+  title: string;
+  icon: IconName;
+  page: string;
+}
+
+const MY_ACTIVITIES: ActivityItem[] = [
+  { id: 'a1', title: '我发布的求助', icon: 'help', page: '/pages/events/index?tab=my_help' },
   { id: 'a2', title: '我参与的互助', icon: 'handshake', page: '/pages/events/index?tab=my_join' },
   { id: 'a3', title: '我的闲置', icon: 'box', page: '/pages/market/index?tab=my' },
   { id: 'a4', title: '我的公益', icon: 'sun', page: '/pages/events/index?tab=my_welfare' },

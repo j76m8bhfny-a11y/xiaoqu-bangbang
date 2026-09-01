@@ -15,6 +15,8 @@ import {
 } from '@tarojs/components';
 import { useAuthStore } from '@/store/auth';
 import { eventService } from '@/services';
+import { EventType } from '@xiaoqu-bangbang/shared';
+import type { CreateEventRequest, PetMeta, PetSubType } from '@xiaoqu-bangbang/shared';
 import ImagePicker from '@/components/image-picker';
 import NavBar from '@/components/navbar';
 import { getFields, FieldConfig } from './field-configs';
@@ -78,15 +80,15 @@ const PetCreate: React.FC = () => {
         : subType === 'walk'
           ? `代遛${petMeta.dogName || ''}`
           : `寻宠-${petMeta.name || petMeta.petType}`;
-    const payload = {
-      type: 'pet_help',
-      subType,
+    const payload: CreateEventRequest = {
+      type: EventType.PET_HELP,
+      subType: subType as PetSubType,
       title,
       description: petMeta.note || '',
-      petMeta,
+      petMeta: petMeta as PetMeta,
     };
     try {
-      const event = await eventService.create(payload);
+      await eventService.create(payload);
       Taro.showToast({ title: '发布成功', icon: 'success' });
       setTimeout(() => Taro.navigateBack(), 1500);
     } catch (e: any) {

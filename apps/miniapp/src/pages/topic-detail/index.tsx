@@ -7,7 +7,6 @@ import EmptyState from '@/components/empty-state';
 import NavBar from '@/components/navbar';
 import type { TopicTimelineItem, TopicCommentDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
-import Icon from '@/components/icon';
 
 // emoji 常量：避免 TS 解析器对 JSX 内 emoji 的编码问题
 const ICON_THUMB_UP = '\u{1f44d}';

@@ -258,10 +258,10 @@ function formatRelativeTime(isoString: string): string {
 // ===== 图文教程 =====
 
 export const GUIDE_CATEGORY_CONFIG: Record<string, { label: string; icon: string }> = {
-  usage_guide: { label: '使用指南', icon: 'book' },
+  usage_guide: { label: '使用指南', icon: 'books' },
   repair: { label: '维修排障', icon: 'wrench' },
-  maintenance: { label: '保养维护', icon: 'tool' },
-  other: { label: '其他', icon: 'more' },
+  maintenance: { label: '保养维护', icon: 'gear' },
+  other: { label: '其他', icon: 'box' },
 };
 
 export const GUIDE_STATUS_LABELS: Record<string, { label: string; color: string }> = {

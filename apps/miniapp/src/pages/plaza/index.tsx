@@ -68,9 +68,7 @@ export default function Plaza() {
           committeeService
             .getAnnouncements()
             .catch(() => ({ items: [] as CommitteeAnnouncementDto[] })),
-          voteService
-            .list({ status: 'published', page: 1, pageSize: 5 })
-            .catch(() => ({ items: [] as VoteDto[] })),
+          voteService.list().catch(() => ({ items: [] as VoteDto[] })),
         ]);
         if (cancelled) return;
         setLatestAnnouncement(annRes.items[0] || null);

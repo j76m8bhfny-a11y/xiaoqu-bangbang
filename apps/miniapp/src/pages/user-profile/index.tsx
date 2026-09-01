@@ -8,7 +8,7 @@ import EmptyState from '@/components/empty-state';
 import NavBar from '@/components/navbar';
 import type { UserProfileDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
-import Icon, { type IconName } from '@/components/icon';
+import Icon from '@/components/icon';
 
 type TabKey = 'event' | 'market' | 'topic';
 

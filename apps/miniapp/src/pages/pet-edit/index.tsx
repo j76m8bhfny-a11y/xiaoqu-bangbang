@@ -14,6 +14,7 @@ import {
   Button,
 } from '@tarojs/components';
 import { eventService } from '@/services';
+import type { PetMeta } from '@xiaoqu-bangbang/shared';
 import ImagePicker from '@/components/image-picker';
 import NavBar from '@/components/navbar';
 import { getFields, FieldConfig } from '../pet-create/field-configs';
@@ -59,7 +60,7 @@ const PetEdit: React.FC = () => {
       if (form[f.name] !== undefined) petMeta[f.name] = form[f.name];
     }
     try {
-      await eventService.update(eventId!, { petMeta });
+      await eventService.update(eventId!, { petMeta: petMeta as PetMeta });
       Taro.showToast({ title: '保存成功', icon: 'success' });
       setTimeout(() => Taro.navigateBack(), 1500);
     } catch (e: any) {
