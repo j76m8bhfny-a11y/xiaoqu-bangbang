@@ -222,11 +222,19 @@ export default function Home() {
     if (route) Taro.navigateTo({ url: route });
   };
 
+  let statusBarHeight = 20;
+  try {
+    const sys = Taro.getSystemInfoSync();
+    if (sys.statusBarHeight) statusBarHeight = sys.statusBarHeight;
+  } catch {
+    // fallback
+  }
+
   return (
     <View className="home">
       <ScrollView scrollY className="home__scroll">
         {/* User Card + Stats */}
-        <View className="home__header">
+        <View className="home__header" style={{ paddingTop: `${statusBarHeight}px` }}>
           <View
             className="home__user"
             onClick={() => Taro.navigateTo({ url: '/pages/profile-edit/index' })}

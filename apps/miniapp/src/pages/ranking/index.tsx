@@ -1,6 +1,6 @@
 import { View, Text, ScrollView } from '@tarojs/components';
 import { useState, useMemo } from 'react';
-import { switchTab } from '@tarojs/taro';
+import Taro, { switchTab } from '@tarojs/taro';
 import { useCommunityStore } from '@/store';
 import { rankingService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
@@ -211,9 +211,17 @@ export default function Ranking() {
   const earnedCount = earnedBadges.length;
   const totalCount = mergedBadges.length;
 
+  let statusBarHeight = 20;
+  try {
+    const sys = Taro.getSystemInfoSync();
+    if (sys.statusBarHeight) statusBarHeight = sys.statusBarHeight;
+  } catch {
+    // fallback
+  }
+
   return (
     <View className="ranking">
-      <View className="ranking__header">
+      <View className="ranking__header" style={{ paddingTop: `${statusBarHeight}px` }}>
         <View className="ranking__header-row">
           <View className="ranking__header-title">
             <Icon name="trophy" size={22} /> <Text>好人榜</Text>

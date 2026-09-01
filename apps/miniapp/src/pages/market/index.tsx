@@ -72,9 +72,17 @@ export default function Market() {
     Taro.navigateTo({ url: `/pages/market-detail/index?id=${id}` });
   };
 
+  let statusBarHeight = 20;
+  try {
+    const sys = Taro.getSystemInfoSync();
+    if (sys.statusBarHeight) statusBarHeight = sys.statusBarHeight;
+  } catch {
+    // fallback
+  }
+
   return (
     <View className="market">
-      <View className="market__header">
+      <View className="market__header" style={{ paddingTop: `${statusBarHeight}px` }}>
         <View className="market__header-title">
           <Icon name="cart" size={22} /> <Text>闲置市集</Text>
         </View>

@@ -85,6 +85,8 @@ export default defineAppConfig({
     ],
   },
   window: {
+    // 全局关闭原生导航栏：各页面统一使用自绘头部（NavBar / 沉浸式 header）
+    navigationStyle: 'custom',
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#F5F8F2',
     navigationBarTitleText: '左邻右帮',

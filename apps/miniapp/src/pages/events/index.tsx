@@ -2,7 +2,7 @@ import { View, Text, ScrollView, Input, Image } from '@tarojs/components';
 import { useState, useEffect, useRef } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useCommunityStore, useAuthStore } from '@/store';
-import type { MarketItemDto, GuideDto } from '@xiaoqu-bangbang/shared';
+import type { MarketItemDto, GuideDto, GuideCategory } from '@xiaoqu-bangbang/shared';
 import {
   eventService,
   marketService,
@@ -137,7 +137,7 @@ export default function Events() {
   const guideList = usePaginatedList(
     (page, pageSize) =>
       guideService.list({
-        category: guideFilter === 'all' ? undefined : guideFilter,
+        category: guideFilter === 'all' ? undefined : (guideFilter as GuideCategory),
         keyword: searchText || undefined,
         page,
         pageSize,
@@ -241,9 +241,17 @@ export default function Events() {
       ? '/pages/guide-create/index'
       : '/pages/market-create/index';
 
+  let statusBarHeight = 20;
+  try {
+    const sys = Taro.getSystemInfoSync();
+    if (sys.statusBarHeight) statusBarHeight = sys.statusBarHeight;
+  } catch {
+    // fallback
+  }
+
   return (
     <View className={`events events--${outer}`}>
-      <View className="events__header">
+      <View className="events__header" style={{ paddingTop: `${statusBarHeight}px` }}>
         <View className="events__header-row">
           <View className="events__header-title">
             <Icon name="handshake" size={22} /> <Text>邻里互助</Text>
@@ -412,7 +420,7 @@ export default function Events() {
               ) : (
                 <View className="events__market-img events__market-img--empty">
                   <View className="events__market-img-emoji">
-                    <Icon name="book" size={32} />
+                    <Icon name="books" size={32} />
                   </View>
                 </View>
               )}
