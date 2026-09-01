@@ -10,7 +10,7 @@ interface EmptyStateProps {
 export default function EmptyState({ icon = 'inbox', text = '暂无内容' }: EmptyStateProps) {
   return (
     <View className="empty-state">
-      <Text className="empty-state__icon">{icon}</Text>
+      <Icon name={icon as any} size={48} color="#6B7A6E" />
       <Text className="empty-state__text">{text}</Text>
     </View>
   );

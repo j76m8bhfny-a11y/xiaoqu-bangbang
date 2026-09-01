@@ -30,7 +30,7 @@ $color-bg-green: #eaf4ec; // 浅绿底
 $color-bg-orange: #fbf0dd; // 浅暖底（accent 配套）
 
 // ── 圆角（柔和圆润）──
-$radius-sm: 16px; // 小圆角（标签/输入框）
+$radius-sm: 12px; // 小圆角（标签/输入框）
 $radius-md: 20px; // 卡片主圆角
 $radius-lg: 28px; // 大卡片/宫格块
 $radius-pill: 999px; // 胶囊
@@ -39,7 +39,7 @@ $radius-pill: 999px; // 胶囊
 $spacing-xs: 8px;
 $spacing-sm: 12px;
 $spacing-md: 16px;
-$spacing-lg: 24px;
+$spacing-lg: 20px;
 $spacing-xl: 32px;
 
 // ── 字号（整体放大一档到常规舒适；数值为 px→rpx，真机 ≈ 半值 pt）──
