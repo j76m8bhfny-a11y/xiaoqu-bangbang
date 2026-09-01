@@ -1,9 +1,5 @@
 @use '../../styles/tokens.scss' as *;
 
-// 「小区事」页 v2 · 草木绿 · 老年友好
-// 结构 = 小区标识条 → 业委会通知(最醒目) → 进行中投票(促参与) → 邻居议事(议题列表)
-// 分层：官方通知草绿描边、投票暖色点缀、议题白卡片。
-
 .plaza {
   min-height: 100vh;
   background: $color-bg;
@@ -12,48 +8,139 @@
     height: 100vh;
   }
 
-  // ── 顶部小区标识条 ──
-  &__community-bar {
+  // ── 顶部暖橙渐变 Header ──
+  &__header {
+    background: linear-gradient(135deg, $color-accent, $color-accent-deep);
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    border-bottom-left-radius: 28px;
+    border-bottom-right-radius: 28px;
+    box-shadow: 0 4px 16px rgba(232, 155, 108, 0.2);
+  }
+
+  &__header-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: $spacing-md $spacing-lg;
-    background: $color-cream;
-    border-bottom: 2px solid $color-border;
+    padding: 12px 0 16px;
   }
 
-  &__community-name {
+  &__header-title-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__header-title {
+    font-size: 40px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1px;
+  }
+
+  &__community-pill {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: $font-size-lg;
-    font-weight: $font-weight-bold;
-    color: $color-text;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
 
-  &__community-switch {
-    font-size: $font-size-sm;
-    color: $color-primary;
+  &__community-name {
+    font-size: 24px;
+    color: #ffffff;
+    font-weight: 500;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__header-tabs {
+    display: flex;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  &__header-tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px 0;
+    border-radius: 999px;
+    transition: all 0.2s ease;
+
+    &--active {
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .plaza__header-tab-text {
+        color: $color-accent-deep;
+        font-weight: 600;
+      }
+    }
+  }
+
+  &__header-tab-text {
+    font-size: 26px;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
   }
 
   // ── 通用卡片 ──
+  &__section {
+    margin: 16px 20px 0;
+  }
+
   &__card {
     background: $color-card;
-    padding: $spacing-md;
-    border-radius: $radius-md;
+    padding: 16px;
+    border-radius: 20px;
     box-shadow: $shadow-card;
   }
 
-  // 业委会通知：草绿左描边，突出「官方、重要」
-  &__committee {
-    border-left: 8px solid $color-primary;
+  &__vote-card {
+    border-left: 6px solid $color-accent;
   }
 
-  // 左右双卡片
+  &__card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  &__card-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 28px;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  &__card-more {
+    font-size: 24px;
+    color: $color-primary;
+    font-weight: 500;
+  }
+
+  &__vote-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: $color-text;
+    margin-top: 4px;
+  }
+
   &__dual-card {
     display: flex;
-    gap: $spacing-sm;
-    margin: $spacing-sm $spacing-lg;
+    gap: 12px;
+    margin: 16px 20px 0;
   }
 
   &__dual-item {
@@ -61,249 +148,142 @@
     min-width: 0;
   }
 
-  &__card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: $spacing-md;
-  }
-
-  &__card-title {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: $font-size-lg;
-    font-weight: $font-weight-bold;
-    color: $color-text;
-  }
-
-  &__card-more {
-    font-size: $font-size-sm;
-    color: $color-primary;
-  }
-
-  &__empty-line {
-    font-size: $font-size-sm;
-    color: $color-text-secondary;
+  &__committee {
+    border-left: 6px solid $color-primary;
   }
 
   &__committee-item {
-    padding: $spacing-sm 0;
-    border-top: 2px solid $color-border;
-
-    &:first-child {
-      border-top: none;
-      padding-top: 0;
-    }
+    padding-top: 4px;
   }
 
   &__committee-title {
-    font-size: $font-size-md;
+    font-size: 26px;
+    font-weight: 600;
     color: $color-text;
-    font-weight: $font-weight-medium;
-    line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
   }
 
   &__committee-date {
+    font-size: 22px;
+    color: $color-text-secondary;
+    margin-top: 2px;
     display: block;
-    font-size: $font-size-xs;
-    color: $color-text-secondary;
-    margin-top: 6px;
   }
 
-  // ── 进行中投票：暖底 + 去投票大按钮 ──
-  &__vote-item {
+  &__empty-line {
+    font-size: 24px;
+    color: $color-text-secondary;
+  }
+
+  // ── 议题区 ──
+  &__topics-section {
+    margin: 20px 20px 0;
+  }
+
+  &__topics-action-row {
     display: flex;
     align-items: center;
-    gap: $spacing-md;
-    padding: $spacing-md 0;
-    border-top: 2px solid $color-border;
-
-    &:first-of-type {
-      border-top: none;
-      padding-top: 0;
-    }
-  }
-
-  &__vote-detail {
-    flex: 1;
-    min-width: 0;
-  }
-
-  &__vote-title {
-    font-size: $font-size-md;
-    color: $color-text;
-    font-weight: $font-weight-medium;
-  }
-
-  &__vote-meta {
-    display: block;
-    font-size: $font-size-xs;
-    color: $color-text-secondary;
-    margin-top: 6px;
-  }
-
-  &__vote-btn {
-    flex-shrink: 0;
-    background: $color-primary;
-    border-radius: $radius-pill;
-    padding: $spacing-sm $spacing-lg;
-  }
-
-  &__vote-btn-text {
-    font-size: $font-size-md;
-    color: #fff;
-    font-weight: $font-weight-bold;
-  }
-
-  // ── 邻居议事 ──
-  &__topics-header {
-    display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: $spacing-lg $spacing-lg $spacing-sm;
+    margin-bottom: 12px;
   }
 
-  &__topic-tabs {
-    display: flex;
-    gap: $spacing-sm;
-  }
-
-  &__topic-tab {
-    padding: $spacing-xs $spacing-lg;
-    border-radius: $radius-pill;
-    background: $color-card;
-    color: $color-text-secondary;
-    font-size: $font-size-sm;
-
-    &--active {
-      background: $color-primary;
-      color: #fff;
-      font-weight: $font-weight-bold;
-    }
-  }
-
-  &__topic-create {
-    background: $color-accent;
-    border-radius: $radius-pill;
-    padding: $spacing-xs $spacing-lg;
-  }
-
-  &__topic-create-text {
-    font-size: $font-size-sm;
-    color: #fff;
-    font-weight: $font-weight-bold;
-  }
-
-  &__topic-item {
-    background: $color-card;
-    margin: $spacing-sm $spacing-lg;
-    padding: $spacing-lg;
-    border-radius: $radius-md;
-    box-shadow: $shadow-card;
-    display: flex;
-    align-items: stretch;
-    overflow: hidden;
-
-    // B1: 左侧状态色条
-    &--open {
-      border-left: 4px solid $color-primary;
-    }
-    &--closed {
-      border-left: 4px solid $color-border;
-    }
-  }
-
-  // B1: 状态色条（备用，如需更醒目可加背景色）
-  &__topic-bar {
-    width: 4px;
-    border-radius: 2px;
-    margin-right: $spacing-md;
-    flex-shrink: 0;
-
-    &--open {
-      background: $color-primary;
-    }
-    &--closed {
-      background: $color-border;
-    }
-  }
-
-  // C1: F 型布局主体
-  &__topic-main {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    min-width: 0;
-  }
-
-  &__topic-left {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  &__topic-date {
-    font-size: $font-size-xs;
-    color: $color-text-secondary;
-  }
-
-  &__topic-right {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    flex-shrink: 0;
-    margin-left: $spacing-sm;
-  }
-
-  &__topic-title {
-    font-size: $font-size-md;
-    font-weight: $font-weight-bold;
+  &__topics-label {
+    font-size: 30px;
+    font-weight: 600;
     color: $color-text;
-    flex: 1;
   }
 
-  // 议题数据：图标+数字，去文字（A4）
-  &__topic-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $spacing-md;
-    font-size: $font-size-sm;
-    color: $color-text-secondary;
-  }
-
-  &__topic-metric {
+  &__topic-create-btn {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: $font-size-sm;
-    color: $color-text-secondary;
+    background: $color-primary;
+    padding: 6px 14px;
+    border-radius: 999px;
+    box-shadow: 0 4px 12px rgba(91, 158, 111, 0.25);
+  }
 
-    // A1: 状态文案样式（待响应/已完成）
-    &--status {
-      font-size: $font-size-xs;
-      color: $color-text-secondary;
-      opacity: 0.7;
-    }
+  &__topic-create-text {
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+  }
 
-    // 已完结评分
-    &--rating {
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
+  &__topic-card {
+    background: $color-card;
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(91, 158, 111, 0.04);
+    border: 1px solid rgba(232, 224, 208, 0.5);
+    transition: transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.99);
     }
   }
 
-  &__topic-metric-label {
-    font-size: 20px;
+  &__topic-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  &__topic-title {
+    font-size: 30px;
+    font-weight: 600;
+    color: $color-text;
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  &__topic-date {
+    font-size: 22px;
     color: $color-text-secondary;
-    opacity: 0.6;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  &__topic-pills {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: $color-bg;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 22px;
+    color: $color-text-secondary;
+
+    &--like {
+      background: $color-bg-green;
+      color: $color-primary;
+    }
+
+    &--rating {
+      background: $color-accent-soft;
+      color: $color-accent-deep;
+    }
+
+    &--event {
+      background: $color-bg-green;
+      color: $color-primary-deep;
+      font-weight: 500;
+    }
   }
 
   &__bottom-spacer {
-    height: 160rpx;
+    height: 180px;
   }
 }

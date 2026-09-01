@@ -283,15 +283,24 @@ export default function Home() {
 
         {/* Grid */}
         <View className="home__grid">
-          {GRID_ITEMS.map((item) => (
-            <View key={item.id} className="home__grid-item" onClick={() => handleGridClick(item)}>
-              <View className="home__grid-icon">
-                <Icon name={item.icon} size={28} />
+          {GRID_ITEMS.map((item, idx) => {
+            const isCream = idx === 0 || idx === 3;
+            return (
+              <View
+                key={item.id}
+                className={`home__grid-item ${isCream ? 'home__grid-item--cream' : 'home__grid-item--bgGreen'}`}
+                onClick={() => handleGridClick(item)}
+              >
+                <View className="home__grid-content">
+                  <Text className="home__grid-label">{item.label}</Text>
+                  <Text className="home__grid-desc">{item.desc}</Text>
+                </View>
+                <View className="home__grid-icon-box">
+                  <Icon name={item.icon} size={24} color={isCream ? '#E89B6C' : '#5B9E6F'} />
+                </View>
               </View>
-              <Text className="home__grid-label">{item.label}</Text>
-              <Text className="home__grid-desc">{item.desc}</Text>
-            </View>
-          ))}
+            );
+          })}
         </View>
 
         {/* Todos */}
