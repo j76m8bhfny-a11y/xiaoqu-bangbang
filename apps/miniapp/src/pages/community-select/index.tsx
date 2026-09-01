@@ -5,6 +5,7 @@ import { communityService } from '@/services';
 import { useCommunityStore, useAuthStore } from '@/store';
 import { useRequest } from '@/hooks';
 import type { CommunityDto } from '@xiaoqu-bangbang/shared';
+import NavBar from '@/components/navbar';
 import './index.scss';
 import Icon from '@/components/icon';
 
@@ -47,6 +48,7 @@ export default function CommunitySelect() {
 
   return (
     <View className="cs">
+      <NavBar title="选择小区" />
       {/* 顶部装饰区域 */}
       <View className="cs__hero">
         <View className="cs__hero-decor">

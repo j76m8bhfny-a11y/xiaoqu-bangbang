@@ -8,6 +8,7 @@ import { MarketCategory, TradeType, ConditionLevel } from '@xiaoqu-bangbang/shar
 import { MARKET_CATEGORY_CONFIG, CONDITION_LABELS } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
 import UnverifiedFormBanner from '@/components/unverified-form-banner';
+import NavBar from '@/components/navbar';
 import './index.scss';
 import Icon from '@/components/icon';
 
@@ -140,6 +141,7 @@ export default function MarketCreate() {
 
   return (
     <View className="market-create">
+      <NavBar title="发布闲置" />
       <UnverifiedFormBanner tip="你尚未完成业主认证，无法发布闲置物品" />
       <View className="market-create__body">
         <View className="market-create__card">

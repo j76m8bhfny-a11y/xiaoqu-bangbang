@@ -8,6 +8,7 @@ import { EventType, RewardType } from '@xiaoqu-bangbang/shared';
 import { EVENT_TYPE_CONFIG } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
 import UnverifiedFormBanner from '@/components/unverified-form-banner';
+import NavBar from '@/components/navbar';
 import './index.scss';
 import Icon from '@/components/icon';
 
@@ -189,6 +190,7 @@ export default function EventCreate() {
 
   return (
     <View className="event-create">
+      <NavBar title="发布求助" />
       <UnverifiedFormBanner tip="你尚未完成业主认证，无法发布互助内容" />
       <View className="event-create__body">
         <View className="event-create__card">

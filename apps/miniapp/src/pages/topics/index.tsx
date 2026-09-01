@@ -8,6 +8,7 @@ import Waterfall from '@/components/waterfall';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import type { TopicDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 import Icon from '@/components/icon';
@@ -81,6 +82,7 @@ export default function TopicsPage() {
 
   return (
     <View className="topics">
+      <NavBar title="议题榜" />
       <View className="topics__tabs">
         <Text
           className={`topics__tab ${status === 'open' ? 'topics__tab--active' : ''}`}

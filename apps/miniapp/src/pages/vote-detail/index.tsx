@@ -5,6 +5,7 @@ import { useRequest } from '@/hooks';
 import { voteService, shareService, reportService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import { VoteType, VoteStatus, ResultVisibility } from '@xiaoqu-bangbang/shared';
 import type { VoteDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
@@ -182,6 +183,7 @@ export default function VoteDetail() {
 
   return (
     <View className="vote-detail">
+      <NavBar title="投票详情" />
       <ScrollView scrollY className="vote-detail__scroll">
         {/* 头部卡片：标签 + 标题 + 描述 + 时间 */}
         <View className="vote-detail__card vote-detail__card--first">

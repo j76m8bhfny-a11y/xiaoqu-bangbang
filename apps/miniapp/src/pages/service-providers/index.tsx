@@ -7,6 +7,7 @@ import { usePaginatedList, useAuthGuard } from '@/hooks';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import './index.scss';
 import Icon from '@/components/icon';
 
@@ -69,6 +70,7 @@ export default function ServiceProviders() {
 
   return (
     <View className="service-providers">
+      <NavBar title="便民服务" />
       <View className="service-providers__header">
         <View className="service-providers__header-title">
           <Icon name="house" size={22} /> <Text>便民服务</Text>

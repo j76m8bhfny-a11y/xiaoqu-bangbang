@@ -5,6 +5,7 @@ import { useRequest } from '@/hooks';
 import { committeeService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import { ClaimStatus, type CommitteeMemberDetailDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
@@ -77,6 +78,7 @@ export default function CommitteeMember() {
 
   return (
     <View className="committee-member">
+      <NavBar title="成员详情" />
       <ScrollView scrollY className="committee-member__scroll">
         {/* Avatar Section */}
         <View className="committee-member__avatar-section">

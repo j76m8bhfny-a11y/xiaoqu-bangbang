@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Taro from '@tarojs/taro';
 import { View, Text, Input, Textarea, Radio, RadioGroup, Label, Button } from '@tarojs/components';
 import { groupBuyService } from '@/services';
+import NavBar from '@/components/navbar';
 import type { GroupBuyDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
@@ -85,6 +86,7 @@ const GroupBuyEdit = () => {
 
   return (
     <View className="gb-edit">
+      <NavBar title="编辑拼单" />
       <View className="form">
         <View className="form-item">
           <Text className="label">采购地点 *</Text>

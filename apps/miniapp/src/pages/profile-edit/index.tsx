@@ -6,6 +6,7 @@ import { useRequest } from '@/hooks';
 import { useAuthStore } from '@/store';
 import type { UserSkillDto } from '@xiaoqu-bangbang/shared';
 import ImagePicker from '@/components/image-picker';
+import NavBar from '@/components/navbar';
 import './index.scss';
 
 export default function ProfileEdit() {
@@ -148,6 +149,7 @@ export default function ProfileEdit() {
 
   return (
     <View className="profile-edit">
+      <NavBar title="编辑资料" />
       <View className="profile-edit__avatar-section" onClick={handleAvatarChange}>
         {avatarUrl ? (
           <Image className="profile-edit__avatar" src={avatarUrl} mode="aspectFill" />

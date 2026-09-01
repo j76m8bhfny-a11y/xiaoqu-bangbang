@@ -16,6 +16,7 @@ import {
 import { useAuthStore } from '@/store/auth';
 import { eventService } from '@/services';
 import ImagePicker from '@/components/image-picker';
+import NavBar from '@/components/navbar';
 import { getFields, FieldConfig } from './field-configs';
 import './index.scss';
 
@@ -174,6 +175,7 @@ const PetCreate: React.FC = () => {
 
   return (
     <View className="pet-create">
+      <NavBar title="发布宠物" />
       <View className="form">
         <View className="form-item">
           <Text className="label">类型 *</Text>

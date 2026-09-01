@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store';
 import { eventService, shareService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import type {
   EventDto,
   EventApplicationDto,
@@ -214,6 +215,7 @@ export default function EventDetail() {
 
   return (
     <View className="event-detail">
+      <NavBar title="互助详情" />
       <ScrollView scrollY className="event-detail__scroll">
         {/* M1: Hero card - tags + title + creator + key info */}
         <View className="event-detail__hero">

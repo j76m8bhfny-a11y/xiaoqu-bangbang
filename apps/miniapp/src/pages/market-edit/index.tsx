@@ -9,6 +9,7 @@ import type { MarketItemDto } from '@xiaoqu-bangbang/shared';
 import { MARKET_CATEGORY_CONFIG, CONDITION_LABELS } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import './index.scss';
 import Icon from '@/components/icon';
 
@@ -131,6 +132,7 @@ export default function MarketEdit() {
 
   return (
     <View className="market-edit">
+      <NavBar title="编辑闲置" />
       <View className="market-edit__body">
         <View className="market-edit__card">
           <View className="market-edit__field">

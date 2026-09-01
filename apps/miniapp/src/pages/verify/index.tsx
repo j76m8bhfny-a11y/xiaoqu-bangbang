@@ -12,6 +12,7 @@ import { MaterialType, VerificationStatus } from '@xiaoqu-bangbang/shared';
 import type { VerificationDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 import Icon from '@/components/icon';
+import NavBar from '@/components/navbar';
 
 const MATERIAL_OPTIONS: { key: MaterialType; label: string; icon: string }[] = [
   { key: MaterialType.PROPERTY_CERT, label: '房产证', icon: 'house' },
@@ -141,6 +142,7 @@ export default function Verify() {
 
   return (
     <View className="verify">
+      <NavBar title="业主认证" />
       <ScrollView scrollY className="verify__body">
         {/* Verified status card */}
         {isVerified && latestApproved && !showForm && (

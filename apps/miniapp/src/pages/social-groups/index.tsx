@@ -6,6 +6,7 @@ import { useRequest, useAuthGuard } from '@/hooks';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import './index.scss';
 import Icon from '@/components/icon';
 
@@ -45,6 +46,7 @@ export default function SocialGroups() {
 
   return (
     <View className="social-groups">
+      <NavBar title="社区群组" />
       <ScrollView scrollY className="social-groups__scroll">
         <View className="social-groups__header">
           <View className="social-groups__header-title">

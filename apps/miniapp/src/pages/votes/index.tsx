@@ -6,6 +6,7 @@ import { useRequest } from '@/hooks';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import { VoteType, VoteStatus } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 import Icon from '@/components/icon';
@@ -52,6 +53,7 @@ export default function Votes() {
 
   return (
     <View className="votes">
+      <NavBar title="社区投票" />
       <View className="votes__header">
         <View className="votes__header-title">
           <Icon name="vote" size={22} /> <Text>社区投票</Text>

@@ -8,6 +8,7 @@ import { GuideCategory, GuideStatus } from '@xiaoqu-bangbang/shared';
 import { useAuthStore } from '@/store';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import Icon from '@/components/icon';
 import { GUIDE_CATEGORY_CONFIG, GUIDE_STATUS_LABELS } from '@/utils/mappers';
 import './index.scss';
@@ -286,6 +287,7 @@ export default function GuideDetail() {
 
   return (
     <View className="guide-detail">
+      <NavBar title="指南详情" />
       {(item.images ?? []).length > 0 ? (
         <Swiper
           className="guide-detail__swiper"

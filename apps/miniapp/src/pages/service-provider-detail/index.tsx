@@ -4,6 +4,7 @@ import { serviceProviderService } from '@/services';
 import { useRequest } from '@/hooks';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import type { ServiceProviderDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 import Icon from '@/components/icon';
@@ -60,11 +61,12 @@ export default function ServiceProviderDetail() {
 
   return (
     <View className="sp-detail">
+      <NavBar title="服务详情" />
       <ScrollView scrollY className="sp-detail__scroll">
         {/* Header */}
         <View className="sp-detail__header">
           <View className="sp-detail__logo">
-            <Text className="sp-detail__logo-icon">{categoryIcon}</Text>
+            <Icon name={categoryIcon as any} size={32} color="#5B9E6F" />
           </View>
           <Text className="sp-detail__name">{provider.name}</Text>
           <View className="sp-detail__tags">

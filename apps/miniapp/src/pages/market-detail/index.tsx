@@ -8,6 +8,7 @@ import type { MarketReviewDto } from '@xiaoqu-bangbang/shared';
 import { useAuthStore } from '@/store';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import { MARKET_CATEGORY_CONFIG, CONDITION_LABELS } from '@/utils/mappers';
 import type { MarketItemDto } from '@xiaoqu-bangbang/shared';
 import { MarketItemStatus, TradeType } from '@xiaoqu-bangbang/shared';
@@ -273,6 +274,7 @@ export default function MarketDetail() {
 
   return (
     <View className="market-detail">
+      <NavBar title="闲置详情" />
       {(item.images ?? []).length > 0 ? (
         <Swiper
           className="market-detail__swiper"

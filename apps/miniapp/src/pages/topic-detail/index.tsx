@@ -4,6 +4,7 @@ import Taro from '@tarojs/taro';
 import { topicService, eventService, reportService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import type { TopicTimelineItem, TopicCommentDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 import Icon from '@/components/icon';
@@ -243,6 +244,7 @@ export default function TopicDetail() {
 
   return (
     <View className="topic-detail">
+      <NavBar title="议题详情" />
       {/* 页面级滚动：sticky Tab 在原生 scroll-view 内不可靠，改用页面滚动 */}
       <View className="topic-detail__content">
         {/* 议题头部：标题左 + 投票图标右，舒展留白 */}

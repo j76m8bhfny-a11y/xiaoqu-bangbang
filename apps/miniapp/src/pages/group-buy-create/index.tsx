@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Taro from '@tarojs/taro';
 import { View, Text, Input, Textarea, Radio, RadioGroup, Label, Button } from '@tarojs/components';
 import { groupBuyService } from '@/services';
+import NavBar from '@/components/navbar';
 import './index.scss';
 
 const DATETIME_RE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
@@ -65,6 +66,7 @@ const GroupBuyCreate = () => {
 
   return (
     <View className="gb-create">
+      <NavBar title="发起拼单" />
       <View className="form">
         {/* FE-1: seek/offer 类型切换（覆盖 URL type 默认 seek） */}
         <View className="form-item">

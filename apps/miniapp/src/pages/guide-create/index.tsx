@@ -10,6 +10,7 @@ import { GUIDE_CATEGORY_CONFIG } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
 import UnverifiedFormBanner from '@/components/unverified-form-banner';
 import Loading from '@/components/loading';
+import NavBar from '@/components/navbar';
 import Icon from '@/components/icon';
 import './index.scss';
 
@@ -167,6 +168,7 @@ export default function GuideCreate() {
 
   return (
     <View className="guide-create">
+      <NavBar title={isEdit ? '编辑指南' : '发布指南'} />
       <UnverifiedFormBanner tip="你尚未完成业主认证，无法发布教程" />
       <View className="guide-create__body">
         <View className="guide-create__card">

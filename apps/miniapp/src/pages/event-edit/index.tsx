@@ -10,6 +10,7 @@ import { EVENT_TYPE_CONFIG } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import './index.scss';
 
 const REWARD_OPTIONS: { key: RewardType; label: string }[] = [
@@ -108,6 +109,7 @@ export default function EventEdit() {
 
   return (
     <View className="event-edit">
+      <NavBar title="编辑互助" />
       <View className="event-edit__body">
         <View className="event-edit__card">
           <View className="event-edit__field">

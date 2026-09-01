@@ -5,6 +5,7 @@ import { communityApplicationService } from '@/services';
 import { useAuthGuard } from '@/hooks';
 import Loading from '@/components/loading';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import type { CommunityApplicationDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 import Icon from '@/components/icon';
@@ -60,6 +61,7 @@ export default function MyApplications() {
 
   return (
     <View className="myapp">
+      <NavBar title="我的小区申请" />
       <View className="myapp__tabs">
         {(['mine', 'supported'] as Tab[]).map((t) => (
           <View

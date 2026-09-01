@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro';
 import { useAuthStore } from '@/store';
 import './index.scss';
 import Icon from '@/components/icon';
+import NavBar from '@/components/navbar';
 
 export default function Settings() {
   const logout = useAuthStore((s) => s.logout);
@@ -41,6 +42,7 @@ export default function Settings() {
 
   return (
     <View className="settings">
+      <NavBar title="设置" />
       <ScrollView scrollY className="settings__scroll">
         {/* 账号安全 */}
         <View className="settings__section">

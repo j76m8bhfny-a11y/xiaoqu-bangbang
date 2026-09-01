@@ -5,6 +5,7 @@ import { useRequest } from '@/hooks';
 import { committeeService, shareService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import type { CommitteeAnnouncementDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 import Icon from '@/components/icon';
@@ -94,6 +95,7 @@ export default function CommitteeAnnouncement() {
 
   return (
     <View className="committee-announcement">
+      <NavBar title="公告详情" />
       <ScrollView scrollY className="committee-announcement__scroll">
         <View className="committee-announcement__card">
           {/* 官方标识 */}

@@ -4,6 +4,7 @@ import { View, Text, Input, Textarea, Button } from '@tarojs/components';
 import { groupBuyService } from '@/services';
 import { useAuthStore } from '@/store';
 import { GROUP_BUY_TYPE_LABELS, GROUP_BUY_STATUS_LABELS } from '@/utils/mappers';
+import NavBar from '@/components/navbar';
 import type { GroupBuyDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
@@ -167,6 +168,7 @@ const GroupBuyDetail = () => {
 
   return (
     <View className="gb-detail">
+      <NavBar title="拼单详情" />
       {/* 基本信息 */}
       <View className="gb-detail__header">
         <View className="gb-detail__tags">

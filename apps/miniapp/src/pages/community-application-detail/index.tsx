@@ -6,6 +6,7 @@ import { useAuthStore, useCommunityStore } from '@/store';
 import { useRequest } from '@/hooks';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import type { CommunityApplicationDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 import Icon from '@/components/icon';
@@ -110,6 +111,7 @@ export default function CommunityApplicationDetail() {
 
   return (
     <View className="cad">
+      <NavBar title="申请详情" />
       <ScrollView scrollY className="cad__body">
         {/* 小区信息卡 */}
         <View className="cad__hero">

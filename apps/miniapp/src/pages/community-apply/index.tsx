@@ -4,6 +4,7 @@ import { View, Text, Input, Textarea, ScrollView } from '@tarojs/components';
 import { communityApplicationService } from '@/services';
 import { useDraft } from '@/hooks';
 import ImagePicker from '@/components/image-picker';
+import NavBar from '@/components/navbar';
 import type { CreateCommunityApplicationRequest } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 import Icon from '@/components/icon';
@@ -126,6 +127,7 @@ export default function CommunityApply() {
 
   return (
     <View className="apply">
+      <NavBar title="开通小区" />
       <ScrollView scrollY className="apply__body">
         <View className="apply__hero">
           <View className="apply__hero-emoji">

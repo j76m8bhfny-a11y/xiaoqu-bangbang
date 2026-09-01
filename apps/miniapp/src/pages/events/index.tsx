@@ -209,7 +209,7 @@ export default function Events() {
       ? 'cart'
       : 'handshake'
     : isGuide
-      ? 'book'
+      ? 'books'
       : 'box';
   const emptyText = isHelp
     ? helpFilter === 'group_buy'

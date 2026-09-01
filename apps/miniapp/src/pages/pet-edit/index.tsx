@@ -15,6 +15,7 @@ import {
 } from '@tarojs/components';
 import { eventService } from '@/services';
 import ImagePicker from '@/components/image-picker';
+import NavBar from '@/components/navbar';
 import { getFields, FieldConfig } from '../pet-create/field-configs';
 import './index.scss';
 
@@ -152,6 +153,7 @@ const PetEdit: React.FC = () => {
 
   return (
     <View className="pet-edit">
+      <NavBar title="编辑宠物" />
       <View className="form">
         {fields.map((f) => (
           <View key={f.name} className="form-item">

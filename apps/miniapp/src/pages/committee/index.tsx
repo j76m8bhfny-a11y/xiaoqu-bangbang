@@ -6,6 +6,7 @@ import { committeeService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import type {
   CommitteeMemberDto,
   CommitteeAnnouncementDto,
@@ -88,6 +89,7 @@ export default function Committee() {
 
   return (
     <View className="committee">
+      <NavBar title="业委会" />
       <ScrollView scrollY className="committee__scroll">
         {/* Stats Header */}
         <View className="committee__stats">
