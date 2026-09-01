@@ -52,6 +52,7 @@ export default defineAppConfig({
   // ponytail: 图标沿用现有彩色 png（selectedColor 只作用于文字）；
   //           统一矢量图标重绘作为后续单独任务。
   tabBar: {
+    custom: true,
     color: '#6B7A6E',
     selectedColor: '#5B9E6F',
     backgroundColor: '#FFF8EE',

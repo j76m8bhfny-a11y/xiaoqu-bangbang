@@ -1,0 +1,56 @@
+@use '../../styles/tokens.scss' as *;
+
+.navbar {
+  width: 100%;
+  position: relative;
+  z-index: 50;
+
+  &__content {
+    height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    position: relative;
+  }
+
+  &__left,
+  &__right {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__back-btn {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 32px;
+    transition: background 0.15s ease;
+
+    &:active {
+      background: rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &__placeholder {
+    width: 64px;
+    height: 64px;
+  }
+
+  &__title {
+    font-size: 32px;
+    font-weight: 600;
+    color: $color-text;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 440px;
+  }
+}
