@@ -8,41 +8,43 @@ import type { NotificationDto } from '@xiaoqu-bangbang/shared';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
+import Icon, { type IconName } from '@/components/icon';
 import './index.scss';
 
-const TYPE_ICON_MAP: Record<string, string> = {
-  review_result: '\u{1F4CB}',
-  event_response: '\u{1F91D}',
-  completion: '\u2705',
-  badge: '\u{1F3C5}',
-  feedback: '\u{1F4E2}',
-  vote: '\u{1F5F3}',
-  announcement: '\u{1F4E2}',
-  system: '\u{1F514}',
+const TYPE_ICON_MAP: Record<string, IconName> = {
+  review_result: 'clipboard',
+  event_response: 'handshake',
+  completion: 'check-circle',
+  badge: 'medal',
+  feedback: 'megaphone',
+  vote: 'vote',
+  announcement: 'megaphone',
+  system: 'bell',
 };
 
 const TYPE_COLOR_MAP: Record<string, string> = {
-  review_result: '#5b9e6f',
-  event_response: '#5b9e6f',
-  completion: '#5b9e6f',
-  badge: '#e89b6c',
-  feedback: '#e89b6c',
-  vote: '#5b9e6f',
-  announcement: '#e89b6c',
-  system: '#5b9e6f',
+  review_result: '#5B9E6F',
+  event_response: '#5B9E6F',
+  completion: '#5B9E6F',
+  badge: '#E89B6C',
+  feedback: '#E89B6C',
+  vote: '#5B9E6F',
+  announcement: '#E89B6C',
+  system: '#5B9E6F',
 };
 
-function _formatTime(iso: string): string {
+function formatTime(iso: string): string {
   const now = Date.now();
   const then = new Date(iso).getTime();
   const diff = now - then;
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return '\u521A\u521A';
-  if (minutes < 60) return `${minutes}\u5206\u949F\u524D`;
+  if (minutes < 1) return '刚刚';
+  if (minutes < 60) return `${minutes}分钟前`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}\u5C0F\u65F6\u524D`;
+  if (hours < 24) return `${hours}小时前`;
   const days = Math.floor(hours / 24);
-  return `${days}\u5929\u524D`;
+  return `${days}天前`;
 }
 
 export default function Notifications() {
@@ -65,6 +67,7 @@ export default function Notifications() {
       await notificationService.markAllRead();
       setUnreadCount(0);
       refresh();
+      Taro.showToast({ title: '已全部标记为已读', icon: 'success' });
     } catch {
       Taro.showToast({ title: '操作失败', icon: 'none' });
     }
@@ -76,13 +79,12 @@ export default function Notifications() {
         await notificationService.markRead(item.id);
         decrementUnread();
       } catch {
-        // silent fail for marking read
+        // silent fail
       }
     }
 
     const targetType = item.targetType;
     const targetId = item.targetId;
-
     if (!targetType || !targetId) return;
 
     const routeMap: Record<string, string> = {
@@ -93,7 +95,6 @@ export default function Notifications() {
       topic: `/pages/topic-detail/index?id=${targetId}`,
       vote: `/pages/vote-detail/index?id=${targetId}`,
       announcement: `/pages/committee-announcement/index?id=${targetId}`,
-      // badge 无跳转目标，点击仅标记已读
     };
 
     const url = routeMap[targetType];
@@ -108,47 +109,43 @@ export default function Notifications() {
     }
   };
 
+  const rightAction =
+    unreadCount > 0 ? (
+      <Text style={{ fontSize: '13px', color: '#5B9E6F', fontWeight: 600 }}>全部已读</Text>
+    ) : null;
+
   return (
     <View className="notifications">
-      <View className="notifications__header">
-        <Text className="notifications__title">消息通知</Text>
-        {unreadCount > 0 && (
-          <View className="notifications__mark-all" onClick={handleMarkAllRead}>
-            <Text className="notifications__mark-all-text">全部已读</Text>
-          </View>
-        )}
-      </View>
+      <NavBar title="消息通知" rightAction={rightAction} onRightClick={handleMarkAllRead} />
 
       <ScrollView scrollY className="notifications__list" onScrollToLower={handleScrollToLower}>
         {loading && <Loading />}
         {error && <ErrorState message={error.message} onRetry={refresh} />}
-        {!loading && !error && items.length === 0 && (
-          <EmptyState icon="\u{1F4EC}" text="\u6682\u65E0\u6D88\u606F" />
-        )}
+        {!loading && !error && items.length === 0 && <EmptyState icon="bell" text="暂无消息通知" />}
         {!loading &&
           !error &&
           items.map((item) => {
-            const icon = TYPE_ICON_MAP[item.type] ?? '\u{1F514}';
-            const color = TYPE_COLOR_MAP[item.type] ?? '#5b9e6f';
+            const iconName = TYPE_ICON_MAP[item.type] || 'bell';
+            const color = TYPE_COLOR_MAP[item.type] || '#5B9E6F';
             return (
               <View
                 key={item.id}
                 className="notifications__item"
                 onClick={() => handleNotificationClick(item)}
               >
-                <View className="notifications__item-icon" style={{ background: color + '1a' }}>
-                  <Text className="notifications__item-emoji">{icon}</Text>
+                <View className="notifications__item-icon" style={{ background: color + '18' }}>
+                  <Icon name={iconName} size={20} color={color} />
                 </View>
                 <View className="notifications__item-content">
                   <Text className="notifications__item-title">{item.title}</Text>
                   <Text className="notifications__item-desc">{item.content}</Text>
-                  <Text className="notifications__item-time">{_formatTime(item.createdAt)}</Text>
+                  <Text className="notifications__item-time">{formatTime(item.createdAt)}</Text>
                 </View>
                 {!item.isRead && <View className="notifications__item-dot" />}
               </View>
             );
           })}
-        {loadingMore && <Loading text="\u52A0\u8F7D\u66F4\u591A..." />}
+        {loadingMore && <Loading text="加载更多..." />}
         <View className="notifications__bottom-spacer" />
       </ScrollView>
     </View>
