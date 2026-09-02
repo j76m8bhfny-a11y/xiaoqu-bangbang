@@ -1,6 +1,7 @@
 import { View, Text } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useAuthStore } from '@/store';
+import Icon from '@/components/icon';
 import './index.scss';
 
 interface UnverifiedFormBannerProps {
@@ -24,7 +25,9 @@ export default function UnverifiedFormBanner({
 
   return (
     <View className="ufb">
-      <Text className="ufb__icon">ℹ️</Text>
+      <View className="ufb__icon">
+        <Icon name="help" size={20} color="#C9702F" />
+      </View>
       <Text className="ufb__tip">{tip}</Text>
       <View className="ufb__cta" onClick={() => Taro.navigateTo({ url: verifyUrl })}>
         <Text className="ufb__cta-text">{ctaText}</Text>

@@ -13,7 +13,9 @@ export function PetMeta({ event }: { event: EventDto }) {
       <Text className="section-title">
         <Icon name="paw" size={16} /> 宠物详情
       </Text>
-      <Text className="pet-meta__watermark">🐾</Text>
+      <View className="pet-meta__watermark">
+        <Icon name="paw" size={80} color="#FBF0DD" />
+      </View>
       {event.subType === PetSubType.FEED &&
         (() => {
           const m = event.petMeta as PetFeedMeta;
@@ -63,18 +65,22 @@ export function PetMeta({ event }: { event: EventDto }) {
             <>
               <View className="pet-meta__tags">
                 <View className="pet-meta__tag pet-meta__tag--size">
-                  <Text>🐶 {DOG_SIZE_LABELS[m.dogSize] ?? m.dogSize}</Text>
+                  <Icon name="paw" size={16} />
+                  <Text>{DOG_SIZE_LABELS[m.dogSize] ?? m.dogSize}</Text>
                 </View>
                 {m.dogName && (
                   <View className="pet-meta__tag pet-meta__tag--type">
-                    <Text>📋 {m.dogName}</Text>
+                    <Icon name="clipboard" size={16} />
+                    <Text>{m.dogName}</Text>
                   </View>
                 )}
                 <View className="pet-meta__tag pet-meta__tag--schedule">
-                  <Text>🔄 每天{m.timesPerDay}次</Text>
+                  <Icon name="recycle" size={16} />
+                  <Text>每天{m.timesPerDay}次</Text>
                 </View>
                 <View className="pet-meta__tag pet-meta__tag--duration">
-                  <Text>⏱️ 每次{m.durationPerTime}分钟</Text>
+                  <Icon name="clock" size={16} />
+                  <Text>每次{m.durationPerTime}分钟</Text>
                 </View>
                 {m.timeSlots?.map((slot) => (
                   <View key={slot} className="pet-meta__tag pet-meta__tag--schedule">
@@ -83,13 +89,15 @@ export function PetMeta({ event }: { event: EventDto }) {
                 ))}
                 {m.needGear && (
                   <View className="pet-meta__tag pet-meta__tag--gear">
-                    <Text>🔧 需牵引绳/尿垫</Text>
+                    <Icon name="wrench" size={16} />
+                    <Text>需牵引绳/尿垫</Text>
                   </View>
                 )}
               </View>
               {m.note && (
                 <View className="pet-meta__warning">
-                  <Text className="pet-meta__warning-text">⚠️ {m.note}</Text>
+                  <Icon name="warning" size={16} color="#D9534F" />
+                  <Text className="pet-meta__warning-text">{m.note}</Text>
                 </View>
               )}
             </>
