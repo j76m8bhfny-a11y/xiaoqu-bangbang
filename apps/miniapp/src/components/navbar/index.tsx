@@ -25,7 +25,7 @@ export default function NavBar({
 }: NavBarProps) {
   let statusBarHeight = 20;
   try {
-    const sysInfo = Taro.getSystemInfoSync();
+    const sysInfo = Taro.getWindowInfo();
     if (sysInfo.statusBarHeight) {
       statusBarHeight = sysInfo.statusBarHeight;
     }

@@ -180,7 +180,7 @@
   }
 
   &__bottom-spacer {
-    height: 120px;
+    height: calc(120px + env(safe-area-inset-bottom));
   }
 
   &__fab {

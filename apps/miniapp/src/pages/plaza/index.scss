@@ -284,6 +284,6 @@
   }
 
   &__bottom-spacer {
-    height: 180px;
+    height: calc(120px + env(safe-area-inset-bottom));
   }
 }

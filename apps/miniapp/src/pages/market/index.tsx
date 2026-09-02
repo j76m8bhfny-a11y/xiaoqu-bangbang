@@ -74,7 +74,7 @@ export default function Market() {
 
   let statusBarHeight = 20;
   try {
-    const sys = Taro.getSystemInfoSync();
+    const sys = Taro.getWindowInfo();
     if (sys.statusBarHeight) statusBarHeight = sys.statusBarHeight;
   } catch {
     // fallback
