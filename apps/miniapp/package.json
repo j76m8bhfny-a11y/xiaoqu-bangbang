@@ -19,7 +19,8 @@
     "lint:fix": "eslint src/ --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "sync:lan": "bash scripts/sync-lan-ip.sh"
   },
   "browserslist": [
     "last 3 versions",
