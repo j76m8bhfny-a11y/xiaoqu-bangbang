@@ -21,15 +21,20 @@ export default function CustomTabBar() {
   const [selected, setSelected] = useState(0);
 
   useEffect(() => {
-    const pages = Taro.getCurrentPages();
-    if (pages.length > 0) {
-      const current = pages[pages.length - 1];
-      const route = current.route ? `/${current.route}` : '';
-      const index = TABS.findIndex((t) => t.pagePath === route);
-      if (index !== -1) {
-        setSelected(index);
+    const sync = () => {
+      const pages = Taro.getCurrentPages();
+      if (pages.length > 0) {
+        const current = pages[pages.length - 1];
+        const route = current.route ? `/${current.route}` : '';
+        const index = TABS.findIndex((t) => t.pagePath === route);
+        if (index !== -1) setSelected(index);
       }
-    }
+    };
+    sync();
+    Taro.eventCenter.on('tabbar:sync', sync);
+    return () => {
+      Taro.eventCenter.off('tabbar:sync', sync);
+    };
   }, []);
 
   const handleSwitch = (index: number) => {

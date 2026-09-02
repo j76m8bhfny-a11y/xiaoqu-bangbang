@@ -150,6 +150,7 @@ export default function Events() {
   const firstShowRef = useRef(true);
 
   useDidShow(() => {
+    Taro.eventCenter.trigger('tabbar:sync');
     if (pendingEventsFilter) {
       setOuter('help');
       setHelpFilter(pendingEventsFilter.filter);

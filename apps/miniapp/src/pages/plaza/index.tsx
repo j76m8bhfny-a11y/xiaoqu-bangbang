@@ -47,6 +47,7 @@ export default function Plaza() {
   const [refreshTick, setRefreshTick] = useState(0);
   const firstShowRef = useRef(true);
   useDidShow(() => {
+    Taro.eventCenter.trigger('tabbar:sync');
     if (firstShowRef.current) {
       firstShowRef.current = false;
       return;

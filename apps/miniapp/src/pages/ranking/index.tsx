@@ -1,6 +1,6 @@
 import { View, Text, ScrollView } from '@tarojs/components';
 import { useState, useMemo } from 'react';
-import Taro, { switchTab } from '@tarojs/taro';
+import Taro, { switchTab, useDidShow } from '@tarojs/taro';
 import { useCommunityStore } from '@/store';
 import { rankingService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
@@ -135,6 +135,10 @@ export default function Ranking() {
   const communityId = useCommunityStore((s) => s.currentCommunityId);
   const [activePeriod, setActivePeriod] = useState<PeriodType>(PeriodType.MONTH);
   const [activeTab, setActiveTab] = useState<'ranking' | 'badges'>('ranking');
+
+  useDidShow(() => {
+    Taro.eventCenter.trigger('tabbar:sync');
+  });
 
   const {
     data: rankingData,

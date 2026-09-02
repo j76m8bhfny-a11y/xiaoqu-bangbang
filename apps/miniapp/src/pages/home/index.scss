@@ -23,6 +23,8 @@
     align-items: center;
     gap: $spacing-md;
     padding-top: $spacing-lg;
+    padding-right: 170px;
+    box-sizing: border-box;
   }
 
   &__avatar {

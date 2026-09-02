@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Image, Button } from '@tarojs/components';
-import Taro, { useShareAppMessage } from '@tarojs/taro';
+import Taro, { useShareAppMessage, useDidShow } from '@tarojs/taro';
 import { useEffect, useState } from 'react';
 import { useAuthStore, useCommunityStore } from '@/store';
 import { authService, rankingService } from '@/services';
@@ -108,6 +108,11 @@ export default function Home() {
   const [moreExpanded, setMoreExpanded] = useState(false);
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useDidShow(() => {
+    Taro.eventCenter.trigger('tabbar:sync');
+  });
+
   useEffect(() => {
     if (user && shouldShowOnboarding(user.verifyStatus === 'verified')) {
       setShowOnboarding(true);

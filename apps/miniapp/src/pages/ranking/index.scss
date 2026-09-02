@@ -15,10 +15,10 @@
   }
 
   &__header {
-    margin: $spacing-md $spacing-lg 0;
-    padding: $spacing-md;
-    border-radius: $radius-lg;
-    background: linear-gradient(135deg, $color-accent, $color-accent-deep);
+    margin: 0;
+    padding: 0 24px 24px;
+    border-radius: 0 0 32px 32px;
+    background: linear-gradient(160deg, #a8551e 0%, #9c4a16 100%);
     box-shadow: $shadow-warm;
     overflow: hidden;
   }
@@ -28,6 +28,8 @@
     align-items: center;
     justify-content: space-between;
     gap: $spacing-xs;
+    padding-right: 170px;
+    box-sizing: border-box;
   }
 
   &__header-title {
@@ -36,27 +38,30 @@
     gap: $spacing-xs;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: #fff;
+    color: #ffffff;
   }
 
   &__header-sub {
     font-size: $font-size-xs;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.85);
   }
 
   // 第一层 tab：排行榜/勋章墙，内嵌 header 底部（与邻里互助一致）
   &__outer-tabs {
     display: flex;
-    margin-top: $spacing-sm;
-    background: rgba(255, 255, 255, 0.15);
+    margin-top: 24px;
+    background: rgba(255, 255, 255, 0.25);
     border-radius: $radius-pill;
     padding: 4px;
+    gap: 4px;
   }
 
   &__outer-tab {
     flex: 1;
-    text-align: center;
-    padding: $spacing-xs 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 72px;
     border-radius: $radius-pill;
     transition: all 0.2s;
 
@@ -67,12 +72,12 @@
 
   &__outer-tab-text {
     font-size: $font-size-sm;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.85);
     font-weight: $font-weight-medium;
   }
 
   &__outer-tab--active &__outer-tab-text {
-    color: $color-accent;
+    color: #9c4a16;
     font-weight: $font-weight-bold;
   }
 
