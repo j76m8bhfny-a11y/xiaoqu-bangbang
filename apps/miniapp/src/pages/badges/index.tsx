@@ -58,7 +58,7 @@ export default function Badges() {
       <NavBar title="勋章墙" />
 
       <View className="badges__stats">
-        <Icon name="medal" size={24} color="#E89B6C" />
+        <Icon name="medal" size={24} color="#C9702F" />
         <Text className="badges__stats-text">
           已获得 {earnedCount}/{allBadges.length} 枚荣誉勋章
         </Text>
@@ -75,7 +75,7 @@ export default function Badges() {
                 className={`badges__card ${earned ? 'badges__card--earned' : 'badges__card--locked'}`}
               >
                 <View className="badges__card-icon-box">
-                  <Icon name={iconName} size={36} color={earned ? '#E89B6C' : '#6B7A6E'} />
+                  <Icon name={iconName} size={36} color={earned ? '#C9702F' : '#6B7A6E'} />
                 </View>
                 <Text className="badges__card-name">{badge.name}</Text>
                 <Text className="badges__card-desc">{badge.description}</Text>

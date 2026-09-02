@@ -304,7 +304,7 @@ export default function Home() {
                   <Text className="home__grid-desc">{item.desc}</Text>
                 </View>
                 <View className="home__grid-icon-box">
-                  <Icon name={item.icon} size={24} color={isCream ? '#E89B6C' : '#5B9E6F'} />
+                  <Icon name={item.icon} size={24} color={isCream ? '#C9702F' : '#5B9E6F'} />
                 </View>
               </View>
             );

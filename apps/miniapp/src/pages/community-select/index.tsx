@@ -53,7 +53,7 @@ export default function CommunitySelect() {
       <View className="cs__hero">
         <View className="cs__hero-decor">
           <View className="cs__hero-emoji">
-            <Icon name="community" size={64} color="#E89B6C" />
+            <Icon name="community" size={64} color="#C9702F" />
           </View>
         </View>
         <Text className="cs__hero-title">选择您所在的小区</Text>
@@ -106,7 +106,7 @@ export default function CommunitySelect() {
         {!loading && !error && communities.length === 0 && (
           <View className="cs__empty">
             <View className="cs__empty-emoji">
-              <Icon name="community" size={48} color="#E89B6C" />
+              <Icon name="community" size={48} color="#C9702F" />
             </View>
             <Text className="cs__empty-text">未找到匹配的小区</Text>
             <Text className="cs__empty-hint">换个关键词试试？</Text>

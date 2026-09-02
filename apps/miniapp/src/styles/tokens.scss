@@ -8,10 +8,11 @@
 $color-bg: #fff8ee; // 页面背景：暖白，奶油纸感
 $color-card: #ffffff; // 卡片背景：纯白，与背景拉开层次
 $color-primary: #5b9e6f; // 主色：草绿（点缀/选中/链接）
-$color-primary-deep: #4a8c5e; // 主色加深：按钮底色，配白字对比达标
+$color-primary-deep: #3e7a54; // 主色加深：按钮底色，配白字对比达标
 $color-primary-soft: #a8d5b5; // 主色浅：标签/浅底
 $color-accent: #e89b6c; // 点缀暖色：蜜桃橙（提醒/奖励/装饰）
-$color-accent-deep: #d48050; // 点缀加深：渐变收尾
+$color-accent-deep: #c9702f; // 点缀加深：渐变收尾
+$color-accent-text: #b05e22; // 橙色文字（白底达标 4.7）
 $color-accent-soft: #fbf0dd; // 点缀浅底（accent 配套）
 $color-cream: #fff3d6; // 奶油色：宫格卡片底色
 $color-cream-deep: #f3ead0; // 奶油深色：渐变收尾
@@ -19,7 +20,7 @@ $color-dark: #171717; // 深墨黑
 
 // ── 文字 ──
 $color-text: #2c3a2e; // 正文：深绿灰，高对比好读
-$color-text-secondary: #6b7a6e; // 次要文字：绿灰（不用浅灰，保证老人看得清）
+$color-text-secondary: #5c6b60; // 次要文字：绿灰（不用浅灰，保证老人看得清）
 $color-text-on-primary: #ffffff; // 主色底上的文字
 
 // ── 辅助 ──

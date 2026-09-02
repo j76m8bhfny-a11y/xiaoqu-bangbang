@@ -87,7 +87,7 @@ export default function Settings() {
           <View className="settings__menu-item">
             <View className="settings__menu-left">
               <View className="settings__menu-icon">
-                <Icon name="bulb" size={22} color="#E89B6C" />
+                <Icon name="bulb" size={22} color="#C9702F" />
               </View>
               <Text className="settings__menu-label">关于我们</Text>
             </View>

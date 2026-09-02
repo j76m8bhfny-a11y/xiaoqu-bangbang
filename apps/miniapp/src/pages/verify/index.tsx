@@ -169,7 +169,7 @@ export default function Verify() {
         {pendingRecord && !showForm && (
           <View className="verify__status-card verify__status-card--pending">
             <View className="verify__status-card-icon">
-              <Icon name="clock" size={32} color="#E89B6C" />
+              <Icon name="clock" size={32} color="#C9702F" />
             </View>
             <View className="verify__status-card-body">
               <Text className="verify__status-card-title">认证审核中</Text>

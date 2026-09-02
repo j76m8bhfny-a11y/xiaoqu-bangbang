@@ -77,13 +77,13 @@ export default function EventCard({ data, onClick, onCtaClick }: EventCardProps)
         </View>
         <View className="event-card__stats">
           <View className="event-card__stat">
-            <Icon name="heart" size={14} color="#E89B6C" /> <Text>{data.likeCount}</Text>
+            <Icon name="heart" size={14} color="#C9702F" /> <Text>{data.likeCount}</Text>
           </View>
           <View className="event-card__stat">
             <Icon name="chat" size={14} /> <Text>{data.commentCount}</Text>
           </View>
           <View className="event-card__stat">
-            <Icon name="flower" size={14} color="#E89B6C" /> <Text>{data.thanksCount}</Text>
+            <Icon name="flower" size={14} color="#C9702F" /> <Text>{data.thanksCount}</Text>
           </View>
         </View>
       </View>

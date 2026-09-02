@@ -107,7 +107,8 @@
   &__filter-tab {
     display: inline-flex;
     align-items: center;
-    padding: 8px 24px;
+    padding: 14px 28px;
+    min-height: 60px;
     border-radius: $radius-pill;
     background: #fff;
     box-shadow: 0 1px 4px rgba(23, 23, 23, 0.04);
@@ -119,7 +120,8 @@
     }
   }
 
-  &__filter-text {
+  &__filter-text,
+  &__filter-tab-text {
     font-size: $font-size-xs;
     color: $color-text;
     font-weight: $font-weight-medium;
@@ -196,7 +198,7 @@
     width: 88px;
     height: 88px;
     border-radius: 50%;
-    background: $color-primary;
+    background: $color-primary-deep;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -228,7 +230,8 @@
   &__outer-tab {
     flex: 1;
     text-align: center;
-    padding: $spacing-xs 0;
+    padding: 14px 0;
+    min-height: 60px;
     border-radius: $radius-pill;
     transition: all 0.2s;
 

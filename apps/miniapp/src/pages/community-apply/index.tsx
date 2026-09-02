@@ -131,7 +131,7 @@ export default function CommunityApply() {
       <ScrollView scrollY className="apply__body">
         <View className="apply__hero">
           <View className="apply__hero-emoji">
-            <Icon name="community" size={64} color="#E89B6C" />
+            <Icon name="community" size={64} color="#C9702F" />
           </View>
           <Text className="apply__hero-title">申请开通你家小区</Text>
           <Text className="apply__hero-subtitle">

@@ -27,7 +27,7 @@ export default function AdPopup({ visible, onClose }: AdPopupProps) {
         </View>
         <View className="ad-popup__content">
           <View className="ad-popup__emoji">
-            <Icon name="flower" size={48} color="#E89B6C" />
+            <Icon name="flower" size={48} color="#C9702F" />
           </View>
           <Text className="ad-popup__title">{AD_CONTENT.title}</Text>
           <Text className="ad-popup__subtitle">{AD_CONTENT.subtitle}</Text>

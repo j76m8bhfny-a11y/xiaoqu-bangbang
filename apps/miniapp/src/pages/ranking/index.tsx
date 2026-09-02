@@ -283,7 +283,7 @@ export default function Ranking() {
                     </View>
                     <Text className="ranking__podium-name">{top3[1].nickname}</Text>
                     <View className="ranking__podium-flowers">
-                      <Icon name="flower" size={16} color="#E89B6C" />{' '}
+                      <Icon name="flower" size={16} color="#C9702F" />{' '}
                       <Text>{top3[1].flowerCount}</Text>
                     </View>
                     <View className="ranking__podium-bar ranking__podium-bar--second">
@@ -294,7 +294,7 @@ export default function Ranking() {
                   <View className="ranking__podium-item ranking__podium-item--first">
                     <View className="ranking__podium-avatar-wrap">
                       <View className="ranking__podium-crown ranking__podium-crown--first">
-                        <Icon name="crown" size={28} color="#E89B6C" />
+                        <Icon name="crown" size={28} color="#C9702F" />
                       </View>
                       <View className="ranking__podium-avatar ranking__podium-avatar--first">
                         <Text className="ranking__podium-avatar-text">
@@ -304,7 +304,7 @@ export default function Ranking() {
                     </View>
                     <Text className="ranking__podium-name">{top3[0].nickname}</Text>
                     <View className="ranking__podium-flowers">
-                      <Icon name="flower" size={16} color="#E89B6C" />{' '}
+                      <Icon name="flower" size={16} color="#C9702F" />{' '}
                       <Text>{top3[0].flowerCount}</Text>
                     </View>
                     <View className="ranking__podium-bar ranking__podium-bar--first">
@@ -325,7 +325,7 @@ export default function Ranking() {
                     </View>
                     <Text className="ranking__podium-name">{top3[2].nickname}</Text>
                     <View className="ranking__podium-flowers">
-                      <Icon name="flower" size={16} color="#E89B6C" />{' '}
+                      <Icon name="flower" size={16} color="#C9702F" />{' '}
                       <Text>{top3[2].flowerCount}</Text>
                     </View>
                     <View className="ranking__podium-bar ranking__podium-bar--third">
@@ -348,7 +348,7 @@ export default function Ranking() {
                     </View>
                     <View className="ranking__list-flowers">
                       <View className="ranking__list-flower-count">
-                        <Icon name="flower" size={14} color="#E89B6C" />{' '}
+                        <Icon name="flower" size={14} color="#C9702F" />{' '}
                         <Text>{user.flowerCount}</Text>
                       </View>
                     </View>
@@ -368,13 +368,13 @@ export default function Ranking() {
                     </View>
                     <Text className="ranking__my-rank-pos">第{myRank.rankNo ?? '--'}名</Text>
                     <View className="ranking__list-flower-count">
-                      <Icon name="flower" size={14} color="#E89B6C" />{' '}
+                      <Icon name="flower" size={14} color="#C9702F" />{' '}
                       <Text>{myRank.flowerCount}</Text>
                     </View>
                   </View>
                   {gapToPrev !== null && gapToPrev > 0 && (
                     <View className="ranking__my-rank-gap">
-                      <Icon name="flower" size={12} color="#E89B6C" />
+                      <Icon name="flower" size={12} color="#C9702F" />
                       <Text className="ranking__my-rank-gap-text">距上一名还差 {gapToPrev} 朵</Text>
                     </View>
                   )}
@@ -418,15 +418,16 @@ export default function Ranking() {
             <>
               <View className="ranking__badge-overview">
                 <View className="ranking__badge-overview-row">
-                  <Icon name="trophy" size={20} color="#E89B6C" />
+                  <Icon name="trophy" size={20} color="#C9702F" />
                   <Text className="ranking__badge-overview-text">
                     已获得 {earnedCount} 枚勋章{totalCount > 0 ? `／共 ${totalCount} 枚` : ''}
                   </Text>
                 </View>
                 {nextBadge && (
                   <View className="ranking__badge-overview-next">
+                    <Icon name="flag" size={16} color="#C9702F" />
                     <Text className="ranking__badge-overview-next-text">
-                      🎯 下一枚目标：「{nextBadge.displayName}」
+                      下一枚目标：「{nextBadge.displayName}」
                       {nextBadge.progressText ? `｜${nextBadge.progressText}` : ''}
                     </Text>
                   </View>
@@ -453,7 +454,8 @@ export default function Ranking() {
                     )}
                     {badge.earned ? (
                       <View className="ranking__badge-status ranking__badge-status--earned">
-                        <Text className="ranking__badge-status-text">✅ 已获得</Text>
+                        <Icon name="check-circle" size={16} color="#3E7A54" />
+                        <Text className="ranking__badge-status-text">已获得</Text>
                       </View>
                     ) : (
                       <View className="ranking__badge-status ranking__badge-status--locked">

@@ -112,7 +112,7 @@ export function Lifecycle({
             onClick={() => onThanks()}
           >
             <Text className="event-detail__lifecycle-btn-text" style={{ color: '#FF6B6B' }}>
-              <Icon name="flower" size={16} color="#E89B6C" /> 送花感谢
+              <Icon name="flower" size={16} color="#C9702F" /> 送花感谢
             </Text>
           </View>
         )}
@@ -130,7 +130,7 @@ export function Lifecycle({
           ) : (
             <View className="event-detail__rating">
               <Text className="event-detail__rating-title">
-                <Icon name="star" size={16} color="#E89B6C" /> 评价{isCreator ? '帮手' : '发起者'}
+                <Icon name="star" size={16} color="#C9702F" /> 评价{isCreator ? '帮手' : '发起者'}
               </Text>
               <View className="event-detail__rating-stars">
                 {[1, 2, 3, 4, 5].map((n) => (
@@ -184,7 +184,7 @@ export function Lifecycle({
         {event.status === EventStatus.COMPLETED && ratings.length > 0 && (
           <View className="event-detail__ratings-list">
             <View className="event-detail__ratings-list-header">
-              <Icon name="star" size={18} color="#E89B6C" /> <Text>评价 ({ratings.length})</Text>
+              <Icon name="star" size={18} color="#C9702F" /> <Text>评价 ({ratings.length})</Text>
             </View>
             {ratings.map((r) => (
               <View key={r.id} className="event-detail__rating-item">

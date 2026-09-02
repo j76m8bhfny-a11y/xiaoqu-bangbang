@@ -189,7 +189,7 @@ export default function UserProfile() {
           </View>
           <View className="up__stat">
             <View className="up__stat-icon">
-              <Icon name="flower" size={20} color="#E89B6C" />
+              <Icon name="flower" size={20} color="#C9702F" />
             </View>
             <Text className="up__stat-value">{profile.flowerCount}</Text>
             <Text className="up__stat-label">小红花</Text>

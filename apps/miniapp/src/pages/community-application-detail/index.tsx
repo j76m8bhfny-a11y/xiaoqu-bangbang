@@ -132,7 +132,7 @@ export default function CommunityApplicationDetail() {
           {isPending && <Text className="cad__count-hint">助力越多，越早被平台审核哦～</Text>}
           {isApproved && (
             <View className="cad__count-hint">
-              <Icon name="party" size={18} color="#E89B6C" /> <Text>小区已开通，欢迎大家加入</Text>
+              <Icon name="party" size={18} color="#C9702F" /> <Text>小区已开通，欢迎大家加入</Text>
             </View>
           )}
         </View>

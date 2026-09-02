@@ -170,7 +170,7 @@ export default function Plaza() {
             >
               <View className="plaza__card-header">
                 <View className="plaza__card-title">
-                  <Icon name="vote" size={18} color="#E89B6C" />
+                  <Icon name="vote" size={18} color="#C9702F" />
                   <Text>待参与投票</Text>
                 </View>
                 <Text className="plaza__card-more">去投票 &gt;</Text>
@@ -276,7 +276,7 @@ export default function Plaza() {
                       </>
                     ) : (
                       <View className="plaza__pill plaza__pill--rating">
-                        <Icon name="star" size={13} color="#E89B6C" />
+                        <Icon name="star" size={13} color="#C9702F" />
                         <Text>{t.avgRating?.toFixed(1) ?? '5.0'}分</Text>
                       </View>
                     )}

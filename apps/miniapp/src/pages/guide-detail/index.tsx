@@ -263,7 +263,7 @@ export default function GuideDetail() {
               className="guide-detail__comment-action"
               onClick={() => handleToggleCommentLike(c.id)}
             >
-              <Icon name="heart" size={16} color={c.isLiked ? '#E89B6C' : '#6B7A6E'} />
+              <Icon name="heart" size={16} color={c.isLiked ? '#C9702F' : '#6B7A6E'} />
               <Text className="guide-detail__comment-action-text">
                 {c.likeCount > 0 ? c.likeCount : '赞'}
               </Text>
@@ -407,7 +407,7 @@ export default function GuideDetail() {
           className={`guide-detail__icon-btn ${liked ? 'guide-detail__icon-btn--liked' : ''}`}
           onClick={handleToggleLike}
         >
-          <Icon name="heart" size={24} color={liked ? '#E89B6C' : '#6B7A6E'} />
+          <Icon name="heart" size={24} color={liked ? '#C9702F' : '#6B7A6E'} />
           <Text className="guide-detail__icon-btn-label">{likeCount > 0 ? likeCount : '点赞'}</Text>
         </View>
 
@@ -418,7 +418,7 @@ export default function GuideDetail() {
           <Icon
             name={favorited ? 'star' : 'star-outline'}
             size={24}
-            color={favorited ? '#E89B6C' : '#6B7A6E'}
+            color={favorited ? '#C9702F' : '#6B7A6E'}
           />
           <Text className="guide-detail__icon-btn-label">
             {favoriteCount > 0 ? favoriteCount : '收藏'}

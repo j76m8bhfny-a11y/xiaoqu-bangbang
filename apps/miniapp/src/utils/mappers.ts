@@ -236,7 +236,7 @@ export const MARKET_CATEGORY_CONFIG: Record<string, { label: string; icon: strin
 export const CONDITION_LABELS: Record<string, { label: string; color: string }> = {
   new: { label: '全新', color: '#5b9e6f' },
   like_new: { label: '九成新', color: '#5b9e6f' },
-  good: { label: '八成新', color: '#e89b6c' },
+  good: { label: '八成新', color: '#B05E22' },
   used: { label: '七成新', color: '#FF6B6B' },
   old: { label: '旧物', color: '#999' },
 };
@@ -265,7 +265,7 @@ export const GUIDE_CATEGORY_CONFIG: Record<string, { label: string; icon: string
 };
 
 export const GUIDE_STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending_review: { label: '待审核', color: '#e89b6c' },
+  pending_review: { label: '待审核', color: '#B05E22' },
   published: { label: '已发布', color: '#5b9e6f' },
   rejected: { label: '未通过', color: '#FF6B6B' },
 };

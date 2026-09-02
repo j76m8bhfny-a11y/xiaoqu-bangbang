@@ -29,13 +29,13 @@ export default function MasonryEventCard({ data, onClick }: MasonryEventCardProp
         <View className="masonry-card__stats">
           {data.thanksCount > 0 && (
             <View className="masonry-card__stat">
-              <Icon name="flower" size={14} color="#E89B6C" />
+              <Icon name="flower" size={14} color="#C9702F" />
               <Text className="masonry-card__stat-text">{data.thanksCount}</Text>
             </View>
           )}
           {data.likeCount > 0 && (
             <View className="masonry-card__stat">
-              <Icon name="heart" size={14} color="#E89B6C" />
+              <Icon name="heart" size={14} color="#C9702F" />
               <Text className="masonry-card__stat-text">{data.likeCount}</Text>
             </View>
           )}

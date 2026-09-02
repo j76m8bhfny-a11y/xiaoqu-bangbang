@@ -195,7 +195,7 @@ export function Participants({
                       onClick={() => onThanks(p.userId)}
                     >
                       <View className="event-detail__participant-action-text">
-                        <Icon name="flower" size={16} color="#E89B6C" /> <Text>送花</Text>
+                        <Icon name="flower" size={16} color="#C9702F" /> <Text>送花</Text>
                       </View>
                     </View>
                     <View
@@ -203,7 +203,7 @@ export function Participants({
                       onClick={() => onStartRating(p.userId)}
                     >
                       <View className="event-detail__participant-action-text">
-                        <Icon name="star" size={16} color="#E89B6C" /> <Text>评价</Text>
+                        <Icon name="star" size={16} color="#C9702F" /> <Text>评价</Text>
                       </View>
                     </View>
                   </View>

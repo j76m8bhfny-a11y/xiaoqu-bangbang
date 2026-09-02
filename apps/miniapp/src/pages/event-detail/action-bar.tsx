@@ -43,7 +43,7 @@ export function ActionBar({
         onClick={interactionDisabled ? undefined : onLike}
       >
         <View className="event-detail__action-btn-icon">
-          <Icon name="heart" size={24} color={liked ? '#E89B6C' : '#6B7A6E'} />
+          <Icon name="heart" size={24} color={liked ? '#C9702F' : '#6B7A6E'} />
         </View>
         <Text className="event-detail__action-btn-label">赞</Text>
       </View>
@@ -80,7 +80,7 @@ export function ActionBar({
         onClick={interactionDisabled ? undefined : onFavorite}
       >
         <View className="event-detail__action-btn-icon">
-          <Icon name={favorited ? 'star' : 'star-outline'} size={24} color="#E89B6C" />
+          <Icon name={favorited ? 'star' : 'star-outline'} size={24} color="#C9702F" />
         </View>
         <Text className="event-detail__action-btn-label">收藏</Text>
       </View>

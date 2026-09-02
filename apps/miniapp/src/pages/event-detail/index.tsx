@@ -223,13 +223,19 @@ export default function EventDetail() {
             <View className={`event-detail__hero-bg event-detail__hero-bg--pet-${event.subType}`} />
           )}
           {event.type === EventType.PET_HELP && event.subType === 'walk' && (
-            <Text className="event-detail__hero-emoji">🐕</Text>
+            <View className="event-detail__hero-emoji">
+              <Icon name="paw" size={48} />
+            </View>
           )}
           {event.type === EventType.PET_HELP && event.subType === 'feed' && (
-            <Text className="event-detail__hero-emoji">🐱</Text>
+            <View className="event-detail__hero-emoji">
+              <Icon name="cat" size={48} />
+            </View>
           )}
           {event.type === EventType.PET_HELP && event.subType === 'lost' && (
-            <Text className="event-detail__hero-emoji">🐾</Text>
+            <View className="event-detail__hero-emoji">
+              <Icon name="paw" size={48} />
+            </View>
           )}
           <View className="event-detail__hero-content">
             <View className="event-detail__hero-badge">
@@ -308,7 +314,7 @@ export default function EventDetail() {
               )}
               {event.rewardType && event.rewardType !== RewardType.NONE && (
                 <View className="event-detail__key-info-item event-detail__key-info-item--reward">
-                  <Icon name="gift" size={14} color="#E89B6C" />
+                  <Icon name="gift" size={14} color="#C9702F" />
                   <Text className="event-detail__key-info-text">
                     {REWARD_TYPE_LABELS[event.rewardType] ?? event.rewardType}
                     {event.rewardType === RewardType.PAID && event.rewardAmount != null
@@ -450,7 +456,7 @@ export default function EventDetail() {
           </Text>
 
           {comments.length === 0 && !commentsLoading && (
-            <Text className="event-detail__comments-empty">还没有邻居留言，来说第一句吧 👋</Text>
+            <Text className="event-detail__comments-empty">还没有邻居留言，来说第一句吧</Text>
           )}
 
           {(commentsExpanded ? comments : comments.slice(0, 2)).map((c) => (

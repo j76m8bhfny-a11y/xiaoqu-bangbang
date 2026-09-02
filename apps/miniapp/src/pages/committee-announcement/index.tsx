@@ -162,7 +162,7 @@ export default function CommitteeAnnouncement() {
             onClick={handleToggleLike}
           >
             <View className="committee-announcement__like-icon">
-              <Icon name="heart" size={20} color={liked ? '#E89B6C' : '#6B7A6E'} />
+              <Icon name="heart" size={20} color={liked ? '#C9702F' : '#6B7A6E'} />
             </View>
             <Text className="committee-announcement__like-text">
               {likeCount > 0 ? `${likeCount} 人觉得有用` : '有用'}
