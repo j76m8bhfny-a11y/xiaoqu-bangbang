@@ -1,20 +1,15 @@
 import { View, Text, Input, Image } from '@tarojs/components';
 import { useState, useCallback } from 'react';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { topicService, eventService, reportService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
 import EmptyState from '@/components/empty-state';
 import NavBar from '@/components/navbar';
+import Icon from '@/components/icon';
 import type { TopicTimelineItem, TopicCommentDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
-// emoji 常量：避免 TS 解析器对 JSX 内 emoji 的编码问题
-const ICON_THUMB_UP = '\u{1f44d}';
-const ICON_THUMB_DOWN = '\u{1f44e}';
-const ICON_HEART = '\u{1f90d}';
-const ICON_HEART_FILLED = '\u{2764}\u{fe0f}';
 const ICON_PLUS = '\uff0b';
-const ICON_REPORT = '\u{1f6ab}';
 
 export default function TopicDetail() {
   useAuthGuard();
@@ -33,6 +28,10 @@ export default function TopicDetail() {
     error: timelineError,
     refresh: refreshTimeline,
   } = useRequest(() => topicService.timeline(id, 1, 20), [id], { enabled: !!id });
+
+  useDidShow(() => {
+    refreshTimeline();
+  });
 
   const {
     data: commentsData,
@@ -219,8 +218,9 @@ export default function TopicDetail() {
         <View className="topic-detail__discuss-content">{c.content}</View>
         <View className="topic-detail__discuss-actions">
           <View className="topic-detail__discuss-like" onClick={() => handleLikeComment(c.id)}>
-            <Text className="topic-detail__discuss-like-text">
-              {'\u{1f44d}'} {c.likeCount}
+            <Icon name="thumbs-up" size={14} color="#5c6b60" />
+            <Text className="topic-detail__discuss-like-text" style={{ marginLeft: 4 }}>
+              {c.likeCount}
             </Text>
           </View>
           {!isClosed && (
@@ -258,11 +258,19 @@ export default function TopicDetail() {
             {!isClosed ? (
               <View className="topic-detail__vote-group">
                 <View className={likeBtnCls} onClick={() => handleVote('like')}>
-                  <Text className="topic-detail__vote-icon">{ICON_THUMB_UP}</Text>
+                  <Icon
+                    name="thumbs-up"
+                    size={18}
+                    color={userVote === 'like' ? '#ffffff' : '#5c6b60'}
+                  />
                   <Text className="topic-detail__vote-count">{topic.likeCount}</Text>
                 </View>
                 <View className={dislikeBtnCls} onClick={() => handleVote('dislike')}>
-                  <Text className="topic-detail__vote-icon">{ICON_THUMB_DOWN}</Text>
+                  <Icon
+                    name="thumbs-down"
+                    size={18}
+                    color={userVote === 'dislike' ? '#ffffff' : '#5c6b60'}
+                  />
                   <Text className="topic-detail__vote-count">{topic.dislikeCount}</Text>
                 </View>
               </View>
@@ -294,13 +302,22 @@ export default function TopicDetail() {
 
           {isClosed && topic.closedSummary && (
             <View className="topic-detail__summary">
-              <Text className="topic-detail__summary-label">{'\u{1f4dc}'} 完结总结</Text>
+              <View
+                className="topic-detail__summary-label"
+                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+              >
+                <Icon name="memo" size={14} color="#e89b6c" />
+                <Text>完结总结</Text>
+              </View>
               <View className="topic-detail__summary-text">{topic.closedSummary}</View>
             </View>
           )}
 
           <View className="topic-detail__report-link" onClick={handleReport}>
-            <Text className="topic-detail__report-link-text">{ICON_REPORT} 举报该议题</Text>
+            <Icon name="block" size={12} color="#5c6b60" />
+            <Text className="topic-detail__report-link-text" style={{ marginLeft: 4 }}>
+              举报该议题
+            </Text>
           </View>
         </View>
 
@@ -363,9 +380,7 @@ export default function TopicDetail() {
                         }
                         onClick={() => handleLikeEvent(ev.id)}
                       >
-                        <Text className="topic-detail__event-like-icon">
-                          {liked ? ICON_HEART_FILLED : ICON_HEART}
-                        </Text>
+                        <Icon name="heart" size={20} color={liked ? '#d9534f' : '#5c6b60'} />
                         <Text className="topic-detail__event-like-count">{ev.likeCount}</Text>
                       </View>
                     </View>
@@ -388,7 +403,13 @@ export default function TopicDetail() {
 
                     {ev.aiComment && (
                       <View className="topic-detail__ai">
-                        <View className="topic-detail__ai-label">{'\u{1f916}'} AI 点评</View>
+                        <View
+                          className="topic-detail__ai-label"
+                          style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                        >
+                          <Icon name="robot" size={14} color="#5b9e6f" />
+                          <Text>AI 点评</Text>
+                        </View>
                         <View className="topic-detail__ai-text">{ev.aiComment}</View>
                       </View>
                     )}

@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image } from '@tarojs/components';
+import { View, Text, Image } from '@tarojs/components';
 import Icon from '@/components/icon';
 import { ApplicationStatus, EventStatus } from '@xiaoqu-bangbang/shared';
 import type { EventDto, EventApplicationDto } from '@xiaoqu-bangbang/shared';
@@ -39,42 +39,43 @@ export function Participants({
     <>
       {/* M5: Participants / Responses Section */}
       {applications && applications.length > 0 && (
-        <View className="event-detail__section">
+        <View className="event-detail__section event-detail__respondents-section">
           <Text className="event-detail__section-title">
             <Icon name="handshake" size={16} /> 响应者 ({applications.length})
           </Text>
-          <ScrollView scrollX className="event-detail__respondents">
-            {applications.slice(0, 10).map((app) => (
-              <View key={app.id} className="event-detail__respondent-avatar-wrap">
-                <View
-                  className={`event-detail__respondent-avatar ${app.status === ApplicationStatus.SELECTED || app.status === ApplicationStatus.CONFIRMED ? 'event-detail__respondent-avatar--selected' : ''}`}
-                >
-                  {app.userAvatarUrl ? (
-                    <Image
-                      className="event-detail__respondent-avatar-img"
-                      src={app.userAvatarUrl}
-                      mode="aspectFill"
-                    />
-                  ) : (
-                    <Text className="event-detail__respondent-avatar-emoji">
-                      {app.userNickname.slice(0, 1)}
-                    </Text>
-                  )}
-                </View>
-                <Text className="event-detail__respondent-name">{app.userNickname}</Text>
+          <View className="event-detail__stacked-avatars">
+            {applications.slice(0, 5).map((app, index) => (
+              <View
+                key={app.id}
+                className="event-detail__stacked-avatar"
+                style={{ zIndex: 10 - index }}
+              >
+                {app.userAvatarUrl ? (
+                  <Image
+                    className="event-detail__stacked-avatar-img"
+                    src={app.userAvatarUrl}
+                    mode="aspectFill"
+                  />
+                ) : (
+                  <Text className="event-detail__stacked-avatar-emoji">
+                    {app.userNickname.slice(0, 1)}
+                  </Text>
+                )}
               </View>
             ))}
-            {applications.length > 10 && (
-              <View className="event-detail__respondent-avatar-wrap">
-                <View className="event-detail__respondent-more">
-                  <Text className="event-detail__respondent-more-text">
-                    还有{applications.length - 10}位
-                  </Text>
-                </View>
-                <Text className="event-detail__respondent-name">愿意帮</Text>
+            {applications.length > 5 && (
+              <View className="event-detail__stacked-badge">
+                <Text className="event-detail__stacked-badge-text">+{applications.length - 5}</Text>
               </View>
             )}
-          </ScrollView>
+          </View>
+          <View className="event-detail__participant-names">
+            {applications.map((app) => (
+              <Text key={app.id} className="event-detail__participant-name-tag">
+                {app.userNickname}
+              </Text>
+            ))}
+          </View>
           {applications.map((app) => (
             <View key={app.id} className="event-detail__participant">
               <View className="event-detail__participant-avatar">

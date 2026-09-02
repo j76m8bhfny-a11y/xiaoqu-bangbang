@@ -215,8 +215,37 @@ export default function EventDetail() {
 
   return (
     <View className="event-detail">
-      <NavBar title="互助详情" />
-      <ScrollView scrollY className="event-detail__scroll">
+      <View className="event-detail__header">
+        <NavBar title="互助详情" bg="transparent" color="#ffffff" />
+        <View className="event-detail__header-summary">
+          <View className="event-detail__header-tags">
+            <View className="event-detail__header-badge">
+              <Text className="event-detail__header-badge-text">{statusLabel}</Text>
+            </View>
+            <View className="event-detail__header-type-tag">
+              <Text className="event-detail__header-type-tag-text">
+                {event.type === EventType.PET_HELP && event.subType
+                  ? (PET_SUBTYPE_LABELS[event.subType] ?? typeConfig.label)
+                  : typeConfig.label}
+              </Text>
+            </View>
+            {event.rewardType && event.rewardType !== RewardType.NONE && (
+              <View className="event-detail__header-reward-tag">
+                <Icon name="gift" size={12} color="#ffffff" />
+                <Text className="event-detail__header-reward-tag-text">
+                  {REWARD_TYPE_LABELS[event.rewardType] ?? event.rewardType}
+                  {event.rewardType === RewardType.PAID && event.rewardAmount != null
+                    ? ` ¥${event.rewardAmount}`
+                    : ''}
+                </Text>
+              </View>
+            )}
+          </View>
+          <Text className="event-detail__header-title">{event.title}</Text>
+        </View>
+      </View>
+
+      <ScrollView scrollY className="event-detail__body">
         {/* M1: Hero card - tags + title + creator + key info */}
         <View className="event-detail__hero">
           {event.type === EventType.PET_HELP && event.subType && (
@@ -238,24 +267,6 @@ export default function EventDetail() {
             </View>
           )}
           <View className="event-detail__hero-content">
-            <View className="event-detail__hero-badge">
-              <Text className="event-detail__hero-badge-text">{statusLabel}</Text>
-            </View>
-            <View className="event-detail__tags">
-              <View
-                className="event-detail__type-tag"
-                style={{ backgroundColor: typeConfig.bgColor, color: typeConfig.color }}
-              >
-                <Text className="event-detail__type-tag-text">
-                  {event.type === EventType.PET_HELP && event.subType
-                    ? (PET_SUBTYPE_LABELS[event.subType] ?? typeConfig.label)
-                    : typeConfig.label}
-                </Text>
-              </View>
-            </View>
-
-            <Text className="event-detail__title">{event.title}</Text>
-
             <View className="event-detail__creator">
               {event.isAnonymous ? (
                 <View className="event-detail__avatar event-detail__avatar--anonymous">
@@ -536,8 +547,6 @@ export default function EventDetail() {
           }
           onSetRatingContent={setRatingContent}
         />
-
-        <View className="event-detail__bottom-spacer" />
       </ScrollView>
 
       <HelperSelectionSheet
@@ -557,19 +566,21 @@ export default function EventDetail() {
         onCopyWechat={handleCopyWechat}
       />
 
-      <ActionBar
-        liked={liked}
-        favorited={favorited}
-        interactionDisabled={interactionDisabled}
-        isCreator={isCreator}
-        event={event}
-        submitting={submitting}
-        typeConfig={typeConfig}
-        onLike={handleLike}
-        onComment={handleComment}
-        onCta={handleCta}
-        onFavorite={handleFavorite}
-      />
+      <View className="event-detail__action">
+        <ActionBar
+          liked={liked}
+          favorited={favorited}
+          interactionDisabled={interactionDisabled}
+          isCreator={isCreator}
+          event={event}
+          submitting={submitting}
+          typeConfig={typeConfig}
+          onLike={handleLike}
+          onComment={handleComment}
+          onCta={handleCta}
+          onFavorite={handleFavorite}
+        />
+      </View>
     </View>
   );
 }

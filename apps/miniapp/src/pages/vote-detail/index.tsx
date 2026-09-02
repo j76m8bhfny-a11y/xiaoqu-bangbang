@@ -273,20 +273,21 @@ export default function VoteDetail() {
         )}
 
         <View className="vote-detail__report-link" onClick={handleReport}>
-          <Text className="vote-detail__report-link-text">{'\u{1f6ab}'} 举报该投票</Text>
+          <Icon name="block" size={14} color="#5c6b60" />
+          <Text className="vote-detail__report-link-text">举报该投票</Text>
         </View>
 
         <View className="vote-detail__bottom-spacer" />
       </ScrollView>
 
       <View className="vote-detail__action-bar">
-        {canSubmit && (
+        {!voted && active && (
           <View
-            className={`vote-detail__submit-btn ${submitting ? 'vote-detail__submit-btn--disabled' : ''}`}
-            onClick={submitting ? undefined : handleSubmit}
+            className={`vote-detail__submit-btn ${submitting || selectedIds.length === 0 ? 'vote-detail__submit-btn--disabled' : ''}`}
+            onClick={submitting || selectedIds.length === 0 ? undefined : handleSubmit}
           >
             <Text className="vote-detail__submit-btn-text">
-              {submitting ? '提交中...' : '提交投票'}
+              {submitting ? '提交中...' : selectedIds.length === 0 ? '请先选择选项' : '提交投票'}
             </Text>
           </View>
         )}
