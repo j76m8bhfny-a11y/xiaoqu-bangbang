@@ -1,10 +1,11 @@
-import { View, Text, ScrollView } from '@tarojs/components';
+import { View, Text, ScrollView, Image } from '@tarojs/components';
 import { rankingService } from '@/services';
 import { useRequest } from '@/hooks';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import NavBar from '@/components/navbar';
 import Icon, { emojiToIconName } from '@/components/icon';
+import { getBadgeImage } from '@/utils/badge-images';
 import './index.scss';
 
 export default function Badges() {
@@ -69,13 +70,18 @@ export default function Badges() {
           {allBadges.map((badge) => {
             const earned = myBadgeIds.has(badge.id);
             const iconName = emojiToIconName(badge.icon, 'medal');
+            const img = getBadgeImage(badge.code);
             return (
               <View
                 key={badge.id}
                 className={`badges__card ${earned ? 'badges__card--earned' : 'badges__card--locked'}`}
               >
                 <View className="badges__card-icon-box">
-                  <Icon name={iconName} size={36} color={earned ? '#C9702F' : '#6B7A6E'} />
+                  {img ? (
+                    <Image className="badge-item__image" src={img} mode="aspectFit" />
+                  ) : (
+                    <Icon name={iconName} size={36} color={earned ? '#C9702F' : '#6B7A6E'} />
+                  )}
                 </View>
                 <Text className="badges__card-name">{badge.name}</Text>
                 <Text className="badges__card-desc">{badge.description}</Text>

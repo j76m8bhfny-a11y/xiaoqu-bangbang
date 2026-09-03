@@ -1,4 +1,4 @@
-import { View, Text, ScrollView } from '@tarojs/components';
+import { View, Text, ScrollView, Image } from '@tarojs/components';
 import { useState, useMemo } from 'react';
 import Taro, { switchTab, useDidShow } from '@tarojs/taro';
 import { useCommunityStore } from '@/store';
@@ -10,6 +10,7 @@ import type { RankingItemDto, MyRankingDto } from '@xiaoqu-bangbang/shared';
 import { PeriodType } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 import Icon, { emojiToIconName, type IconName } from '@/components/icon';
+import { getBadgeImage } from '@/utils/badge-images';
 
 const PERIOD_TABS = [
   { key: PeriodType.MONTH, label: '本月' },
@@ -439,37 +440,44 @@ export default function Ranking() {
               </View>
 
               <View className="ranking__badges-grid">
-                {mergedBadges.map((badge) => (
-                  <View
-                    key={badge.id}
-                    className={`ranking__badge-card ${badge.earned ? 'ranking__badge-card--earned' : ''}`}
-                  >
+                {mergedBadges.map((badge) => {
+                  const badgeImg = getBadgeImage(badge.code);
+                  return (
                     <View
-                      className={`ranking__badge-icon-wrap ${badge.earned ? '' : 'ranking__badge-icon-wrap--locked'}`}
+                      key={badge.id}
+                      className={`ranking__badge-card ${badge.earned ? 'ranking__badge-card--earned' : ''}`}
                     >
-                      <View className="ranking__badge-icon">
-                        <Icon name={badge.iconMapped} size={28} />
+                      <View
+                        className={`ranking__badge-icon-wrap ${badge.earned ? '' : 'ranking__badge-icon-wrap--locked'}`}
+                      >
+                        {badgeImg ? (
+                          <Image className="ranking__badge-image" src={badgeImg} mode="aspectFit" />
+                        ) : (
+                          <View className="ranking__badge-icon">
+                            <Icon name={badge.iconMapped} size={28} />
+                          </View>
+                        )}
                       </View>
+                      <Text className="ranking__badge-name">{badge.displayName}</Text>
+                      <Text className="ranking__badge-desc">{badge.description}</Text>
+                      {!badge.earned && badge.progressText && (
+                        <Text className="ranking__badge-progress">{badge.progressText}</Text>
+                      )}
+                      {badge.earned ? (
+                        <View className="ranking__badge-status ranking__badge-status--earned">
+                          <Icon name="check-circle" size={16} color="#3E7A54" />
+                          <Text className="ranking__badge-status-text">已获得</Text>
+                        </View>
+                      ) : (
+                        <View className="ranking__badge-status ranking__badge-status--locked">
+                          <Text className="ranking__badge-status-text ranking__badge-status-text--locked">
+                            {badge.progressText ? '继续努力' : '未解锁'}
+                          </Text>
+                        </View>
+                      )}
                     </View>
-                    <Text className="ranking__badge-name">{badge.displayName}</Text>
-                    <Text className="ranking__badge-desc">{badge.description}</Text>
-                    {!badge.earned && badge.progressText && (
-                      <Text className="ranking__badge-progress">{badge.progressText}</Text>
-                    )}
-                    {badge.earned ? (
-                      <View className="ranking__badge-status ranking__badge-status--earned">
-                        <Icon name="check-circle" size={16} color="#3E7A54" />
-                        <Text className="ranking__badge-status-text">已获得</Text>
-                      </View>
-                    ) : (
-                      <View className="ranking__badge-status ranking__badge-status--locked">
-                        <Text className="ranking__badge-status-text ranking__badge-status-text--locked">
-                          {badge.progressText ? '继续努力' : '未解锁'}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             </>
           )}
