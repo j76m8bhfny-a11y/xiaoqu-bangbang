@@ -25,7 +25,7 @@ function TopicCard({ topic, onClick }: { topic: TopicDto; onClick: (id: string) 
         {isOpen ? (
           <>
             <View>
-              <Icon name="thumbs-up" size={14} /> <Text>{topic.likeCount}</Text>
+              <Icon name="thumbs-up" size={20} /> <Text>{topic.likeCount}</Text>
             </View>
             <View>
               <Icon name="thumbs-down" size={14} /> <Text>{topic.dislikeCount}</Text>

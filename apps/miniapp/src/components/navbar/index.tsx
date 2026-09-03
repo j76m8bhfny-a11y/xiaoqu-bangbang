@@ -47,7 +47,7 @@ export default function NavBar({
         <View className="navbar__left">
           {showBack ? (
             <View className="navbar__back-btn" onClick={handleBack}>
-              <Icon name="back" size={20} color={color} />
+              <Icon name="back" size={24} color={color} />
             </View>
           ) : (
             <View className="navbar__placeholder" />

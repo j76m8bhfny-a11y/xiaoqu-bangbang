@@ -71,6 +71,7 @@ const GUIDE_FILTERS = [
 ];
 
 export default function Events() {
+  const [scrollTop, setScrollTop] = useState(0);
   useAuthGuard();
 
   const communityId = useCommunityStore((s) => s.currentCommunityId);
@@ -150,6 +151,7 @@ export default function Events() {
   const firstShowRef = useRef(true);
 
   useDidShow(() => {
+    setScrollTop((v) => (v === 0 ? 0.01 : 0));
     Taro.eventCenter.trigger('tabbar:sync');
     if (pendingEventsFilter) {
       setOuter('help');
@@ -323,7 +325,7 @@ export default function Events() {
             />
             {searchText ? (
               <View className="events__search-clear" onClick={() => setSearchText('')}>
-                <Icon name="close" size={18} />
+                <Icon name="close" size={22} />
               </View>
             ) : null}
           </View>
@@ -332,6 +334,7 @@ export default function Events() {
 
       <ScrollView
         scrollY
+        scrollTop={scrollTop}
         className="events__list"
         onScrollToLower={() => {
           if (list.hasMore && !list.loadingMore) list.loadMore();

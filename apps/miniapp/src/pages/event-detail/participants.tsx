@@ -204,7 +204,7 @@ export function Participants({
                       onClick={() => onStartRating(p.userId)}
                     >
                       <View className="event-detail__participant-action-text">
-                        <Icon name="star" size={16} color="#C9702F" /> <Text>评价</Text>
+                        <Icon name="star" size={20} color="#C9702F" /> <Text>评价</Text>
                       </View>
                     </View>
                   </View>

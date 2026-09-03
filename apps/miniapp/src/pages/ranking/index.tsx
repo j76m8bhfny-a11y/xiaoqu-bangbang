@@ -131,6 +131,7 @@ interface BadgeItem {
 }
 
 export default function Ranking() {
+  const [scrollTop, setScrollTop] = useState(0);
   useAuthGuard();
 
   const communityId = useCommunityStore((s) => s.currentCommunityId);
@@ -138,6 +139,7 @@ export default function Ranking() {
   const [activeTab, setActiveTab] = useState<'ranking' | 'badges'>('ranking');
 
   useDidShow(() => {
+    setScrollTop((v) => (v === 0 ? 0.01 : 0));
     Taro.eventCenter.trigger('tabbar:sync');
   });
 
@@ -250,7 +252,7 @@ export default function Ranking() {
       </View>
 
       {activeTab === 'ranking' ? (
-        <ScrollView scrollY className="ranking__content">
+        <ScrollView scrollY scrollTop={scrollTop} className="ranking__content">
           <View className="ranking__period">
             {PERIOD_TABS.map((tab) => (
               <View
@@ -414,7 +416,7 @@ export default function Ranking() {
           <View className="ranking__bottom-spacer" />
         </ScrollView>
       ) : (
-        <ScrollView scrollY className="ranking__content">
+        <ScrollView scrollY scrollTop={scrollTop} className="ranking__content">
           {badgesLoading ? (
             <Loading text="加载勋章..." />
           ) : badgesError ? (

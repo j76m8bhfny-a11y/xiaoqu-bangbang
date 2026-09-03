@@ -64,7 +64,7 @@ export default function Settings() {
           <View className="settings__menu-item" onClick={handleClearCache}>
             <View className="settings__menu-left">
               <View className="settings__menu-icon">
-                <Icon name="trash" size={22} color="#D9534F" />
+                <Icon name="trash" size={24} color="#D9534F" />
               </View>
               <Text className="settings__menu-label">清除缓存</Text>
             </View>

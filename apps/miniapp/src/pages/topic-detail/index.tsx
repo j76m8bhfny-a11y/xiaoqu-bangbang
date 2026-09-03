@@ -218,7 +218,7 @@ export default function TopicDetail() {
         <View className="topic-detail__discuss-content">{c.content}</View>
         <View className="topic-detail__discuss-actions">
           <View className="topic-detail__discuss-like" onClick={() => handleLikeComment(c.id)}>
-            <Icon name="thumbs-up" size={14} color="#5c6b60" />
+            <Icon name="thumbs-up" size={20} color="#5c6b60" />
             <Text className="topic-detail__discuss-like-text" style={{ marginLeft: 4 }}>
               {c.likeCount}
             </Text>
@@ -260,7 +260,7 @@ export default function TopicDetail() {
                 <View className={likeBtnCls} onClick={() => handleVote('like')}>
                   <Icon
                     name="thumbs-up"
-                    size={18}
+                    size={22}
                     color={userVote === 'like' ? '#ffffff' : '#5c6b60'}
                   />
                   <Text className="topic-detail__vote-count">{topic.likeCount}</Text>
@@ -268,7 +268,7 @@ export default function TopicDetail() {
                 <View className={dislikeBtnCls} onClick={() => handleVote('dislike')}>
                   <Icon
                     name="thumbs-down"
-                    size={18}
+                    size={22}
                     color={userVote === 'dislike' ? '#ffffff' : '#5c6b60'}
                   />
                   <Text className="topic-detail__vote-count">{topic.dislikeCount}</Text>

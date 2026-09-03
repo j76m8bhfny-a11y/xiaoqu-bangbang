@@ -57,7 +57,6 @@ interface MenuItem {
 
 interface MenuGroup {
   title: string;
-  collapsable?: boolean;
   items: MenuItem[];
 }
 
@@ -81,7 +80,6 @@ const MENU_GROUPS: MenuGroup[] = [
   },
   {
     title: '更多',
-    collapsable: true,
     items: [
       { id: 'settings', label: '设置', icon: 'gear' },
       { id: 'about', label: '关于我们', icon: 'bulb' },
@@ -105,11 +103,12 @@ export default function Home() {
   const user = useAuthStore((s) => s.user);
   const communityName = useCommunityStore((s) => s.currentCommunityName);
   const setPendingEventsFilter = useCommunityStore((s) => s.setPendingEventsFilter);
-  const [moreExpanded, setMoreExpanded] = useState(false);
 
+  const [scrollTop, setScrollTop] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useDidShow(() => {
+    setScrollTop((v) => (v === 0 ? 0.01 : 0));
     Taro.eventCenter.trigger('tabbar:sync');
   });
 
@@ -237,7 +236,7 @@ export default function Home() {
 
   return (
     <View className="home">
-      <ScrollView scrollY className="home__scroll">
+      <ScrollView scrollY scrollTop={scrollTop} className="home__scroll">
         {/* User Card + Stats */}
         <View className="home__header" style={{ paddingTop: `${statusBarHeight}px` }}>
           <View

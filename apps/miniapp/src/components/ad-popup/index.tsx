@@ -22,7 +22,7 @@ export default function AdPopup({ visible, onClose }: AdPopupProps) {
       <View className="ad-popup__card" catchMove>
         <View className="ad-popup__close" onClick={onClose}>
           <View className="ad-popup__close-icon">
-            <Icon name="close" size={20} />
+            <Icon name="close" size={24} />
           </View>
         </View>
         <View className="ad-popup__content">

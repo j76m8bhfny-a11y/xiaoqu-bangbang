@@ -384,14 +384,14 @@ export default function GuideDetail() {
             className="guide-detail__author-btn guide-detail__author-btn--edit"
             onClick={handleEdit}
           >
-            <Icon name="edit" size={20} color="#4a8c5e" />
+            <Icon name="edit" size={24} color="#4a8c5e" />
             <Text className="guide-detail__author-btn-text">编辑</Text>
           </View>
           <View
             className="guide-detail__author-btn guide-detail__author-btn--delete"
             onClick={handleDelete}
           >
-            <Icon name="trash" size={20} color="#d9534f" />
+            <Icon name="trash" size={24} color="#d9534f" />
             <Text className="guide-detail__author-btn-text guide-detail__author-btn-text--danger">
               删除
             </Text>
@@ -430,7 +430,7 @@ export default function GuideDetail() {
             <View className="guide-detail__reply-indicator">
               <Text className="guide-detail__reply-text">回复 @{replyTo.nickname}</Text>
               <View className="guide-detail__reply-cancel" onClick={handleCancelReply}>
-                <Icon name="close" size={16} color="#6B7A6E" />
+                <Icon name="close" size={20} color="#6B7A6E" />
               </View>
             </View>
           )}

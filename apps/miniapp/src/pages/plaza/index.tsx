@@ -22,6 +22,7 @@ const AD_POPUP_KEY = () => {
 };
 
 export default function Plaza() {
+  const [scrollTop, setScrollTop] = useState(0);
   useAuthGuard();
   const communityId = useCommunityStore((s) => s.currentCommunityId);
   const communityName = useCommunityStore((s) => s.currentCommunityName) || '我的小区';
@@ -47,6 +48,7 @@ export default function Plaza() {
   const [refreshTick, setRefreshTick] = useState(0);
   const firstShowRef = useRef(true);
   useDidShow(() => {
+    setScrollTop((v) => (v === 0 ? 0.01 : 0));
     Taro.eventCenter.trigger('tabbar:sync');
     if (firstShowRef.current) {
       firstShowRef.current = false;
@@ -267,7 +269,7 @@ export default function Plaza() {
                     {isOpen ? (
                       <>
                         <View className="plaza__pill plaza__pill--like">
-                          <Icon name="thumbs-up" size={13} color="#5B9E6F" />
+                          <Icon name="thumbs-up" size={18} color="#5B9E6F" />
                           <Text>{t.likeCount}</Text>
                         </View>
                         <View className="plaza__pill">
@@ -277,7 +279,7 @@ export default function Plaza() {
                       </>
                     ) : (
                       <View className="plaza__pill plaza__pill--rating">
-                        <Icon name="star" size={13} color="#C9702F" />
+                        <Icon name="star" size={18} color="#C9702F" />
                         <Text>{t.avgRating?.toFixed(1) ?? '5.0'}分</Text>
                       </View>
                     )}

@@ -118,7 +118,7 @@ export default function MyApplications() {
                 </Text>
                 <View className="myapp__item-meta">
                   <View>
-                    <Icon name="thumbs-up" size={14} /> <Text>{it.supportCount} 助力</Text>
+                    <Icon name="thumbs-up" size={20} /> <Text>{it.supportCount} 助力</Text>
                   </View>
                   <Text>{new Date(it.createdAt).toLocaleDateString()}</Text>
                 </View>

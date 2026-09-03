@@ -75,7 +75,7 @@ export default function CommunitySelect() {
           />
           {keyword && (
             <Text className="cs__search-clear" onClick={() => setKeyword('')}>
-              <Icon name="close" size={20} />
+              <Icon name="close" size={24} />
             </Text>
           )}
         </View>
