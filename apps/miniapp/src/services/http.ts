@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { ENV } from '@/config/env';
+import { resolveApiBaseUrl } from '@/config/env';
 import { getToken, removeToken } from '@/utils/storage';
 import type { ApiResponse } from '@xiaoqu-bangbang/shared';
 import { ErrorCodes } from '@xiaoqu-bangbang/shared';
@@ -42,7 +42,7 @@ async function request<T>(options: RequestOptions): Promise<T> {
       : data;
 
   const res = await Taro.request({
-    url: `${ENV.API_BASE_URL}${url}`,
+    url: `${resolveApiBaseUrl()}${url}`,
     method,
     data: cleanedData,
     timeout: 10000,
@@ -96,7 +96,7 @@ export const http = {
     const token = getToken();
     return new Promise<{ url: string }>((resolve, reject) => {
       Taro.uploadFile({
-        url: `${ENV.API_BASE_URL}/upload`,
+        url: `${resolveApiBaseUrl()}/upload`,
         filePath,
         name: 'file',
         header: token ? { Authorization: `Bearer ${token}` } : {},

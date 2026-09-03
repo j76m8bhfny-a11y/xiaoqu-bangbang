@@ -11,11 +11,11 @@ if [ -z "$IP" ]; then
 fi
 
 ENV_FILE="src/config/env.ts"
-if grep -q "http://[0-9.]*:3000" "$ENV_FILE"; then
-  sed -i '' "s|http://[0-9.]*:3000|http://${IP}:3000|g" "$ENV_FILE"
-  echo "✅ API_BASE_URL 已更新为 http://${IP}:3000"
+if grep -q "LAN_API_BASE_URL = 'http://[0-9.]*:3000" "$ENV_FILE"; then
+  sed -i '' "s|^const LAN_API_BASE_URL = 'http://[0-9.]*:3000|const LAN_API_BASE_URL = 'http://${IP}:3000|" "$ENV_FILE"
+  echo "✅ LAN_API_BASE_URL 已更新为 http://${IP}:3000（模拟器走 127.0.0.1 不受影响）"
 else
-  echo "❌ env.ts 中未找到局域网地址，请手动检查"
+  echo "❌ env.ts 中未找到 LAN_API_BASE_URL，请手动检查"
   exit 1
 fi
 
