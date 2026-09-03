@@ -2,7 +2,7 @@
   "name": "@xiaoqu-bangbang/admin",
   "version": "0.1.0",
   "private": true,
-  "description": "小区帮榜棒 - Next.js 管理后台",
+  "description": "左邻右帮 - Next.js 管理后台",
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",

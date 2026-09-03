@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小区帮榜棒 — 开发进展汇报</title>
+<title>左邻右帮 — 开发进展汇报</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -337,9 +337,9 @@
 <!-- 头部 -->
 <div class="hero">
   <div class="container">
-    <h1>🌱 小区帮榜棒</h1>
+    <h1>🌱 左邻右帮</h1>
     <p class="tagline">让小区里的好事，被看见</p>
-    <p class="meta">开发进展汇报 · 2026-07-07 · HEAD: 18ce73b · 161 commits · 领先 origin 19</p>
+    <p class="meta">开发进展汇报 · 2026-07-20 · HEAD: 25df01a · 209 commits · 分支 feature/guide-module</p>
   </div>
 </div>
 
@@ -361,26 +361,26 @@
         <div class="metric-value">100%</div>
         <div class="metric-label">PRD 功能开发完成</div>
       </div>
-      <div class="metric-card orange">
-        <div class="metric-value">14</div>
-        <div class="metric-label">待验收项</div>
+      <div class="metric-card green">
+        <div class="metric-value">287</div>
+        <div class="metric-label">后端测试通过</div>
       </div>
       <div class="metric-card blue">
-        <div class="metric-value">297</div>
-        <div class="metric-label">已修复问题</div>
+        <div class="metric-value">22</div>
+        <div class="metric-label">后端模块（+ guides + group-buys）</div>
+      </div>
+      <div class="metric-card orange">
+        <div class="metric-value">M22+M23</div>
+        <div class="metric-label">宠物帮帮 + 购物拼拼</div>
       </div>
       <div class="metric-card green">
-        <div class="metric-value">0</div>
-        <div class="metric-label">建议修（已清零）</div>
-      </div>
-      <div class="metric-card green">
-        <div class="metric-value">0</div>
-        <div class="metric-label">可延后（已清零）</div>
+        <div class="metric-value">六套激励</div>
+        <div class="metric-label">新增 group_buy 主买人发花</div>
       </div>
     </div>
 
     <div class="highlight-box">
-      <strong>一句话总结：</strong>核心功能 100% 开发完毕，黄+绿+契约对齐问题全部清零，没有阻塞发布的 Bug。E2E 交互式测试单已发布（二轮模式，8 模块独立板块），首轮修复批次完成 5 个 bug。剩余 65 条⚠️设计选择均不影响用户使用。后续 <span style="color:var(--info);font-weight:700;">E2E 测试</span> 与 <span style="color:var(--primary);font-weight:700;">项目开发</span> 分开处理。
+      <strong>一句话总结：</strong>核心功能 100% 开发完毕，新增两个模块：<strong>M22 宠物帮帮</strong>（代喂/代遛/寻宠 3 子分类，复用 events 表）+ <strong>M23 购物拼拼</strong>（求代购/代购方 2 方向，独立 group_buys 表 + 12 端点 + 状态机）。邻里帮 filter 从 4 项扩到 5 项（含 pet_help + group_buy），/feed/all 聚合查询打通。后端 287 测试全绿（+27 M22/M23 测试），前端编译通过。当前在 <span style="color:var(--info);font-weight:700;">feature/guide-module</span> 分支，待 <span style="color:var(--primary);font-weight:700;">E2E 手动测试</span> 通过后合并回 main。
     </div>
   </div>
 </div>
@@ -396,7 +396,7 @@
 
     <div class="card">
       <p style="font-size:16px; margin-bottom:12px;">
-        <strong>小区帮榜棒</strong>是一个微信小程序，让同小区的邻居可以：
+        <strong>左邻右帮</strong>是一个微信小程序，让同小区的邻居可以：
       </p>
       <ul style="font-size:15px; padding-left:20px; line-height:2;">
         <li>🤝 <strong>互相帮忙</strong> — 谁家水管漏了、谁要代收快递，发个求助，邻居来响应</li>
@@ -481,7 +481,7 @@
         <span class="feature-emoji">🏆</span>
         <div class="feature-info">
           <h4>排行榜 + 勋章</h4>
-          <p>月榜/总榜，四套激励，自动发勋章</p>
+          <p>月榜/总榜，六套激励，自动发勋章</p>
         </div>
         <span class="feature-status">已完成</span>
       </div>
@@ -497,7 +497,7 @@
         <span class="feature-emoji">🚩</span>
         <div class="feature-info">
           <h4>举报 + AI 审核</h4>
-          <p>8 种举报目标，AI 审核内容（Mock）</p>
+          <p>10 种举报目标，AI 审核内容（Mock）</p>
         </div>
         <span class="feature-status">已完成</span>
       </div>
@@ -549,8 +549,255 @@
         </div>
         <span class="feature-status">已完成</span>
       </div>
+      <div class="feature-item">
+        <span class="feature-emoji">📖</span>
+        <div class="feature-info">
+          <h4>图文教程</h4>
+          <p>发布教程 -> Admin 审核 -> 点赞/收藏/评论</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🐾</span>
+        <div class="feature-info">
+          <h4>宠物帮帮</h4>
+          <p>代喂/代遛/寻宠 3 子分类，复用 events</p>
+        </div>
+        <span class="feature-status" style="background:var(--accent);color:white;">新增</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🛒</span>
+        <div class="feature-info">
+          <h4>购物拼拼</h4>
+          <p>求代购/代购方，独立表，不结算</p>
+        </div>
+        <span class="feature-status" style="background:var(--accent);color:white;">新增</span>
+      </div>
     </div>
   </div>
+</div>
+
+<!-- UI 晨光暖色改造 -->
+<div class="section" style="background:linear-gradient(135deg,#FFF8EE 0%,#FFF3D6 100%);">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:#E89B6C;color:white;">🎨</span>
+      UI 晨光暖色全站改造（2026-07-09 ~ 07-12）
+    </div>
+    <p class="section-desc">从草木绿升级为晨光暖色系，69 个手绘 SVG Icon 替换全站 emoji，tabBar 重绘</p>
+
+    <div class="feature-grid">
+      <div class="feature-item">
+        <span class="feature-emoji">🎨</span>
+        <div class="feature-info">
+          <h4>tokens 换色</h4>
+          <p>4 个变量换晨光暖色系（#FFF8EE / #E89B6C / #FFF3D6 / #E8E0D0）</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">📄</span>
+        <div class="feature-info">
+          <h4>纸纹背景</h4>
+          <p>极淡 SVG noise 纸纹（opacity 0.025），增加质感</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🖌️</span>
+        <div class="feature-info">
+          <h4>69 个手绘 SVG Icon</h4>
+          <p>新建 Icon 组件 + emojiToIconName 辅助函数</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🔄</span>
+        <div class="feature-info">
+          <h4>150 处 emoji 替换</h4>
+          <p>25+ 个 TSX 文件全站 emoji 替换为 &lt;Icon&gt; 组件</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">🏠</span>
+        <div class="feature-info">
+          <h4>SCSS 微调</h4>
+          <p>home 宫格奶油底+描边+角落装饰、plaza 社区条奶油底、ranking header 蜜桃橙渐变</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-emoji">📱</span>
+        <div class="feature-info">
+          <h4>tabBar 重绘</h4>
+          <p>8 张 PNG 重绘 + backgroundColor 适配</p>
+        </div>
+        <span class="feature-status">已完成</span>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="background:white;border-left-color:#E89B6C;">
+      <strong>验证状态：</strong>每步均通过 <code>pnpm --filter miniapp build:weapp</code> 编译，ESLint + Prettier 通过。131 个文件变更，+4546 / -523 行。分支 <code>codex/ui-morning-warm-handrawn</code>，4 次提交（step①②③A / 批次B+C / step④ SCSS / step⑤ tabBar）。
+    </div>
+
+    <div class="highlight-box" style="background:#FFF3D6;border-left-color:#F5A623;">
+      <strong>待验证：</strong>① Icon 组件在小程序中的 SVG 渲染（部分小程序对内联 SVG 支持有限）② <code>page::before</code> 纸纹背景的性能影响 ③ tabBar PNG 在真机的清晰度
+    </div>
+  </div>
+</div>
+
+<!-- M22 + M23 新增模块 -->
+<div class="section" style="background:linear-gradient(135deg,#F0F8FF 0%,#E8F5ED 100%);">
+  <div class="container">
+    <div class="section-title">
+      <span class="icon" style="background:var(--primary);color:white;">🆕</span>
+      M22 宠物帮帮 + M23 购物拼拼（2026-07-13 ~ 07-20）
+    </div>
+    <p class="section-desc">邻里帮 filter 从 4 项扩到 5 项，新增 2 个互助场景，PRD v0.8.0 锁版</p>
+
+    <!-- M22 宠物帮帮 -->
+    <div class="card" style="margin-bottom:16px;">
+      <h4 style="margin-bottom:12px; color:var(--primary);">🐾 M22 宠物帮帮 (pet_help)</h4>
+      <p style="font-size:14px; margin-bottom:12px; color:var(--text-secondary);">宠物相关互助专用子模块。复用 events 表，沿用现有 event 状态机（pending_review/open/completed/closed/rejected），不引入 in_progress 中间态。子分类差异体现在创建表单字段 + 卡片 typeLabel 上。</p>
+
+      <div class="feature-grid" style="margin-bottom:12px;">
+        <div class="feature-item">
+          <span class="feature-emoji">🐈</span>
+          <div class="feature-info">
+            <h4>代喂 (feed)</h4>
+            <p>委托邻居上门喂食，业主认证前置，单帮手，发 1 朵花</p>
+          </div>
+          <span class="feature-status">已完成</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">🐕</span>
+          <div class="feature-info">
+            <h4>代遛 (walk)</h4>
+            <p>委托邻居代为遛狗，业主认证前置，单帮手，发 1 朵花</p>
+          </div>
+          <span class="feature-status">已完成</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">🔍</span>
+          <div class="feature-info">
+            <h4>寻宠 (lost)</h4>
+            <p>宠物走丢求助，多帮手流程，每人发 2 朵花</p>
+          </div>
+          <span class="feature-status">已完成</span>
+        </div>
+      </div>
+
+      <div class="highlight-box" style="background:white;border-left-color:var(--info);margin:8px 0;">
+        <strong>技术决策：</strong>① 复用 events 表（不引入新表）② 老数据 lost_found 迁移到 pet_help + subType=lost ③ 寻宠多帮手沿用 EventParticipant 表（batch 6 已实现）④ 钥匙交接方式不在表单内（平台不传递敏感信息）⑤ pet_help 加入 /feed/all 联合查询
+      </div>
+    </div>
+
+    <!-- M23 购物拼拼 -->
+    <div class="card">
+      <h4 style="margin-bottom:12px; color:var(--primary);">🛒 M23 购物拼拼 (group_buy)</h4>
+      <p style="font-size:14px; margin-bottom:12px; color:var(--text-secondary);">邻居间拼买/代买的信息同步工具。<strong>纯信息同步，不做资金结算</strong>（与"不做支付"原则一致）。独立表 group_buys（字段完全不同：商品清单/名额/响应人关系表），不复用 events。</p>
+
+      <div class="feature-grid" style="margin-bottom:12px;">
+        <div class="feature-item">
+          <span class="feature-emoji">📝</span>
+          <div class="feature-info">
+            <h4>求代购 (seek)</h4>
+            <p>邻居要买某物，发起"谁能帮带"，必填商品清单</p>
+          </div>
+          <span class="feature-status">已完成</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">🚗</span>
+          <div class="feature-info">
+            <h4>代购方 (offer)</h4>
+            <p>要去某店，发起"我能帮带，谁要"，必填 quota+departAt+bidCloseAt</p>
+          </div>
+          <span class="feature-status">已完成</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">⚙️</span>
+          <div class="feature-info">
+            <h4>状态机</h4>
+            <p>pending_review -> open -> closed_for_bid -> purchased -> completed</p>
+          </div>
+          <span class="feature-status">已完成</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">🏆</span>
+          <div class="feature-info">
+            <h4>激励</h4>
+            <p>主买人完成发 1 朵花；响应人不发花</p>
+          </div>
+          <span class="feature-status">已完成</span>
+        </div>
+      </div>
+
+      <div class="highlight-box" style="background:white;border-left-color:var(--accent);margin:8px 0;">
+        <strong>关键设计：</strong>① 5 个中间态（closed_for_bid / purchased 是关键节点，影响响应人行为）② 按响应人计名额（一人占一名额）③ 自动完成（全部 item delivered 后事务内自动转 completed）④ Admin 下架违规拼单 status -> closed（注意：不是 cancelled，GroupBuyStatus 无此枚举值）
+      </div>
+
+      <div class="highlight-box" style="background:#FFF3D6;border-left-color:#F5A623;margin:8px 0;">
+        <strong>ponytail 暂缓（不阻塞）：</strong>① closeBid/purchased 通知逻辑暂缓（同 closeBid） ② deliver 自动完成时 awardFlower 待接入 ContributionService ③ group-buy-edit 不支持 seek items 编辑（spec 未明确）
+      </div>
+    </div>
+  </div>
+    <!-- M22+M23 E2E 测试结果 (2026-07-21) -->
+    <div class="card" style="border-left:4px solid var(--primary);">
+      <h4 style="margin-bottom:12px; color:var(--primary);">🧪 M22+M23 E2E 测试结果（2026-07-21）</h4>
+      <p style="font-size:14px; margin-bottom:12px; color:var(--text-secondary);">90 检查点（11-pet-help 45 + 12-group-buy 45），API 类 curl + Admin Playwright 已测，UI 类待 weapp-dev-mcp。详细结果见 <code>e2e/results/m22-m23-e2e-results.md</code>。</p>
+
+      <div class="feature-grid" style="margin-bottom:12px;">
+        <div class="feature-item">
+          <span class="feature-emoji">✅</span>
+          <div class="feature-info">
+            <h4>pass 58 项</h4>
+            <p>API 类 47 + Admin 类 9 + 举报 1 + 间接 1</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">🟡</span>
+          <div class="feature-info">
+            <h4>pass(部分) 3 项</h4>
+            <p>AI reject 路径无 pending 数据触发</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">⏳</span>
+          <div class="feature-info">
+            <h4>skip 27 项</h4>
+            <p>UI 类待 weapp-dev-mcp 连接稳定</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-emoji">❌</span>
+          <div class="feature-info">
+            <h4>finding 2 项</h4>
+            <p>PH-009/016 petMeta 内部不校验（待确认）</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#FEF3C7; border-left:3px solid #F59E0B; padding:10px 14px; margin-bottom:10px; font-size:13px; color:#92400E; border-radius:4px;">
+        <strong>🐛 已修复 4 个 bug（commit 08de26b，后端 287/287 单测无回归）：</strong>
+        <ul style="margin:6px 0 0 16px; padding:0;">
+          <li><strong>M22 Bug1 Critical</strong>: selectParticipant 不支持寻宠多帮手（pet_help+lost 被 400 拒绝）→ events.service.ts:855 加 pet_help+lost 分支</li>
+          <li><strong>M22 Bug2 Major</strong>: 寻宠线索人发花 1 朵（应 2 朵）→ rankings.service getEventAction 加 pet_help 分支（subType=lost → lost_found action）</li>
+          <li><strong>M23 Bug3 Critical</strong>: seek 创建多商品 UNIQUE 冲突 500 → schema GroupBuyItem @@unique 改为含 name + respond 显式防重复</li>
+          <li><strong>M23 Bug4 Major</strong>: group_buy 完成不发花（原 ponytail TODO）→ rankings 加 handleGroupBuyCompletion（主买人 1 朵）+ group-buys.service deliver 事务后发花</li>
+        </ul>
+      </div>
+
+      <div style="background:#FEE2E2; border-left:3px solid #EF4444; padding:10px 14px; font-size:13px; color:#991B1B; border-radius:4px;">
+        <strong>⚠️ 待确认 Findings（非阻塞）：</strong>
+        <ul style="margin:6px 0 0 16px; padding:0;">
+          <li><strong>PH-009/016</strong>: petMeta 内部字段（dogSize/petType/lostLocation）后端不校验，缺失不 400。需确认 PRD 是否要求后端校验 petMeta 内部结构</li>
+          <li><strong>PH-037</strong>: events 模块无 reject application 接口（寻宠发布者无法明确拒绝响应人，只能不选）</li>
+          <li><strong>GB-045</strong>: Admin takedown API 不校验 group_buy 状态（UI 已隐藏按钮，API 层无守卫）</li>
+        </ul>
+      </div>
+    </div>
+
 </div>
 
 <!-- 核心业务链路 -->
@@ -986,10 +1233,58 @@
           <div class="timeline-desc">b98e94d: 8 模块独立板块+独立导出，一轮结果+修复情况+二轮可编辑</div>
         </div>
         <div class="timeline-item">
-          <div class="timeline-dot" style="background:var(--success); box-shadow:0 0 0 2px var(--success);"></div>
-          <div class="timeline-date">07-07 · 当前</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-07</div>
           <div class="timeline-title">E2E 测试单模块级 bug 清单导出</div>
           <div class="timeline-desc">18ce73b: 每个模块可独立导出 bug 清单+一键复制，方便分工执行。297 已修复 / 65 设计选择 / 0 阻塞 / 0 黄 / 0 绿，237 测试通过</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-09</div>
+          <div class="timeline-title">E2E 二轮测试完成 + 首轮 12 bug 全修复</div>
+          <div class="timeline-desc">dd800f0: 244 检查点 221 通过 / 23 跳过 / 0 bug。首轮 12 个 bug 全部修复（表单认证拦截/草稿恢复/价格 ¥null/admin 公告删除/banner 删除+plaza/ad-popup 弹窗等）</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">07-09</div>
+          <div class="timeline-title">DESIGN.md 视觉规范 + 用户主页发布历史</div>
+          <div class="timeline-desc">b15d879: events/market/topics 加 userId 过滤 + 前端 tab 区域。73832ed: DESIGN.md 逆向工程视觉规范（供 Google Stitch 使用）</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:#E89B6C; box-shadow:0 0 0 2px #E89B6C;"></div>
+          <div class="timeline-date">07-09</div>
+          <div class="timeline-title">E2E seed 数据补齐（18 项跳过项）</div>
+          <div class="timeline-desc">e8f7b89: closed 议题/闲置分页/议题分页/带图公告/committee_admin/pending 申请/manual_review/公益活动 completed/失物招领 completed/合并建议/未上榜用户</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:#E89B6C; box-shadow:0 0 0 2px #E89B6C;"></div>
+          <div class="timeline-date">07-09 ~ 07-12</div>
+          <div class="timeline-title">UI 晨光暖色全站改造</div>
+          <div class="timeline-desc">ea4eac6/85dff00/c6197bc/7c431f9: tokens 换色 + 69 个手绘 SVG Icon + 150 处 emoji 替换 + SCSS 微调 + tabBar 重绘。131 文件 +4546/-523 行</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--success); box-shadow:0 0 0 2px var(--success);"></div>
+          <div class="timeline-date">07-12</div>
+          <div class="timeline-title">UI 改造完成，进入预览验证 + E2E 三轮测试</div>
+          <div class="timeline-desc">HEAD: 7c431f9 · 172 commits · 分支 codex/ui-morning-warm-handrawn。小程序编译通过，待微信开发者工具预览</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--accent); box-shadow:0 0 0 2px var(--accent);"></div>
+          <div class="timeline-date">07-13</div>
+          <div class="timeline-title">图文教程模块 (M21) 完成</div>
+          <div class="timeline-desc">f428ad9 + ad8bdf8: 5 张新表 + 20 后端模块 + 35 小程序页 + 20 Admin 页，后端 260 测试全绿。第五套激励体系（guide_1/5/20 勋章）触发审核通过</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--accent); box-shadow:0 0 0 2px var(--accent);"></div>
+          <div class="timeline-date">07-13 ~ 07-20</div>
+          <div class="timeline-title">M22 宠物帮帮 + M23 购物拼拼 开发（批次 1 + 批次 2）</div>
+          <div class="timeline-desc">PRD v0.8.0 锁版。批次 1 (M22, 10 任务)：复用 events 表，3 子分类（代喂/代遛/寻宠），老 lost_found 迁移。批次 2 (M23, 10 任务)：独立 group_buys 表 + 12 端点 + 状态机 + 自动完成。2 轮 /review 修复 7 个 standards + 6 个 spec 问题（VerifiedMemberGuard / UpdateGroupBuyDto / Prisma 类型 / takedown 状态纠正）</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--success); box-shadow:0 0 0 2px var(--success);"></div>
+          <div class="timeline-date">07-20 · 当前</div>
+          <div class="timeline-title">M22+M23 全部完成，进入 E2E 测试阶段</div>
+          <div class="timeline-desc">HEAD: 25df01a · 209 commits · 分支 feature/guide-module。后端 287 测试全绿（+27 M22/M23 测试），前端编译通过。新增 90 检查点（11-pet-help + 12-group-buy），待 E2E 手动验证</div>
         </div>
       </div>
     </div>
@@ -1009,14 +1304,14 @@
         <h4 style="margin-bottom:12px;">代码规模</h4>
         <table class="table">
           <tbody>
-            <tr><td>总 commits</td><td><strong>161</strong></td></tr>
-            <tr><td>已推送</td><td><strong>142</strong>（本地领先 19）</td></tr>
-            <tr><td>数据库表</td><td><strong>49 张</strong></td></tr>
-            <tr><td>数据库迁移</td><td><strong>9 次</strong></td></tr>
-            <tr><td>小程序页面</td><td><strong>33 个</strong></td></tr>
-            <tr><td>后端模块</td><td><strong>19 个</strong></td></tr>
-            <tr><td>Admin 功能页</td><td><strong>19 个</strong></td></tr>
-            <tr><td>测试用例</td><td><strong>237 个</strong></td></tr>
+            <tr><td>总 commits</td><td><strong>209</strong></td></tr>
+            <tr><td>分支</td><td><strong>feature/guide-module</strong>（基于 codex/ui-morning-warm-handrawn）</td></tr>
+            <tr><td>数据库表</td><td><strong>56 张</strong>（+5 guide 表 +2 group_buys/group_buy_items）</td></tr>
+            <tr><td>数据库迁移</td><td><strong>10 次</strong>（group_buys 通过 migration 同步）</td></tr>
+            <tr><td>小程序页面</td><td><strong>38 个</strong>（+guide-detail/guide-create + pet-create/detail/edit + group-buy-create/detail/edit）</td></tr>
+            <tr><td>后端模块</td><td><strong>22 个</strong>（+guides +group-buys）</td></tr>
+            <tr><td>Admin 功能页</td><td><strong>21 个</strong>（+guides +group-buys）</td></tr>
+            <tr><td>测试用例</td><td><strong>287 个</strong>（+19 guide +8 M22 pet-help +19 M23 group-buy 测试）</td></tr>
           </tbody>
         </table>
       </div>
@@ -1059,18 +1354,24 @@
         是一份在浏览器里打开就能用的交互式测试清单，独立于本报告。它把小程序所有端到端测试用例拆成 8 个模块，每个模块可以单独勾选、单独导出 bug 清单，方便分工执行。
       </p>
 
-      <h4 style="margin-bottom:12px;">当前状态（HEAD: 18ce73b）</h4>
+      <h4 style="margin-bottom:12px;">当前状态（HEAD: 25df01a · 2026-07-20）</h4>
       <table class="table" style="margin-bottom:16px;">
         <tbody>
-          <tr><td>测试用例总数</td><td><strong>57 个</strong>（8 模块）</td></tr>
-          <tr><td>模式</td><td><strong>二轮测试模式</strong>（b98e94d 重构）</td></tr>
-          <tr><td>首轮修复</td><td><strong>5 个 bug 已修复</strong>（认证流程/草稿恢复/¥null/admin 删除/小区隔离）</td></tr>
-          <tr><td>导出能力</td><td>每模块独立导出 bug 清单 + 一键复制（18ce73b）</td></tr>
-          <tr><td>测试用户</td><td>已内置测试用户清单 + 未认证用户标注</td></tr>
+          <tr><td>测试用例总数</td><td><strong>379 个</strong>（11 模块，含新增 ⑪ 宠物帮帮 45 + ⑫ 购物拼拼 45 检查点）</td></tr>
+          <tr><td>二轮结果</td><td><strong>221 通过 / 23 跳过 / 0 bug</strong>（前 8 模块，待三轮重测）</td></tr>
+          <tr><td>新增宠物帮帮模块</td><td><strong>45 检查点待测</strong>（11-pet-help.html：代喂/代遛/寻宠 3 子分类 + 单/多帮手完成流程 + Admin 管理）</td></tr>
+          <tr><td>新增购物拼拼模块</td><td><strong>45 检查点待测</strong>（12-group-buy.html：seek/offer 双方向 + 状态机流转 + 名额限制 + 自动完成 + Admin 管理）</td></tr>
+          <tr><td>首轮修复</td><td><strong>12 个 bug 全部修复</strong>（认证流程/草稿恢复/¥null/admin 删除/小区隔离/表单拦截/价格修复/banner 删除/ad-popup 等）</td></tr>
+          <tr><td>seed 数据补齐</td><td><strong>18 项跳过项数据已补齐</strong></td></tr>
+          <tr><td>测试用户</td><td><code>test_zhangsan</code> / <code>test_lisi</code>（阳光花园 verified）/ Admin: <code>committee_admin</code> / <code>admin123</code></td></tr>
         </tbody>
       </table>
 
-      <h4 style="margin-bottom:12px;">8 个模块</h4>
+      <div class="highlight-box" style="background:#E8F8E8;border-left-color:var(--success);">
+        <strong>三轮测试就绪：</strong>18 项因缺 seed 数据而跳过的检查点现已全部补齐数据，可进入第三轮测试。23 跳过项中 17 项为 seed 数据缺失（已补齐），6 项为功能未实现（收藏/社群）。新增 M22+M23 共 90 检查点为全新模块，无历史包袱。
+      </div>
+
+      <h4 style="margin-bottom:12px;">11 个模块</h4>
       <div class="feature-grid" style="margin-bottom:16px;">
         <div class="feature-item"><span class="feature-emoji">🔐</span><div class="feature-info"><h4>认证</h4><p>登录/业主认证/权限</p></div></div>
         <div class="feature-item"><span class="feature-emoji">📢</span><div class="feature-info"><h4>公告</h4><p>banner/广告弹窗/列表</p></div></div>
@@ -1080,6 +1381,9 @@
         <div class="feature-item"><span class="feature-emoji">🏆</span><div class="feature-info"><h4>排行勋章</h4><p>月榜/小红花/勋章</p></div></div>
         <div class="feature-item"><span class="feature-emoji">👤</span><div class="feature-info"><h4>个人中心</h4><p>资料/技能档案/我的</p></div></div>
         <div class="feature-item"><span class="feature-emoji">🛡️</span><div class="feature-info"><h4>Admin</h4><p>后台管理/审核/举报</p></div></div>
+        <div class="feature-item"><span class="feature-emoji">📖</span><div class="feature-info"><h4>图文教程</h4><p>发布/审核/互动/激励</p></div></div>
+        <div class="feature-item"><span class="feature-emoji">🐾</span><div class="feature-info"><h4>宠物帮帮</h4><p>代喂/代遛/寻宠 + 单/多帮手</p></div><span class="feature-status" style="background:var(--accent);color:white;font-size:11px;padding:2px 8px;border-radius:4px;">新增</span></div>
+        <div class="feature-item"><span class="feature-emoji">🛒</span><div class="feature-info"><h4>购物拼拼</h4><p>求代购/代购方 + 状态机</p></div><span class="feature-status" style="background:var(--accent);color:white;font-size:11px;padding:2px 8px;border-radius:4px;">新增</span></div>
       </div>
 
       <div class="highlight-box" style="background:#E8F4FD; border-left-color:var(--info);">
@@ -1099,15 +1403,25 @@
     <p class="section-desc">发布前需要处理的事项</p>
 
     <div class="advice-grid">
+      <div class="advice-card medium">
+        <div class="advice-priority">⭐⭐ 待验证</div>
+        <div class="advice-title">Icon SVG 小程序渲染</div>
+        <div class="advice-desc">69 个手绘 SVG Icon 需在微信开发者工具中验证渲染效果，部分小程序对内联 SVG 支持有限</div>
+      </div>
+      <div class="advice-card medium">
+        <div class="advice-priority">⭐⭐ 待验证</div>
+        <div class="advice-title">纸纹背景性能</div>
+        <div class="advice-desc">page::before 的 SVG noise 纸纹（opacity 0.025）在低端机上的性能影响需验证</div>
+      </div>
+      <div class="advice-card medium">
+        <div class="advice-priority">⭐⭐ 待验证</div>
+        <div class="advice-title">tabBar PNG 清晰度</div>
+        <div class="advice-desc">8 张重绘的 tabBar PNG 需在真机上确认清晰度</div>
+      </div>
       <div class="advice-card low">
         <div class="advice-priority">已修复 ✅</div>
         <div class="advice-title">临时登录框</div>
         <div class="advice-desc">已核实为正常微信登录页，非临时页面，无需删除</div>
-      </div>
-      <div class="advice-card low">
-        <div class="advice-priority">已修复 ✅</div>
-        <div class="advice-title">Admin 依赖</div>
-        <div class="advice-desc">package.json 正常，pnpm install 后可编译</div>
       </div>
       <div class="advice-card low">
         <div class="advice-priority">已修复 ✅</div>
@@ -1118,11 +1432,6 @@
         <div class="advice-priority">已修复 ✅</div>
         <div class="advice-title">测试 flaky</div>
         <div class="advice-desc">rankings.spec.ts afterAll 清理已补全，237 测试稳定通过</div>
-      </div>
-      <div class="advice-card low">
-        <div class="advice-priority">已修复 ✅</div>
-        <div class="advice-title">构建产物 tracked</div>
-        <div class="advice-desc">tsconfig.tsbuildinfo 已 git rm --cached，.gitignore 已有规则</div>
       </div>
     </div>
   </div>
@@ -1135,46 +1444,56 @@
       <span class="icon" style="background:var(--primary-light)">🎯</span>
       下一步建议
     </div>
-    <p class="section-desc">E2E 测试与项目开发分开推进，两条线并行</p>
+    <p class="section-desc">M21/M22/M23 E2E 测试（共 135 新检查点）+ 合并分支 + 发布前清理</p>
 
     <div class="advice-grid">
       <div class="advice-card high">
-        <div class="advice-priority">⭐⭐⭐ E2E 测试线</div>
-        <div class="advice-title">按 e2e-test-checklist.html 执行二轮测试</div>
-        <div class="advice-desc">打开 e2e-test-checklist.html，逐模块执行 57 个用例，发现 bug 用「一键导出」生成清单，修复后进入下一轮</div>
+        <div class="advice-priority">⭐⭐⭐ E2E 测试</div>
+        <div class="advice-title">执行 M22 宠物帮帮 E2E 测试（45 检查点）</div>
+        <div class="advice-desc">打开 e2e/checklist/11-pet-help.html，按 8 模块逐项验证：代喂/代遛/寻宠创建 -> 列表 filter -> 详情响应 -> 单帮手完成（feed/walk）-> 多帮手完成（lost）-> Admin 管理。用 test_zhangsan 登录测试，寻宠用未认证用户</div>
       </div>
       <div class="advice-card high">
-        <div class="advice-priority">⭐⭐⭐ 项目开发线</div>
-        <div class="advice-title">跑完验收（14 项）</div>
-        <div class="advice-desc">重点验收 C11-C16 新开发的功能（事件评价/闲置评价/意向系统/多帮手/技能档案/卖家下架），确认好用</div>
+        <div class="advice-priority">⭐⭐⭐ E2E 测试</div>
+        <div class="advice-title">执行 M23 购物拼拼 E2E 测试（45 检查点）</div>
+        <div class="advice-desc">打开 e2e/checklist/12-group-buy.html，按 8 模块逐项验证：seek/offer 创建 -> 列表 filter -> 详情响应 -> 主买人确认/拒绝 -> 状态机流转（截止->已购回->交付->自动完成）-> 名额限制 -> Admin 下架</div>
+      </div>
+      <div class="advice-card high">
+        <div class="advice-priority">⭐⭐⭐ 分支管理</div>
+        <div class="advice-title">合并 feature/guide-module 到 main</div>
+        <div class="advice-desc">E2E 测试通过后，将 feature/guide-module 分支 --no-ff 合并回 codex/ui-morning-warm-handrawn 或 main</div>
       </div>
       <div class="advice-card medium">
         <div class="advice-priority">⭐⭐ 尽快做</div>
-        <div class="advice-title">推送到远程</div>
-        <div class="advice-desc">本地领先 origin 19 个 commit（含 E2E 测试单 + 首轮修复批次），需尽快推送备份</div>
+        <div class="advice-title">发布前删除临时登录框</div>
+        <div class="advice-desc">apps/miniapp/src/pages/login/index.tsx 的 devLogin code 输入框，发布前必须删除</div>
+      </div>
+      <div class="advice-card medium">
+        <div class="advice-priority">⭐⭐ ponytail 暂缓</div>
+        <div class="advice-title">补全 group_buy 通知 + awardFlower</div>
+        <div class="advice-desc">M23 留下 3 处 ponytail：closeBid/purchased 通知、deliver 自动完成时 awardFlower、group-buy-edit seek items 编辑。发布前或发布后补全均可，不阻塞 E2E 测试</div>
       </div>
       <div class="advice-card low">
         <div class="advice-priority">⭐ 可延后</div>
-        <div class="advice-title">装 Admin 依赖</div>
-        <div class="advice-desc">pnpm install 修复 antd 模块解析问题</div>
+        <div class="advice-title">功能补全</div>
+        <div class="advice-desc">收藏功能（事件/闲置/议题）+ 社群入口 + 徽章手动发放通知（6.3.6/6.7.3），PRD 未锁版必须可后置</div>
       </div>
       <div class="advice-card low">
         <div class="advice-priority">⭐ 可延后</div>
         <div class="advice-title">准备发布</div>
-        <div class="advice-desc">E2E 测试全绿 + 验收通过后，确定版本号、写发版说明、提交微信审核</div>
+        <div class="advice-desc">E2E 三轮全绿 + UI 验证通过后，确定版本号、写发版说明、提交微信审核</div>
       </div>
     </div>
 
     <div class="highlight-box" style="margin-top:24px;">
-      <strong>总结：</strong>代码层面已 100% 开发完毕，95 条黄色 + 67 条绿色 + 25 条契约对齐问题全部清零，没有阻塞 Bug。剩余 65 条⚠️为设计选择/ponytail 可接受，均不影响用户使用。后续分两条线并行：<span style="color:var(--info);font-weight:700;">E2E 测试线</span>按 e2e-test-checklist.html 执行二轮测试（57 用例，首轮 5 bug 已修），<span style="color:var(--primary);font-weight:700;">项目开发线</span>跑完 14 项验收。两条线都绿了就可以推送到远程 + 准备发布。
+      <strong>总结：</strong>M22 宠物帮帮 + M23 购物拼拼开发完成：邻里帮 filter 从 4 项扩到 5 项，新增 2 张表（group_buys/group_buy_items）+ 12 后端端点 + 4 小程序页（pet-create/detail/edit + group-buy-create/detail/edit）+ 1 Admin 页。后端 287 测试全绿（+27 M22/M23 测试），前端编译通过。新增 90 E2E 检查点（11-pet-help + 12-group-buy）。当前在 <code>feature/guide-module</code> 分支，待 E2E 手动测试（90 新检查点 + 历史 289 检查点三轮重测）通过后合并回 main。
     </div>
   </div>
 </div>
 
 <div class="footer">
   <div class="container">
-    <p>小区帮榜棒 · 开发进展汇报 · 生成于 2026-07-07</p>
-    <p style="margin-top:4px;">HEAD: 18ce73b · 161 commits · 9 迁移 · 49 表 · 33 页面 · 237 测试 · 🟡 0 · 🟢 0 · E2E 测试单二轮模式</p>
+    <p>左邻右帮 · 开发进展汇报 · 生成于 2026-07-20</p>
+    <p style="margin-top:4px;">HEAD: 25df01a · 209 commits · 10 迁移 · 56 表 · 38 页面 · 287 测试 · M21 图文教程 + M22 宠物帮帮 + M23 购物拼拼 · 六套激励体系</p>
   </div>
 </div>
 

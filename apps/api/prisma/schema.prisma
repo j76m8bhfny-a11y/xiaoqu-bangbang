@@ -68,6 +68,14 @@ model User {
   communityApplications   CommunityApplication[]        @relation("ApplicationApplicant")
   communityApplicationSupports CommunityApplicationSupport[] @relation("ApplicationSupporter")
   skills                     UserSkill[]
+  guides                     Guide[]
+  guideReviews               Guide[]                       @relation("GuideReviewer")
+  guideLikes                 GuideLike[]
+  guideFavorites             GuideFavorite[]
+  guideComments              GuideComment[]
+  guideCommentLikes          GuideCommentLike[]
+  groupBuysInitiated         GroupBuy[]                    @relation("GroupBuyInitiator")
+  groupBuyItems              GroupBuyItem[]                @relation("GroupBuyItemRequester")
 
   @@index([phone])
   @@index([currentCommunityId])
@@ -124,6 +132,8 @@ model Community {
   adminUsers             AdminUser[]
   topics                 Topic[]
   topicMergeSuggestions  TopicMergeSuggestion[]
+  guides                 Guide[]
+  groupBuys              GroupBuy[]
 
   @@map("communities")
 }
@@ -231,7 +241,9 @@ model Event {
   id               String    @id @default(uuid()) @db.Uuid
   communityId      String    @map("community_id") @db.Uuid
   creatorId        String    @map("creator_id") @db.Uuid
-  type             String // help_request/public_welfare/lost_found/public_feedback/discussion (help_offer 已废弃，仅兼容历史数据)
+  type             String // help_request/public_welfare/pet_help/public_feedback/discussion (lost_found 已迁移至 pet_help+subType=lost; help_offer 已废弃)
+  subType          String?  @map("sub_type") // pet_help 子分类: feed/walk/lost; 其他类型为 null
+  petMeta          Json?    @map("pet_meta") // pet_help 专属字段 JSON
   title            String
   description      String
   images           Json      @default("[]")
@@ -274,6 +286,7 @@ model Event {
   topicComments           TopicComment[]
 
   @@index([communityId, type, status, createdAt])
+  @@index([communityId, type, subType, status, createdAt])
   @@index([creatorId])
   @@index([selectedHelperId])
   @@index([aiReviewStatus])
@@ -1123,4 +1136,149 @@ model CommunityApplicationSupport {
   @@unique([applicationId, userId])
   @@index([userId])
   @@map("community_application_supports")
+}
+
+// ============================
+// 图文教程 (Guide)
+// ============================
+
+model Guide {
+  id             String    @id @default(uuid()) @db.Uuid
+  communityId    String    @map("community_id") @db.Uuid
+  authorId       String    @map("author_id") @db.Uuid
+  title          String
+  description     String
+  images         Json      @default("[]")
+  category       String    @default("other") // usage_guide/repair/maintenance/other
+  status         String    @default("pending_review") // pending_review/published/rejected
+  reviewedBy     String?   @map("reviewed_by") @db.Uuid
+  reviewedAt     DateTime? @map("reviewed_at")
+  rejectedReason String?   @map("rejected_reason")
+  viewCount      Int       @default(0) @map("view_count")
+  likeCount      Int       @default(0) @map("like_count")
+  favoriteCount  Int       @default(0) @map("favorite_count")
+  commentCount   Int       @default(0) @map("comment_count")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  community  Community     @relation(fields: [communityId], references: [id])
+  author     User          @relation(fields: [authorId], references: [id])
+  reviewer   User?         @relation("GuideReviewer", fields: [reviewedBy], references: [id])
+  likes      GuideLike[]
+  favorites  GuideFavorite[]
+  comments   GuideComment[]
+
+  @@index([communityId, category, status, createdAt])
+  @@index([authorId])
+  @@map("guides")
+}
+
+model GuideLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  guideId   String   @map("guide_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  guide Guide @relation(fields: [guideId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([guideId, userId])
+  @@map("guide_likes")
+}
+
+model GuideFavorite {
+  id        String   @id @default(uuid()) @db.Uuid
+  guideId   String   @map("guide_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  guide Guide @relation(fields: [guideId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([guideId, userId])
+  @@map("guide_favorites")
+}
+
+model GuideComment {
+  id        String    @id @default(uuid()) @db.Uuid
+  guideId   String    @map("guide_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  parentId  String?   @map("parent_id") @db.Uuid
+  content   String
+  likeCount Int       @default(0) @map("like_count")
+  replyCount Int      @default(0) @map("reply_count")
+  status    String    @default("visible") // visible/hidden/deleted
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  guide   Guide          @relation(fields: [guideId], references: [id])
+  user    User           @relation(fields: [userId], references: [id])
+  parent  GuideComment?  @relation("GuideCommentReplies", fields: [parentId], references: [id])
+  replies GuideComment[] @relation("GuideCommentReplies")
+  likes   GuideCommentLike[]
+
+  @@index([guideId, createdAt])
+  @@map("guide_comments")
+}
+
+model GuideCommentLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  commentId String   @map("comment_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  comment GuideComment @relation(fields: [commentId], references: [id])
+  user    User         @relation(fields: [userId], references: [id])
+
+  @@unique([commentId, userId])
+  @@map("guide_comment_likes")
+}
+
+model GroupBuy {
+  id              String   @id @default(uuid()) @db.Uuid
+  communityId     String   @map("community_id") @db.Uuid
+  initiatorId     String   @map("initiator_id") @db.Uuid
+  type            String   // seek | offer
+  location        String
+  departAt        DateTime? @map("depart_at")
+  bidCloseAt      DateTime? @map("bid_close_at")
+  quota           Int      @default(5)
+  serviceFee      String   @default("free") @map("service_fee")
+  deliveryMethod  String   @map("delivery_method") // self_pickup | door_drop | spot
+  note            String?
+  status          String   @default("pending_review")
+  aiReviewStatus  String   @default("pending") @map("ai_review_status")
+  aiReviewReason  String?  @map("ai_review_reason")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  community       Community     @relation(fields: [communityId], references: [id])
+  initiator      User          @relation("GroupBuyInitiator", fields: [initiatorId], references: [id])
+  items          GroupBuyItem[]
+
+  @@index([communityId, type, status, createdAt])
+  @@index([initiatorId])
+  @@map("group_buys")
+}
+
+model GroupBuyItem {
+  id           String   @id @default(uuid()) @db.Uuid
+  groupBuyId   String   @map("group_buy_id") @db.Uuid
+  requesterId  String   @map("requester_id") @db.Uuid
+  name         String
+  qty          Int      @default(1)
+  note         String?
+  status       String   @default("pending")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  groupBuy    GroupBuy @relation(fields: [groupBuyId], references: [id], onDelete: Cascade)
+  requester   User     @relation("GroupBuyItemRequester", fields: [requesterId], references: [id])
+
+  @@unique([groupBuyId, requesterId, name])
+  @@index([groupBuyId, status])
+  @@map("group_buy_items")
 }

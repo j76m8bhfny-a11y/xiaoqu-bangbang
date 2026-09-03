@@ -8,15 +8,17 @@ import type { MarketReviewDto } from '@xiaoqu-bangbang/shared';
 import { useAuthStore } from '@/store';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import { MARKET_CATEGORY_CONFIG, CONDITION_LABELS } from '@/utils/mappers';
 import type { MarketItemDto } from '@xiaoqu-bangbang/shared';
 import { MarketItemStatus, TradeType } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 const TRADE_TYPE_LABELS: Record<string, { label: string; color: string; bgColor: string }> = {
   [TradeType.SELL]: { label: '出售', color: '#ff6b6b', bgColor: '#fff0f0' },
   [TradeType.FREE]: { label: '免费', color: '#5b9e6f', bgColor: '#eaf4ec' },
-  [TradeType.EXCHANGE]: { label: '交换', color: '#e0a458', bgColor: '#fbf0dd' },
+  [TradeType.EXCHANGE]: { label: '交换', color: '#B05E22', bgColor: '#fbf0dd' },
 };
 
 const REVIEW_TAGS = ['沟通顺畅', '描述相符', '发货迅速', '物超所值', '态度友好'];
@@ -111,7 +113,7 @@ export default function MarketDetail() {
   useShareAppMessage(() => {
     if (shareConfig && !shareConfig.canShare) {
       Taro.showToast({ title: shareConfig.disabledReason ?? '无法分享', icon: 'none' });
-      return { title: '小区帮榜棒', path: '/pages/home/index' };
+      return { title: '左邻右帮', path: '/pages/home/index' };
     }
     if (shareConfig) {
       return {
@@ -121,7 +123,7 @@ export default function MarketDetail() {
       };
     }
     return {
-      title: item ? `${item.title} - 小区帮榜棒` : '小区帮榜棒',
+      title: item ? `${item.title} - 左邻右帮` : '左邻右帮',
       path: `/pages/market-detail/index?id=${id}`,
     };
   });
@@ -272,6 +274,7 @@ export default function MarketDetail() {
 
   return (
     <View className="market-detail">
+      <NavBar title="闲置详情" />
       {(item.images ?? []).length > 0 ? (
         <Swiper
           className="market-detail__swiper"
@@ -290,7 +293,9 @@ export default function MarketDetail() {
         </Swiper>
       ) : (
         <View className="market-detail__swiper market-detail__swiper--empty">
-          <Text className="market-detail__swiper-emoji">{catConfig?.icon ?? '📦'}</Text>
+          <View className="market-detail__swiper-emoji">
+            <Icon name={(catConfig?.icon ?? 'box') as any} size={48} />
+          </View>
         </View>
       )}
 
@@ -320,7 +325,9 @@ export default function MarketDetail() {
         <View className="market-detail__meta-row">
           {catConfig ? (
             <View className="market-detail__category-tag">
-              <Text className="market-detail__category-icon">{catConfig.icon}</Text>
+              <View className="market-detail__category-icon">
+                <Icon name={catConfig.icon as any} size={16} />
+              </View>
               <Text className="market-detail__category-label">{catConfig.label}</Text>
             </View>
           ) : null}
@@ -338,7 +345,9 @@ export default function MarketDetail() {
                 mode="aspectFill"
               />
             ) : (
-              <Text className="market-detail__avatar-emoji">👤</Text>
+              <View className="market-detail__avatar-emoji">
+                <Icon name="person" size={32} />
+              </View>
             )}
           </View>
           <Text className="market-detail__nickname">{item.sellerNickname}</Text>
@@ -354,7 +363,9 @@ export default function MarketDetail() {
       {/* 评论区 */}
       <View className="market-detail__card market-detail__comments">
         <View className="market-detail__comments-header">
-          <Text className="market-detail__comments-title">💬 留言 ({comments.length})</Text>
+          <View className="market-detail__comments-title">
+            <Icon name="chat" size={18} /> <Text>留言 ({comments.length})</Text>
+          </View>
           <View className="market-detail__comment-add" onClick={handleComment}>
             <Text className="market-detail__comment-add-text">写留言</Text>
           </View>
@@ -372,7 +383,9 @@ export default function MarketDetail() {
                     mode="aspectFill"
                   />
                 ) : (
-                  <Text className="market-detail__comment-avatar-emoji">👤</Text>
+                  <View className="market-detail__comment-avatar-emoji">
+                    <Icon name="person" size={24} />
+                  </View>
                 )}
               </View>
               <View className="market-detail__comment-body">
@@ -477,7 +490,9 @@ export default function MarketDetail() {
           className={`market-detail__icon-btn ${liked ? 'market-detail__icon-btn--liked' : ''}`}
           onClick={handleToggleLike}
         >
-          <Text className="market-detail__icon-btn-emoji">{liked ? '❤️' : '🤍'}</Text>
+          <View className="market-detail__icon-btn-emoji">
+            <Icon name="heart" size={24} color={liked ? '#C9702F' : '#6B7A6E'} />
+          </View>
           <Text className="market-detail__icon-btn-label">
             {likeCount > 0 ? likeCount : '点赞'}
           </Text>
@@ -517,7 +532,9 @@ export default function MarketDetail() {
             className="market-detail__icon-btn market-detail__icon-btn--report"
             onClick={handleReport}
           >
-            <Text className="market-detail__icon-btn-emoji">⚑</Text>
+            <View className="market-detail__icon-btn-emoji">
+              <Icon name="flag" size={24} />
+            </View>
           </View>
         )}
       </View>

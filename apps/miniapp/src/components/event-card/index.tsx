@@ -1,5 +1,6 @@
 import { View, Text, Image } from '@tarojs/components';
 import './index.scss';
+import Icon from '@/components/icon';
 
 export interface EventCardData {
   id: string;
@@ -19,6 +20,10 @@ export interface EventCardData {
   thanksCount: number;
   ctaText: string;
   ctaColor: string;
+  isInactive?: boolean;
+  // M23: 用于区分卡片来源，影响点击跳转路由。
+  // 未设置时默认按 'event' 处理（兼容历史调用方）。
+  sourceType?: 'event' | 'group_buy';
 }
 
 interface EventCardProps {
@@ -71,9 +76,15 @@ export default function EventCard({ data, onClick, onCtaClick }: EventCardProps)
           )}
         </View>
         <View className="event-card__stats">
-          <Text className="event-card__stat">❤️ {data.likeCount}</Text>
-          <Text className="event-card__stat">💬 {data.commentCount}</Text>
-          <Text className="event-card__stat">🌸 {data.thanksCount}</Text>
+          <View className="event-card__stat">
+            <Icon name="heart" size={14} color="#C9702F" /> <Text>{data.likeCount}</Text>
+          </View>
+          <View className="event-card__stat">
+            <Icon name="chat" size={14} /> <Text>{data.commentCount}</Text>
+          </View>
+          <View className="event-card__stat">
+            <Icon name="flower" size={14} color="#C9702F" /> <Text>{data.thanksCount}</Text>
+          </View>
         </View>
       </View>
 

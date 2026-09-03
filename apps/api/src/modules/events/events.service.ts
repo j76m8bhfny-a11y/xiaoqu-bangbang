@@ -38,12 +38,16 @@ export class EventsService {
     };
 
     if (query?.type) {
-      where.type = query.type;
+      // M22: 支持 type=a,b,c 多类型联合查询
+      const types = query.type.split(',').filter(Boolean);
+      where.type = types.length > 1 ? { in: types } : query.type;
     } else if (query?.excludeTypes && query.excludeTypes.length > 0) {
       where.type = { notIn: query.excludeTypes };
     }
     if (query?.status) {
-      where.status = query.status;
+      // 支持逗号分隔多状态查询，如 'open,in_progress,processing'
+      const statuses = query.status.split(',').filter(Boolean);
+      where.status = statuses.length > 1 ? { in: statuses } : query.status;
     }
     if (query?.keyword) {
       where.OR = [
@@ -83,6 +87,15 @@ export class EventsService {
       take: pagination?.take,
     });
 
+    // 已完成/已关闭事件沉底（与 feed.service.ts 一致）
+    const INACTIVE_STATUSES = new Set(['completed', 'closed']);
+    items.sort((a, b) => {
+      const aInactive = INACTIVE_STATUSES.has(a.status) ? 1 : 0;
+      const bInactive = INACTIVE_STATUSES.has(b.status) ? 1 : 0;
+      if (aInactive !== bInactive) return aInactive - bInactive;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+
     return items.map((item) => this.maskAnonymous(item, viewerUserId));
   }
 
@@ -119,8 +132,11 @@ export class EventsService {
       deletedAt: null,
     };
 
-    if (query?.type) where.type = query.type;
-    else if (query?.excludeTypes && query.excludeTypes.length > 0)
+    if (query?.type) {
+      // M22: 支持 type=a,b,c 多类型联合查询
+      const types = query.type.split(',').filter(Boolean);
+      where.type = types.length > 1 ? { in: types } : query.type;
+    } else if (query?.excludeTypes && query.excludeTypes.length > 0)
       where.type = { notIn: query.excludeTypes };
     if (query?.status) where.status = query.status;
     if (query?.keyword) {
@@ -134,6 +150,11 @@ export class EventsService {
       if (viewerUserId !== query.creatorId) {
         where.isAnonymous = false;
       }
+    }
+    if (query?.status) {
+      // 支持逗号分隔多状态查询
+      const statuses = query.status.split(',').filter(Boolean);
+      where.status = statuses.length > 1 ? { in: statuses } : query.status;
     }
 
     return this.prisma.event.count({ where });
@@ -204,6 +225,29 @@ export class EventsService {
       throw new BadRequestException('非议事类事件不能挂议题');
     }
 
+    // M22: pet_help 子分类校验
+    if (dto.type === 'pet_help') {
+      if (!dto.subType) {
+        throw new BadRequestException('pet_help 类型必须指定 subType');
+      }
+      // feed/walk 需要业主认证，lost 不需要
+      if (dto.subType === 'feed' || dto.subType === 'walk') {
+        const member = await this.prisma.communityMember.findUnique({
+          where: { userId_communityId: { userId: userId, communityId } },
+        });
+        if (!member || member.verifyStatus !== 'verified') {
+          throw new ForbiddenException({
+            code: 40301,
+            message: '需要业主认证后才能创建代喂/代遛',
+          });
+        }
+      }
+      // feed/walk 不允许 photos 字段
+      if ((dto.subType === 'feed' || dto.subType === 'walk') && dto.petMeta?.photos) {
+        throw new BadRequestException('feed/walk 不支持图片上传');
+      }
+    }
+
     // Run AI review on content - use a temp id for logging before creation
     const tempId = crypto.randomUUID();
     const aiResult = await this.aiReviewService.reviewText(
@@ -269,6 +313,8 @@ export class EventsService {
         topicId: dto.topicId ?? null,
         capacity: dto.capacity ?? null,
         aiComment,
+        subType: dto.type === 'pet_help' ? dto.subType : null,
+        petMeta: dto.type === 'pet_help' ? (dto.petMeta as any) : null,
         status,
         aiReviewStatus,
         aiReviewResult: aiResult as any,
@@ -421,6 +467,7 @@ export class EventsService {
     }
 
     // P-19: 有人响应后禁止编辑核心内容
+    // M22: petMeta 也算核心字段（宠物详细信息），subType 不允许通过 update 改类型
     const coreFields = [
       'type',
       'title',
@@ -428,6 +475,8 @@ export class EventsService {
       'rewardType',
       'rewardAmount',
       'expectedTime',
+      'petMeta',
+      'subType',
     ];
     const editingCore = coreFields.some((f) => dto[f] !== undefined);
     if (editingCore) {
@@ -450,6 +499,8 @@ export class EventsService {
     if (dto.expectedTime !== undefined)
       updateData.expectedTime = dto.expectedTime ? new Date(dto.expectedTime) : null;
     if (dto.isAnonymous !== undefined) updateData.isAnonymous = dto.isAnonymous;
+    // M22: pet_help 事件编辑 petMeta 字段（subType 不允许改，避免类型切换）
+    if (dto.petMeta !== undefined) updateData.petMeta = dto.petMeta as any;
 
     // Re-run AI review if content changed
     if (dto.title !== undefined || dto.description !== undefined) {
@@ -616,6 +667,69 @@ export class EventsService {
       userNickname: user?.nickname ?? '',
       userAvatarUrl: user?.avatarUrl ?? null,
     }));
+  }
+
+  async getContactInfo(eventId: string, communityId: string, viewerUserId: string) {
+    const event = await this.prisma.event.findFirst({
+      where: { id: eventId, deletedAt: null },
+    });
+    if (!event) {
+      throw new NotFoundException('事件不存在');
+    }
+    if (event.communityId !== communityId) {
+      throw new ForbiddenException('无权访问该事件');
+    }
+
+    const isCreator = event.creatorId === viewerUserId;
+    const isSelectedHelper = event.selectedHelperId === viewerUserId;
+    const isParticipant = await this.prisma.eventParticipant.findFirst({
+      where: { eventId, userId: viewerUserId },
+    });
+
+    if (!isCreator && !isSelectedHelper && !isParticipant) {
+      throw new ForbiddenException('仅互助双方可查看联系方式');
+    }
+
+    const targetUserId = isCreator
+      ? (event.selectedHelperId ??
+        (isParticipant
+          ? (
+              await this.prisma.eventParticipant.findFirst({
+                where: { eventId, userId: { not: viewerUserId } },
+                orderBy: { createdAt: 'asc' },
+              })
+            )?.userId
+          : null))
+      : event.creatorId;
+
+    if (!targetUserId) {
+      throw new NotFoundException('未找到对方用户');
+    }
+
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: {
+        nickname: true,
+        phone: true,
+        wechatId: true,
+      },
+    });
+
+    if (!targetUser) {
+      throw new NotFoundException('未找到对方用户');
+    }
+
+    // 脱敏：手机号中间4位打码
+    const maskedPhone = targetUser.phone
+      ? targetUser.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
+      : null;
+
+    return {
+      nickname: targetUser.nickname,
+      phone: maskedPhone,
+      rawPhone: isCreator || isSelectedHelper ? targetUser.phone : maskedPhone,
+      wechatId: targetUser.wechatId,
+    };
   }
 
   async selectHelper(
@@ -789,6 +903,7 @@ export class EventsService {
         selectedHelperId: event.selectedHelperId,
         type: event.type,
         rewardType: event.rewardType,
+        subType: event.subType,
       });
 
       return completed;
@@ -817,7 +932,12 @@ export class EventsService {
     if (event.creatorId !== creatorId) {
       throw new ForbiddenException('只有创建者可以选择参与者');
     }
-    if (event.type !== 'public_welfare' && event.type !== 'lost_found') {
+    // M22: pet_help + subType=lost (寻宠) 也走多帮手流程（多人提供线索）
+    if (
+      event.type !== 'public_welfare' &&
+      event.type !== 'lost_found' &&
+      !(event.type === 'pet_help' && event.subType === 'lost')
+    ) {
       throw new BadRequestException('该事件类型不支持多帮手选择');
     }
     if (event.status === 'completed' || event.status === 'closed') {
@@ -936,6 +1056,7 @@ export class EventsService {
         communityId: event.communityId,
         type: event.type,
         rewardType: event.rewardType,
+        subType: event.subType,
       },
       participant.userId,
     );
@@ -960,6 +1081,7 @@ export class EventsService {
         selectedHelperId: null,
         type: event.type,
         rewardType: event.rewardType,
+        subType: event.subType,
       });
     }
 

@@ -1,26 +1,30 @@
-// 小区帮榜棒 Design Tokens
-// v2 草木绿 · 老年友好版（UI 重设计 feature/ui-redesign）
-// 设计基调：温润草木绿、简洁温暖、字号放大、柔和圆润、老人也能用
+// 左邻右帮 Design Tokens
+// v3 晨光暖 · 轻手绘版（codex/ui-morning-warm-handrawn）
+// 设计基调：暖系手绘、治愈插画、晨光暖色、克制点缀
 // 注意：designWidth=750，源码里 px 会 1:1 转成 rpx。真机显示 ≈ 数值/2 pt。
 //       即正文 32(px→rpx) ≈ 16pt。
 
-// ── 主色（草木绿）──
-$color-bg: #f5f8f2; // 页面背景：白绿，柔和不刺眼
+// ── 主色（晨光暖：奶油黄 + 草木绿 + 蜜桃橙）──
+$color-bg: #fff8ee; // 页面背景：暖白，奶油纸感
 $color-card: #ffffff; // 卡片背景：纯白，与背景拉开层次
 $color-primary: #5b9e6f; // 主色：草绿（点缀/选中/链接）
-$color-primary-deep: #4a8c5e; // 主色加深：按钮底色，配白字对比达标
+$color-primary-deep: #3e7a54; // 主色加深：按钮底色，配白字对比达标
 $color-primary-soft: #a8d5b5; // 主色浅：标签/浅底
-$color-accent: #e0a458; // 点缀暖色：琥珀（少量用于提醒/奖励，增添温度）
-$color-cream: #f3ead0; // 奶油色：浅暖底
+$color-accent: #e89b6c; // 点缀暖色：蜜桃橙（提醒/奖励/装饰）
+$color-accent-deep: #c9702f; // 点缀加深：渐变收尾
+$color-accent-text: #b05e22; // 橙色文字（白底达标 4.7）
+$color-accent-soft: #fbf0dd; // 点缀浅底（accent 配套）
+$color-cream: #fff3d6; // 奶油色：宫格卡片底色
+$color-cream-deep: #f3ead0; // 奶油深色：渐变收尾
 $color-dark: #171717; // 深墨黑
 
 // ── 文字 ──
 $color-text: #2c3a2e; // 正文：深绿灰，高对比好读
-$color-text-secondary: #6b7a6e; // 次要文字：绿灰（不用浅灰，保证老人看得清）
+$color-text-secondary: #5c6b60; // 次要文字：绿灰（不用浅灰，保证老人看得清）
 $color-text-on-primary: #ffffff; // 主色底上的文字
 
 // ── 辅助 ──
-$color-border: #e2eae0; // 浅绿边框
+$color-border: #e8e0d0; // 暖灰边框
 $color-success: #5b9e6f; // 成功绿
 $color-danger: #d9534f; // 危险/删除：柔红
 $color-bg-green: #eaf4ec; // 浅绿底
@@ -28,15 +32,15 @@ $color-bg-orange: #fbf0dd; // 浅暖底（accent 配套）
 
 // ── 圆角（柔和圆润）──
 $radius-sm: 16px; // 小圆角（标签/输入框）
-$radius-md: 20px; // 卡片主圆角
-$radius-lg: 28px; // 大卡片/宫格块
+$radius-md: 24px; // 卡片主圆角
+$radius-lg: 32px; // 大卡片/宫格块
 $radius-pill: 999px; // 胶囊
 
 // ── 间距（充足留白，呼吸感）──
 $spacing-xs: 8px;
 $spacing-sm: 12px;
 $spacing-md: 16px;
-$spacing-lg: 24px;
+$spacing-lg: 20px;
 $spacing-xl: 32px;
 
 // ── 字号（整体放大一档到常规舒适；数值为 px→rpx，真机 ≈ 半值 pt）──
@@ -57,4 +61,5 @@ $line-height-base: 1.6; // 正文行距放宽，好读
 
 // ── 阴影（淡、柔）──
 $shadow-card: 0 4px 20px rgba(91, 158, 111, 0.08); // 卡片淡阴影，带一点主色调
+$shadow-warm: 0 4px 16px rgba(232, 155, 108, 0.1); // 暖色卡片阴影
 $shadow-btn: 0 6px 16px rgba(74, 140, 94, 0.24); // 主按钮阴影

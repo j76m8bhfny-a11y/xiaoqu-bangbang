@@ -165,6 +165,8 @@
   }
 
   &__indicator-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-sm;
     color: #fff;
     font-weight: $font-weight-bold;
@@ -322,6 +324,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
     padding: $spacing-sm 0;
     margin-top: $spacing-xs;
 
@@ -331,6 +334,8 @@
   }
 
   &__report-link-text {
+    display: flex;
+    align-items: center;
     font-size: $font-size-xs;
     color: $color-text-secondary;
   }

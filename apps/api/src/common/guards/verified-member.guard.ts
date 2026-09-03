@@ -22,6 +22,12 @@ export class VerifiedMemberGuard implements CanActivate {
     const userId: string | undefined = request.user?.userId;
     const communityId: string | undefined = request.currentCommunityId;
 
+    // M22: pet_help 类型由 Service 层做 subType 级别的认证校验（PRD §4.21：lost 不需认证，feed/walk 需要）
+    // 这里对所有 pet_help 放行，让 Service 返回精确的 40301 (NEED_VERIFICATION) 错误码
+    if (request.body?.type === 'pet_help') {
+      return true;
+    }
+
     if (!userId || !communityId) {
       throw new ForbiddenException({ code: 40303, message: '请先登录并选择小区' });
     }

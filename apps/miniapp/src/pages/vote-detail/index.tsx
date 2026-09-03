@@ -5,9 +5,11 @@ import { useRequest } from '@/hooks';
 import { voteService, shareService, reportService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import { VoteType, VoteStatus, ResultVisibility } from '@xiaoqu-bangbang/shared';
 import type { VoteDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 interface VoteResultOption {
   id: string;
@@ -71,7 +73,7 @@ export default function VoteDetail() {
   useShareAppMessage(() => {
     if (shareConfig && !shareConfig.canShare) {
       Taro.showToast({ title: shareConfig.disabledReason ?? '无法分享', icon: 'none' });
-      return { title: '小区帮榜棒', path: '/pages/home/index' };
+      return { title: '左邻右帮', path: '/pages/home/index' };
     }
     if (shareConfig) {
       return {
@@ -81,7 +83,7 @@ export default function VoteDetail() {
       };
     }
     return {
-      title: vote ? `${vote.title} - 小区帮榜棒` : '小区帮榜棒',
+      title: vote ? `${vote.title} - 左邻右帮` : '左邻右帮',
       path: `/pages/vote-detail/index?id=${id}`,
     };
   });
@@ -181,6 +183,7 @@ export default function VoteDetail() {
 
   return (
     <View className="vote-detail">
+      <NavBar title="投票详情" />
       <ScrollView scrollY className="vote-detail__scroll">
         {/* 头部卡片：标签 + 标题 + 描述 + 时间 */}
         <View className="vote-detail__card vote-detail__card--first">
@@ -233,7 +236,11 @@ export default function VoteDetail() {
                 <View
                   className={`vote-detail__indicator ${vote.voteType === VoteType.SINGLE ? 'vote-detail__indicator--radio' : 'vote-detail__indicator--checkbox'} ${isSelected ? 'vote-detail__indicator--checked' : ''}`}
                 >
-                  {isSelected && <Text className="vote-detail__indicator-icon">✓</Text>}
+                  {isSelected && (
+                    <View className="vote-detail__indicator-icon">
+                      <Icon name="check" size={16} color="#FFF" />
+                    </View>
+                  )}
                 </View>
                 <Text className="vote-detail__option-text">{option.content}</Text>
               </View>
@@ -266,20 +273,21 @@ export default function VoteDetail() {
         )}
 
         <View className="vote-detail__report-link" onClick={handleReport}>
-          <Text className="vote-detail__report-link-text">{'\u{1f6ab}'} 举报该投票</Text>
+          <Icon name="block" size={14} color="#5c6b60" />
+          <Text className="vote-detail__report-link-text">举报该投票</Text>
         </View>
 
         <View className="vote-detail__bottom-spacer" />
       </ScrollView>
 
       <View className="vote-detail__action-bar">
-        {canSubmit && (
+        {!voted && active && (
           <View
-            className={`vote-detail__submit-btn ${submitting ? 'vote-detail__submit-btn--disabled' : ''}`}
-            onClick={submitting ? undefined : handleSubmit}
+            className={`vote-detail__submit-btn ${submitting || selectedIds.length === 0 ? 'vote-detail__submit-btn--disabled' : ''}`}
+            onClick={submitting || selectedIds.length === 0 ? undefined : handleSubmit}
           >
             <Text className="vote-detail__submit-btn-text">
-              {submitting ? '提交中...' : '提交投票'}
+              {submitting ? '提交中...' : selectedIds.length === 0 ? '请先选择选项' : '提交投票'}
             </Text>
           </View>
         )}

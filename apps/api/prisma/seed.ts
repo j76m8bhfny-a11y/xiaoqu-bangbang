@@ -107,6 +107,10 @@ const UB_3 = 'ae000000-0000-0000-0000-000000000003';
 // Admin Users
 const ADMIN_ZHANGSAN_ID = 'af000000-0000-0000-0000-000000000001';
 
+// Verifications
+const VERIF_ZHANGSAN_ID = 'b2000000-0000-0000-0000-000000000001';
+const VERIF_LISI_ID = 'b2000000-0000-0000-0000-000000000002';
+
 async function seed() {
   console.log('Seeding database...');
 
@@ -882,6 +886,10 @@ async function seed() {
     // 议题类
     { code: 'topic_1', name: '议题提出者', description: '提出1个议题' },
     { code: 'topic_5', name: '议题达人', description: '提出5个议题' },
+    // 教程类
+    { code: 'guide_1', name: '教程分享者', description: '发布1个教程' },
+    { code: 'guide_5', name: '教程达人', description: '发布5个教程' },
+    { code: 'guide_20', name: '教程专家', description: '发布20个教程' },
     // 小花类
     { code: 'flower_10', name: '花开满园', description: '累计获得10朵小红花' },
     { code: 'flower_50', name: '花团锦簇', description: '累计获得50朵小红花' },
@@ -1126,6 +1134,51 @@ async function seed() {
       role: 'platform_admin',
       communityId: COMMUNITY_YANGGUANG_ID,
       status: 'active',
+    },
+  });
+
+  // ============================================================
+  // 16. Verifications (for seed verified users)
+  // ============================================================
+  console.log('Creating verifications...');
+
+  await prisma.verification.upsert({
+    where: { id: VERIF_ZHANGSAN_ID },
+    update: {},
+    create: {
+      id: VERIF_ZHANGSAN_ID,
+      userId: USER_ZHANGSAN_ID,
+      communityId: COMMUNITY_YANGGUANG_ID,
+      materialType: 'property_cert',
+      originalFileUrl: null,
+      maskedFileUrl: null,
+      status: 'approved',
+      consentSnapshot: {
+        consentAccepted: true,
+        consentVersion: '1.0',
+        acceptedAt: '2026-01-10T08:00:00.000Z',
+      },
+      reviewedAt: new Date('2026-01-10T12:00:00.000Z'),
+    },
+  });
+
+  await prisma.verification.upsert({
+    where: { id: VERIF_LISI_ID },
+    update: {},
+    create: {
+      id: VERIF_LISI_ID,
+      userId: USER_LISI_ID,
+      communityId: COMMUNITY_YANGGUANG_ID,
+      materialType: 'property_cert',
+      originalFileUrl: null,
+      maskedFileUrl: null,
+      status: 'approved',
+      consentSnapshot: {
+        consentAccepted: true,
+        consentVersion: '1.0',
+        acceptedAt: '2026-01-12T08:00:00.000Z',
+      },
+      reviewedAt: new Date('2026-01-12T12:00:00.000Z'),
     },
   });
 

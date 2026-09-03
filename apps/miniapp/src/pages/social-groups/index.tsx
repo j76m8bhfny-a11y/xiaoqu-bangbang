@@ -6,7 +6,9 @@ import { useRequest, useAuthGuard } from '@/hooks';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import './index.scss';
+import Icon from '@/components/icon';
 
 export default function SocialGroups() {
   useAuthGuard();
@@ -14,10 +16,12 @@ export default function SocialGroups() {
   const user = useAuthStore((s) => s.user);
   const isVerified = user?.verifyStatus === 'verified';
 
-  const { data: groupsData, loading, error, refresh } = useRequest<{ items: SocialGroupDto[] }>(
-    () => communityService.getSocialGroups(),
-    [],
-  );
+  const {
+    data: groupsData,
+    loading,
+    error,
+    refresh,
+  } = useRequest<{ items: SocialGroupDto[] }>(() => communityService.getSocialGroups(), []);
   const groups = groupsData?.items;
 
   const handleVerifyPrompt = () => {
@@ -33,7 +37,7 @@ export default function SocialGroups() {
   };
 
   if (loading) {
-    return <Loading text='加载群组...' />;
+    return <Loading text="加载群组..." />;
   }
 
   if (error) {
@@ -41,46 +45,51 @@ export default function SocialGroups() {
   }
 
   return (
-    <View className='social-groups'>
-      <ScrollView scrollY className='social-groups__scroll'>
-        <View className='social-groups__header'>
-          <Text className='social-groups__header-title'>👥 社区群组</Text>
-          <Text className='social-groups__header-sub'>加入兴趣群组，认识更多邻居</Text>
+    <View className="social-groups">
+      <NavBar title="社区群组" />
+      <ScrollView scrollY className="social-groups__scroll">
+        <View className="social-groups__header">
+          <View className="social-groups__header-title">
+            <Icon name="people" size={22} /> <Text>社区群组</Text>
+          </View>
+          <Text className="social-groups__header-sub">加入兴趣群组，认识更多邻居</Text>
         </View>
 
         {!groups || groups.length === 0 ? (
-          <EmptyState icon='👥' text='暂无群组' />
+          <EmptyState icon="people" text="暂无群组" />
         ) : (
-          <View className='social-groups__list'>
+          <View className="social-groups__list">
             {groups.map((group) => (
-              <View key={group.id} className='social-groups__card'>
-                <View className='social-groups__card-header'>
-                  <View className='social-groups__card-info'>
-                    <Text className='social-groups__card-name'>{group.title}</Text>
-                    <Text className='social-groups__card-desc'>{group.description}</Text>
+              <View key={group.id} className="social-groups__card">
+                <View className="social-groups__card-header">
+                  <View className="social-groups__card-info">
+                    <Text className="social-groups__card-name">{group.title}</Text>
+                    <Text className="social-groups__card-desc">{group.description}</Text>
                   </View>
                 </View>
                 {group.contactText && (
-                  <View className='social-groups__card-meta'>
-                    <Text className='social-groups__card-members'>{group.contactText}</Text>
+                  <View className="social-groups__card-meta">
+                    <Text className="social-groups__card-members">{group.contactText}</Text>
                   </View>
                 )}
 
                 {isVerified ? (
-                  <View className='social-groups__card-qr'>
+                  <View className="social-groups__card-qr">
                     {group.qrImageUrl ? (
                       <Image
-                        className='social-groups__qr-image'
+                        className="social-groups__qr-image"
                         src={group.qrImageUrl}
-                        mode='aspectFit'
+                        mode="aspectFit"
                       />
                     ) : (
-                      <Text className='social-groups__qr-placeholder'>暂无二维码</Text>
+                      <Text className="social-groups__qr-placeholder">暂无二维码</Text>
                     )}
                   </View>
                 ) : (
-                  <View className='social-groups__card-verify' onClick={handleVerifyPrompt}>
-                    <Text className='social-groups__card-verify-text'>🔒 认证后查看</Text>
+                  <View className="social-groups__card-verify" onClick={handleVerifyPrompt}>
+                    <View className="social-groups__card-verify-text">
+                      <Icon name="lock" size={14} /> <Text>认证后查看</Text>
+                    </View>
                   </View>
                 )}
               </View>
@@ -88,7 +97,7 @@ export default function SocialGroups() {
           </View>
         )}
 
-        <View className='social-groups__bottom-spacer' />
+        <View className="social-groups__bottom-spacer" />
       </ScrollView>
     </View>
   );

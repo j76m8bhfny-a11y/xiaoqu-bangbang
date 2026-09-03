@@ -1,7 +1,8 @@
-// ===== 小区帮榜棒 - 共享 API DTO 类型 =====
+// ===== 左邻右帮 - 共享 API DTO 类型 =====
 
 import type {
   EventType,
+  PetSubType,
   EventStatus,
   AiReviewStatus,
   RewardType,
@@ -42,6 +43,12 @@ import type {
   ClaimStatus,
   AnnouncementStatus,
   AdminRole,
+  GuideStatus,
+  GuideCategory,
+  GroupBuyType,
+  GroupBuyStatus,
+  GroupBuyItemStatus,
+  GroupBuyDeliveryMethod,
 } from './enums';
 
 // ===== 通用响应 =====
@@ -124,6 +131,7 @@ export interface MyDashboardDto {
   contributionScore: number;
   badgeCount: number;
   myActiveEventCount: number;
+  myCompletedEventCount: number;
   myActiveMarketCount: number;
   pendingVotes: Array<{ id: string; title: string; endAt: string }>;
 }
@@ -196,6 +204,45 @@ export interface SubmitVerificationResponse {
 
 // ===== 事件 =====
 
+/** 代喂专属字段 */
+export interface PetFeedMeta {
+  petType: 'cat' | 'dog' | 'fish' | 'other';
+  petName?: string;
+  feedsPerDay: number;
+  totalDays: number;
+  dateRange: { start: string; end: string };
+  needClean: boolean;
+  rewardType: RewardType;
+  note?: string;
+}
+
+/** 代遛专属字段 */
+export interface PetWalkMeta {
+  dogSize: 'small' | 'medium' | 'large';
+  dogName?: string;
+  timesPerDay: number;
+  durationPerTime: number;
+  timeSlots: Array<'morning' | 'noon' | 'evening' | 'night'>;
+  needGear: boolean;
+  rewardType: RewardType;
+  note?: string;
+}
+
+/** 寻宠专属字段 */
+export interface PetLostMeta {
+  petType: string;
+  breed?: string;
+  name?: string;
+  lostLocation: string;
+  lostTime: string;
+  appearance?: string;
+  photos?: string[];
+  rewardType: RewardType;
+  note?: string;
+}
+
+export type PetMeta = PetFeedMeta | PetWalkMeta | PetLostMeta;
+
 export interface CreateEventRequest {
   type: EventType;
   title: string;
@@ -211,6 +258,8 @@ export interface CreateEventRequest {
   isAnonymous?: boolean;
   visibility?: Visibility;
   topicId?: string;
+  subType?: PetSubType;
+  petMeta?: PetMeta;
 }
 
 export interface EventDto {
@@ -249,6 +298,8 @@ export interface EventDto {
   };
   createdAt: string;
   updatedAt: string;
+  subType?: PetSubType | null;
+  petMeta?: PetMeta | null;
 }
 
 export interface EventParticipantDto {
@@ -263,8 +314,9 @@ export interface EventParticipantDto {
 }
 
 export interface EventListQuery {
-  type?: EventType;
-  status?: EventStatus;
+  // 支持单类型 'help_request' 或多类型逗号分隔 'help_request,public_welfare,pet_help'
+  type?: string;
+  status?: string;
   keyword?: string;
   excludeTypes?: string; // 逗号分隔的 EventType 列表
   creatorId?: string;
@@ -1119,4 +1171,165 @@ export interface MergeSuggestionDto {
   sourceTopic: { id: string; title: string; eventCount: number };
   targetTopic: { id: string; title: string; eventCount: number };
   createdAt: string;
+}
+
+// ===== 图文教程 (Guide) DTOs =====
+
+export interface GuideDto {
+  id: string;
+  communityId: string;
+  authorId: string;
+  authorNickname: string;
+  authorAvatarUrl: string | null;
+  title: string;
+  description: string;
+  images: string[];
+  category: GuideCategory;
+  status: GuideStatus;
+  rejectedReason: string | null;
+  viewCount: number;
+  likeCount: number;
+  favoriteCount: number;
+  commentCount: number;
+  isLiked?: boolean;
+  isFavorited?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GuideDetailDto extends GuideDto {
+  reviewedAt: string | null;
+}
+
+export interface CreateGuideRequest {
+  title: string;
+  description: string;
+  images?: string[];
+  category: GuideCategory;
+}
+
+export interface UpdateGuideRequest {
+  title?: string;
+  description?: string;
+  images?: string[];
+  category?: GuideCategory;
+}
+
+export interface GuideListQuery {
+  category?: GuideCategory;
+  status?: GuideStatus;
+  keyword?: string;
+  authorId?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface GuideCommentDto {
+  id: string;
+  guideId: string;
+  userId: string;
+  userNickname: string;
+  userAvatarUrl: string | null;
+  parentId: string | null;
+  content: string;
+  likeCount: number;
+  replyCount: number;
+  status: string;
+  createdAt: string;
+  isLiked?: boolean;
+  replies?: GuideCommentDto[];
+}
+
+export interface CreateGuideCommentRequest {
+  content: string;
+  parentId?: string;
+}
+
+export interface AdminGuideReviewRequest {
+  action: 'approve' | 'reject';
+  rejectReason?: string;
+}
+
+// ===== 购物拼拼 (GroupBuy) DTOs =====
+
+/** 购物拼拼商品项（创建时填） */
+export interface GroupBuyItemInput {
+  name: string;
+  qty?: number;
+  note?: string;
+}
+
+/** 创建购物拼拼请求 */
+export interface CreateGroupBuyRequest {
+  type: GroupBuyType;
+  location: string;
+  departAt?: string; // offer 必填
+  bidCloseAt?: string; // offer 必填
+  quota?: number; // offer 必填，默认 5
+  serviceFee?: string; // free/negotiable/具体金额
+  deliveryMethod: GroupBuyDeliveryMethod;
+  note?: string;
+  items?: GroupBuyItemInput[]; // seek 必填 ≥1
+}
+
+/** 购物拼拼商品项 DTO */
+export interface GroupBuyItemDto {
+  id: string;
+  groupBuyId: string;
+  requesterId: string;
+  requester?: { id: string; nickname: string; avatarUrl: string | null };
+  name: string;
+  qty: number;
+  note?: string | null;
+  status: GroupBuyItemStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 购物拼拼 DTO */
+export interface GroupBuyDto {
+  id: string;
+  communityId: string;
+  initiatorId: string;
+  initiator?: { id: string; nickname: string; avatarUrl: string | null };
+  type: GroupBuyType;
+  location: string;
+  departAt: string | null;
+  bidCloseAt: string | null;
+  quota: number;
+  serviceFee: string;
+  deliveryMethod: GroupBuyDeliveryMethod;
+  note: string | null;
+  status: GroupBuyStatus;
+  aiReviewStatus: AiReviewStatus;
+  aiReviewReason: string | null;
+  items: GroupBuyItemDto[];
+  _count?: { items: number };
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 响应购物拼拼 */
+export interface RespondGroupBuyRequest {
+  name: string;
+  qty?: number;
+  note?: string;
+}
+
+/** Feed 聚合端点统一卡片 DTO */
+export interface FeedItemDto {
+  id: string;
+  sourceType: 'event' | 'group_buy';
+  type: string; // EventType 或 GroupBuyType
+  subType?: string | null;
+  title: string;
+  subtitle?: string | null;
+  status: string;
+  stats: {
+    likeCount?: number;
+    commentCount?: number;
+    responseCount?: number;
+  };
+  createdAt: string;
+  creator?: { nickname: string };
 }

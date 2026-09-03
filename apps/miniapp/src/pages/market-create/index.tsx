@@ -8,7 +8,9 @@ import { MarketCategory, TradeType, ConditionLevel } from '@xiaoqu-bangbang/shar
 import { MARKET_CATEGORY_CONFIG, CONDITION_LABELS } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
 import UnverifiedFormBanner from '@/components/unverified-form-banner';
+import NavBar from '@/components/navbar';
 import './index.scss';
+import Icon from '@/components/icon';
 
 const TRADE_OPTIONS: { key: TradeType; label: string }[] = [
   { key: TradeType.SELL, label: '出售' },
@@ -139,6 +141,7 @@ export default function MarketCreate() {
 
   return (
     <View className="market-create">
+      <NavBar title="发布闲置" />
       <UnverifiedFormBanner tip="你尚未完成业主认证，无法发布闲置物品" />
       <View className="market-create__body">
         <View className="market-create__card">
@@ -154,7 +157,9 @@ export default function MarketCreate() {
                     className={`market-create__category-item ${category === key ? 'market-create__category-item--active' : ''}`}
                     onClick={() => setCategory(key as MarketCategory)}
                   >
-                    <Text className="market-create__category-icon">{cfg.icon}</Text>
+                    <View className="market-create__category-icon">
+                      <Icon name={cfg.icon as any} size={24} />
+                    </View>
                     <Text
                       className={`market-create__category-label ${category === key ? 'market-create__category-label--active' : ''}`}
                     >

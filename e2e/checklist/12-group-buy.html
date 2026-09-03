@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⑫ 购物拼拼 - E2E 检查点测试单</title>
+<style>
+  :root {
+    --primary: #5B9E6F;
+    --primary-light: #E8F5ED;
+    --accent: #F5A623;
+    --danger: #E74C3C;
+    --warning: #F39C12;
+    --success: #27AE60;
+    --info: #3498DB;
+    --bg: #FAFBF7;
+    --card-bg: #FFFFFF;
+    --text: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --border: #E5E7EB;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+
+  .hero {
+    background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%);
+    color: white;
+    padding: 40px 0 32px;
+    text-align: center;
+    position: relative;
+  }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; }
+  .hero h1 { font-size: 28px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.8; }
+
+  .section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .section-header {
+    background: var(--primary-light);
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-header .num {
+    background: var(--primary);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .section-header .count {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+  .section-body { padding: 8px 0; }
+  .checkpoint {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .checkpoint:last-child { border-bottom: none; }
+  .checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .checkbox.checked { background: var(--success); border-color: var(--success); }
+  .checkbox.checked::after { content: '✓'; color: white; font-size: 14px; font-weight: bold; }
+  .checkpoint-content { flex: 1; }
+  .checkpoint-id { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
+  .checkpoint-desc { color: var(--text); }
+  .checkpoint-detail { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 6px;
+  }
+  .badge-api { background: #E3F2FD; color: #1565C0; }
+  .badge-ui { background: #F3E5F5; color: #7B1FA2; }
+  .badge-admin { background: #FFF3E0; color: #E65100; }
+
+  .progress-bar-container {
+    background: var(--border);
+    border-radius: 20px;
+    height: 22px;
+    overflow: hidden;
+    margin: 16px 0 4px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), var(--primary));
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    transition: width 0.3s;
+    min-width: 40px;
+  }
+
+  .summary { margin: 20px 0; }
+  .summary-stats { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .stat { text-align: center; padding: 12px 24px; background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .stat-value { font-size: 24px; font-weight: 700; }
+  .stat-label { font-size: 12px; color: var(--text-secondary); }
+  .stat.pass .stat-value { color: var(--success); }
+  .stat.fail .stat-value { color: var(--danger); }
+  .stat.skip .stat-value { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <a class="back-link" href="../checklist/index.html">← 返回索引</a>
+  <h1>⑫ 购物拼拼 (Group Buy)</h1>
+  <p class="tagline">求代购 (seek) / 代购方 (offer) -> 响应 -> 截止 -> 已购回 -> 自动完成</p>
+  <p class="meta">模块: M23 | 独立表 group_buys | 不做资金结算（纯信息同步） | 完成给主买人发 1 朵花</p>
+</div>
+
+<div class="container">
+  <div class="summary">
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="progressBar" style="width: 0%;">0%</div>
+    </div>
+    <div class="summary-stats">
+      <div class="stat pass"><div class="stat-value" id="passCount">0</div><div class="stat-label">通过</div></div>
+      <div class="stat fail"><div class="stat-value" id="failCount">0</div><div class="stat-label">失败</div></div>
+      <div class="stat skip"><div class="stat-value" id="skipCount">0</div><div class="stat-label">跳过</div></div>
+      <div class="stat"><div class="stat-value" id="totalCount">0</div><div class="stat-label">总计</div></div>
+    </div>
+  </div>
+
+  <!-- 1. 创建求代购 (seek) -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">1</span>
+      <span>创建求代购 (seek)</span>
+      <span class="count" id="count-1">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-001</div> ⏳ skip
+          <div class="checkpoint-desc">认证用户在邻里帮 filter=group_buy -> FAB -> /pages/group-buy-create/index -> 选"求代购" <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-002</div> ✅
+          <div class="checkpoint-desc">填商品清单（≥1 项：商品名+数量+备注）+ 期望采购地 + 期望时间 + 预算 + 交付方式 + 备注 -> 提交成功 <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /group-buys (type=seek) -> 同时创建 GroupBuyItem 记录</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-003</div> ✅
+          <div class="checkpoint-desc">seek 必填至少 1 个商品 -> 商品清单为空返回 400 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-004</div> 🟡 pass(部分)
+          <div class="checkpoint-desc">AI 审核通过 -> status=open；拒绝 -> rejected；不确定 -> pending_review <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-005</div> ⏳ skip
+          <div class="checkpoint-desc">未认证用户点 FAB 创建 -> 跳认证页 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-006</div> ✅
+          <div class="checkpoint-desc">seek 不填 quota（默认 999，不限名额）；offer 必填 quota <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 创建代购方 (offer) -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">2</span>
+      <span>创建代购方 (offer)</span>
+      <span class="count" id="count-2">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-007</div> ✅
+          <div class="checkpoint-desc">选"代购方" -> 表单字段：采购地点 + 出发时间 + 截止接单时间 + 名额限制 + 代买费 + 交付方式 + 备注 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-008</div> ✅
+          <div class="checkpoint-desc">offer 必填 quota + departAt + bidCloseAt -> 缺一返回 400 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-009</div> ⏳ skip
+          <div class="checkpoint-desc">采购地点支持"其他"自定义文本 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-010</div> ✅
+          <div class="checkpoint-desc">offer 不填商品清单（响应人提交时再填） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-011</div> ⏳ skip
+          <div class="checkpoint-desc">名额限制数字默认 5，可修改 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-012</div> ⏳ skip
+          <div class="checkpoint-desc">代买费/服务费选项（免费/面议/具体金额）<span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 列表展示与 filter -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">3</span>
+      <span>列表展示与 filter</span>
+      <span class="count" id="count-3">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-013</div> ⏳ skip
+          <div class="checkpoint-desc">邻里帮 filter 出现第 5 项"购物拼拼" <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-014</div> ✅
+          <div class="checkpoint-desc">filter=group_buy 列表展示 group_buys 表数据 <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">GET /group-buys</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-015</div> ✅
+          <div class="checkpoint-desc">filter=全部 列表含 group_buy（/feed/all 联合查询） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-016</div> ⏳ skip
+          <div class="checkpoint-desc">卡片 typeLabel 显示"求代购"/"代购方"（根据 type） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-017</div> ⏳ skip
+          <div class="checkpoint-desc">卡片 CTA 文案"我要加入" -> 点击进详情页 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 详情页与响应 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">4</span>
+      <span>详情页与响应</span>
+      <span class="count" id="count-4">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-018</div> ⏳ skip
+          <div class="checkpoint-desc">详情页展示类型/地点/出发时间/截止时间/名额/状态/备注 + 响应列表 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-019</div> ⏳ skip
+          <div class="checkpoint-desc">seek 详情展示商品清单 + 每个 item 的状态标签 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-020</div> ⏳ skip
+          <div class="checkpoint-desc">非发起人详情页底部展示"我要加入"区域（填商品+数量+备注） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-021</div> ✅
+          <div class="checkpoint-desc">提交响应 -> POST /group-buys/:id/respond -> GroupBuyItem.status=pending <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-022</div> ✅
+          <div class="checkpoint-desc">同一用户重复响应 -> 409 Conflict（UNIQUE 约束） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-023</div> ✅
+          <div class="checkpoint-desc">小区隔离：A 小区看不到 B 小区的 group_buy <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">R2 红线验证</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 主买人确认/拒绝 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">5</span>
+      <span>主买人确认/拒绝响应</span>
+      <span class="count" id="count-5">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-024</div> ⏳ skip
+          <div class="checkpoint-desc">发起人详情页可见"确认"/"拒绝"按钮（仅 pending 状态） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-025</div> ✅
+          <div class="checkpoint-desc">确认响应 -> item.status=confirmed <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /group-buys/:id/items/:itemId/confirm</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-026</div> ✅
+          <div class="checkpoint-desc">拒绝响应 -> item.status=rejected（释放名额） <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /group-buys/:id/items/:itemId/reject</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-027</div> ✅
+          <div class="checkpoint-desc">非主买人调用 confirm/reject -> 403 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-028</div> ✅
+          <div class="checkpoint-desc">响应人截止接单前可取消响应（cancel-response） <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /group-buys/:id/cancel-response；截止后不可取消</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 状态机流转 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">6</span>
+      <span>状态机流转（截止 -> 已购回 -> 交付）</span>
+      <span class="count" id="count-6">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-029</div> ✅
+          <div class="checkpoint-desc">主买人点"截止接单" -> status=closed_for_bid <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /group-buys/:id/close-bid；仅 open 状态可截止</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-030</div> ✅
+          <div class="checkpoint-desc">截止后不可再响应 -> 400 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-031</div> ✅
+          <div class="checkpoint-desc">主买人点"已购回" -> status=purchased <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /group-buys/:id/purchased；仅 closed_for_bid 可转</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-032</div> ✅
+          <div class="checkpoint-desc">主买人逐个标记 item 已交付 -> item.status=delivered <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /group-buys/:id/items/:itemId/deliver；confirmed/purchased 状态可交付</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-033</div> ✅
+          <div class="checkpoint-desc">全部 item delivered 后 -> 自动转 completed（无需手动调用 complete） <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">事务内 count 检查 remaining=0 -> update group_buy.status=completed</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-034</div> ✅
+          <div class="checkpoint-desc">主买人可主动关闭 -> status=closed（终止流程） <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /group-buys/:id/close</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. 名额限制 + 自动完成 + 激励 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">7</span>
+      <span>名额限制 + 自动完成 + 激励</span>
+      <span class="count" id="count-7">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-035</div> ✅
+          <div class="checkpoint-desc">offer 满名额后响应 -> 409 QUOTA_EXCEEDED <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">事务内 count 非 rejected 响应数 >= quota</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-036</div> ✅
+          <div class="checkpoint-desc">seek 不限名额（quota=999），不会触发 QUOTA_EXCEEDED <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-037</div> ✅
+          <div class="checkpoint-desc">拒绝响应后名额释放，可继续接受新响应直到满 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-038</div> ✅
+          <div class="checkpoint-desc">自动 completed 时给主买人发 1 朵花 <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">PRD §4.22 激励表：group_buy 1 朵；ponytail: awardFlower TODO</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-039</div> ✅
+          <div class="checkpoint-desc">响应人不发花（只发布信息撮合，不是劳动） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-040</div> ✅
+          <div class="checkpoint-desc">完成后排行榜重算（recalculateRankings） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Admin 管理 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">8</span>
+      <span>Admin 管理</span>
+      <span class="count" id="count-8">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-041</div> ✅
+          <div class="checkpoint-desc">Admin 后台"拼单管理"菜单可见（platform_admin/committee_admin） <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-042</div> ✅
+          <div class="checkpoint-desc">列表展示所有 group_buy + 类型/状态 filter + 分页 <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-043</div> ✅
+          <div class="checkpoint-desc">点详情 -> Drawer 展示完整信息 + 响应列表（商品/数量/状态/请求人） <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-044</div> ✅
+          <div class="checkpoint-desc">Admin 下架违规拼单 -> status=closed（非 cancelled，GroupBuyStatus 无 cancelled） <span class="badge badge-admin">Admin</span></div>
+          <div class="checkpoint-detail">POST /admin/group-buys/:id/takedown</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">GB-045</div> ✅
+          <div class="checkpoint-desc">已 closed/rejected 状态不展示"下架"按钮 <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 60px;"></div>
+</div>
+
+<script>
+function toggleSection(header) {
+  var body = header.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? '' : 'none';
+}
+
+function toggleCheck(checkbox) {
+  checkbox.classList.toggle('checked');
+  updateProgress();
+}
+
+function updateProgress() {
+  var sections = document.querySelectorAll('.section');
+  var total = 0, passed = 0;
+  sections.forEach(function(section, idx) {
+    var checks = section.querySelectorAll('.checkbox');
+    var sectionPassed = section.querySelectorAll('.checkbox.checked').length;
+    total += checks.length;
+    passed += sectionPassed;
+    var countEl = document.getElementById('count-' + (idx + 1));
+    if (countEl) countEl.textContent = sectionPassed + '/' + checks.length;
+  });
+  var percent = total > 0 ? Math.round((passed / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = percent + '%';
+  document.getElementById('progressBar').textContent = percent + '%';
+  document.getElementById('passCount').textContent = passed;
+  document.getElementById('failCount').textContent = 0;
+  document.getElementById('skipCount').textContent = 0;
+  document.getElementById('totalCount').textContent = total;
+}
+
+updateProgress();
+</script>
+
+</body>
+</html>

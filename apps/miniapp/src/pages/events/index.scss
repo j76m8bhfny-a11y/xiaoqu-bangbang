@@ -1,25 +1,49 @@
 @use '../../styles/tokens.scss' as *;
 
 .events {
-  min-height: 100vh;
+  height: 100vh;
   background: $color-bg;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  // 隐藏所有滚动条
+  ::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 
   &__header {
-    padding: $spacing-lg $spacing-lg $spacing-sm;
+    margin: 0;
+    padding: 0 24px 24px;
+    border-radius: 0 0 32px 32px;
+    background: linear-gradient(160deg, #4a8c5e 0%, #3e7a54 100%);
+    box-shadow: $shadow-card;
+    overflow: hidden;
+  }
+
+  &__header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-xs;
+    padding-right: 170px;
+    box-sizing: border-box;
   }
 
   &__header-title {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $color-text;
+    color: #ffffff;
   }
 
   &__header-sub {
-    display: block;
     font-size: $font-size-xs;
-    color: $color-text-secondary;
-    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.85);
   }
 
   &__search-wrap {
@@ -37,6 +61,8 @@
   }
 
   &__search-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-sm;
     flex-shrink: 0;
   }
@@ -53,6 +79,8 @@
   }
 
   &__search-clear {
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
     font-size: $font-size-sm;
     color: $color-text-secondary;
@@ -65,6 +93,7 @@
     align-items: center;
     gap: $spacing-sm;
     padding: 0 $spacing-lg $spacing-sm;
+    margin-top: 24px;
   }
 
   &__filter-scroll {
@@ -93,7 +122,8 @@
     }
   }
 
-  &__filter-text {
+  &__filter-text,
+  &__filter-tab-text {
     font-size: $font-size-xs;
     color: $color-text;
     font-weight: $font-weight-medium;
@@ -122,12 +152,16 @@
   }
 
   &__search-toggle-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-md;
   }
 
   &__list {
-    height: calc(100vh - 320px);
+    flex: 1;
+    min-height: 0;
     box-sizing: border-box;
+    padding: 0 $spacing-lg;
   }
 
   &__empty {
@@ -148,7 +182,7 @@
   }
 
   &__bottom-spacer {
-    height: 120px;
+    height: calc(120px + env(safe-area-inset-bottom));
   }
 
   &__fab {
@@ -166,7 +200,7 @@
     width: 88px;
     height: 88px;
     border-radius: 50%;
-    background: $color-primary;
+    background: $color-primary-deep;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -186,60 +220,91 @@
     font-weight: $font-weight-medium;
   }
 
-  // S1-7 第一层 tab：互助/闲置
+  // 第一层 tab：互助/闲置/指南，内嵌 header 底部
   &__outer-tabs {
     display: flex;
-    margin: 0 $spacing-lg $spacing-sm;
-    background: #fff;
+    margin-top: 24px;
+    background: rgba(255, 255, 255, 0.25);
     border-radius: $radius-pill;
-    padding: 6px;
-    box-shadow: $shadow-card;
+    padding: 4px;
+    gap: 4px;
   }
 
   &__outer-tab {
     flex: 1;
-    text-align: center;
-    padding: 12px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 72px;
     border-radius: $radius-pill;
     transition: all 0.2s;
 
     &--active {
-      background: $color-primary;
-      box-shadow: 0 2px 12px rgba(74, 140, 94, 0.2);
+      background: #fff;
     }
   }
 
   &__outer-tab-text {
     font-size: $font-size-sm;
-    color: $color-text;
+    color: rgba(255, 255, 255, 0.85);
     font-weight: $font-weight-medium;
   }
 
   &__outer-tab--active &__outer-tab-text {
-    color: #fff;
+    color: #3e7a54;
     font-weight: $font-weight-bold;
+  }
+
+  // 互助瀑布流容器
+  &__masonry {
+    column-count: 2;
+    column-gap: $spacing-sm;
+    padding: $spacing-sm 0;
+
+    // 未认证时：BlurredList 返回 .bl 容器包裹卡片
+    // 外层不再分列，由 .bl 自己管理 column-count:2，避免嵌套多列导致宽度坍缩
+    &--locked {
+      column-count: 1;
+
+      .bl {
+        column-count: 2;
+        column-gap: $spacing-sm;
+      }
+    }
   }
 
   // S1-7 闲置卡片
   &__market-item {
     display: flex;
     align-items: stretch;
-    gap: 12px;
+    gap: $spacing-sm;
     background: #fff;
-    border-radius: 16px;
-    padding: 12px;
-    margin: 0 $spacing-lg 12px;
+    border-radius: $radius-md;
+    padding: $spacing-sm;
+    margin-bottom: $spacing-sm;
     box-shadow: $shadow-card;
     box-sizing: border-box;
     overflow: hidden;
+    // E5: 点击微缩放反馈
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.1s ease;
+
+    &:active {
+      transform: scale(0.98);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    // E3: 闲置卡片左侧橙色竖条
+    border-left: 4px solid #e89b6c;
   }
 
   &__market-img {
     width: 120rpx;
     height: 120rpx;
-    border-radius: 12px;
+    border-radius: $radius-sm;
     flex-shrink: 0;
-    background: #f3f4f6;
+    background: $color-bg;
 
     &--empty {
       display: flex;
@@ -249,6 +314,8 @@
   }
 
   &__market-img-emoji {
+    display: flex;
+    align-items: center;
     font-size: 64px;
   }
 
@@ -285,6 +352,22 @@
     margin-top: auto;
   }
 
+  // E1: meta 行（昵称+时间）
+  &__market-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    gap: $spacing-sm;
+  }
+
+  &__market-time {
+    font-size: $font-size-xs - 2;
+    color: $color-text-secondary;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
   // 右侧：价格竖直居中
   &__market-side {
     flex-shrink: 0;
@@ -312,5 +395,16 @@
     color: $color-text-secondary;
     padding: 2px 10px;
     border-radius: 8px;
+  }
+
+  // E6: tab 背景色微变（心理锚点）
+  &--help {
+    background: #fafbf7; // 默认草绿底
+  }
+  &--market {
+    background: #fffbf5; // 暖橙底
+  }
+  &--guide {
+    background: #f5fafb; // 浅青底
   }
 }

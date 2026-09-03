@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { authService, communityApplicationService } from '@/services';
 import { useAuthStore, useCommunityStore } from '@/store';
 import './index.scss';
+import Icon from '@/components/icon';
 
 const handleLoginSuccess = async (
   result: { token: string; user: any },
@@ -81,10 +82,13 @@ export default function Login() {
   return (
     <View className="login">
       <View className="login__content">
-        <Text className="login__logo">🏠</Text>
-        <Text className="login__title">小区帮榜棒</Text>
+        <View className="login__logo">
+          <Icon name="house" size={48} color="#5B9E6F" />
+        </View>
+        <Text className="login__title">左邻右帮</Text>
         <Text className="login__subtitle">让小区里的好事，被看见</Text>
         <View className="login__btn login__btn--wechat" onTap={handleWechatLogin}>
+          <Icon name="chat" size={20} color="#FFFFFF" />
           <Text className="login__btn-text">{loading ? '登录中...' : '微信一键登录'}</Text>
         </View>
         <Text className="login__hint">登录即代表同意《用户协议》和《隐私政策》</Text>

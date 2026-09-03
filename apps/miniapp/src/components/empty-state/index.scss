@@ -7,12 +7,18 @@
   padding: $spacing-xl;
 
   &__icon {
-    font-size: 80px;
-    margin-bottom: $spacing-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    height: 96px;
+    margin: 0 auto $spacing-md;
+    color: $color-text-secondary;
   }
 
   &__text {
     font-size: $font-size-sm;
     color: $color-text-secondary;
+    white-space: pre-line;
   }
 }

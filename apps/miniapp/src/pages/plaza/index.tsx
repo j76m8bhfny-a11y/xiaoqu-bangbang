@@ -7,27 +7,34 @@ import { useCommunityStore } from '@/store';
 import Loading from '@/components/loading';
 import EmptyState from '@/components/empty-state';
 import AdPopup from '@/components/ad-popup';
+import Icon from '@/components/icon';
 import type { TopicDto, VoteDto, CommitteeAnnouncementDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
-// S1-6 plaza 改造：从「事件+闲置」混合广场重构为「公共反馈」中心。
-// 入口分层：业委会卡片（公告/入口）→ 待投票 → 议题列表 → 发起议题 CTA。
-// 闲置（market）下沉到 events tab；议题（topic）取代旧 event-type=public_feedback/discussion。
+function formatCNDate(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+}
 
-// 启动广告弹窗：模块级变量保证每次启动只弹一次
-let adPopupShown = false;
+const AD_POPUP_KEY = () => {
+  const d = new Date();
+  return `ad_popup_ranking_${d.getFullYear()}-${d.getMonth() + 1}`;
+};
 
 export default function Plaza() {
+  const [scrollTop, setScrollTop] = useState(0);
   useAuthGuard();
   const communityId = useCommunityStore((s) => s.currentCommunityId);
-  const communityName = useCommunityStore((s) => s.currentCommunityName);
+  const communityName = useCommunityStore((s) => s.currentCommunityName) || '我的小区';
 
-  // 启动广告弹窗
   const [adVisible, setAdVisible] = useState(false);
   useEffect(() => {
-    if (!adPopupShown) {
-      adPopupShown = true;
-      const timer = setTimeout(() => setAdVisible(true), 300);
+    const key = AD_POPUP_KEY();
+    if (!Taro.getStorageSync(key)) {
+      const timer = setTimeout(() => {
+        setAdVisible(true);
+        Taro.setStorageSync(key, true);
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -35,12 +42,14 @@ export default function Plaza() {
   const [topics, setTopics] = useState<TopicDto[]>([]);
   const [topicStatus, setTopicStatus] = useState<'open' | 'closed'>('open');
   const [loadingTopics, setLoadingTopics] = useState(false);
+  const [openCount, setOpenCount] = useState(0);
+  const [closedCount, setClosedCount] = useState(0);
 
-  // 发起议题 navigateBack 回本页后，用 didShow 兜底刷新议题列表。
-  // 函数式 setState 触发下方议题 useEffect 重拉，跳过首次显示避免与 mount 重复。
   const [refreshTick, setRefreshTick] = useState(0);
   const firstShowRef = useRef(true);
   useDidShow(() => {
+    setScrollTop((v) => (v === 0 ? 0.01 : 0));
+    Taro.eventCenter.trigger('tabbar:sync');
     if (firstShowRef.current) {
       firstShowRef.current = false;
       return;
@@ -53,7 +62,6 @@ export default function Plaza() {
   );
   const [activeVotes, setActiveVotes] = useState<VoteDto[]>([]);
 
-  // 顶部业委会公告 + 活跃投票（一次加载，不分页）
   useEffect(() => {
     if (!communityId) return;
     let cancelled = false;
@@ -63,196 +71,239 @@ export default function Plaza() {
           committeeService
             .getAnnouncements()
             .catch(() => ({ items: [] as CommitteeAnnouncementDto[] })),
-          voteService
-            .list()
-            .catch(() => ({ items: [] as VoteDto[], total: 0, page: 1, pageSize: 0 })),
+          voteService.list().catch(() => ({ items: [] as VoteDto[] })),
         ]);
         if (cancelled) return;
-        setLatestAnnouncement(annRes.items?.[0] ?? null);
-        // ponytail: 取前 2 条进行中投票（status='published' 且未过期）；更多走 /pages/votes
-        const now = Date.now();
-        setActiveVotes(
-          (voteRes.items ?? [])
-            .filter((v: any) => v.status === 'published' && new Date(v.endAt).getTime() > now)
-            .slice(0, 2),
-        );
-      } catch (_) {
-        // swallow，子卡片各自降级
+        setLatestAnnouncement(annRes.items[0] || null);
+        setActiveVotes(voteRes.items || []);
+      } catch {
+        // fail silently
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [communityId]);
+  }, [communityId, refreshTick]);
 
-  // 议题列表
   useEffect(() => {
     if (!communityId) return;
     let cancelled = false;
     setLoadingTopics(true);
-    topicService
-      .list({ status: topicStatus, page: 1, pageSize: 30 })
-      .then((res) => {
-        if (!cancelled) setTopics(res.items ?? []);
+    const fetchTopics = topicService.list({ status: topicStatus, page: 1, pageSize: 30 });
+    const fetchOpenCount = topicService.list({ status: 'open', page: 1, pageSize: 1 });
+    const fetchClosedCount = topicService.list({ status: 'closed', page: 1, pageSize: 1 });
+
+    Promise.all([fetchTopics, fetchOpenCount, fetchClosedCount])
+      .then(([res, openRes, closedRes]) => {
+        if (cancelled) return;
+        setTopics(res.items || []);
+        setOpenCount(openRes.total ?? 0);
+        setClosedCount(closedRes.total ?? 0);
       })
-      .catch((e: any) => {
-        Taro.showToast({ title: e.message || '议题加载失败', icon: 'none' });
+      .catch((err: any) => {
+        if (cancelled) return;
+        Taro.showToast({ title: err.message || '加载议题失败', icon: 'none' });
       })
       .finally(() => {
         if (!cancelled) setLoadingTopics(false);
       });
+
     return () => {
       cancelled = true;
     };
   }, [communityId, topicStatus, refreshTick]);
 
+  let statusBarHeight = 20;
+  try {
+    const sys = Taro.getWindowInfo();
+    if (sys.statusBarHeight) statusBarHeight = sys.statusBarHeight;
+  } catch {
+    // fallback
+  }
+
   return (
     <View className="plaza">
-      <ScrollView scrollY className="plaza__scroll">
-        {/* 小区标识条：一眼确认「这是我家小区」，点击可切换 */}
-        <View
-          className="plaza__community-bar"
-          onClick={() => Taro.navigateTo({ url: '/pages/community-select/index' })}
-        >
-          <Text className="plaza__community-name">🏠 {communityName ?? '我的小区'}</Text>
-          <Text className="plaza__community-switch">切换 ›</Text>
+      <ScrollView className="plaza__scroll" scrollY>
+        {/* 顶部暖橙渐变 Header */}
+        <View className="plaza__header" style={{ paddingTop: `${statusBarHeight}px` }}>
+          <View className="plaza__header-top">
+            <View className="plaza__header-title-box">
+              <Icon name="megaphone" size={24} color="#FFFFFF" />
+              <Text className="plaza__header-title">小区事</Text>
+            </View>
+            <View
+              className="plaza__community-pill"
+              onClick={() => Taro.navigateTo({ url: '/pages/community-select/index' })}
+            >
+              <Icon name="community" size={14} color="#FFFFFF" />
+              <Text className="plaza__community-name">{communityName}</Text>
+              <Icon name="comm-arrow" size={12} color="#FFFFFF" />
+            </View>
+          </View>
+
+          {/* Tab 胶囊切换 */}
+          <View className="plaza__header-tabs">
+            {(['open', 'closed'] as const).map((s) => {
+              const isActive = topicStatus === s;
+              const count = s === 'open' ? openCount : closedCount;
+              return (
+                <View
+                  key={s}
+                  className={`plaza__header-tab ${isActive ? 'plaza__header-tab--active' : ''}`}
+                  onClick={() => setTopicStatus(s)}
+                >
+                  <Text className="plaza__header-tab-text">
+                    {s === 'open' ? '进行中议题' : '已完结议题'}
+                    {count > 0 ? ` (${count})` : ''}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
         </View>
 
-        {/* 业委会公告 */}
-        <View className="plaza__card plaza__committee">
-          <View className="plaza__card-header">
-            <Text className="plaza__card-title">📢 业委会通知</Text>
-            <Text
-              className="plaza__card-more"
-              onClick={() => Taro.navigateTo({ url: '/pages/committee/index' })}
-            >
-              进入 ›
-            </Text>
-          </View>
-          {latestAnnouncement ? (
+        {/* 待投票区 */}
+        {activeVotes.length > 0 && (
+          <View className="plaza__section">
             <View
-              className="plaza__committee-item"
+              className="plaza__card plaza__vote-card"
               onClick={() =>
-                Taro.navigateTo({
-                  url: `/pages/committee-announcement/index?id=${latestAnnouncement.id}`,
-                })
+                Taro.navigateTo({ url: `/pages/vote-detail/index?id=${activeVotes[0].id}` })
               }
             >
-              <Text className="plaza__committee-title">{latestAnnouncement.title}</Text>
-              <Text className="plaza__committee-date">
-                {new Date(latestAnnouncement.publishedAt).toLocaleDateString()}
-              </Text>
-            </View>
-          ) : (
-            <Text className="plaza__empty-line">暂无公告</Text>
-          )}
-        </View>
-
-        {/* 待投票 */}
-        {activeVotes.length > 0 && (
-          <View className="plaza__card">
-            <View className="plaza__card-header">
-              <Text className="plaza__card-title">🗳️ 进行中投票</Text>
-              <Text
-                className="plaza__card-more"
-                onClick={() => Taro.navigateTo({ url: '/pages/votes/index' })}
-              >
-                查看全部 ›
-              </Text>
-            </View>
-            {activeVotes.map((v) => (
-              <View
-                key={v.id}
-                className="plaza__vote-item"
-                onClick={() => Taro.navigateTo({ url: `/pages/vote-detail/index?id=${v.id}` })}
-              >
-                <View className="plaza__vote-detail">
-                  <Text className="plaza__vote-title">{v.title}</Text>
-                  <Text className="plaza__vote-meta">
-                    截止 {new Date(v.endAt).toLocaleDateString()}
-                  </Text>
+              <View className="plaza__card-header">
+                <View className="plaza__card-title">
+                  <Icon name="vote" size={18} color="#C9702F" />
+                  <Text>待参与投票</Text>
                 </View>
-                <View className="plaza__vote-btn">
-                  <Text className="plaza__vote-btn-text">去投票</Text>
-                </View>
+                <Text className="plaza__card-more">去投票 &gt;</Text>
               </View>
-            ))}
+              <Text className="plaza__vote-title">{activeVotes[0].title}</Text>
+            </View>
           </View>
         )}
 
-        {/* 社群入口 */}
-        <View
-          className="plaza__card plaza__social-entry"
-          onClick={() => Taro.navigateTo({ url: '/pages/social-groups/index' })}
-        >
-          <View className="plaza__card-header">
-            <Text className="plaza__card-title">👥 社群</Text>
-            <Text className="plaza__card-more">进入 ›</Text>
-          </View>
-        </View>
-
-        {/* 议题区 */}
-        <View className="plaza__topics-header">
-          <View className="plaza__topic-tabs">
-            {(['open', 'closed'] as const).map((s) => (
-              <View
-                key={s}
-                className={`plaza__topic-tab ${topicStatus === s ? 'plaza__topic-tab--active' : ''}`}
-                onClick={() => setTopicStatus(s)}
-              >
-                {s === 'open' ? '进行中' : '已完结'}
-              </View>
-            ))}
-          </View>
+        {/* 业委会通知 & 社群入口 */}
+        <View className="plaza__dual-card">
           <View
-            className="plaza__topic-create"
-            onClick={() => Taro.navigateTo({ url: '/pages/topic-create/index' })}
+            className="plaza__card plaza__committee plaza__dual-item"
+            onClick={() => Taro.navigateTo({ url: '/pages/committee/index' })}
           >
-            <Text className="plaza__topic-create-text">+ 发议题</Text>
+            <View className="plaza__card-header">
+              <View className="plaza__card-title">
+                <Icon name="building" size={18} color="#5B9E6F" />
+                <Text>业委会</Text>
+              </View>
+              <Text className="plaza__card-more">&gt;</Text>
+            </View>
+            {latestAnnouncement ? (
+              <View className="plaza__committee-item">
+                <Text className="plaza__committee-title">{latestAnnouncement.title}</Text>
+                <Text className="plaza__committee-date">
+                  {formatCNDate(latestAnnouncement.publishedAt)}
+                </Text>
+              </View>
+            ) : (
+              <Text className="plaza__empty-line">暂无公告</Text>
+            )}
+          </View>
+
+          <View
+            className="plaza__card plaza__committee plaza__dual-item"
+            onClick={() => Taro.navigateTo({ url: '/pages/social-groups/index' })}
+          >
+            <View className="plaza__card-header">
+              <View className="plaza__card-title">
+                <Icon name="people" size={18} color="#5B9E6F" />
+                <Text>邻里社群</Text>
+              </View>
+              <Text className="plaza__card-more">&gt;</Text>
+            </View>
+            <View className="plaza__committee-item">
+              <Text className="plaza__committee-title">兴趣社群</Text>
+              <Text className="plaza__committee-date">加入业主微信群</Text>
+            </View>
           </View>
         </View>
 
-        {loadingTopics && <Loading />}
-        {!loadingTopics && topics.length === 0 && (
-          <EmptyState
-            icon="💬"
-            text={topicStatus === 'open' ? '暂无进行中议题' : '暂无已完结议题'}
-          />
-        )}
-        {!loadingTopics &&
-          topics.map((t) => {
-            const isOpen = t.status === 'open';
-            return (
-              <View
-                key={t.id}
-                className="plaza__topic-item"
-                onClick={() => Taro.navigateTo({ url: `/pages/topic-detail/index?id=${t.id}` })}
-              >
-                <View className="plaza__topic-top">
-                  <Text
-                    className={`plaza__topic-status plaza__topic-status--${isOpen ? 'open' : 'closed'}`}
-                  >
-                    {isOpen ? '进行中' : '已完结'}
-                  </Text>
-                  <Text className="plaza__topic-title">{t.title}</Text>
+        {/* 议题列表区 */}
+        <View className="plaza__topics-section">
+          <View className="plaza__topics-action-row">
+            <Text className="plaza__topics-label">
+              {topicStatus === 'open' ? '居民反馈与讨论' : '历史完结与总结'}
+            </Text>
+            <View
+              className="plaza__topic-create-btn"
+              onClick={() => Taro.navigateTo({ url: '/pages/topic-create/index' })}
+            >
+              <Icon name="plus" size={14} color="#FFFFFF" />
+              <Text className="plaza__topic-create-text">发起议题</Text>
+            </View>
+          </View>
+
+          {loadingTopics && <Loading />}
+          {!loadingTopics && topics.length === 0 && (
+            <EmptyState
+              icon="chat"
+              text={
+                topicStatus === 'open' ? '暂无进行中议题\n快来发起第一个吧！' : '暂无已完结议题'
+              }
+            />
+          )}
+
+          {!loadingTopics &&
+            topics.map((t) => {
+              const isOpen = t.status === 'open';
+              return (
+                <View
+                  key={t.id}
+                  className="plaza__topic-card"
+                  onClick={() => Taro.navigateTo({ url: `/pages/topic-detail/index?id=${t.id}` })}
+                >
+                  <View className="plaza__topic-top">
+                    <Text className="plaza__topic-title">{t.title}</Text>
+                    <Text className="plaza__topic-date">{formatCNDate(t.createdAt)}</Text>
+                  </View>
+
+                  <View className="plaza__topic-pills">
+                    {isOpen ? (
+                      <>
+                        <View className="plaza__pill plaza__pill--like">
+                          <Icon name="thumbs-up" size={18} color="#5B9E6F" />
+                          <Text>{t.likeCount}</Text>
+                        </View>
+                        <View className="plaza__pill">
+                          <Icon name="thumbs-down" size={13} color="#6B7A6E" />
+                          <Text>{t.dislikeCount}</Text>
+                        </View>
+                      </>
+                    ) : (
+                      <View className="plaza__pill plaza__pill--rating">
+                        <Icon name="star" size={18} color="#C9702F" />
+                        <Text>{t.avgRating?.toFixed(1) ?? '5.0'}分</Text>
+                      </View>
+                    )}
+
+                    <View className="plaza__pill">
+                      <Icon name="chat" size={13} color="#6B7A6E" />
+                      <Text>{t.commentCount}</Text>
+                    </View>
+
+                    {t.eventCount > 0 ? (
+                      <View className="plaza__pill plaza__pill--event">
+                        <Icon name="clipboard" size={13} color="#4A8C5E" />
+                        <Text>{t.eventCount}个互助</Text>
+                      </View>
+                    ) : (
+                      <View className="plaza__pill">
+                        <Text>{isOpen ? '讨论中' : '已完结'}</Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
-                <View className="plaza__topic-meta">
-                  {isOpen ? (
-                    <>
-                      <Text className="plaza__topic-metric">👍 赞 {t.likeCount}</Text>
-                      <Text className="plaza__topic-metric">👎 踩 {t.dislikeCount}</Text>
-                    </>
-                  ) : (
-                    <Text className="plaza__topic-metric">
-                      ⭐ 评分 {t.avgRating?.toFixed(1) ?? '—'}（{t.ratingCount}人）
-                    </Text>
-                  )}
-                  <Text className="plaza__topic-metric">💬 评论 {t.commentCount}</Text>
-                  <Text className="plaza__topic-metric">📋 事件 {t.eventCount}</Text>
-                </View>
-              </View>
-            );
-          })}
+              );
+            })}
+        </View>
 
         <View className="plaza__bottom-spacer" />
       </ScrollView>

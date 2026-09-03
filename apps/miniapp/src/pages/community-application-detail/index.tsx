@@ -6,8 +6,10 @@ import { useAuthStore, useCommunityStore } from '@/store';
 import { useRequest } from '@/hooks';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import type { CommunityApplicationDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   pending: { label: '审核中', color: 'orange' },
@@ -30,7 +32,7 @@ export default function CommunityApplicationDetail() {
   );
 
   useShareAppMessage(() => ({
-    title: data ? `请为「${data.name}」助力开通小区帮榜棒` : '小区帮榜棒',
+    title: data ? `请为「${data.name}」助力开通左邻右帮` : '左邻右帮',
     path: `/pages/community-application-detail/index?id=${id}`,
   }));
 
@@ -44,7 +46,7 @@ export default function CommunityApplicationDetail() {
     setSupporting(true);
     try {
       await communityApplicationService.support(id);
-      Taro.showToast({ title: '助力成功！🎉', icon: 'success' });
+      Taro.showToast({ title: '助力成功！', icon: 'success' });
       refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : '助力失败';
@@ -109,6 +111,7 @@ export default function CommunityApplicationDetail() {
 
   return (
     <View className="cad">
+      <NavBar title="申请详情" />
       <ScrollView scrollY className="cad__body">
         {/* 小区信息卡 */}
         <View className="cad__hero">
@@ -127,7 +130,11 @@ export default function CommunityApplicationDetail() {
           <Text className="cad__count-num">{data.supportCount}</Text>
           <Text className="cad__count-label">位邻居已助力</Text>
           {isPending && <Text className="cad__count-hint">助力越多，越早被平台审核哦～</Text>}
-          {isApproved && <Text className="cad__count-hint">🎉 小区已开通，欢迎大家加入</Text>}
+          {isApproved && (
+            <View className="cad__count-hint">
+              <Icon name="party" size={18} color="#C9702F" /> <Text>小区已开通，欢迎大家加入</Text>
+            </View>
+          )}
         </View>
 
         {/* 申请人 */}
@@ -201,7 +208,7 @@ export default function CommunityApplicationDetail() {
             onClick={data.hasSupported || supporting ? undefined : handleSupport}
           >
             <Text className="cad__support-text">
-              {data.hasSupported ? '✓ 已助力' : supporting ? '助力中...' : '👍 我来助力'}
+              {data.hasSupported ? '✓ 已助力' : supporting ? '助力中...' : '我来助力'}
             </Text>
           </View>
         )}

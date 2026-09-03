@@ -273,7 +273,7 @@ async function main() {
       district: '秦淮区',
       address: '秦淮区苜蓿园大街88号',
       estimatedHouseholds: 1200,
-      reason: '新交付小区，希望接入小区帮榜棒平台方便邻里互助',
+      reason: '新交付小区，希望接入左邻右帮平台方便邻里互助',
       materialType: 'property_cert',
       materialUrl: 'https://placeholder.co/600x400/cccccc/white?text=房产证',
       doorPhotoUrl: 'https://placeholder.co/600x400/999999/white?text=小区门头',

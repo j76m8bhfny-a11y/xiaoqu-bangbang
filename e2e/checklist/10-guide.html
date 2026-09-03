@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⑩ 图文教程 - E2E 检查点测试单</title>
+<style>
+  :root {
+    --primary: #5B9E6F;
+    --primary-light: #E8F5ED;
+    --accent: #F5A623;
+    --danger: #E74C3C;
+    --warning: #F39C12;
+    --success: #27AE60;
+    --info: #3498DB;
+    --bg: #FAFBF7;
+    --card-bg: #FFFFFF;
+    --text: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --border: #E5E7EB;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--info); text-decoration: none; }
+
+  .hero {
+    background: linear-gradient(135deg, #5B9E6F 0%, #4A8B5E 100%);
+    color: white;
+    padding: 40px 0 32px;
+    text-align: center;
+    position: relative;
+  }
+  .hero .back-link { position: absolute; top: 16px; left: 24px; color: white; opacity: 0.85; font-size: 14px; }
+  .hero h1 { font-size: 28px; margin-bottom: 6px; }
+  .hero .tagline { font-size: 15px; opacity: 0.9; }
+  .hero .meta { margin-top: 12px; font-size: 13px; opacity: 0.8; }
+
+  .section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .section-header {
+    background: var(--primary-light);
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-header .num {
+    background: var(--primary);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .section-header .count {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+  .section-body { padding: 8px 0; }
+  .checkpoint {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .checkpoint:last-child { border-bottom: none; }
+  .checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .checkbox.checked { background: var(--success); border-color: var(--success); }
+  .checkbox.checked::after { content: '✓'; color: white; font-size: 14px; font-weight: bold; }
+  .checkpoint-content { flex: 1; }
+  .checkpoint-id { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
+  .checkpoint-desc { color: var(--text); }
+  .checkpoint-detail { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 6px;
+  }
+  .badge-api { background: #E3F2FD; color: #1565C0; }
+  .badge-ui { background: #F3E5F5; color: #7B1FA2; }
+  .badge-admin { background: #FFF3E0; color: #E65100; }
+
+  .progress-bar-container {
+    background: var(--border);
+    border-radius: 20px;
+    height: 22px;
+    overflow: hidden;
+    margin: 16px 0 4px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), var(--primary));
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    transition: width 0.3s;
+    min-width: 40px;
+  }
+
+  .summary { margin: 20px 0; }
+  .summary-stats { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .stat { text-align: center; padding: 12px 24px; background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .stat-value { font-size: 24px; font-weight: 700; }
+  .stat-label { font-size: 12px; color: var(--text-secondary); }
+  .stat.pass .stat-value { color: var(--success); }
+  .stat.fail .stat-value { color: var(--danger); }
+  .stat.skip .stat-value { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <a class="back-link" href="../checklist/index.html">← 返回索引</a>
+  <h1>⑩ 图文教程 (Guide)</h1>
+  <p class="tagline">创建 → 审核 → 互动 → 编辑删除 → 列表展示</p>
+  <p class="meta">模块: M21 | 新增表: 5 (Guide/GuideLike/GuideFavorite/GuideComment/GuideCommentLike) | 勋章: guide_1/5/20</p>
+</div>
+
+<div class="container">
+  <div class="summary">
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="progressBar" style="width: 0%;">0%</div>
+    </div>
+    <div class="summary-stats">
+      <div class="stat pass"><div class="stat-value" id="passCount">0</div><div class="stat-label">通过</div></div>
+      <div class="stat fail"><div class="stat-value" id="failCount">0</div><div class="stat-label">失败</div></div>
+      <div class="stat skip"><div class="stat-value" id="skipCount">0</div><div class="stat-label">跳过</div></div>
+      <div class="stat"><div class="stat-value" id="totalCount">0</div><div class="stat-label">总计</div></div>
+    </div>
+  </div>
+
+  <!-- 1. 创建教程 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">1</span>
+      <span>创建教程</span>
+      <span class="count" id="count-1">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-001</div>
+          <div class="checkpoint-desc">认证用户在邻里帮 → 指南 tab → 点击「发教程」进入创建页 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-002</div>
+          <div class="checkpoint-desc">填写标题(≤50) + 描述(≤2000) + 选分类 + 上传图片(≤9) → 提交成功 <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /guides → status=pending_review</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-003</div>
+          <div class="checkpoint-desc">未认证用户点「发布」弹出认证引导弹窗 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-004</div>
+          <div class="checkpoint-desc">标题超 50 字 / 图片超 9 张 → 后端返回 400 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-005</div>
+          <div class="checkpoint-desc">创建页草稿：填写一半退出 → 重进提示恢复草稿 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-006</div>
+          <div class="checkpoint-desc">分类选择器展示 4 类（使用指南/维修排障/保养维护/其他），选中高亮 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Admin 审核 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">2</span>
+      <span>Admin 审核</span>
+      <span class="count" id="count-2">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-007</div>
+          <div class="checkpoint-desc">Admin 后台 → 教程管理 → 列表展示所有状态教程 <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-008</div>
+          <div class="checkpoint-desc">按状态筛选（待审核/已发布/已驳回）+ 按分类筛选 + 关键词搜索 <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-009</div>
+          <div class="checkpoint-desc">点击「详情」→ Drawer 展示完整教程信息（标题/分类/状态/作者/统计/描述/图片预览） <span class="badge badge-admin">Admin</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-010</div>
+          <div class="checkpoint-desc">待审核教程点「通过」→ status=published → 列表可见 <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /admin/guides/:id/approve → 触发 handleGuideApproved</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-011</div>
+          <div class="checkpoint-desc">待审核教程点「驳回」→ 填写驳回原因 → status=rejected <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">POST /admin/guides/:id/reject → 发通知 review_result</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-012</div>
+          <div class="checkpoint-desc">重复 approve 同一教程 → 报错（不可重复审核） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-013</div>
+          <div class="checkpoint-desc">approve 后作者收到通知（review_result 类型） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 激励触发 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">3</span>
+      <span>激励触发</span>
+      <span class="count" id="count-3">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-014</div>
+          <div class="checkpoint-desc">approve 后 ContributionRecord 写入（sourceType=guide, action=guide, score=1, flowerCount=1） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-015</div>
+          <div class="checkpoint-desc">首次 approve → 颁发 guide_1 勋章（教程分享者） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-016</div>
+          <div class="checkpoint-desc">累计 5 个教程 approve → 颁发 guide_5 勋章（教程达人） <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">需创建+审核 5 个教程，可跳过（数据量大）</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-017</div>
+          <div class="checkpoint-desc">approve 后排行榜重算（recalculateRankings） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-018</div>
+          <div class="checkpoint-desc">reject 不触发激励（不写 ContributionRecord） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 详情页互动 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">4</span>
+      <span>详情页互动</span>
+      <span class="count" id="count-4">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-019</div>
+          <div class="checkpoint-desc">详情页展示标题/分类标签/状态标签/描述/图片 Swiper/作者/浏览数 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-020</div>
+          <div class="checkpoint-desc">访问详情页 → viewCount +1 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-021</div>
+          <div class="checkpoint-desc">点赞 toggle → 图标变色 + 计数变化；再次点击取消 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-022</div>
+          <div class="checkpoint-desc">收藏 toggle → 图标变色 + 计数变化；再次点击取消 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-023</div>
+          <div class="checkpoint-desc">评论：输入文字 → 发送 → 评论列表刷新展示 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-024</div>
+          <div class="checkpoint-desc">回复评论：点击回复 → 输入框显示「回复 @昵称」→ 发送 → 嵌套展示 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-025</div>
+          <div class="checkpoint-desc">评论第 3 层嵌套 → 后端返回 400（R15 红线） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-026</div>
+          <div class="checkpoint-desc">评论点赞 toggle → 图标变色 + 计数变化 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-027</div>
+          <div class="checkpoint-desc">rejected 教程详情页展示驳回原因 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 编辑/删除 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">5</span>
+      <span>编辑/删除</span>
+      <span class="count" id="count-5">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-028</div>
+          <div class="checkpoint-desc">pending_review 教程：作者详情页可见「编辑」「删除」按钮 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-029</div>
+          <div class="checkpoint-desc">编辑 → 跳转 guide-create?id=xxx → 预填内容 → 修改提交成功 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-030</div>
+          <div class="checkpoint-desc">published 教程：作者不可编辑（按钮不显示） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-031</div>
+          <div class="checkpoint-desc">非作者访问 pending/rejected 教程详情 → 404 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-032</div>
+          <div class="checkpoint-desc">作者软删除教程 → 确认弹窗 → 删除成功 → navigateBack <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">DELETE /guides/:id → deletedAt 非空</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-033</div>
+          <div class="checkpoint-desc">非作者编辑/删除 → 后端返回 403 <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 列表展示 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">6</span>
+      <span>列表展示</span>
+      <span class="count" id="count-6">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-034</div>
+          <div class="checkpoint-desc">邻里帮 → 指南 tab → 展示已发布教程列表 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-035</div>
+          <div class="checkpoint-desc">列表项展示：标题 + 分类标签 + 作者 + 点赞数 + 首图 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-036</div>
+          <div class="checkpoint-desc">分类筛选：全部/使用指南/维修排障/保养维护/其他 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-037</div>
+          <div class="checkpoint-desc">搜索：输入关键词 → 列表过滤 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-038</div>
+          <div class="checkpoint-desc">列表只展示 published 状态（pending/rejected 不可见） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-039</div>
+          <div class="checkpoint-desc">小区隔离：A 小区不能查 B 小区教程 <span class="badge badge-api">API</span></div>
+          <div class="checkpoint-detail">R2 红线验证</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-040</div>
+          <div class="checkpoint-desc">滚动到底 → 加载更多（分页） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-041</div>
+          <div class="checkpoint-desc">空列表展示空状态（book 图标 + 「暂无教程」） <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. 分享 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">7</span>
+      <span>分享</span>
+      <span class="count" id="count-7">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-042</div>
+          <div class="checkpoint-desc">详情页分享 → 标题包含教程标题 <span class="badge badge-ui">UI</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-043</div>
+          <div class="checkpoint-desc">分享链接 path = /pages/guide-detail/index?id=xxx <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. 举报 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="num">8</span>
+      <span>举报</span>
+      <span class="count" id="count-8">0/0</span>
+    </div>
+    <div class="section-body">
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-044</div>
+          <div class="checkpoint-desc">教程可被举报（targetType=guide） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="checkbox" onclick="toggleCheck(this)"></div>
+        <div class="checkpoint-content">
+          <div class="checkpoint-id">G-045</div>
+          <div class="checkpoint-desc">教程评论可被举报（targetType=guide_comment） <span class="badge badge-api">API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 60px;"></div>
+</div>
+
+<script>
+function toggleSection(header) {
+  var body = header.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? '' : 'none';
+}
+
+function toggleCheck(checkbox) {
+  checkbox.classList.toggle('checked');
+  updateProgress();
+}
+
+function updateProgress() {
+  var sections = document.querySelectorAll('.section');
+  var total = 0, passed = 0;
+  sections.forEach(function(section, idx) {
+    var checks = section.querySelectorAll('.checkbox');
+    var sectionPassed = section.querySelectorAll('.checkbox.checked').length;
+    total += checks.length;
+    passed += sectionPassed;
+    var countEl = document.getElementById('count-' + (idx + 1));
+    if (countEl) countEl.textContent = sectionPassed + '/' + checks.length;
+  });
+  var percent = total > 0 ? Math.round((passed / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = percent + '%';
+  document.getElementById('progressBar').textContent = percent + '%';
+  document.getElementById('passCount').textContent = passed;
+  document.getElementById('failCount').textContent = 0;
+  document.getElementById('skipCount').textContent = 0;
+  document.getElementById('totalCount').textContent = total;
+}
+
+updateProgress();
+</script>
+
+</body>
+</html>

@@ -5,8 +5,10 @@ import { communityApplicationService } from '@/services';
 import { useAuthGuard } from '@/hooks';
 import Loading from '@/components/loading';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import type { CommunityApplicationDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 // 两 tab：我发起的 / 我助力的；进入页面/切 tab 时重新拉数据。
 // ponytail: 不分页，账户里的申请通常 < 20 条，列表全量返回。
@@ -59,6 +61,7 @@ export default function MyApplications() {
 
   return (
     <View className="myapp">
+      <NavBar title="我的小区申请" />
       <View className="myapp__tabs">
         {(['mine', 'supported'] as Tab[]).map((t) => (
           <View
@@ -77,7 +80,7 @@ export default function MyApplications() {
         {!loading && items.length === 0 && (
           <View className="myapp__empty">
             <EmptyState
-              icon={tab === 'mine' ? '🏘️' : '🤝'}
+              icon={tab === 'mine' ? 'community' : 'handshake'}
               text={tab === 'mine' ? '还没发起过小区申请' : '还没助力过任何申请'}
             />
             {tab === 'mine' && (
@@ -114,7 +117,9 @@ export default function MyApplications() {
                   {it.city} · {it.district}
                 </Text>
                 <View className="myapp__item-meta">
-                  <Text>👍 {it.supportCount} 助力</Text>
+                  <View>
+                    <Icon name="thumbs-up" size={20} /> <Text>{it.supportCount} 助力</Text>
+                  </View>
                   <Text>{new Date(it.createdAt).toLocaleDateString()}</Text>
                 </View>
                 {tab === 'mine' && it.status === 'rejected' && it.rejectReason && (

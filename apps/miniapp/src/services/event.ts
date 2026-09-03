@@ -92,6 +92,14 @@ export const eventService = {
   getApplications: (eventId: string) =>
     http.get<{ items: EventApplicationDto[] }>(`/events/${eventId}/applications`),
 
+  getContactInfo: (eventId: string) =>
+    http.get<{
+      nickname: string;
+      phone: string | null;
+      rawPhone: string | null;
+      wechatId: string | null;
+    }>(`/events/${eventId}/contact`),
+
   getFeedbackLogs: (eventId: string) =>
     // P-104: 后端返回 { items: FeedbackLogDto[] }
     http.get<{ items: FeedbackLogDto[] }>(`/events/${eventId}/feedback-logs`),

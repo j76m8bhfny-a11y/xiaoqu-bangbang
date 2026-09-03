@@ -610,12 +610,12 @@
   // ── 热评"查看全部"链接 ───────────────────────────
   // 已移除：评论统一到议题讨论 Tab，事件卡片不再展示评论
 
-  // ── 举报入口 ──────────────────────────────────────
+  // ── 举报入口（右对齐小字，避免误点） ──────────────
   &__report-link {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: $spacing-sm 0;
+    justify-content: flex-end;
+    padding: $spacing-xs 0;
     margin-top: $spacing-xs;
 
     &:active {
@@ -624,7 +624,10 @@
   }
 
   &__report-link-text {
-    font-size: $font-size-xs;
+    display: flex;
+    align-items: center;
+    font-size: 20px;
     color: $color-text-secondary;
+    opacity: 0.6;
   }
 }

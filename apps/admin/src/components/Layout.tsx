@@ -13,6 +13,7 @@ import {
   TeamOutlined,
   LikeOutlined,
   PictureOutlined,
+  BookOutlined,
   ToolOutlined,
   TrophyOutlined,
   WarningOutlined,
@@ -54,6 +55,18 @@ const allMenuItems = [
     roles: ['platform_admin', 'committee_admin'],
   },
   { key: '/market', label: '闲置管理', icon: <ShopOutlined />, roles: ['platform_admin'] },
+  {
+    key: '/group-buys',
+    label: '拼单管理',
+    icon: <ShopOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
+  {
+    key: '/guides',
+    label: '教程管理',
+    icon: <BookOutlined />,
+    roles: ['platform_admin', 'committee_admin'],
+  },
   { key: '/verifications', label: '用户与认证', icon: <UserOutlined />, roles: ['platform_admin'] },
   {
     key: '/community-applications',
@@ -149,7 +162,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             overflow: 'hidden',
           }}
         >
-          {collapsed ? '帮' : '小区帮榜棒'}
+          {collapsed ? '帮' : '左邻右帮'}
         </div>
         <Menu
           theme="dark"

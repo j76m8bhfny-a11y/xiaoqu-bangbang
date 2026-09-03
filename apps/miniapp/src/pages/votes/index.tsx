@@ -6,8 +6,10 @@ import { useRequest } from '@/hooks';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import { VoteType, VoteStatus } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 function formatDate(isoString: string): string {
   const d = new Date(isoString);
@@ -46,13 +48,16 @@ export default function Votes() {
   }
 
   if (!votes || votes.length === 0) {
-    return <EmptyState icon="🗳️" text="暂无投票" />;
+    return <EmptyState icon="vote" text="暂无投票" />;
   }
 
   return (
     <View className="votes">
+      <NavBar title="社区投票" />
       <View className="votes__header">
-        <Text className="votes__header-title">🗳️ 社区投票</Text>
+        <View className="votes__header-title">
+          <Icon name="vote" size={22} /> <Text>社区投票</Text>
+        </View>
         <Text className="votes__header-sub">参与投票，共建美好社区</Text>
       </View>
 

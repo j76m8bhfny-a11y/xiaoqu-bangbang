@@ -246,6 +246,17 @@ export class EventsController {
     return { code: 0, message: 'ok', data: { items } };
   }
 
+  @Get(':id/contact')
+  @UseGuards(JwtAuthGuard, CurrentCommunityGuard)
+  async getContactInfo(
+    @Param('id') eventId: string,
+    @CurrentUser('userId') userId: string,
+    @CurrentCommunityId() communityId: string,
+  ) {
+    const data = await this.eventsService.getContactInfo(eventId, communityId, userId);
+    return { code: 0, message: 'ok', data };
+  }
+
   @Post(':id/comments')
   @UseGuards(JwtAuthGuard, CurrentCommunityGuard, VerifiedMemberGuard)
   async addComment(

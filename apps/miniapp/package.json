@@ -2,7 +2,7 @@
   "name": "@xiaoqu-bangbang/miniapp",
   "version": "0.1.0",
   "private": true,
-  "description": "小区帮榜棒 - Taro 微信小程序",
+  "description": "左邻右帮 - Taro 微信小程序",
   "templateInfo": {
     "name": "default",
     "typescript": true,
@@ -19,7 +19,8 @@
     "lint:fix": "eslint src/ --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "sync:lan": "bash scripts/sync-lan-ip.sh"
   },
   "browserslist": [
     "last 3 versions",

@@ -20,3 +20,7 @@ postgres-data/
 # 构建产物与运行时上传
 *.tsbuildinfo
 apps/api/uploads/
+
+# Claude Code / WorkBuddy local settings
+.claude/settings.local.json
+.workbuddy/

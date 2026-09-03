@@ -76,6 +76,10 @@ $radius-xl: 40px;
       background: rgba(255, 255, 255, 0.3);
     }
 
+    &--unverified {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
     &--community {
       background: rgba(255, 255, 255, 0.2);
     }
@@ -107,6 +111,8 @@ $radius-xl: 40px;
   }
 
   &__stat-icon {
+    display: flex;
+    align-items: center;
     font-size: 32px;
     margin-bottom: 2px;
   }
@@ -118,12 +124,23 @@ $radius-xl: 40px;
   }
 
   &__stat-label {
+    display: flex;
+    align-items: center;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &__greeting {
+    padding: $spacing-sm $spacing-lg 0;
+  }
+
+  &__greeting-text {
     font-size: $font-size-xs;
     color: $color-text-secondary;
   }
 
   &__content {
-    height: calc(100vh - 480px);
+    height: calc(100vh - 540px);
   }
 
   &__activities {
@@ -169,6 +186,8 @@ $radius-xl: 40px;
   }
 
   &__activity-icon {
+    display: flex;
+    align-items: center;
     font-size: 36px;
   }
 
@@ -206,15 +225,37 @@ $radius-xl: 40px;
     box-shadow: $shadow-card;
   }
 
+  &__group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-sm $spacing-md 0;
+  }
+
+  &__group-title {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+  }
+
+  &__group-arrow {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    transition: transform 0.2s;
+
+    &--expanded {
+      transform: rotate(90deg);
+    }
+  }
+
   &__menu-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: $spacing-md;
-    border-bottom: 1px solid $color-border;
 
-    &:last-child {
-      border-bottom: none;
+    &:not(:last-child) {
+      border-bottom: 1px solid rgba(232, 224, 208, 0.3);
     }
   }
 
@@ -225,6 +266,8 @@ $radius-xl: 40px;
   }
 
   &__menu-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-md;
   }
 

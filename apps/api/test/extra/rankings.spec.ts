@@ -212,8 +212,10 @@ describe('P-277+P-278+P-279: 勋章规则', () => {
     ];
 
     for (const b of badges) {
-      const badge = await prisma.badge.create({
-        data: {
+      const badge = await prisma.badge.upsert({
+        where: { code: b.code },
+        update: {},
+        create: {
           code: b.code,
           name: b.name,
           description: b.description,
@@ -232,7 +234,7 @@ describe('P-277+P-278+P-279: 勋章规则', () => {
     await prisma.rankingSnapshot.deleteMany({ where: { userId } });
     await prisma.notification.deleteMany({ where: { userId } });
     await prisma.communityMember.deleteMany({ where: { userId } });
-    await prisma.badge.deleteMany({ where: { id: { in: badgeIds } } });
+    // ponytail: 不删除 badge（seed 全局资源），upsert 保证幂等
     await prisma.user
       .update({ where: { id: userId }, data: { currentCommunityId: null } })
       .catch(() => {});

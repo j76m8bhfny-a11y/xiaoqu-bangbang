@@ -5,15 +5,17 @@ import { userService, eventService, marketService, topicService } from '@/servic
 import { useAuthStore } from '@/store';
 import Loading from '@/components/loading';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import type { UserProfileDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 type TabKey = 'event' | 'market' | 'topic';
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
-  { key: 'event', label: '互助', icon: '🤝' },
-  { key: 'market', label: '闲置', icon: '♻️' },
-  { key: 'topic', label: '议题', icon: '📋' },
+  { key: 'event', label: '互助', icon: 'handshake' },
+  { key: 'market', label: '闲置', icon: 'recycle' },
+  { key: 'topic', label: '议题', icon: 'clipboard' },
 ];
 
 const EVENT_STATUS_LABEL: Record<string, string> = {
@@ -118,7 +120,7 @@ export default function UserProfile() {
   if (notFound || !profile) {
     return (
       <View className="up">
-        <EmptyState icon="👤" text="用户不存在或已注销" />
+        <EmptyState icon="person" text="用户不存在或已注销" />
       </View>
     );
   }
@@ -136,133 +138,152 @@ export default function UserProfile() {
   };
 
   return (
-    <ScrollView scrollY className="up">
-      <View className="up__hero">
-        <View className="up__avatar">
-          {profile.avatarUrl ? (
-            <Image className="up__avatar-img" src={profile.avatarUrl} mode="aspectFill" />
-          ) : (
-            <Text className="up__avatar-text">{initial}</Text>
-          )}
-        </View>
-        <Text className="up__nickname">{profile.nickname}</Text>
-        <View className="up__tags">
-          {profile.verifyStatus && (
-            <View
-              className={`up__tag ${profile.verifyStatus === 'verified' ? 'up__tag--verified' : 'up__tag--unverified'}`}
-            >
-              <Text className="up__tag-text">
-                {profile.verifyStatus === 'verified' ? '✅ 已认证业主' : '⏳ 未认证'}
-              </Text>
-            </View>
-          )}
-          {profile.communityName && (
-            <View className="up__tag up__tag--community">
-              <Text className="up__tag-text">🏠 {profile.communityName}</Text>
-            </View>
-          )}
-        </View>
-        {profile.bio && <Text className="up__bio">{profile.bio}</Text>}
-        {isMe && (
-          <View
-            className="up__edit"
-            onClick={() => Taro.navigateTo({ url: '/pages/profile-edit/index' })}
-          >
-            <Text className="up__edit-text">编辑资料</Text>
+    <View className="up">
+      <NavBar title="个人主页" />
+      <ScrollView scrollY className="up__scroll">
+        <View className="up__hero">
+          <View className="up__avatar">
+            {profile.avatarUrl ? (
+              <Image className="up__avatar-img" src={profile.avatarUrl} mode="aspectFill" />
+            ) : (
+              <Text className="up__avatar-text">{initial}</Text>
+            )}
           </View>
-        )}
-      </View>
-
-      <View className="up__stats">
-        <View className="up__stat">
-          <Text className="up__stat-icon">🤲</Text>
-          <Text className="up__stat-value">{profile.helpCount}</Text>
-          <Text className="up__stat-label">帮助次数</Text>
-        </View>
-        <View className="up__stat">
-          <Text className="up__stat-icon">🌸</Text>
-          <Text className="up__stat-value">{profile.flowerCount}</Text>
-          <Text className="up__stat-label">小红花</Text>
-        </View>
-        <View className="up__stat">
-          <Text className="up__stat-icon">🏅</Text>
-          <Text className="up__stat-value">{profile.badgeCount}</Text>
-          <Text className="up__stat-label">勋章</Text>
-        </View>
-        <View className="up__stat">
-          <Text className="up__stat-icon">📊</Text>
-          <Text className="up__stat-value">{profile.contributionScore}</Text>
-          <Text className="up__stat-label">贡献分</Text>
-        </View>
-      </View>
-
-      <View className="up__section">
-        <Text className="up__section-title">🏅 最近徽章</Text>
-        {profile.badges.length === 0 ? (
-          <View className="up__empty">
-            <Text className="up__empty-text">暂无徽章</Text>
-          </View>
-        ) : (
-          <View className="up__badges">
-            {profile.badges.map((b) => (
-              <View key={b.id} className="up__badge">
-                {b.iconUrl ? (
-                  <Image className="up__badge-icon" src={b.iconUrl} mode="aspectFit" />
-                ) : (
-                  <Text className="up__badge-emoji">🏅</Text>
-                )}
-                <Text className="up__badge-name">{b.name}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-      </View>
-
-      <View className="up__section">
-        <Text className="up__section-title">📦 发布历史</Text>
-        <View className="up__tabs">
-          {TABS.map((t) => (
-            <View
-              key={t.key}
-              className={`up__tab ${activeTab === t.key ? 'up__tab--active' : ''}`}
-              onClick={() => setActiveTab(t.key)}
-            >
-              <Text className="up__tab-text">
-                {t.icon} {t.label}
-              </Text>
-            </View>
-          ))}
-        </View>
-        {historyLoading ? (
-          <Loading />
-        ) : historyItems.length === 0 ? (
-          <EmptyState icon="📦" text="暂无发布记录" />
-        ) : (
-          <View className="up__history-list">
-            {historyItems.map((item) => (
+          <Text className="up__nickname">{profile.nickname}</Text>
+          <View className="up__tags">
+            {profile.verifyStatus && (
               <View
-                key={item.id}
-                className="up__history-item"
-                onClick={() => Taro.navigateTo({ url: DETAIL_ROUTES[activeTab] + item.id })}
+                className={`up__tag ${profile.verifyStatus === 'verified' ? 'up__tag--verified' : 'up__tag--unverified'}`}
               >
-                <Text className="up__history-title">{item.title}</Text>
-                <View className="up__history-meta">
-                  <Text className="up__history-status">
-                    {getStatusLabel(activeTab, item.status)}
-                  </Text>
-                  <Text className="up__history-time">{item.createdAt?.slice(0, 10)}</Text>
+                <Text className="up__tag-text">
+                  {profile.verifyStatus === 'verified' ? '已认证业主' : '未认证'}
+                </Text>
+              </View>
+            )}
+            {profile.communityName && (
+              <View className="up__tag up__tag--community">
+                <View className="up__tag-text">
+                  <Icon name="house" size={14} /> <Text>{profile.communityName}</Text>
                 </View>
               </View>
+            )}
+          </View>
+          {profile.bio && <Text className="up__bio">{profile.bio}</Text>}
+          {isMe && (
+            <View
+              className="up__edit"
+              onClick={() => Taro.navigateTo({ url: '/pages/profile-edit/index' })}
+            >
+              <Text className="up__edit-text">编辑资料</Text>
+            </View>
+          )}
+        </View>
+
+        <View className="up__stats">
+          <View className="up__stat">
+            <View className="up__stat-icon">
+              <Icon name="hands-up" size={20} />
+            </View>
+            <Text className="up__stat-value">{profile.helpCount}</Text>
+            <Text className="up__stat-label">帮助次数</Text>
+          </View>
+          <View className="up__stat">
+            <View className="up__stat-icon">
+              <Icon name="flower" size={20} color="#C9702F" />
+            </View>
+            <Text className="up__stat-value">{profile.flowerCount}</Text>
+            <Text className="up__stat-label">小红花</Text>
+          </View>
+          <View className="up__stat">
+            <View className="up__stat-icon">
+              <Icon name="medal" size={20} />
+            </View>
+            <Text className="up__stat-value">{profile.badgeCount}</Text>
+            <Text className="up__stat-label">勋章</Text>
+          </View>
+          <View className="up__stat">
+            <View className="up__stat-icon">
+              <Icon name="chart" size={20} />
+            </View>
+            <Text className="up__stat-value">{profile.contributionScore}</Text>
+            <Text className="up__stat-label">贡献分</Text>
+          </View>
+        </View>
+
+        <View className="up__section">
+          <View className="up__section-title">
+            <Icon name="medal" size={18} /> <Text>最近徽章</Text>
+          </View>
+          {profile.badges.length === 0 ? (
+            <View className="up__empty">
+              <Text className="up__empty-text">暂无徽章</Text>
+            </View>
+          ) : (
+            <View className="up__badges">
+              {profile.badges.map((b) => (
+                <View key={b.id} className="up__badge">
+                  {b.iconUrl ? (
+                    <Image className="up__badge-icon" src={b.iconUrl} mode="aspectFit" />
+                  ) : (
+                    <View className="up__badge-emoji">
+                      <Icon name="medal" size={28} />
+                    </View>
+                  )}
+                  <Text className="up__badge-name">{b.name}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        <View className="up__section">
+          <View className="up__section-title">
+            <Icon name="box" size={18} /> <Text>发布历史</Text>
+          </View>
+          <View className="up__tabs">
+            {TABS.map((t) => (
+              <View
+                key={t.key}
+                className={`up__tab ${activeTab === t.key ? 'up__tab--active' : ''}`}
+                onClick={() => setActiveTab(t.key)}
+              >
+                <Text className="up__tab-text">
+                  {t.icon} {t.label}
+                </Text>
+              </View>
             ))}
           </View>
-        )}
-      </View>
+          {historyLoading ? (
+            <Loading />
+          ) : historyItems.length === 0 ? (
+            <EmptyState icon="box" text="暂无发布记录" />
+          ) : (
+            <View className="up__history-list">
+              {historyItems.map((item) => (
+                <View
+                  key={item.id}
+                  className="up__history-item"
+                  onClick={() => Taro.navigateTo({ url: DETAIL_ROUTES[activeTab] + item.id })}
+                >
+                  <Text className="up__history-title">{item.title}</Text>
+                  <View className="up__history-meta">
+                    <Text className="up__history-status">
+                      {getStatusLabel(activeTab, item.status)}
+                    </Text>
+                    <Text className="up__history-time">{item.createdAt?.slice(0, 10)}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
 
-      <View className="up__footer-tip">
-        <Text className="up__footer-tip-text">
-          数据按你当前所在小区展示 · 加入于 {profile.joinedAt.slice(0, 10)}
-        </Text>
-      </View>
-    </ScrollView>
+        <View className="up__footer-tip">
+          <Text className="up__footer-tip-text">
+            数据按你当前所在小区展示 · 加入于 {profile.joinedAt.slice(0, 10)}
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
   );
 }

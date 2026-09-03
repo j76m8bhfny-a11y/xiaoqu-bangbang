@@ -21,6 +21,8 @@
   }
 
   &__logo {
+    display: flex;
+    align-items: center;
     font-size: 120px;
     margin-bottom: $spacing-md;
   }
@@ -39,31 +41,38 @@
   }
 
   &__btn {
-    width: 560px;
+    width: 100%;
     height: 96px;
-    border-radius: $radius-pill;
+    border-radius: $radius-md;
     background: $color-accent;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: $spacing-xs;
     margin-bottom: $spacing-sm;
+    box-shadow: $shadow-btn;
 
     &:active {
       opacity: 0.8;
     }
 
     &--wechat {
-      background: #5b9e6f;
+      background: $color-primary;
     }
 
     &--dev {
       background: rgba(0, 0, 0, 0.06);
+      box-shadow: none;
     }
+  }
+
+  &__btn-icon {
+    font-size: $font-size-lg;
   }
 
   // ponytail: 临时调试入口样式，发布前删除
   &__dev {
-    width: 560px;
+    width: 100%;
     margin-top: $spacing-md;
   }
 

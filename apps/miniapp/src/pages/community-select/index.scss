@@ -57,6 +57,8 @@
   }
 
   &__hero-emoji {
+    display: flex;
+    align-items: center;
     font-size: 56px;
   }
 
@@ -97,6 +99,8 @@
   }
 
   &__search-icon {
+    display: flex;
+    align-items: center;
     font-size: $font-size-sm;
     flex-shrink: 0;
   }
@@ -167,6 +171,8 @@
   }
 
   &__card-icon-text {
+    display: flex;
+    align-items: center;
     font-size: 44px;
   }
 
@@ -298,6 +304,8 @@
   }
 
   &__empty-emoji {
+    display: flex;
+    align-items: center;
     font-size: 72px;
     margin-bottom: $spacing-sm;
   }

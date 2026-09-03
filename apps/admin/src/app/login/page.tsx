@@ -46,7 +46,7 @@ export default function LoginPage() {
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           <div style={{ textAlign: 'center' }}>
             <Typography.Title level={3} style={{ marginBottom: 4 }}>
-              小区帮榜棒
+              左邻右帮
             </Typography.Title>
             <Typography.Text type="secondary">管理后台</Typography.Text>
           </div>

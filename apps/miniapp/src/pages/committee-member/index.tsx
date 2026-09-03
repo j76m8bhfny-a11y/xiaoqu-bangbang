@@ -5,11 +5,12 @@ import { useRequest } from '@/hooks';
 import { committeeService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
+import NavBar from '@/components/navbar';
 import { ClaimStatus, type CommitteeMemberDetailDto } from '@xiaoqu-bangbang/shared';
 import './index.scss';
 
 const CLAIM_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  [ClaimStatus.UNCLAIMED]: { label: '待认领', color: '#e0a458', bgColor: '#fbf0dd' },
+  [ClaimStatus.UNCLAIMED]: { label: '待认领', color: '#B05E22', bgColor: '#fbf0dd' },
   [ClaimStatus.PENDING]: { label: '审核中', color: '#3586FF', bgColor: '#EBF2FF' },
   [ClaimStatus.CLAIMED]: { label: '已认领', color: '#5b9e6f', bgColor: '#eaf4ec' },
   [ClaimStatus.REJECTED]: { label: '已拒绝', color: '#FF6B6B', bgColor: '#FFF0F0' },
@@ -77,6 +78,7 @@ export default function CommitteeMember() {
 
   return (
     <View className="committee-member">
+      <NavBar title="成员详情" />
       <ScrollView scrollY className="committee-member__scroll">
         {/* Avatar Section */}
         <View className="committee-member__avatar-section">

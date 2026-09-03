@@ -2676,3 +2676,44 @@ const userScores = await this.prisma.contributionRecord.groupBy({
 | 🟡 建议修        | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 🟢 可延后        | 0       | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | **合计**         | **362** |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+---
+
+## [2026-07-21] M22 宠物帮帮 + M23 购物拼拼 E2E 测试轮次
+
+**测试范围**: 90 检查点 (11-pet-help.html 45 + 12-group-buy.html 45)
+**测试人**: Claude (glm-5.2 纯文本 API)
+**分支**: feature/guide-module @ 7091718 -> 08de26b (含修复)
+**详细结果**: `e2e/results/m22-m23-e2e-results.md`
+
+### 🐛 发现并修复的 Bug (commit 08de26b)
+
+| #   | 模块 | 严重度   | 描述                                                                           | 位置                              |
+| --- | ---- | -------- | ------------------------------------------------------------------------------ | --------------------------------- |
+| 1   | M22  | Critical | selectParticipant 不支持寻宠多帮手 (pet_help+lost 被 400 拒绝)                 | events.service.ts:855             |
+| 2   | M22  | Major    | 寻宠线索人发花 1 朵 (应 2 朵, getEventAction 无 pet_help 分支)                 | rankings.service.ts:294           |
+| 3   | M23  | Critical | seek 创建多商品 UNIQUE 冲突 500 (group_buy_id+requester_id 与 seek 多商品矛盾) | schema.prisma GroupBuyItem        |
+| 4   | M23  | Major    | group_buy 完成不发花 (原 ponytail TODO 未接入 awardFlower)                     | group-buys.service.ts:265 deliver |
+
+### ⚠️ 待确认 Findings (非阻塞)
+
+- **PH-009/PH-016**: petMeta 内部字段 (dogSize/petType/lostLocation) 后端不校验，缺失不返回 400。需确认 PRD 是否要求后端校验 petMeta 内部结构（当前前端可能校验）
+- **PH-037**: events 模块无 reject application 接口 (寻宠发布者无法明确拒绝响应人，只能不选)。多帮手寻宠场景下响应人留 pending 无明确 reject 路径
+- **GB-045**: Admin takedown API 不校验 group_buy 状态，已 closed/rejected 仍可 takedown (UI 层已隐藏按钮，API 层无守卫)
+
+### 📊 测试统计 (90 检查点)
+
+| 状态          | M22 | M23 | 合计                                    |
+| ------------- | --- | --- | --------------------------------------- |
+| ✅ pass       | 26  | 32  | 58                                      |
+| 🟡 pass(部分) | 2   | 1   | 3 (AI reject 路径无数据触发)            |
+| ❌ fail       | 2   | 0   | 2 (PH-009/016 petMeta, 已记入 findings) |
+| ⏳ skip       | 15  | 12  | 27 (UI 类待 weapp-dev-mcp 连接稳定)     |
+
+### 环境问题 (已解决)
+
+1. **后端跑旧 dist**: 后端进程启动于 6 天前 (2026-07-14 编译)，M22/M23 代码未编译。修复: kill + 重启 pnpm dev:api
+2. **Admin 前端 chunks 404**: Next.js dev server 缓存问题。修复: 重启 pnpm dev:admin
+3. **weapp-dev-mcp 元素操作超时**: Taro 4 + weapp-dev-mcp 兼容性问题，page_getElements/element_input 超时 (ws 连接正常但 page.$ 不可用)。UI 类检查点未能完成
+
+**后端单测**: 287/287 pass (修复后无回归)

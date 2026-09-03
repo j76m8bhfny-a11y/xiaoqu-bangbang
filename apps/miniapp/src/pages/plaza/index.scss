@@ -1,9 +1,5 @@
 @use '../../styles/tokens.scss' as *;
 
-// 「小区事」页 v2 · 草木绿 · 老年友好
-// 结构 = 小区标识条 → 业委会通知(最醒目) → 进行中投票(促参与) → 邻居议事(议题列表)
-// 分层：官方通知草绿描边、投票暖色点缀、议题白卡片。
-
 .plaza {
   min-height: 100vh;
   background: $color-bg;
@@ -12,219 +8,287 @@
     height: 100vh;
   }
 
-  // ── 顶部小区标识条 ──
-  &__community-bar {
+  // ── 顶部暖橙渐变 Header ──
+  &__header {
+    background: linear-gradient(135deg, $color-accent-text, $color-accent-deep);
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    border-bottom-left-radius: 28px;
+    border-bottom-right-radius: 28px;
+    box-shadow: 0 4px 16px rgba(232, 155, 108, 0.2);
+  }
+
+  &__header-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: $spacing-md $spacing-lg;
+    padding: 12px 0 16px;
+    padding-right: 170px;
+    box-sizing: border-box;
+  }
+
+  &__header-title-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__header-title {
+    font-size: 40px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1px;
+  }
+
+  &__community-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
 
   &__community-name {
-    font-size: $font-size-lg;
-    font-weight: $font-weight-bold;
-    color: $color-text;
+    font-size: 24px;
+    color: #ffffff;
+    font-weight: 500;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  &__community-switch {
-    font-size: $font-size-sm;
-    color: $color-primary;
+  &__header-tabs {
+    display: flex;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: $radius-pill;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  &__header-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 72px;
+    padding: 0 32px;
+    border-radius: 36px;
+    transition: all 0.2s ease;
+
+    &--active {
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .plaza__header-tab-text {
+        color: $color-accent-deep;
+        font-weight: 600;
+      }
+    }
+  }
+
+  &__header-tab-text {
+    font-size: 26px;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
   }
 
   // ── 通用卡片 ──
+  &__section {
+    margin: 16px 20px 0;
+  }
+
   &__card {
     background: $color-card;
-    margin: $spacing-sm $spacing-lg;
-    padding: $spacing-lg;
-    border-radius: $radius-md;
+    padding: 16px;
+    border-radius: 20px;
     box-shadow: $shadow-card;
   }
 
-  // 业委会通知：草绿左描边，突出「官方、重要」
-  &__committee {
-    border-left: 8px solid $color-primary;
+  &__vote-card {
+    border-left: 6px solid $color-accent;
   }
 
   &__card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: $spacing-md;
+    margin-bottom: 8px;
   }
 
   &__card-title {
-    font-size: $font-size-lg;
-    font-weight: $font-weight-bold;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 28px;
+    font-weight: 600;
     color: $color-text;
   }
 
   &__card-more {
-    font-size: $font-size-sm;
+    font-size: 24px;
     color: $color-primary;
+    font-weight: 500;
   }
 
-  &__empty-line {
-    font-size: $font-size-sm;
-    color: $color-text-secondary;
-  }
-
-  &__committee-item {
-    padding: $spacing-sm 0;
-    border-top: 2px solid $color-border;
-
-    &:first-child {
-      border-top: none;
-      padding-top: 0;
-    }
-  }
-
-  &__committee-title {
-    font-size: $font-size-md;
+  &__vote-title {
+    font-size: 28px;
+    font-weight: 600;
     color: $color-text;
-    font-weight: $font-weight-medium;
-    line-height: 1.5;
+    margin-top: 4px;
   }
 
-  &__committee-date {
-    display: block;
-    font-size: $font-size-xs;
-    color: $color-text-secondary;
-    margin-top: 6px;
-  }
-
-  // ── 进行中投票：暖底 + 去投票大按钮 ──
-  &__vote-item {
+  &__dual-card {
     display: flex;
-    align-items: center;
-    gap: $spacing-md;
-    padding: $spacing-md 0;
-    border-top: 2px solid $color-border;
-
-    &:first-of-type {
-      border-top: none;
-      padding-top: 0;
-    }
+    gap: 12px;
+    margin: 16px 20px 0;
   }
 
-  &__vote-detail {
+  &__dual-item {
     flex: 1;
     min-width: 0;
   }
 
-  &__vote-title {
-    font-size: $font-size-md;
+  &__committee {
+    border-left: 6px solid $color-primary;
+  }
+
+  &__committee-item {
+    padding-top: 4px;
+  }
+
+  &__committee-title {
+    font-size: 26px;
+    font-weight: 600;
     color: $color-text;
-    font-weight: $font-weight-medium;
-  }
-
-  &__vote-meta {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     display: block;
-    font-size: $font-size-xs;
+  }
+
+  &__committee-date {
+    font-size: 22px;
     color: $color-text-secondary;
-    margin-top: 6px;
+    margin-top: 2px;
+    display: block;
   }
 
-  &__vote-btn {
-    flex-shrink: 0;
-    background: $color-accent;
-    border-radius: $radius-pill;
-    padding: $spacing-sm $spacing-lg;
+  &__empty-line {
+    font-size: 24px;
+    color: $color-text-secondary;
   }
 
-  &__vote-btn-text {
-    font-size: $font-size-md;
-    color: #fff;
-    font-weight: $font-weight-bold;
+  // ── 议题区 ──
+  &__topics-section {
+    margin: 20px 20px 0;
   }
 
-  // ── 邻居议事 ──
-  &__topics-header {
+  &__topics-action-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: $spacing-lg $spacing-lg $spacing-sm;
+    justify-content: space-between;
+    margin-bottom: 12px;
   }
 
-  &__topic-tabs {
+  &__topics-label {
+    font-size: 30px;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  &__topic-create-btn {
     display: flex;
-    gap: $spacing-sm;
-  }
-
-  &__topic-tab {
-    padding: $spacing-xs $spacing-lg;
-    border-radius: $radius-pill;
-    background: $color-card;
-    color: $color-text-secondary;
-    font-size: $font-size-sm;
-
-    &--active {
-      background: $color-primary;
-      color: #fff;
-      font-weight: $font-weight-bold;
-    }
-  }
-
-  &__topic-create {
-    background: $color-primary-deep;
-    border-radius: $radius-pill;
-    padding: $spacing-xs $spacing-lg;
+    align-items: center;
+    gap: 4px;
+    background: $color-primary;
+    padding: 6px 14px;
+    border-radius: 999px;
+    box-shadow: 0 4px 12px rgba(91, 158, 111, 0.25);
   }
 
   &__topic-create-text {
-    font-size: $font-size-sm;
-    color: #fff;
-    font-weight: $font-weight-bold;
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
   }
 
-  &__topic-item {
+  &__topic-card {
     background: $color-card;
-    margin: $spacing-sm $spacing-lg;
-    padding: $spacing-lg;
-    border-radius: $radius-md;
-    box-shadow: $shadow-card;
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(91, 158, 111, 0.04);
+    border: 1px solid rgba(232, 224, 208, 0.5);
+    transition: transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.99);
+    }
   }
 
   &__topic-top {
     display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    margin-bottom: $spacing-sm;
-  }
-
-  &__topic-status {
-    font-size: $font-size-xs;
-    padding: 4px 14px;
-    border-radius: $radius-sm;
-    flex-shrink: 0;
-
-    &--open {
-      background: $color-bg-green;
-      color: $color-primary-deep;
-    }
-
-    &--closed {
-      background: $color-border;
-      color: $color-text-secondary;
-    }
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
   }
 
   &__topic-title {
-    font-size: $font-size-md;
-    font-weight: $font-weight-bold;
+    font-size: 30px;
+    font-weight: 600;
     color: $color-text;
+    line-height: 1.4;
     flex: 1;
   }
 
-  // 议题数据：4 项均配中文词，flex-wrap 防溢出
-  &__topic-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $spacing-md;
-    font-size: $font-size-sm;
+  &__topic-date {
+    font-size: 22px;
     color: $color-text-secondary;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  &__topic-pills {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: $color-bg;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 22px;
+    color: $color-text-secondary;
+
+    &--like {
+      background: $color-bg-green;
+      color: $color-primary;
+    }
+
+    &--rating {
+      background: $color-accent-soft;
+      color: $color-accent-deep;
+    }
+
+    &--event {
+      background: $color-bg-green;
+      color: $color-primary-deep;
+      font-weight: 500;
+    }
   }
 
   &__bottom-spacer {
-    height: 160rpx;
+    height: calc(120px + env(safe-area-inset-bottom));
   }
 }

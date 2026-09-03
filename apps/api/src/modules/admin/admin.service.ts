@@ -6,7 +6,9 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
+import { RankingsService } from '../rankings/rankings.service';
 import { maybeAwardFirstOwnerBadge } from '../verifications/verifications.service';
 import * as bcrypt from 'bcryptjs';
 
@@ -15,6 +17,7 @@ export class AdminService {
   constructor(
     @Inject(PrismaService) private prisma: PrismaService,
     @Inject(NotificationsService) private notificationsService: NotificationsService,
+    @Inject(RankingsService) private rankingsService: RankingsService,
   ) {}
 
   // P-343: 内容长度校验（inline interface 导致 ValidationPipe 不生效，在 service 层补齐）
@@ -2003,6 +2006,79 @@ export class AdminService {
     return { id, status: 'rejected' };
   }
 
+  // === Group Buys ===
+  async getGroupBuys(
+    communityId: string,
+    query: { status?: string; type?: string },
+    pagination?: { skip: number; take: number },
+  ) {
+    const where: Prisma.GroupBuyWhereInput = { communityId, deletedAt: null };
+    if (query.status) where.status = query.status;
+    if (query.type) where.type = query.type;
+    return this.prisma.groupBuy.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        type: true,
+        location: true,
+        departAt: true,
+        quota: true,
+        status: true,
+        createdAt: true,
+        initiator: { select: { id: true, nickname: true } },
+        _count: { select: { items: true } },
+      },
+      skip: pagination?.skip,
+      take: pagination?.take,
+    });
+  }
+
+  async countGroupBuys(communityId: string, query: { status?: string; type?: string }) {
+    const where: Prisma.GroupBuyWhereInput = { communityId, deletedAt: null };
+    if (query.status) where.status = query.status;
+    if (query.type) where.type = query.type;
+    return this.prisma.groupBuy.count({ where });
+  }
+
+  async getGroupBuyDetail(id: string, communityId: string) {
+    const gb = await this.prisma.groupBuy.findUnique({
+      where: { id },
+      include: {
+        initiator: { select: { id: true, nickname: true } },
+        items: {
+          select: {
+            id: true,
+            name: true,
+            qty: true,
+            note: true,
+            status: true,
+            createdAt: true,
+            requester: { select: { id: true, nickname: true } },
+          },
+        },
+      },
+    });
+    if (!gb || gb.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    return gb;
+  }
+
+  async takedownGroupBuy(adminId: string, id: string, communityId: string) {
+    const gb = await this.prisma.groupBuy.findUnique({
+      where: { id },
+      select: { communityId: true, status: true },
+    });
+    if (!gb || gb.communityId !== communityId) throw new ForbiddenException('无权操作该资源');
+    // ④: 状态守卫，已 closed 不可重复下架（GB-045 finding 修复）
+    if (gb.status === 'closed') {
+      throw new BadRequestException('该拼单已下架，不可重复操作');
+    }
+    // spec §3.7: 下架违规内容 status -> closed（'cancelled' 不在 GroupBuyStatus 枚举内）
+    await this.prisma.groupBuy.update({ where: { id }, data: { status: 'closed' } });
+    await this.logAudit(adminId, 'takedown_group_buy', 'group_buy', id);
+    return { id, status: 'closed' };
+  }
+
   // === System Settings ===
   // P-193: ponytail: getSettings 返回 Record<string, string> 而非 SystemSettingsDto，因为 DB 中所有值存为字符串
   // 前端手动 Number() 转换数字字段。升级路径: service 层映射到 SystemSettingsDto
@@ -2333,6 +2409,102 @@ export class AdminService {
     });
     await this.logAudit(adminId, 'reject_merge_suggestion', 'topic_merge_suggestion', id);
     return updated;
+  }
+
+  // === Guide 审核 ===
+
+  async getGuides(
+    communityId: string,
+    query: { status?: string; category?: string; keyword?: string },
+    pagination: { skip: number; take: number },
+  ) {
+    const where: any = { communityId, deletedAt: null };
+    if (query.status) where.status = query.status;
+    if (query.category) where.category = query.category;
+    if (query.keyword) {
+      where.title = { contains: query.keyword, mode: 'insensitive' };
+    }
+    const [items, total] = await Promise.all([
+      this.prisma.guide.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: pagination.skip,
+        take: pagination.take,
+        include: { author: { select: { id: true, nickname: true, avatarUrl: true } } },
+      }),
+      this.prisma.guide.count({ where }),
+    ]);
+    return { items, total };
+  }
+
+  async getGuideById(id: string, communityId: string) {
+    const guide = await this.prisma.guide.findUnique({
+      where: { id },
+      include: { author: { select: { id: true, nickname: true, avatarUrl: true } } },
+    });
+    if (!guide || guide.deletedAt || guide.communityId !== communityId) {
+      throw new NotFoundException('教程不存在');
+    }
+    return guide;
+  }
+
+  async approveGuide(adminId: string, id: string, communityId: string) {
+    const guide = await this.getGuideById(id, communityId);
+    if (guide.status !== 'pending_review') {
+      throw new BadRequestException('该教程不在待审核状态');
+    }
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      return tx.guide.update({
+        where: { id },
+        data: {
+          status: 'published',
+          reviewedBy: adminId,
+          reviewedAt: new Date(),
+        },
+      });
+    });
+
+    await this.rankingsService.handleGuideApproved({
+      id: guide.id,
+      communityId: guide.communityId,
+      authorId: guide.authorId,
+    });
+    await this.logAudit(adminId, 'approve_guide', 'guide', id);
+
+    return { id, status: 'published' };
+  }
+
+  async rejectGuide(adminId: string, id: string, communityId: string, reason?: string) {
+    const guide = await this.getGuideById(id, communityId);
+    if (guide.status !== 'pending_review') {
+      throw new BadRequestException('该教程不在待审核状态');
+    }
+
+    const updated = await this.prisma.guide.update({
+      where: { id },
+      data: {
+        status: 'rejected',
+        rejectedReason: reason ?? null,
+        reviewedBy: adminId,
+        reviewedAt: new Date(),
+      },
+    });
+
+    await this.prisma.notification.create({
+      data: {
+        userId: guide.authorId,
+        communityId: guide.communityId,
+        type: 'review_result',
+        title: '教程审核未通过',
+        content: reason ? `您发布的教程未通过审核：${reason}` : '您发布的教程未通过审核',
+        targetType: 'guide',
+        targetId: guide.id,
+      },
+    });
+    await this.logAudit(adminId, 'reject_guide', 'guide', id, { reason });
+
+    return { id, status: 'rejected' };
   }
 
   // === Helpers ===

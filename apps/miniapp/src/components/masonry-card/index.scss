@@ -1,0 +1,90 @@
+@use '../../styles/tokens.scss' as *;
+
+.masonry-card {
+  display: flex;
+  flex-direction: column;
+  background: $color-card;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+  box-sizing: border-box;
+  break-inside: avoid;
+  transition: transform 0.15s;
+  padding: $spacing-lg $spacing-md;
+  margin-bottom: $spacing-md;
+  min-height: 200px;
+  // E3: 互助卡片左侧绿色竖条
+  border-left: 4px solid $color-primary;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &--inactive {
+    opacity: 0.5;
+    border-left-color: $color-text-secondary;
+  }
+
+  &__tag {
+    align-self: flex-start;
+    padding: 2px 8px;
+    border-radius: $radius-pill;
+    margin-bottom: $spacing-md;
+  }
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+    line-height: 1.6;
+    margin-bottom: auto;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-xs;
+    margin-top: $spacing-md;
+  }
+
+  &__name {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  &__stats {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    flex-shrink: 0;
+  }
+
+  &__stat {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__stat-text {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+
+    &--empty {
+      opacity: 0.5;
+      font-style: italic;
+    }
+  }
+
+  // E1: 卡片时间
+  &__time {
+    font-size: $font-size-xs - 2;
+    color: $color-text-secondary;
+    opacity: 0.6;
+    margin-bottom: $spacing-xs;
+  }
+}

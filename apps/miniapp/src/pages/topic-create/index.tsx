@@ -5,6 +5,7 @@ import { topicService } from '@/services';
 import { useAuthStore, useCommunityStore } from '@/store';
 import { useDraft } from '@/hooks';
 import UnverifiedFormBanner from '@/components/unverified-form-banner';
+import NavBar from '@/components/navbar';
 import './index.scss';
 
 // 发起议题页。议题独立于 event 表，后端 POST /topics 仅接收 { title, description? }，
@@ -97,6 +98,7 @@ export default function TopicCreate() {
 
   return (
     <View className="topic-create">
+      <NavBar title="发起议题" />
       <UnverifiedFormBanner tip="你尚未完成业主认证，认证后才能发起议题" />
 
       <View className="topic-create__field">

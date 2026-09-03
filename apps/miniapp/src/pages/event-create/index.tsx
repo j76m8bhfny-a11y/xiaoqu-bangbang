@@ -8,7 +8,9 @@ import { EventType, RewardType } from '@xiaoqu-bangbang/shared';
 import { EVENT_TYPE_CONFIG } from '@/utils/mappers';
 import ImagePicker from '@/components/image-picker';
 import UnverifiedFormBanner from '@/components/unverified-form-banner';
+import NavBar from '@/components/navbar';
 import './index.scss';
+import Icon from '@/components/icon';
 
 const REWARD_OPTIONS: { key: RewardType; label: string }[] = [
   { key: RewardType.FREE, label: '免费' },
@@ -188,6 +190,7 @@ export default function EventCreate() {
 
   return (
     <View className="event-create">
+      <NavBar title="发布求助" />
       <UnverifiedFormBanner tip="你尚未完成业主认证，无法发布互助内容" />
       <View className="event-create__body">
         <View className="event-create__card">
@@ -240,7 +243,8 @@ export default function EventCreate() {
                   style={{ width: '100%' }}
                 >
                   <Text className="event-create__radio-text event-create__radio-text--active">
-                    ✓ 已选议题 {preselectedTopicId ? '（从详情页带入）' : ''}
+                    <Icon name="check" size={16} color="#5B9E6F" /> 已选议题{' '}
+                    {preselectedTopicId ? '（从详情页带入）' : ''}
                   </Text>
                   {!preselectedTopicId && (
                     <Text
@@ -255,7 +259,9 @@ export default function EventCreate() {
                 <View>
                   {title.trim() && suggestions.length > 0 && (
                     <View style={{ marginBottom: '8px' }}>
-                      <Text style={{ fontSize: '12px', color: '#5b9e6f' }}>🤖 推荐议题：</Text>
+                      <Text style={{ fontSize: '12px', color: '#5b9e6f' }}>
+                        <Icon name="robot" size={14} /> 推荐议题：
+                      </Text>
                       {suggestions.map((s) => (
                         <View
                           key={s.topicId}

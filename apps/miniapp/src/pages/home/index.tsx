@@ -1,23 +1,17 @@
 import { View, Text, ScrollView, Image, Button } from '@tarojs/components';
-import Taro, { useShareAppMessage } from '@tarojs/taro';
+import Taro, { useShareAppMessage, useDidShow } from '@tarojs/taro';
 import { useEffect, useState } from 'react';
 import { useAuthStore, useCommunityStore } from '@/store';
 import { authService, rankingService } from '@/services';
 import { useRequest, useAuthGuard } from '@/hooks';
 import Onboarding, { shouldShowOnboarding } from '@/components/onboarding';
+import Icon, { type IconName } from '@/components/icon';
 import './index.scss';
 
-// 「我的」页（UI 重设计 v2 · 功能宫格样板）：
-// 结构 = 用户卡片 → 数据统计 → 主功能大宫格 → 待办提醒 → 设置类列表。
-// 老年友好：大按钮、图标配文字、草木绿、字号放大、留白充足。
-// ponytail: 功能图标暂用 emoji（彩色直观、老人易认、零成本，且均配文字标签）。
-//           升级路径：后续统一替换为矢量图标集（Lucide/自绘 SVG 组件）。
-
-// 主功能宫格：4 个高频/重要入口，2×2 大方块
 interface GridItem {
   id: string;
   label: string;
-  icon: string;
+  icon: IconName;
   desc: string;
   route: string;
   isTab?: boolean;
@@ -27,50 +21,70 @@ const GRID_ITEMS: GridItem[] = [
   {
     id: 'event',
     label: '发布求助',
-    icon: '🆘',
+    icon: 'help',
     desc: '找邻居搭把手',
     route: '/pages/event-create/index',
   },
   {
     id: 'topic',
     label: '发起议题',
-    icon: '💬',
+    icon: 'chat',
     desc: '大家一起议',
     route: '/pages/topic-create/index',
   },
   {
     id: 'rank',
     label: '我的排名',
-    icon: '🏆',
+    icon: 'trophy',
     desc: '看看贡献值',
     route: '/pages/ranking/index',
     isTab: true,
   },
-  { id: 'verify', label: '业主认证', icon: '✅', desc: '认证享更多', route: '/pages/verify/index' },
+  {
+    id: 'verify',
+    label: '业主认证',
+    icon: 'check-circle',
+    desc: '认证享更多',
+    route: '/pages/verify/index',
+  },
 ];
 
-// 设置类列表（次要功能，列表呈现即可）
 interface MenuItem {
   id: string;
   label: string;
-  icon: string;
+  icon: IconName;
 }
 
-const MENU_ITEMS: MenuItem[][] = [
-  [
-    { id: 'notifications', label: '消息通知', icon: '🔔' },
-    { id: 'my_badges', label: '我的勋章', icon: '🏅' },
-    { id: 'my_services', label: '我的服务', icon: '🔧' },
-  ],
-  [
-    { id: 'community_apply', label: '申请开通小区', icon: '🏘️' },
-    { id: 'my_applications', label: '我的小区申请', icon: '📑' },
-    { id: 'invite', label: '邀请邻居', icon: '💌' },
-  ],
-  [
-    { id: 'settings', label: '设置', icon: '⚙️' },
-    { id: 'about', label: '关于我们', icon: '💡' },
-  ],
+interface MenuGroup {
+  title: string;
+  items: MenuItem[];
+}
+
+const MENU_GROUPS: MenuGroup[] = [
+  {
+    title: '通知与服务',
+    items: [
+      { id: 'notifications', label: '消息通知', icon: 'bell' },
+      { id: 'my_badges', label: '我的勋章', icon: 'medal' },
+      { id: 'my_services', label: '我的服务', icon: 'wrench' },
+    ],
+  },
+  {
+    title: '小区管理',
+    items: [
+      { id: 'community_switch', label: '切换小区', icon: 'house' },
+      { id: 'community_apply', label: '申请开通小区', icon: 'community' },
+      { id: 'my_applications', label: '我的小区申请', icon: 'documents' },
+      { id: 'invite', label: '邀请邻居', icon: 'envelope' },
+    ],
+  },
+  {
+    title: '更多',
+    items: [
+      { id: 'settings', label: '设置', icon: 'gear' },
+      { id: 'about', label: '关于我们', icon: 'bulb' },
+    ],
+  },
 ];
 
 const MENU_ROUTES: Record<string, string> = {
@@ -80,6 +94,7 @@ const MENU_ROUTES: Record<string, string> = {
   settings: '/pages/settings/index',
   community_apply: '/pages/community-apply/index',
   my_applications: '/pages/my-applications/index',
+  community_switch: '/pages/community-select/index',
 };
 
 export default function Home() {
@@ -87,11 +102,20 @@ export default function Home() {
 
   const user = useAuthStore((s) => s.user);
   const communityName = useCommunityStore((s) => s.currentCommunityName);
+  const setPendingEventsFilter = useCommunityStore((s) => s.setPendingEventsFilter);
 
-  // 首次登录新手引导
+  const [scrollTop, setScrollTop] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useDidShow(() => {
+    setScrollTop((v) => (v === 0 ? 0.01 : 0));
+    Taro.eventCenter.trigger('tabbar:sync');
+  });
+
   useEffect(() => {
-    if (user && shouldShowOnboarding()) setShowOnboarding(true);
+    if (user && shouldShowOnboarding(user.verifyStatus === 'verified')) {
+      setShowOnboarding(true);
+    }
   }, [user]);
 
   const { data: myRanking } = useRequest(
@@ -111,40 +135,60 @@ export default function Home() {
   );
 
   useShareAppMessage(() => ({
-    title: communityName
-      ? `${communityName}的邻居都在用「小区帮榜棒」`
-      : '邻里互助，从小区帮榜棒开始',
+    title: communityName ? `${communityName}的邻居都在用「左邻右帮」` : '邻里互助，从左邻右帮开始',
     path: '/pages/home/index',
   }));
 
   const nickname = user?.nickname ?? '邻居';
   const isVerified = user?.verifyStatus === 'verified';
-  const verifyLabel = isVerified ? '✅ 已认证' : '⏳ 未认证';
+  const verifyIcon: IconName = isVerified ? 'check-circle' : 'lock';
+  const verifyLabel = isVerified ? '业主' : '去认证';
   const verifyClass = isVerified ? 'home__tag--verified' : 'home__tag--unverified';
 
-  const stats = [
-    { label: '帮助次数', value: myRanking?.helpCount ?? 0, icon: '🤲' },
-    { label: '小红花', value: myRanking?.flowerCount ?? 0, icon: '🌸' },
-    { label: '勋章', value: myRanking?.badgeCount ?? 0, icon: '🏅' },
+  const helpCount = myRanking?.helpCount ?? 0;
+
+  const stats: { label: string; value: number; icon: IconName }[] = [
+    { label: '帮助次数', value: helpCount, icon: 'hands-up' },
+    { label: '小红花', value: myRanking?.flowerCount ?? 0, icon: 'flower' },
+    { label: '勋章', value: myRanking?.badgeCount ?? 0, icon: 'medal' },
   ];
 
-  // 待办提醒（dashboard）—— 没数据不渲染
-  const todos: { key: string; icon: string; label: string; value: number; onClick: () => void }[] =
-    [];
+  const todos: {
+    key: string;
+    icon: IconName;
+    label: string;
+    value: number;
+    onClick: () => void;
+  }[] = [];
   if (dashboard) {
     if (dashboard.myActiveEventCount > 0) {
       todos.push({
         key: 'active_event',
-        icon: '📋',
+        icon: 'clipboard',
         label: '进行中互助',
         value: dashboard.myActiveEventCount,
-        onClick: () => Taro.switchTab({ url: '/pages/events/index' }),
+        onClick: () => {
+          setPendingEventsFilter({ filter: 'mine', status: 'open,in_progress,processing' });
+          Taro.switchTab({ url: '/pages/events/index' });
+        },
+      });
+    }
+    if (dashboard.myCompletedEventCount > 0) {
+      todos.push({
+        key: 'completed_event',
+        icon: 'check-circle',
+        label: '已完成互助',
+        value: dashboard.myCompletedEventCount,
+        onClick: () => {
+          setPendingEventsFilter({ filter: 'mine', status: 'completed,closed' });
+          Taro.switchTab({ url: '/pages/events/index' });
+        },
       });
     }
     if (dashboard.pendingVotes && dashboard.pendingVotes.length > 0) {
       todos.push({
         key: 'pending_votes',
-        icon: '🗳️',
+        icon: 'vote',
         label: '待投票',
         value: dashboard.pendingVotes.length,
         onClick: () => Taro.navigateTo({ url: '/pages/votes/index' }),
@@ -153,7 +197,7 @@ export default function Home() {
     if (dashboard.unreadNotificationCount > 0) {
       todos.push({
         key: 'unread',
-        icon: '🔔',
+        icon: 'bell',
         label: '未读消息',
         value: dashboard.unreadNotificationCount,
         onClick: () => Taro.navigateTo({ url: '/pages/notifications/index' }),
@@ -172,7 +216,7 @@ export default function Home() {
   const handleMenuClick = (item: MenuItem) => {
     if (item.id === 'about') {
       Taro.showModal({
-        title: '小区帮榜棒',
+        title: '左邻右帮',
         content: '邻里互助，共建美好社区\n版本：1.0.0',
         showCancel: false,
       });
@@ -182,11 +226,19 @@ export default function Home() {
     if (route) Taro.navigateTo({ url: route });
   };
 
+  let statusBarHeight = 20;
+  try {
+    const sys = Taro.getWindowInfo();
+    if (sys.statusBarHeight) statusBarHeight = sys.statusBarHeight;
+  } catch {
+    // fallback
+  }
+
   return (
     <View className="home">
-      <ScrollView scrollY className="home__scroll">
-        {/* 用户卡片 */}
-        <View className="home__header">
+      <ScrollView scrollY scrollTop={scrollTop} className="home__scroll">
+        {/* User Card + Stats */}
+        <View className="home__header" style={{ paddingTop: `${statusBarHeight}px` }}>
           <View
             className="home__user"
             onClick={() => Taro.navigateTo({ url: '/pages/profile-edit/index' })}
@@ -201,12 +253,22 @@ export default function Home() {
             <View className="home__user-detail">
               <Text className="home__user-name">{nickname}</Text>
               <View className="home__tags">
-                <View className={`home__tag ${verifyClass}`}>
+                <View
+                  className={`home__tag ${verifyClass}`}
+                  onClick={(e) => {
+                    if (!isVerified) {
+                      e.stopPropagation();
+                      Taro.navigateTo({ url: '/pages/verify/index' });
+                    }
+                  }}
+                >
+                  <Icon name={verifyIcon} size={14} />
                   <Text className="home__tag-text">{verifyLabel}</Text>
                 </View>
                 {communityName && (
                   <View className="home__tag home__tag--community">
-                    <Text className="home__tag-text">🏠 {communityName}</Text>
+                    <Icon name="house" size={14} />
+                    <Text className="home__tag-text">{communityName}</Text>
                   </View>
                 )}
               </View>
@@ -214,38 +276,55 @@ export default function Home() {
             <Text className="home__user-arrow">›</Text>
           </View>
 
-          {/* 数据统计 */}
           <View className="home__stats">
             {stats.map((stat) => (
               <View key={stat.label} className="home__stat">
                 <Text className="home__stat-value">{stat.value}</Text>
-                <Text className="home__stat-label">
-                  {stat.icon} {stat.label}
-                </Text>
+                <View className="home__stat-label">
+                  <Icon name={stat.icon} size={16} />
+                  <Text> {stat.label}</Text>
+                </View>
               </View>
             ))}
           </View>
+
+          <Text className="home__greeting">
+            {helpCount > 0 ? `本月你帮助了${helpCount}位邻居` : '还没有帮助过邻居，去邻里帮看看？'}
+          </Text>
         </View>
 
-        {/* 主功能大宫格 */}
+        {/* Grid */}
         <View className="home__grid">
-          {GRID_ITEMS.map((item) => (
-            <View key={item.id} className="home__grid-item" onClick={() => handleGridClick(item)}>
-              <Text className="home__grid-icon">{item.icon}</Text>
-              <Text className="home__grid-label">{item.label}</Text>
-              <Text className="home__grid-desc">{item.desc}</Text>
-            </View>
-          ))}
+          {GRID_ITEMS.map((item, idx) => {
+            const isCream = idx === 0 || idx === 3;
+            return (
+              <View
+                key={item.id}
+                className={`home__grid-item ${isCream ? 'home__grid-item--cream' : 'home__grid-item--bgGreen'}`}
+                onClick={() => handleGridClick(item)}
+              >
+                <View className="home__grid-content">
+                  <Text className="home__grid-label">{item.label}</Text>
+                  <Text className="home__grid-desc">{item.desc}</Text>
+                </View>
+                <View className="home__grid-icon-box">
+                  <Icon name={item.icon} size={24} color={isCream ? '#C9702F' : '#5B9E6F'} />
+                </View>
+              </View>
+            );
+          })}
         </View>
 
-        {/* 待办提醒 */}
+        {/* Todos */}
         {todos.length > 0 && (
           <View className="home__todos">
             <Text className="home__section-title">待办提醒</Text>
             <View className="home__todo-row">
               {todos.map((t) => (
                 <View key={t.key} className="home__todo" onClick={t.onClick}>
-                  <Text className="home__todo-icon">{t.icon}</Text>
+                  <View className="home__todo-icon">
+                    <Icon name={t.icon} size={22} />
+                  </View>
                   <View className="home__todo-detail">
                     <Text className="home__todo-value">{t.value}</Text>
                     <Text className="home__todo-label">{t.label}</Text>
@@ -256,38 +335,59 @@ export default function Home() {
           </View>
         )}
 
-        {/* 设置类列表 */}
-        {MENU_ITEMS.map((group, gi) => (
-          <View key={gi} className="home__menu-group">
-            {group.map((item) =>
-              item.id === 'invite' ? (
-                <Button
-                  key={item.id}
-                  className="home__menu-item home__menu-item--share"
-                  openType="share"
-                >
-                  <View className="home__menu-left">
-                    <Text className="home__menu-icon">{item.icon}</Text>
-                    <Text className="home__menu-label">{item.label}</Text>
-                  </View>
-                  <Text className="home__menu-arrow">›</Text>
-                </Button>
-              ) : (
-                <View
-                  key={item.id}
-                  className="home__menu-item"
-                  onClick={() => handleMenuClick(item)}
-                >
-                  <View className="home__menu-left">
-                    <Text className="home__menu-icon">{item.icon}</Text>
-                    <Text className="home__menu-label">{item.label}</Text>
-                  </View>
-                  <Text className="home__menu-arrow">›</Text>
-                </View>
-              ),
-            )}
-          </View>
-        ))}
+        {/* Menu Groups */}
+        {MENU_GROUPS.map((group, gi) => {
+          const isCollapsed = group.collapsable && !moreExpanded;
+          return (
+            <View key={gi} className="home__menu-group">
+              <View
+                className="home__group-header"
+                onClick={() => group.collapsable && setMoreExpanded(!moreExpanded)}
+              >
+                <Text className="home__group-title">{group.title}</Text>
+                {group.collapsable && (
+                  <Text
+                    className={`home__group-arrow ${moreExpanded ? 'home__group-arrow--expanded' : ''}`}
+                  >
+                    ›
+                  </Text>
+                )}
+              </View>
+              {!isCollapsed &&
+                group.items.map((item) =>
+                  item.id === 'invite' ? (
+                    <Button
+                      key={item.id}
+                      className="home__menu-item home__menu-item--share"
+                      openType="share"
+                    >
+                      <View className="home__menu-left">
+                        <View className="home__menu-icon">
+                          <Icon name={item.icon} size={22} />
+                        </View>
+                        <Text className="home__menu-label">{item.label}</Text>
+                      </View>
+                      <Text className="home__menu-arrow">›</Text>
+                    </Button>
+                  ) : (
+                    <View
+                      key={item.id}
+                      className="home__menu-item"
+                      onClick={() => handleMenuClick(item)}
+                    >
+                      <View className="home__menu-left">
+                        <View className="home__menu-icon">
+                          <Icon name={item.icon} size={22} />
+                        </View>
+                        <Text className="home__menu-label">{item.label}</Text>
+                      </View>
+                      <Text className="home__menu-arrow">›</Text>
+                    </View>
+                  ),
+                )}
+            </View>
+          );
+        })}
 
         <View className="home__bottom-spacer" />
       </ScrollView>

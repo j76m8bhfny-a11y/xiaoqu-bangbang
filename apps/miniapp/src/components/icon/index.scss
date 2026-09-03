@@ -1,0 +1,19 @@
+.xq-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+
+  &__svg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

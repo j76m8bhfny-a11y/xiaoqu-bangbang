@@ -2,6 +2,8 @@ import { View, Text, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useAuthStore } from '@/store';
 import './index.scss';
+import Icon from '@/components/icon';
+import NavBar from '@/components/navbar';
 
 export default function Settings() {
   const logout = useAuthStore((s) => s.logout);
@@ -39,52 +41,61 @@ export default function Settings() {
   };
 
   return (
-    <View className='settings'>
-      <ScrollView scrollY className='settings__scroll'>
+    <View className="settings">
+      <NavBar title="设置" />
+      <ScrollView scrollY className="settings__scroll">
         {/* 账号安全 */}
-        <View className='settings__section'>
-          <Text className='settings__section-title'>账号安全</Text>
-          <View className='settings__menu-item' onClick={handleLogout}>
-            <View className='settings__menu-left'>
-              <Text className='settings__menu-icon'>🚪</Text>
-              <Text className='settings__menu-label'>退出登录</Text>
+        <View className="settings__section">
+          <Text className="settings__section-title">账号安全</Text>
+          <View className="settings__menu-item" onClick={handleLogout}>
+            <View className="settings__menu-left">
+              <View className="settings__menu-icon">
+                <Icon name="door" size={22} />
+              </View>
+              <Text className="settings__menu-label">退出登录</Text>
             </View>
-            <Text className='settings__menu-arrow'>›</Text>
+            <Text className="settings__menu-arrow">›</Text>
           </View>
         </View>
 
         {/* 通用 */}
-        <View className='settings__section'>
-          <Text className='settings__section-title'>通用</Text>
-          <View className='settings__menu-item' onClick={handleClearCache}>
-            <View className='settings__menu-left'>
-              <Text className='settings__menu-icon'>🗑️</Text>
-              <Text className='settings__menu-label'>清除缓存</Text>
+        <View className="settings__section">
+          <Text className="settings__section-title">通用</Text>
+          <View className="settings__menu-item" onClick={handleClearCache}>
+            <View className="settings__menu-left">
+              <View className="settings__menu-icon">
+                <Icon name="trash" size={24} color="#D9534F" />
+              </View>
+              <Text className="settings__menu-label">清除缓存</Text>
             </View>
-            <Text className='settings__menu-arrow'>›</Text>
+            <Text className="settings__menu-arrow">›</Text>
           </View>
         </View>
 
         {/* 关于 */}
-        <View className='settings__section'>
-          <Text className='settings__section-title'>关于</Text>
-          <View className='settings__menu-item' onClick={handlePrivacyPolicy}>
-            <View className='settings__menu-left'>
-              <Text className='settings__menu-icon'>🔒</Text>
-              <Text className='settings__menu-label'>隐私政策</Text>
+        <View className="settings__section">
+          <Text className="settings__section-title">关于</Text>
+          <View className="settings__menu-item" onClick={handlePrivacyPolicy}>
+            <View className="settings__menu-left">
+              <View className="settings__menu-icon">
+                <Icon name="lock" size={22} />
+              </View>
+              <Text className="settings__menu-label">隐私政策</Text>
             </View>
-            <Text className='settings__menu-arrow'>›</Text>
+            <Text className="settings__menu-arrow">›</Text>
           </View>
-          <View className='settings__menu-item'>
-            <View className='settings__menu-left'>
-              <Text className='settings__menu-icon'>💡</Text>
-              <Text className='settings__menu-label'>关于我们</Text>
+          <View className="settings__menu-item">
+            <View className="settings__menu-left">
+              <View className="settings__menu-icon">
+                <Icon name="bulb" size={22} color="#C9702F" />
+              </View>
+              <Text className="settings__menu-label">关于我们</Text>
             </View>
-            <Text className='settings__menu-value'>小区帮榜棒 v1.0.0</Text>
+            <Text className="settings__menu-value">左邻右帮 v1.0.0</Text>
           </View>
         </View>
 
-        <View className='settings__bottom-spacer' />
+        <View className="settings__bottom-spacer" />
       </ScrollView>
     </View>
   );

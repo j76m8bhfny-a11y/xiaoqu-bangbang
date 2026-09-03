@@ -2,7 +2,7 @@
   "name": "xiaoqu-bangbang",
   "version": "0.1.0",
   "private": true,
-  "description": "小区帮榜棒 - 让小区里的好事，被看见",
+  "description": "左邻右帮 - 让小区里的好事，被看见",
   "scripts": {
     "dev:miniapp": "pnpm --filter @xiaoqu-bangbang/miniapp dev:weapp",
     "dev:api": "pnpm --filter @xiaoqu-bangbang/api dev",

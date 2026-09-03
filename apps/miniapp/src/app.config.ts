@@ -19,12 +19,19 @@ export default defineAppConfig({
     'pages/event-detail/index',
     'pages/market-detail/index',
     'pages/event-create/index',
+    'pages/pet-create/index',
+    'pages/pet-edit/index',
     'pages/market-create/index',
+    'pages/guide-detail/index',
+    'pages/guide-create/index',
     'pages/notifications/index',
     'pages/profile-edit/index',
     'pages/badges/index',
     'pages/event-edit/index',
     'pages/market-edit/index',
+    'pages/group-buy-create/index',
+    'pages/group-buy-detail/index',
+    'pages/group-buy-edit/index',
     'pages/votes/index',
     'pages/vote-detail/index',
     'pages/committee/index',
@@ -41,13 +48,14 @@ export default defineAppConfig({
     'pages/user-profile/index',
   ],
   // tab 顺序：小区事（首屏）/ 邻里帮 / 光荣榜 / 我的（挪到最右）
-  // 文案通俗化：公共反馈→小区事、邻里互助→邻里帮、棒帮榜→光荣榜
+  // 文案通俗化：公共反馈->小区事、邻里互助->邻里帮、棒帮榜->光荣榜
   // ponytail: 图标沿用现有彩色 png（selectedColor 只作用于文字）；
   //           统一矢量图标重绘作为后续单独任务。
   tabBar: {
+    custom: true,
     color: '#6B7A6E',
     selectedColor: '#5B9E6F',
-    backgroundColor: '#F5F8F2',
+    backgroundColor: '#FFF8EE',
     borderStyle: 'white',
     list: [
       {
@@ -77,9 +85,11 @@ export default defineAppConfig({
     ],
   },
   window: {
+    // 全局关闭原生导航栏：各页面统一使用自绘头部（NavBar / 沉浸式 header）
+    navigationStyle: 'custom',
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#F5F8F2',
-    navigationBarTitleText: '小区帮榜棒',
+    navigationBarTitleText: '左邻右帮',
     navigationBarTextStyle: 'black',
   },
 });

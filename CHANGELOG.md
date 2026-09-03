@@ -1,6 +1,6 @@
 # 变更日志
 
-本文件记录「小区帮榜棒」的重要变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
+本文件记录「左邻右帮」的重要变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
 ## [未发布]
 

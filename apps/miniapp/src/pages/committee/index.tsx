@@ -6,6 +6,7 @@ import { committeeService } from '@/services';
 import Loading from '@/components/loading';
 import ErrorState from '@/components/error-state';
 import EmptyState from '@/components/empty-state';
+import NavBar from '@/components/navbar';
 import type {
   CommitteeMemberDto,
   CommitteeAnnouncementDto,
@@ -13,6 +14,7 @@ import type {
 } from '@xiaoqu-bangbang/shared';
 import { ClaimStatus } from '@xiaoqu-bangbang/shared';
 import './index.scss';
+import Icon from '@/components/icon';
 
 interface CommitteeOverviewDto {
   memberCount: number;
@@ -21,7 +23,7 @@ interface CommitteeOverviewDto {
 }
 
 const CLAIM_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  [ClaimStatus.UNCLAIMED]: { label: '待认领', color: '#e0a458', bgColor: '#fbf0dd' },
+  [ClaimStatus.UNCLAIMED]: { label: '待认领', color: '#B05E22', bgColor: '#fbf0dd' },
   [ClaimStatus.PENDING]: { label: '审核中', color: '#3586FF', bgColor: '#EBF2FF' },
   [ClaimStatus.CLAIMED]: { label: '已认领', color: '#5b9e6f', bgColor: '#eaf4ec' },
   [ClaimStatus.REJECTED]: { label: '已拒绝', color: '#FF6B6B', bgColor: '#FFF0F0' },
@@ -87,6 +89,7 @@ export default function Committee() {
 
   return (
     <View className="committee">
+      <NavBar title="业委会" />
       <ScrollView scrollY className="committee__scroll">
         {/* Stats Header */}
         <View className="committee__stats">
@@ -106,7 +109,9 @@ export default function Committee() {
             className="committee__section-header-row"
             onClick={() => setMembersExpanded((v) => !v)}
           >
-            <Text className="committee__section-header">👥 业委会成员</Text>
+            <View className="committee__section-header">
+              <Icon name="people" size={18} /> <Text>业委会成员</Text>
+            </View>
             <View className="committee__section-toggle">
               <Text className="committee__section-toggle-text">
                 {membersExpanded ? '收起' : `查看名单 (${members?.length ?? 0})`}
@@ -135,7 +140,7 @@ export default function Committee() {
               )}
             </View>
           ) : !members || members.length === 0 ? (
-            <EmptyState icon="👥" text="暂无成员信息" />
+            <EmptyState icon="people" text="暂无成员信息" />
           ) : (
             members.map((member) => {
               const statusConfig =
@@ -177,9 +182,11 @@ export default function Committee() {
 
         {/* Announcements Section */}
         <View className="committee__section">
-          <Text className="committee__section-header">📢 公告通知</Text>
+          <View className="committee__section-header">
+            <Icon name="megaphone" size={18} /> <Text>公告通知</Text>
+          </View>
           {!announcements || announcements.length === 0 ? (
-            <EmptyState icon="📢" text="暂无公告" />
+            <EmptyState icon="megaphone" text="暂无公告" />
           ) : (
             announcements.map((ann) => (
               <View
@@ -191,7 +198,9 @@ export default function Committee() {
                   <Text className="committee__announcement-title">{ann.title}</Text>
                   {ann.isPinned && (
                     <View className="committee__announcement-pin">
-                      <Text className="committee__announcement-pin-text">📌 置顶</Text>
+                      <View className="committee__announcement-pin-text">
+                        <Icon name="flag" size={14} /> <Text>置顶</Text>
+                      </View>
                     </View>
                   )}
                 </View>

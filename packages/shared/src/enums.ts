@@ -1,4 +1,4 @@
-// ===== 小区帮榜棒 - 共享枚举 =====
+// ===== 左邻右帮 - 共享枚举 =====
 
 /** 用户状态 */
 export enum UserStatus {
@@ -51,9 +51,18 @@ export enum EventType {
   /** @deprecated help_offer 已废弃，前端不再允许创建，仅兼容历史数据 */
   HELP_OFFER = 'help_offer',
   PUBLIC_WELFARE = 'public_welfare',
+  PET_HELP = 'pet_help',
+  /** @deprecated lost_found 已迁移到 pet_help + subType=lost */
   LOST_FOUND = 'lost_found',
   PUBLIC_FEEDBACK = 'public_feedback',
   DISCUSSION = 'discussion',
+}
+
+/** 宠物帮帮子分类 */
+export enum PetSubType {
+  FEED = 'feed',
+  WALK = 'walk',
+  LOST = 'lost',
 }
 
 /** 事件状态 */
@@ -155,6 +164,8 @@ export enum ReportTargetType {
   USER = 'user',
   TOPIC = 'topic',
   TOPIC_COMMENT = 'topic_comment',
+  GUIDE = 'guide',
+  GUIDE_COMMENT = 'guide_comment',
   VOTE = 'vote',
 }
 
@@ -215,6 +226,7 @@ export enum ContributionAction {
   // ponytail: 预留枚举值，当前未使用但未来可能需要
   MARKET = 'market',
   GOOD_REVIEW = 'good_review',
+  GUIDE = 'guide',
   MANUAL = 'manual',
 }
 
@@ -223,6 +235,7 @@ export enum ContributionSourceType {
   EVENT = 'event',
   MARKET = 'market',
   FEEDBACK = 'feedback',
+  GUIDE = 'guide',
   MANUAL = 'manual',
 }
 
@@ -243,6 +256,7 @@ export enum PeriodType {
 export enum BadgeSourceType {
   EVENT = 'event',
   MARKET = 'market',
+  GUIDE = 'guide',
   MANUAL = 'manual',
 }
 
@@ -440,4 +454,52 @@ export enum CommunityApplicationStatus {
   PENDING = 'pending',
   APPROVED = 'approved',
   REJECTED = 'rejected',
+}
+
+/** 图文教程状态 */
+export enum GuideStatus {
+  PENDING_REVIEW = 'pending_review',
+  PUBLISHED = 'published',
+  REJECTED = 'rejected',
+}
+
+/** 图文教程分类 */
+export enum GuideCategory {
+  USAGE_GUIDE = 'usage_guide',
+  REPAIR = 'repair',
+  MAINTENANCE = 'maintenance',
+  OTHER = 'other',
+}
+
+/** 购物拼拼方向 */
+export enum GroupBuyType {
+  SEEK = 'seek',
+  OFFER = 'offer',
+}
+
+/** 购物拼拼主表状态 */
+export enum GroupBuyStatus {
+  PENDING_REVIEW = 'pending_review',
+  OPEN = 'open',
+  CLOSED_FOR_BID = 'closed_for_bid',
+  PURCHASED = 'purchased',
+  COMPLETED = 'completed',
+  CLOSED = 'closed',
+  REJECTED = 'rejected',
+}
+
+/** 购物拼拼 item 状态 */
+export enum GroupBuyItemStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  PURCHASED = 'purchased',
+  DELIVERED = 'delivered',
+  REJECTED = 'rejected',
+}
+
+/** 交付方式 */
+export enum GroupBuyDeliveryMethod {
+  SELF_PICKUP = 'self_pickup',
+  DOOR_DROP = 'door_drop',
+  SPOT = 'spot',
 }

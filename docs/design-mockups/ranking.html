@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>光荣榜 · 晨光暖设计稿</title><style>:root{--c-bg:#FFF8EE;--c-card:#FFF;--c-primary:#5B9E6F;--c-primary-deep:#4A8C5E;--c-primary-soft:#A8D5B5;--c-accent:#E89B6C;--c-accent-soft:#FBF0DD;--c-cream:#FFF3D6;--c-cream-deep:#F3EAD0;--c-text:#2C3A2E;--c-text-2:#6B7A6E;--c-border:#E8E0D0;--c-bg-green:#EAF4EC;--c-bg-orange:#FBF0DD;--c-danger:#D9534F;--r-sm:16px;--r-md:20px;--r-lg:28px;--r-pill:999px;--sh-card:0 4px 20px rgba(91,158,111,.08);--sh-warm:0 4px 16px rgba(232,155,108,.1);--sh-btn:0 6px 16px rgba(74,140,94,.24);--fs-xs:13px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:20px;--fs-xxl:24px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;background:#EDE6D6;display:flex;justify-content:center;min-height:100vh;-webkit-font-smoothing:antialiased}
+.phone{width:375px;min-height:100vh;background:var(--c-bg);position:relative;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.08)}
+.phone::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.015' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;padding-bottom:32px}
+.notes{position:fixed;top:20px;right:20px;width:220px;background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:100;font-size:12px;line-height:1.6;color:#333;max-height:80vh;overflow-y:auto}
+.notes h3{font-size:13px;margin-bottom:6px;color:var(--c-primary-deep)}
+.notes .item{margin-bottom:4px;padding-left:8px;border-left:2px solid var(--c-primary-soft)}
+@media(max-width:900px){.notes{display:none}}
+.podium-bar{border-radius:var(--r-md) var(--r-md) 0 0;width:100%}
+</style></head><body>
+<div class="notes"><h3>光荣榜</h3><div class="item">光荣榜首页</div><div class="item">Top3领奖台: 手绘花+渐变色阶</div><div class="item">排名列表+我的排名固定底栏</div><div class="item">emoji替换: 🏆→手绘奖杯 🥈🥉→渐变色阶 🌸→手绘花</div></div>
+<div class="phone"><div class="page">
+<div style="margin:24px 24px 0;padding:20px 24px;border-radius:var(--r-lg);background:linear-gradient(135deg,var(--c-accent),#D48050);box-shadow:var(--sh-warm);position:relative;overflow:hidden;text-align:center">
+  <svg style="position:absolute;top:-12px;right:-8px;opacity:0.12" width="100" height="100" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="20" fill="#FFF"/><path d="M50 15L50 8M50 92L50 85M15 50L8 50M92 50L85 50" stroke="#FFF" stroke-width="3" stroke-linecap="round"/></svg>
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 4 H16 V12 C16 14 14 16 12 16 C10 16 8 14 8 12 Z" stroke="#FFF" stroke-width="2" stroke-linejoin="round" fill="#FFF11"/><path d="M4 6 C3 6 2 7 2 8 C2 10 3 11 4 11" stroke="#FFF" stroke-width="2" stroke-linecap="round"/><path d="M20 6 C21 6 22 7 22 8 C22 10 21 11 20 11" stroke="#FFF" stroke-width="2" stroke-linecap="round"/><path d="M12 16 V20 M8 22 H16" stroke="#FFF" stroke-width="2" stroke-linecap="round"/><path d="M12 7 L13 9 L15 9.5 L13.5 10.5 L14 12.5 L12 11.5 L10 12.5 L10.5 10.5 L9 9.5 L11 9 Z" fill="#FFF3D6"/></svg><span style="font-size:var(--fs-xl);font-weight:700;color:#fff">好人榜</span></div>
+  <div style="font-size:var(--fs-sm);color:rgba(255,255,255,0.85);margin-top:4px;position:relative;z-index:1">每一朵小花，都是一份温暖</div>
+</div>
+
+<div style="display:flex;margin:16px 24px 0;gap:8px">
+  <div style="flex:1;text-align:center;padding:10px;border-radius:var(--r-md);background:var(--c-accent);color:#fff;font-size:var(--fs-sm);font-weight:600">排行榜</div>
+  <div style="flex:1;text-align:center;padding:10px;border-radius:var(--r-md);background:var(--c-card);color:var(--c-text-2);font-size:var(--fs-sm);box-shadow:var(--sh-card)">勋章墙</div>
+</div>
+
+<div style="display:flex;gap:8px;padding:12px 24px 0">
+  <div style="padding:5px 16px;border-radius:var(--r-pill);white-space:nowrap;background:var(--c-primary-soft);color:var(--c-primary-deep);font-size:var(--fs-sm);font-weight:600">本月</div>
+  <div style="padding:5px 16px;border-radius:var(--r-pill);white-space:nowrap;background:var(--c-card);color:var(--c-text-2);font-size:var(--fs-sm);border:1px solid var(--c-border)">总榜</div>
+</div>
+
+<div style="display:flex;align-items:flex-end;justify-content:center;gap:12px;margin:20px 24px 0;padding:0 8px">
+  
+  <div style="text-align:center;flex:1">
+    <div style="width:48px;height:48px;border-radius:50%;background:var(--c-cream);border:2px solid var(--c-cream-deep);margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:var(--fs-md);font-weight:700;color:var(--c-text-2)">王</div>
+    <div style="font-size:var(--fs-sm);font-weight:600;color:var(--c-text);margin-bottom:2px">王阿姨</div>
+    <div style="font-size:var(--fs-xs);color:var(--c-accent);margin-bottom:6px"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#E89B6C"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/></svg> 28</div>
+    <div class="podium-bar" style="background:linear-gradient(180deg,var(--c-cream),var(--c-cream-deep));height:48px;display:flex;align-items:center;justify-content:center;font-size:var(--fs-lg);font-weight:700;color:var(--c-text-2)">2</div>
+  </div>
+  
+  <div style="text-align:center;flex:1">
+    <div style="position:relative;width:56px;height:56px;margin:0 auto 4px">
+      <div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8 4 H16 V12 C16 14 14 16 12 16 C10 16 8 14 8 12 Z" stroke="#E89B6C" stroke-width="2" stroke-linejoin="round" fill="#E89B6C11"/><path d="M4 6 C3 6 2 7 2 8 C2 10 3 11 4 11" stroke="#E89B6C" stroke-width="2" stroke-linecap="round"/><path d="M20 6 C21 6 22 7 22 8 C22 10 21 11 20 11" stroke="#E89B6C" stroke-width="2" stroke-linecap="round"/><path d="M12 16 V20 M8 22 H16" stroke="#E89B6C" stroke-width="2" stroke-linecap="round"/><path d="M12 7 L13 9 L15 9.5 L13.5 10.5 L14 12.5 L12 11.5 L10 12.5 L10.5 10.5 L9 9.5 L11 9 Z" fill="#FFF3D6"/></svg></div>
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--c-accent-soft);border:3px solid var(--c-accent);display:flex;align-items:center;justify-content:center;font-size:var(--fs-lg);font-weight:700;color:var(--c-accent)">张</div>
+    </div>
+    <div style="font-size:var(--fs-sm);font-weight:700;color:var(--c-text);margin-bottom:2px">张大爷</div>
+    <div style="font-size:var(--fs-xs);color:var(--c-accent);margin-bottom:6px"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#E89B6C"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/></svg> 45</div>
+    <div class="podium-bar" style="background:linear-gradient(180deg,var(--c-accent-soft),var(--c-accent));height:64px;display:flex;align-items:center;justify-content:center;font-size:var(--fs-xl);font-weight:700;color:#fff">1</div>
+  </div>
+  
+  <div style="text-align:center;flex:1">
+    <div style="width:48px;height:48px;border-radius:50%;background:var(--c-bg-green);border:2px solid var(--c-primary-soft);margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:var(--fs-md);font-weight:700;color:var(--c-primary)">李</div>
+    <div style="font-size:var(--fs-sm);font-weight:600;color:var(--c-text);margin-bottom:2px">李奶奶</div>
+    <div style="font-size:var(--fs-xs);color:var(--c-accent);margin-bottom:6px"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#E89B6C"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/></svg> 20</div>
+    <div class="podium-bar" style="background:linear-gradient(180deg,var(--c-bg-green),var(--c-primary-soft));height:36px;display:flex;align-items:center;justify-content:center;font-size:var(--fs-lg);font-weight:700;color:var(--c-primary-deep)">3</div>
+  </div>
+</div>
+
+<div style="display:flex;align-items:center;gap:12px;background:var(--c-card);border-radius:var(--r-md);padding:12px 16px;margin:8px 24px 0;box-shadow:var(--sh-card)">
+  <span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text-2);width:24px;text-align:center">4</span>
+  <div style="width:36px;height:36px;border-radius:50%;background:var(--c-cream);display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:600;color:var(--c-text-2)">赵</div>
+  <div style="flex:1"><div style="font-size:var(--fs-sm);font-weight:600;color:var(--c-text)">赵叔</div><div style="font-size:var(--fs-xs);color:var(--c-text-2)">帮助了11位邻居</div></div>
+  <div style="display:flex;align-items:center;gap:3px;font-size:var(--fs-sm);color:var(--c-accent);font-weight:600"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#E89B6C"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/></svg> 10</div>
+</div><div style="display:flex;align-items:center;gap:12px;background:var(--c-card);border-radius:var(--r-md);padding:12px 16px;margin:8px 24px 0;box-shadow:var(--sh-card)">
+  <span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text-2);width:24px;text-align:center">5</span>
+  <div style="width:36px;height:36px;border-radius:50%;background:var(--c-cream);display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:600;color:var(--c-text-2)">钱</div>
+  <div style="flex:1"><div style="font-size:var(--fs-sm);font-weight:600;color:var(--c-text)">钱阿姨</div><div style="font-size:var(--fs-xs);color:var(--c-text-2)">帮助了10位邻居</div></div>
+  <div style="display:flex;align-items:center;gap:3px;font-size:var(--fs-sm);color:var(--c-accent);font-weight:600"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#E89B6C"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/></svg> 8</div>
+</div><div style="display:flex;align-items:center;gap:12px;background:var(--c-card);border-radius:var(--r-md);padding:12px 16px;margin:8px 24px 0;box-shadow:var(--sh-card)">
+  <span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text-2);width:24px;text-align:center">6</span>
+  <div style="width:36px;height:36px;border-radius:50%;background:var(--c-cream);display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:600;color:var(--c-text-2)">孙</div>
+  <div style="flex:1"><div style="font-size:var(--fs-sm);font-weight:600;color:var(--c-text)">孙大爷</div><div style="font-size:var(--fs-xs);color:var(--c-text-2)">帮助了9位邻居</div></div>
+  <div style="display:flex;align-items:center;gap:3px;font-size:var(--fs-sm);color:var(--c-accent);font-weight:600"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#E89B6C"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/></svg> 6</div>
+</div><div style="display:flex;align-items:center;gap:12px;background:var(--c-card);border-radius:var(--r-md);padding:12px 16px;margin:8px 24px 0;box-shadow:var(--sh-card)">
+  <span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-text-2);width:24px;text-align:center">7</span>
+  <div style="width:36px;height:36px;border-radius:50%;background:var(--c-cream);display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:600;color:var(--c-text-2)">李</div>
+  <div style="flex:1"><div style="font-size:var(--fs-sm);font-weight:600;color:var(--c-text)">李姐</div><div style="font-size:var(--fs-xs);color:var(--c-text-2)">帮助了8位邻居</div></div>
+  <div style="display:flex;align-items:center;gap:3px;font-size:var(--fs-sm);color:var(--c-accent);font-weight:600"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#E89B6C"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/></svg> 4</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:12px;background:var(--c-bg-green);border-radius:var(--r-md);padding:12px 16px;margin:12px 24px 0;border:1.5px solid var(--c-primary-soft)">
+  <span style="font-size:var(--fs-lg);font-weight:700;color:var(--c-primary);width:24px;text-align:center">8</span>
+  <div style="width:36px;height:36px;border-radius:50%;background:var(--c-primary);display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:600;color:#fff">我</div>
+  <div style="flex:1"><div style="font-size:var(--fs-sm);font-weight:600;color:var(--c-text)">我</div><div style="font-size:var(--fs-xs);color:var(--c-text-2)">帮助了5位邻居</div></div>
+  <div style="display:flex;align-items:center;gap:3px;font-size:var(--fs-sm);color:var(--c-accent);font-weight:600"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" fill="#E89B6C"/><ellipse cx="9" cy="3.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="9" cy="14.5" rx="2.5" ry="3" fill="#E89B6C" opacity="0.5"/><ellipse cx="3.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/><ellipse cx="14.5" cy="9" rx="3" ry="2.5" fill="#E89B6C" opacity="0.5"/></svg> 8</div>
+</div>
+<div style="height:32px"></div></div></div>
+</body></html>
